@@ -1,0 +1,62 @@
+{
+  "id": "req016.compat_mbti",
+  "version": "1.0.0",
+  "schema_id": "req016.compat_mbti.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "intj",
+      "kind": "axis_value",
+      "label": "INTJ"
+    },
+    {
+      "id": "enfp",
+      "kind": "axis_value",
+      "label": "ENFP"
+    },
+    {
+      "id": "intj__intj",
+      "kind": "cell",
+      "self_id": "intj",
+      "partner_id": "intj",
+      "band_id": "needs_tuning",
+      "fit": "Cả hai đều thích nói thẳng vào vấn đề, nên một cuộc bàn chuyện dài thường đi tới chỗ rõ ràng.",
+      "friction": "Cùng giữ ý riêng và cùng ít nói phần cảm xúc, nên chuyện chưa vừa ý dễ bị tích lại.",
+      "activity": "Mỗi người viết ra ba điều đang bận tâm rồi đổi giấy cho nhau đọc.",
+      "question": "Có điều gì bạn đang giữ lại vì nghĩ nói ra cũng không đổi được gì?"
+    },
+    {
+      "id": "intj__enfp",
+      "kind": "cell",
+      "self_id": "intj",
+      "partner_id": "enfp",
+      "band_id": "complementary",
+      "fit": "Người kia mang tới nhiều hướng mới, còn bạn giúp chọn ra hướng đi được tới cùng.",
+      "friction": "Bạn muốn một kế hoạch gọn, người kia muốn để ngỏ; ép sớm quá thì họ thấy bị thu hẹp.",
+      "activity": "Để người kia kể ra năm ý đang nghĩ, bạn chỉ chọn một và hai người cùng làm thử.",
+      "question": "Trong những hướng bạn nghĩ ra, hướng nào bạn muốn mình cùng làm nhất?"
+    },
+    {
+      "id": "enfp__intj",
+      "kind": "cell",
+      "self_id": "enfp",
+      "partner_id": "intj",
+      "band_id": "complementary",
+      "fit": "Bạn mở ra nhiều khả năng, người kia giúp biến một trong số đó thành việc làm được.",
+      "friction": "Bạn cần nói ra để nghĩ, người kia cần nghĩ xong mới nói, nên giữa chừng dễ hiểu nhầm là họ lạnh nhạt.",
+      "activity": "Kể cho người kia một ý đang dang dở rồi hỏi họ phần nào khó nhất.",
+      "question": "Lúc mình nói dài quá, bạn muốn mình dừng lại kiểu nào?"
+    },
+    {
+      "id": "enfp__enfp",
+      "kind": "cell",
+      "self_id": "enfp",
+      "partner_id": "enfp",
+      "band_id": "needs_tuning",
+      "fit": "Cả hai đều dễ hào hứng, nên chuyện rủ nhau thử cái mới gần như không cần thuyết phục.",
+      "friction": "Cùng mở nhiều việc một lúc, nên phần thu dọn và phần theo tới cùng hay bị bỏ trống.",
+      "activity": "Chọn một việc hai người đã bắt mà chưa xong, dành một buổi tối làm cho xong.",
+      "question": "Trong những việc mình đang bỏ dở, bạn muốn làm xong việc nào trước?"
+    }
+  ]
+}

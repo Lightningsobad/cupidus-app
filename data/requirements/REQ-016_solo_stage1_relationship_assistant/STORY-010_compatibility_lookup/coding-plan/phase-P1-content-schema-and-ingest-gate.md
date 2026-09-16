@@ -7,7 +7,7 @@
 - Lane: Mobile
 - Depends On: None
 - Parallelizable: YES (chạy song song P2)
-- Status: NOT_STARTED
+- Status: COMPLETE
 - Runtime Registry Id: `mobile-app`
 - Build Command Source: runtime registry `mobile-app.buildCommand`
 - Startup Smoke: NOT_APPLICABLE

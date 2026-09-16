@@ -1,0 +1,62 @@
+{
+  "id": "req016.compat_zodiac",
+  "version": "1.0.0",
+  "schema_id": "req016.compat_zodiac.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "aries",
+      "kind": "axis_value",
+      "label": "Bạch Dương"
+    },
+    {
+      "id": "taurus",
+      "kind": "axis_value",
+      "label": "Kim Ngưu"
+    },
+    {
+      "id": "aries__aries",
+      "kind": "cell",
+      "self_id": "aries",
+      "partner_id": "aries",
+      "band_id": "needs_tuning",
+      "fit": "Cả hai đều thích chốt nhanh, nên một kế hoạch chung hiếm khi kẹt lại ở khâu bàn tới bàn lui.",
+      "friction": "Cùng muốn giữ vai người quyết, nên lúc bất đồng dễ thành ai cũng bám ý mình và không ai lùi trước.",
+      "activity": "Cùng thử một môn vận động mới trong một buổi, chia trước ai dẫn phần nào.",
+      "question": "Khi cả hai cùng muốn quyết, bạn thấy mình nên nhường ở chuyện nào?"
+    },
+    {
+      "id": "aries__taurus",
+      "kind": "cell",
+      "self_id": "aries",
+      "partner_id": "taurus",
+      "band_id": "complementary",
+      "fit": "Bạn đẩy mọi thứ đi tới, người kia giữ cho nó không đổ vỡ giữa chừng; hai vai này bù cho nhau.",
+      "friction": "Bạn muốn chốt ngay, người kia cần thời gian cân nhắc, và càng bị giục thì họ càng chậm lại.",
+      "activity": "Lên một kế hoạch cuối tuần rồi để người kia chọn khâu ăn uống, bạn chọn khâu di chuyển.",
+      "question": "Lúc mình sốt ruột muốn chốt, cách nào giúp bạn thấy dễ chịu hơn?"
+    },
+    {
+      "id": "taurus__aries",
+      "kind": "cell",
+      "self_id": "taurus",
+      "partner_id": "aries",
+      "band_id": "complementary",
+      "fit": "Người kia mở lối cho những việc bạn hay trì hoãn, còn bạn giữ cho nhịp đó không quá tải.",
+      "friction": "Bạn cần chắc chắn rồi mới bắt đầu, người kia bắt đầu rồi mới tính tiếp; khoảng chênh đó dễ thành trách móc.",
+      "activity": "Chọn một việc nhỏ hai người cùng làm trong nửa tiếng, người kia mở đầu còn bạn chốt phần cuối.",
+      "question": "Có lúc nào nhịp chậm của mình làm bạn thấy bị kéo lại không?"
+    },
+    {
+      "id": "taurus__taurus",
+      "kind": "cell",
+      "self_id": "taurus",
+      "partner_id": "taurus",
+      "band_id": "easy_sync",
+      "fit": "Cả hai đều thích nhịp ổn định, nên thói quen chung hình thành nhanh và ít bị xáo.",
+      "friction": "Cùng ngại thay đổi, nên chuyện cần nói thẳng dễ bị để đó cho tới lúc thành chuyện lớn.",
+      "activity": "Chọn một chuyện nhỏ cả hai vẫn né, hẹn nhau nói về nó trong mười lăm phút.",
+      "question": "Có chuyện gì bạn muốn nói với mình mà vẫn đang để đó không?"
+    }
+  ]
+}

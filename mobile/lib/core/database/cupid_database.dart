@@ -9,6 +9,7 @@ import 'daos/expense_dao.dart';
 import 'daos/invite_message_dao.dart';
 import 'daos/journal_dao.dart';
 import 'daos/message_dao.dart';
+import 'daos/relationship_labels_dao.dart';
 import 'daos/timeline_dao.dart';
 import 'tables/activity_cards_table.dart';
 import 'tables/context_notebook_tables.dart';
@@ -17,6 +18,7 @@ import 'tables/invite_messages_table.dart';
 import 'tables/journal_entries.dart';
 import 'tables/journal_photos.dart';
 import 'tables/messages_table.dart';
+import 'tables/relationship_labels_table.dart';
 import 'tables/timeline_tables.dart';
 
 part 'cupid_database.g.dart';
@@ -53,6 +55,7 @@ typedef BackupExclusion = Future<void> Function(String absolutePath);
     NotebookEntries,
     SkillProfileEntries,
     AskPromptState,
+    RelationshipLabels,
   ],
   daos: [
     MessageDao,
@@ -61,6 +64,7 @@ typedef BackupExclusion = Future<void> Function(String absolutePath);
     ActivityCardDao,
     JournalDao,
     InviteMessageDao,
+    RelationshipLabelsDao,
   ],
 )
 class CupidDatabase extends _$CupidDatabase {
@@ -68,7 +72,7 @@ class CupidDatabase extends _$CupidDatabase {
       : super(executor ?? _openConnection(excludeFromBackup));
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   /// From v3 onward this database is NO LONGER a disposable cache, and a
   /// destructive-recreate migration is forbidden.
@@ -83,8 +87,9 @@ class CupidDatabase extends _$CupidDatabase {
   /// (`architecture/solution.md` §1 Key Discovery 1 and 3). v4 adds the five
   /// B-1 activity-card columns. v5 adds `activity_cards.location` and the
   /// device-authoritative `invite_messages` table. v6 adds the three
-  /// device-authoritative context-notebook tables. Every migration step here
-  /// and onward must therefore be additive, or migrate the data explicitly.
+  /// device-authoritative context-notebook tables. v7 adds
+  /// `relationship_labels`. Every migration step here and onward must therefore
+  /// be additive, or migrate the data explicitly.
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
@@ -127,6 +132,9 @@ class CupidDatabase extends _$CupidDatabase {
             await m.createTable(notebookEntries);
             await m.createTable(skillProfileEntries);
             await m.createTable(askPromptState);
+          }
+          if (from < 7) {
+            await m.createTable(relationshipLabels);
           }
         },
         // `ON DELETE CASCADE` on activity_card_photos.card_id,
