@@ -10,6 +10,8 @@ import 'package:path_provider/path_provider.dart';
 import '../../features/activity_cards/data/activity_card_repository_impl.dart';
 import '../../features/activity_cards/domain/activity_card_repository.dart';
 import '../../features/chapter_closure/data/chapter_closure_service.dart';
+import '../../features/chapter_closure/data/stage1_wipe_registry.dart';
+import '../../features/chapter_closure/data/stage1_wipe_service.dart';
 import '../../features/chapter_closure/domain/chapter_closure_gate.dart';
 import '../../features/context_notebook/context_notebook_entry_point.dart';
 import '../../features/context_notebook/data/context_notebook_dao.dart';
@@ -397,6 +399,27 @@ void setupServiceLocator() {
       db: getIt<CupidDatabase>(),
       dao: getIt<ChapterClosureDao>(),
       ownerKeyStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  // REQ-016 STORY-013 P3 (`architecture/contract-summary.md` §4): the stage-1
+  // wipe registry and the service that executes it. Both resolve
+  // `JournalMediaStore` lazily, so this block stays independent of where that
+  // registration sits in this file.
+  getIt.registerLazySingleton<Stage1WipeRegistry>(
+    () => Stage1WipeRegistry(
+      db: getIt<CupidDatabase>(),
+      journalMediaStore: getIt<JournalMediaStore>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<Stage1WipeService>(
+    () => Stage1WipeService(
+      db: getIt<CupidDatabase>(),
+      dao: getIt<ChapterClosureDao>(),
+      gate: getIt<ChapterClosureGate>(),
+      ownerKeyStore: getIt<BackendUserIdStore>(),
+      registry: getIt<Stage1WipeRegistry>(),
     ),
   );
 

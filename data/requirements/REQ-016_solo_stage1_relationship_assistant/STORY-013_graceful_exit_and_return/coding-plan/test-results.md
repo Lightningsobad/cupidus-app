@@ -295,3 +295,166 @@ NOT_APPLICABLE — P2 không dựng hay đổi màn hình nào (đúng như `pha
 6 với ba bằng chứng cho thấy nó không liên quan tới bump `schemaVersion` 6 → 7.
 Không nằm trong các thư mục test mà lệnh 3 chạy, nên không xuất hiện trong lần
 chạy này; vẫn là lỗi có sẵn, ngoài write scope P2.
+
+## Phase P3 — Xoá sạch và purge giai đoạn 1
+
+Ngày chạy: 2026-09-17. Worktree:
+`story-REQ-016_solo_stage1_relationship_assistant-STORY-013_graceful_exit_and_return`,
+HEAD nền `5b08a16a`.
+
+### 1. Lệnh đã chạy
+
+| # | Lệnh | Kết quả |
+|---|---|---|
+| 1 | `flutter test test/features/chapter_closure/stage1_wipe_registry_parity_test.dart` | `00:00 +6: All tests passed!` |
+| 2 | `flutter test test/features/chapter_closure/stage1_wipe_service_test.dart` | `00:00 +16: All tests passed!` |
+| 3 | `flutter test test/features/chapter_closure/ test/features/journal/` | `00:11 +114 ~4: All other tests passed!` |
+| 4 | `flutter analyze lib/features/chapter_closure lib/core/di test/features/chapter_closure` | `13 issues found` — 0 error, 0 warning |
+| 5 | `flutter build apk --debug --flavor local` | `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk` |
+
+Lệnh 3 là lệnh xác minh mà `phase-P3 §6` yêu cầu. 4 test `~` là test capture ảnh
+có sẵn của journal, chúng bị skip từ trước phase này chứ không phải do P3.
+
+Lệnh 4: cả 13 issue đều là `info • prefer_initializing_formals` trên các
+constructor tham số-tên gán vào field riêng tư. Dart không cho phép tham số tên
+riêng tư (`this._db` sẽ đổi tên tham số công khai), nên lint này chỉ sửa được
+bằng cách đổi API công khai — đúng nhận định đã ghi ở P2. 0 error mới.
+
+Lệnh 5 chệch khỏi chữ trong `phase-P3 §6` (`flutter build apk --debug`): dự án
+này có flavor, nên lệnh không flavor thất bại ngay ở Gradle
+(`Task 'assembleDevDebug' not found`). Dạng có `--flavor local` là dạng hợp lệ
+duy nhất và là dạng P1/P2 đã dùng.
+
+### 2. Tệp của phase này
+
+Mới:
+
+- `mobile/lib/features/chapter_closure/data/stage1_wipe_registry.dart`
+- `mobile/lib/features/chapter_closure/data/stage1_wipe_service.dart`
+- `mobile/test/features/chapter_closure/stage1_wipe_service_test.dart` (16 test)
+- `mobile/test/features/chapter_closure/stage1_wipe_registry_parity_test.dart` (6 test)
+
+Sửa:
+
+- `mobile/lib/core/di/service_locator.dart` — thêm đúng hai đăng ký
+  `Stage1WipeRegistry` và `Stage1WipeService` (append-only, không đụng đăng ký cũ)
+
+### 3. Bằng chứng số hàng trước/sau `wipeAll()` (AC-14)
+
+Số đếm do chính vị từ trong registry sinh ra (cùng SQL mà lệnh xoá chạy), in ra
+từ test `mọi bảng trong registry về 0 hàng cho chủ sở hữu`:
+
+| Bảng | Trước | Sau |
+|---|---|---|
+| `activity_card_photos` | 1 | 0 |
+| `invite_messages` | 1 | 0 |
+| `activity_cards` | 1 | 0 |
+| `journal_photos` | 1 | 0 |
+| `journal_entries` | 1 | 0 |
+| `notebook_entries` | 1 | 0 |
+| `skill_profile_entries` | 1 | 0 |
+| `ask_prompt_state` | 1 | 0 |
+| `chapter_closure_items` | 3 | 0 |
+| `chapter_closures` | 1 | 0 |
+
+Đúng 10 bảng — bằng toàn bộ bảng REQ-016 trong `CupidDatabase.allTables`.
+Cùng phép đếm chạy cho tài khoản thứ hai (`user-2`) trên cùng máy cho kết quả
+**không đổi** trước/sau, nên phạm vi xoá đúng bằng một chủ sở hữu.
+
+### 4. Bằng chứng `existsSync()` của gốc media (AC-14)
+
+In ra từ test `gốc media biến mất khỏi đĩa, gốc của người khác thì không`:
+
+| Gốc media | Trước | Sau |
+|---|---|---|
+| `journal_media/<hex(user-1)>/` (của mình) | `true` | `false` |
+| `journal_media/<hex(user-2)>/` (tài khoản khác) | `true` | `true` |
+
+Không còn tệp mồ côi: sau khi xoá, `journal_media/` chỉ còn đúng một mục con là
+segment của `user-2`. Thứ tự là hàng trước, tệp sau (giống
+`JournalRepository.deleteAll()`), nên một cú sập giữa chừng chỉ có thể để lại
+tệp thừa đã mất hàng — không bao giờ để lại hàng trỏ vào tệp không còn.
+
+### 5. Bằng chứng `purgeClosed()` theo từng id (AC-15)
+
+Ảnh chụp closure: `{activity_card: card-da-dong, notebook_entry: note-da-dong,
+ask_prompt: question-da-dong}`.
+
+| Bảng | Còn lại sau purge | Nghĩa |
+|---|---|---|
+| `activity_cards` | `[card-giu-lai]` | thẻ đã đóng biến mất |
+| `activity_card_photos` | `[anh-giu-lai]` | ảnh đính kèm của thẻ đã đóng đi theo |
+| `invite_messages` | `[moi-giu-lai]` | lời mời của thẻ đã đóng đi theo |
+| `notebook_entries` | `[note-giu-lai]` | mục sổ tay đã đóng biến mất |
+| `ask_prompt_state` | `[question-giu-lai]` | trạng thái câu hỏi đã đóng biến mất |
+| `skill_profile_entries` | `[skill-1]` | không bao giờ bị chạm (AC-8) |
+| `journal_entries` / `journal_photos` | `[journal-1]` / `[journalphoto-1]` | nhật ký riêng không bao giờ là thành viên (BR-6) |
+
+Sau purge `hasAnyClosure()` → `false`: sổ đóng ngăn ra đi cùng vật liệu của nó,
+vì các thành viên không còn tồn tại. Hai biên đã kiểm: purge khi **chưa** đóng
+ngăn không xoá gì, và purge không với sang hàng của tài khoản khác.
+
+### 6. Tripwire parity của registry
+
+`stage1_wipe_registry_parity_test.dart` so `Stage1WipeRegistry.tables` với
+`CupidDatabase.allTables` trừ đúng 5 bảng đệm máy chủ (`messages`,
+`timeline_entries`, `timeline_sync_state`, `expenses`,
+`expense_sync_metadata`) — loại trừ theo tên, từng quyết định một, không theo
+mẫu có thể nuốt mất một bảng REQ-016 tương lai. Thêm một bảng REQ-016 mà quên
+đăng ký → test này đỏ.
+
+Test không rỗng nghĩa: có một case cố tình bỏ một bảng khỏi tập đã đăng ký và
+khẳng định phép so sánh **phải** khác nhau, nên một so sánh "luôn xanh" không
+thể lọt. Ngoài ra mỗi vị từ chủ sở hữu được chạy thật trên lược đồ (`SELECT
+COUNT(*) ... WHERE <vị từ>`), nên một lỗi chính tả trong SQL sẽ ném chứ không
+âm thầm bỏ sót hàng, và thứ tự bảng con trước bảng cha được khẳng định cho cả
+bốn cặp khoá ngoại.
+
+### 7. AC coverage
+
+| AC / BR | Nội dung | Test chứng minh | Kết quả |
+|---|---|---|---|
+| AC-14 | Sau `wipeAll()` không còn hàng nào của chủ sở hữu trong mọi bảng registry | `mọi bảng trong registry về 0 hàng cho chủ sở hữu` | PASS |
+| AC-14 | Gốc media biến mất khỏi đĩa, không còn tệp mồ côi | `gốc media biến mất khỏi đĩa...`, `không còn tệp ảnh mồ côi...` | PASS |
+| AC-14 | Khoá tuỳ chọn của REQ-016 bị xoá, khoá tính năng khác ở lại | `khoá tuỳ chọn của REQ-016 bị xoá, khoá tính năng khác ở lại` | PASS |
+| AC-14 | `hasAnyClosure()` false và mọi đường đọc rỗng mà không ném lỗi | `hasAnyClosure về false và mọi đọc đều rỗng, không ném lỗi` | PASS |
+| AC-15 | Vật liệu đã đóng biến mất thật, vật liệu giữ lại còn nguyên từng id | 3 test trong nhóm `purgeClosed ...` (mục 5) | PASS |
+| AC-29 | Không đi qua `clearOnSignOut()`; phiên đăng nhập sống sót | `phiên đăng nhập sống sót: vẫn ghi được ngay sau khi xoá (AC-29)` — `messages` (bộ đệm do đăng xuất sở hữu) còn nguyên, `resolve()` vẫn trả chủ sở hữu, ghi mới thành công | PASS |
+| AC-8, BR-6 | Hồ sơ kỹ năng và nhật ký riêng không bị purge chạm vào | `hồ sơ kỹ năng và nhật ký riêng không bao giờ bị purge chạm vào` | PASS |
+| §4 registry | Ba danh sách `tables` / `mediaRoots` / `preferenceKeys` đầy đủ và có tripwire | `stage1_wipe_registry_parity_test.dart` (6 test) | PASS |
+| §6 regression | `JournalRepository.deleteAll()` và test media-store cũ còn xanh | lệnh 3 (`+114 ~4`) | PASS |
+
+### 8. Per-story visual fidelity
+
+NOT_APPLICABLE — P3 không dựng hay đổi màn hình nào (đúng như `phase-P3 §6`).
+
+### 9. Quan sát để Reviewer đọc trước
+
+1. **`hasAnyClosure()` không lọc theo chủ sở hữu.** Đây là thiết kế có sẵn từ
+   P1/P2 (`chapter_closure_dao.dart` nói rõ ledger không mang vị từ owner). Hệ
+   quả: trên máy dùng chung, sau khi `user-1` rời đi, `hasAnyClosure()` vẫn
+   `true` nếu `user-2` đang có closure. AC-14 được kiểm trong ngữ cảnh thật của
+   nó — tài khoản duy nhất trên máy — và ngữ cảnh hai tài khoản được ghi lại
+   thành một test riêng (`sổ đóng ngăn của tài khoản khác vẫn còn nguyên`) thay
+   vì sửa lén API của P2. Nếu Reviewer muốn `hasAnyClosure()` mang owner, đó là
+   thay đổi hợp đồng §3, nằm ngoài write scope P3.
+2. **`preferenceKeys` khớp theo tiền tố.** `before_you_go` ghi một khoá cho mỗi
+   thẻ (`before_you_go.dismissed_on.<cardId>`), nên không tồn tại danh sách khoá
+   chính xác hữu hạn. Khoá chính xác là tiền tố của chính nó, nên cơ chế này là
+   tập cha, không phải ngoại lệ.
+3. **`req016.last_opened_at` chưa có trong `preferenceKeys`.** Khoá đó do P6 tạo;
+   ở BaseHead `5b08a16a` chưa có mã nào trong `lib/` viết khoá đó. P6 phải thêm
+   nó vào registry khi tạo.
+4. **`activity_card_photos` được xoá hàng nhưng không xoá tệp.** `localPath` trỏ
+   tới đường dẫn mà app này chưa từng sao chép vào thư mục của riêng nó, nên xoá
+   tệp sẽ với ra ngoài vùng dữ liệu của app và phá ảnh gốc của người dùng. Gốc
+   media duy nhất app sở hữu là `journal_media/`, và nó nằm trong `mediaRoots`.
+   Khi nào có luồng sao chép ảnh thẻ vào thư mục riêng, gốc đó phải được đăng ký
+   thêm.
+
+### 10. Lỗi có sẵn, không do phase này
+
+`test/design_system/shared_backdrop_occlusion_test.dart:565` —
+`chat shows the shared sky wash` (`pumpAndSettle` timed out). Đã ghi ở P1 mục 6
+và P2 mục 8. Không nằm trong các thư mục mà lệnh 3 chạy nên không xuất hiện
+trong lần chạy này; vẫn là lỗi có sẵn, ngoài write scope P3.
