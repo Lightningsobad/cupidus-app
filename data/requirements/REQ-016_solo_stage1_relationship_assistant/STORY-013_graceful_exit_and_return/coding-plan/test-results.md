@@ -125,3 +125,173 @@ Không liên quan tới bump 6 → 7, bằng ba điểm:
 
 Nằm ngoài write scope P1 (`mobile/lib/core/database`, `mobile/lib/features/chapter_closure`),
 nên ghi nhận chứ không sửa ở đây.
+
+## Phase P2 — Dịch vụ đóng ngăn và loại trừ ở đường đọc
+
+Status: **COMPLETE**
+Ngày chạy: 2026-09-16
+Flutter 3.44.1 / Dart 3.12.1 (`export PATH="$HOME/flutter/bin:$PATH"`)
+BaseHead của phase: `66a339c013174b635754a3fc6ea488424fc63614`
+
+### 1. Điểm xuất phát (session recovery)
+
+Commit `66a339c0` đã mang sẵn toàn bộ **mã nguồn** P2, không có test nào của P2.
+Kiểm kê đối chiếu `phase-P2 §1B Write Scope`:
+
+| File trong write scope | Trạng thái ở `66a339c0` | Việc phase này làm |
+|---|---|---|
+| `lib/features/chapter_closure/data/chapter_closure_service.dart` | có, `close()`/`reopen()` đầy đủ | không đổi, chỉ kiểm chứng bằng test |
+| `lib/core/database/daos/activity_card_dao.dart` | có anti-join ở `cardsByStatus`, `watchCardsByStatus`, `countsByStatus` | không đổi |
+| `lib/features/context_notebook/data/context_notebook_repository.dart` | không đổi — cổng nằm ở `context_notebook_dao.notebookRows()`, đúng đường đọc của `entries()` và không đụng `skills()` | không đổi |
+| `lib/core/di/service_locator.dart` | có đăng ký `ChapterClosureDao`/`Gate`/`Service` | không đổi |
+| `test/features/chapter_closure/chapter_closure_service_test.dart` | **thiếu** | viết mới (14 test) |
+| `test/features/activity_cards/activity_card_dao_closure_filter_test.dart` | **thiếu** | viết mới (11 test) |
+| `test/features/context_notebook/context_notebook_closure_filter_test.dart` | **thiếu** | viết mới (7 test) |
+
+Một sai khác so với §1B là cố ý và đã kiểm chứng: mệnh đề anti-join của sổ tay
+nằm trong `context_notebook_dao.dart` chứ không phải `context_notebook_repository.dart`.
+`ContextNotebookRepository.entries()` đọc qua đúng `notebookRows()` đó, nên hành vi
+hợp đồng `§3` vẫn đúng và chữ ký công khai không đổi.
+
+Ngoài phạm vi P2 (theo `§3 Tasks` và `contract-summary.md §3`): đường đọc
+`promptStates()` **không** được lọc. `§3` chỉ ràng buộc `entries()` và cấm lọc
+`skills()`; `ask_prompt` được chụp vào sổ ghi ở P2 nhưng consumer của nó không
+thuộc phase này.
+
+### 2. Lệnh đã chạy
+
+| # | Lệnh (chạy trong `mobile/`) | Kết quả |
+|---|---|---|
+| 1 | `flutter test --no-pub --reporter github test/features/chapter_closure/chapter_closure_service_test.dart` | `🎉 14 tests passed.` — exit 0 |
+| 2 | `flutter test --no-pub --reporter github test/features/activity_cards/activity_card_dao_closure_filter_test.dart test/features/context_notebook/context_notebook_closure_filter_test.dart` | `🎉 18 tests passed.` — exit 0 |
+| 3 | `flutter test --no-pub --reporter compact test/features/chapter_closure/ test/features/activity_cards/ test/features/context_notebook/ test/core/database/` | `+438 ~6: All other tests passed!` — exit 0, 0 failed, 6 skipped |
+| 4 | `flutter analyze --no-pub lib/core/database lib/core/di lib/features/chapter_closure lib/features/context_notebook test/features/chapter_closure test/features/activity_cards test/features/context_notebook` | `13 issues found` — **0 error, 0 warning**, 13 info |
+| 5 | `flutter build apk --debug --flavor local` | `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk` — exit 0 |
+
+Ghi chú lệnh 3: đây là regression bắt buộc của `§6` (test cũ của `ActivityCardDao`,
+`ActivityCardListCubit` và context notebook phải còn xanh với cổng đã nối dây và sổ
+ghi rỗng). 438 test xanh, không có test nào đỏ.
+
+Ghi chú lệnh 4: `flutter analyze` trên repo này không bao giờ exit 0 (nền ~222
+warning cũ), nên cổng là "0 error mới". 13 issue đều là `info •
+prefer_initializing_formals` trên constructor dùng initializer list với tham số
+**named** và field private — chuyển sang initializing formal sẽ buộc caller viết
+`_db:`, tức đổi API công khai. Cùng lint đã tồn tại sẵn trên
+`context_notebook_repository.dart` và `ask_on_the_spot_cubit.dart` (không thuộc
+phase này), nên đây là khuôn mẫu sẵn có của codebase chứ không phải lỗi mới.
+
+Ghi chú lệnh 5: `--flavor local` là bắt buộc, giống P1.
+
+### 3. Test mới
+
+`mobile/test/features/chapter_closure/chapter_closure_service_test.dart` (14 test)
+
+- `vị từ phân loại gắn người` → `chỉ ba tín hiệu dương tính đóng một thẻ`
+  (đóng đúng `card-invited`, `card-answered`, `card-messaged`)
+- → `thẻ chưa từng mời ở lại luồng thường ngày (AC-7)` (`card-untouched` sống sót)
+- → `ca không dứt khoát giữ lại, không đóng (AC-10)` (`card-scheduled-alone` sống
+  sót: lên lịch một mình không phải tín hiệu gắn người)
+- → `thẻ của chủ khác không bao giờ bị đóng` (`card-other-owner` của `user-2`)
+- → `lời mời không có item_kind riêng` (`invite-1` không xuất hiện trong
+  `chapter_closure_items`; chỉ có kind `activity_card`)
+- `sổ tay, hồ sơ kỹ năng và nhật ký riêng` → `mọi mục sổ tay người yêu của chủ hiện
+  tại vào sổ đóng` (`entry-a`, `entry-b`; `entry-other` của `user-2` không vào)
+- → `hồ sơ kỹ năng không bao giờ là thành viên (AC-8)` (`skill-a`)
+- → `nhật ký riêng không bao giờ là thành viên (BR-6)` (`journal-a`, kèm khẳng định
+  hàng nhật ký vẫn còn nguyên)
+- → `ask_prompt lưu question_id làm item_id (§2)`
+  (`ask.birthday.v1`, `ask.coffee.v1`)
+- `giao dịch đơn (AC-1)` → `lỗi giữa chừng không để lại closure một nửa`
+- `đóng lại và mở lại (AC-17)` → `close trả về id của closure vừa ghi`,
+  `đóng lần hai thay thế ảnh chụp cũ, không xếp chồng`,
+  `reopen xoá hàng closure và mọi thành viên theo cascade`,
+  `reopen khi chưa đóng gì là no-op, không ném lỗi`
+
+`mobile/test/features/activity_cards/activity_card_dao_closure_filter_test.dart` (11 test)
+
+- `chưa đóng gì` → `anti-join không loại trừ gì và phân trang giữ nguyên`
+- `phân trang sau khi đóng 10/25 thẻ` → `hai trang liên tiếp trả 10 rồi 5, không
+  trùng, không sót`, `cờ hasMore đúng ở cả hai trang`, `không thẻ đã đóng nào lọt
+  vào bất kỳ trang nào`, `countsByStatus đếm theo tập đã lọc (AC-11)`,
+  `watchCardsByStatus phát ra cùng tập đã lọc`,
+  `mở lại đưa đủ 25 thẻ trở lại mọi đường đọc (AC-17)`
+- `ảnh chụp tại thời điểm đóng, không tính lại lúc đọc (AC-9)` → `thẻ sống sót được
+  mời cho người mới vẫn ở luồng thường ngày`
+- `phạm vi lọc` → `pane khác và chủ khác không bị ảnh hưởng`,
+  `id đóng dưới kind khác không ẩn thẻ trùng id`
+
+`mobile/test/features/context_notebook/context_notebook_closure_filter_test.dart` (7 test)
+
+- `sổ tay sau khi đóng ngăn (AC-12)` → `entries() trả list rỗng, không ném lỗi`,
+  `lọc theo kind cũng rỗng sau khi đóng`,
+  `hồ sơ kỹ năng không bao giờ bị lọc (AC-8)`,
+  `đóng một phần chỉ giấu đúng mục đã đóng`,
+  `mở lại đưa đúng tập mục đó trở lại (AC-17)`,
+  `id đóng dưới kind khác không giấu mục sổ tay`
+- `trạng thái rỗng` → `chưa đóng gì thì anti-join không giấu gì`,
+  `mục viết sau khi đóng vẫn hiện ra bình thường`
+
+### 4. Bằng chứng phân trang (§6 yêu cầu số hàng từng trang)
+
+Fixture: 25 thẻ `card-00`..`card-24`, cùng pane `idea`, `updatedAt` tăng dần theo
+chỉ số nên thứ tự đọc là mới nhất trước. Đóng đúng 10 thẻ có chỉ số chẵn từ 0 đến
+18 — trải trên **cả hai** trang, không gom vào một trang (một khối đóng nằm gọn ở
+trang 2 sẽ làm trang 1 đúng một cách ngẫu nhiên).
+
+| Lần đọc | Tham số | Số hàng trả về | Id trả về (theo thứ tự) |
+|---|---|---|---|
+| Trang 1 | `limit: 10, offset: 0` | **10** | `card-24, card-23, card-22, card-21, card-20, card-19, card-17, card-15, card-13, card-11` |
+| Trang 2 | `limit: 10, offset: 10` | **5** | `card-09, card-07, card-05, card-03, card-01` |
+| Trang 3 | `limit: 10, offset: 20` | **0** | — |
+| `countsByStatus` | — | `{idea: 15}` | — |
+
+`hasMore` (suy ra đúng cách `ActivityCardListCubit._fetchPage` làm, `page.length ==
+pageSize`): `true` ở trang 1, `false` ở trang 2. Nếu lọc trong Dart sau khi đọc,
+trang 1 chỉ còn 5 hàng và `hasMore` hoá `false` ngay, mất 10 thẻ sống sót.
+
+Chứng cứ AC-9 bằng id cụ thể: sau khi đóng, `card-01` (sống sót) được đặt
+`invited = true, replyState = 'answered'` — tức được mời cho người mới — và vẫn
+nằm trong trang 2, `countsByStatus` vẫn `{idea: 15}`. Vị từ không được tính lại
+lúc đọc.
+
+### 5. Bằng chứng giao dịch đơn (AC-1)
+
+`_FailsAfterWritingDao` ghi **thật** hàng `chapter_closures` và toàn bộ
+`chapter_closure_items` qua `super.createClosure(...)`, tự xác nhận
+`closureCount() > 0` ngay tại chỗ, rồi mới ném `StateError`. Sau khi
+`close()` ném:
+
+- `gate.hasAnyClosure()` → `false`
+- `select(chapter_closure_items)` → rỗng
+- `wroteBeforeThrowing` → `true` (chứng minh dữ liệu đã thực sự nằm trong DB trước
+  khi ném, nên cái dọn nó đi đúng là transaction bọc ngoài trong `close()`, không
+  phải việc "DAO ném trước khi kịp ghi")
+
+### 6. AC coverage
+
+| AC / BR | Nội dung | Test chứng minh | Kết quả |
+|---|---|---|---|
+| AC-1 | `close()` là một transaction; lỗi giữa chừng không để lại closure một nửa | `lỗi giữa chừng không để lại closure một nửa` | PASS |
+| AC-6 | Vị từ phân loại chạy một lần, chỉ tín hiệu dương tính | `chỉ ba tín hiệu dương tính đóng một thẻ` + 2 test biên | PASS |
+| AC-7, AC-10 | Thẻ "mới nghĩ ra" chưa từng mời và ca không dứt khoát được giữ lại | `thẻ chưa từng mời ở lại luồng thường ngày`, `ca không dứt khoát giữ lại, không đóng` | PASS |
+| AC-8 | Hồ sơ kỹ năng không bao giờ bị lọc và không bao giờ là thành viên | `hồ sơ kỹ năng không bao giờ là thành viên`, `hồ sơ kỹ năng không bao giờ bị lọc` | PASS |
+| AC-9 | Tập đóng là ảnh chụp, không tính lại lúc đọc | `thẻ sống sót được mời cho người mới vẫn ở luồng thường ngày` (`card-01`) | PASS |
+| AC-11 | Vật liệu đã đóng biến mất khỏi mọi pane và khỏi `countsByStatus` | `không thẻ đã đóng nào lọt vào bất kỳ trang nào`, `countsByStatus đếm theo tập đã lọc`, `watchCardsByStatus phát ra cùng tập đã lọc` | PASS |
+| AC-12 | `entries()` rỗng sau khi đóng — trạng thái bình thường, không lỗi | `entries() trả list rỗng, không ném lỗi`, `lọc theo kind cũng rỗng sau khi đóng` | PASS |
+| AC-17 | `reopen()` đưa đúng tập vật liệu đó trở lại mọi đường đọc | `reopen xoá hàng closure và mọi thành viên theo cascade`, `mở lại đưa đủ 25 thẻ trở lại mọi đường đọc`, `mở lại đưa đúng tập mục đó trở lại` | PASS |
+| BR-3, BR-4 | Không cột mới trên bảng STORY-001/004, không giá trị thứ năm cho `ActivityCardStatus` | Không diff nào chạm `activity_cards_table.dart`/`ActivityCardStatus`; `schemaVersion` vẫn 7 (P1), test v7 của P1 còn xanh ở lệnh 3 | PASS |
+| BR-6 | Nhật ký riêng không bao giờ là thành viên closure | `nhật ký riêng không bao giờ là thành viên (BR-6)` | PASS |
+| §3 anti-join | Loại trừ **trong SQL**, trước `LIMIT`/`OFFSET` | bảng phân trang ở mục 4 | PASS |
+| §6 regression | Test cũ của DAO thẻ / cubit / context notebook còn xanh | lệnh 3 (`+438 ~6`) | PASS |
+
+### 7. Per-story visual fidelity
+
+NOT_APPLICABLE — P2 không dựng hay đổi màn hình nào (đúng như `phase-P2 §6`).
+
+### 8. Lỗi có sẵn, không do phase này
+
+`test/design_system/shared_backdrop_occlusion_test.dart:565` —
+`chat shows the shared sky wash` (`pumpAndSettle` timed out). Đã ghi nhận ở P1 mục
+6 với ba bằng chứng cho thấy nó không liên quan tới bump `schemaVersion` 6 → 7.
+Không nằm trong các thư mục test mà lệnh 3 chạy, nên không xuất hiện trong lần
+chạy này; vẫn là lỗi có sẵn, ngoài write scope P2.

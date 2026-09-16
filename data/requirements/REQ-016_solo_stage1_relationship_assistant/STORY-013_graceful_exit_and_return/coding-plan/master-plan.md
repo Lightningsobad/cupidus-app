@@ -50,7 +50,7 @@
 | Phase | Owner | Lane | Depends On | Parallelizable | Status |
 |-------|-------|------|------------|----------------|--------|
 | P1 | Mobile Developer | Mobile | None | NO | COMPLETE |
-| P2 | Mobile Developer | Mobile | P1 | NO | NOT_STARTED |
+| P2 | Mobile Developer | Mobile | P1 | NO | COMPLETE |
 | P3 | Mobile Developer | Mobile | P2 | NO | NOT_STARTED |
 | P4 | Mobile Developer | Mobile | P2 | NO | NOT_STARTED |
 | P5 | Mobile Developer | Mobile | P3, P4 | NO | NOT_STARTED |
