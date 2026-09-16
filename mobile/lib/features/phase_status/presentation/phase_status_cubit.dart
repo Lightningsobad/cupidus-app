@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/content/content_package.dart';
 import '../../activity_cards/domain/activity_card.dart';
 import '../../activity_cards/domain/activity_card_repository.dart';
 import '../data/phase_content_repository.dart';
+import '../domain/evening_check_in_scheduler.dart';
 import '../domain/phase_content.dart';
 import '../domain/solo_phase.dart';
 import '../domain/solo_phase_resolver.dart';
@@ -64,10 +67,12 @@ class PhaseStatusCubit extends Cubit<PhaseStatusState> {
     required ActivityCardRepository repository,
     PhaseContentRepository? content,
     PhaseWidgetPublisher? widgetPublisher,
+    EveningCheckInScheduler? eveningCheckIn,
     DateTime Function()? clock,
   })  : _repository = repository,
         _content = content ?? PhaseContentRepository(),
         _widgetPublisher = widgetPublisher,
+        _eveningCheckIn = eveningCheckIn,
         _clock = clock ?? DateTime.now,
         super(const PhaseStatusState());
 
@@ -79,6 +84,7 @@ class PhaseStatusCubit extends Cubit<PhaseStatusState> {
   final ActivityCardRepository _repository;
   final PhaseContentRepository _content;
   final PhaseWidgetPublisher? _widgetPublisher;
+  final EveningCheckInScheduler? _eveningCheckIn;
   final DateTime Function() _clock;
 
   Future<void> refresh() async {
@@ -95,6 +101,15 @@ class PhaseStatusCubit extends Cubit<PhaseStatusState> {
     }
 
     await _widgetPublisher?.pushWidgetPayload(resolution);
+
+    // Not awaited, for the same reason the widget payload is not: the sentence
+    // below must never wait on a permission dialog or a notification queue.
+    // The scheduler swallows its own failures and its one-shot gate is what
+    // makes a repeat refresh harmless (`REMIND-REPEAT`).
+    final EveningCheckInScheduler? eveningCheckIn = _eveningCheckIn;
+    if (eveningCheckIn != null) {
+      unawaited(eveningCheckIn.sync(resolution));
+    }
 
     final PhaseContentCatalogue catalogue;
     try {

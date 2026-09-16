@@ -91,8 +91,11 @@ tính năng.
   dựng composer thứ hai.
 - Bỏ qua sheet là kết thúc hợp lệ: không nhắc lại, không dấu chấm đỏ, không mục
   "chưa hoàn thành" ở đâu cả (AC-19).
-- `me_screen.dart`: thêm **đúng hai** hàng công tắc theo `../ux/uiux-spec.md` §7.
-  Tắt → huỷ mọi lịch đang treo và không đặt thêm (AC-35). Không thêm hàng thứ ba.
+- `notification_settings_screen.dart`: thêm **đúng hai** hàng công tắc theo
+  `../ux/uiux-spec.md` §7. Tắt → huỷ mọi lịch đang treo và không đặt thêm
+  (AC-30/AC-32). Không thêm hàng thứ ba.
+  (Phase file ban đầu ghi `me_screen.dart`; trong repo màn hình đó chỉ là lối
+  vào, mọi hàng công tắc thông báo nằm ở `notification_settings_screen.dart`.)
 - Android 13+: xin `POST_NOTIFICATIONS` **tại thời điểm** đặt lịch đầu tiên, chứ
   không xin lúc khởi động app. Từ chối quyền → im lặng, không banner nài nỉ.
 
@@ -100,11 +103,11 @@ tính năng.
 
 - Một thẻ `dateDay` → tối đa **một** thông báo, kể cả khi app mở lại nhiều lần
   trong ngày (AC-16/`REMIND-REPEAT`).
-- Bỏ qua một lần → thẻ đó không bao giờ được nhắc lại (BR-10/AC-18).
-- Sheet chỉ có hai lối: ảnh và dòng nhật ký (AC-17).
+- Bỏ qua một lần → thẻ đó không bao giờ được nhắc lại (BR-10/AC-17).
+- Sheet chỉ có hai lối: ảnh và dòng nhật ký (AC-16/AC-18).
 - Không chấm điểm buổi hẹn, không hỏi phản ứng người kia (BR-14).
-- Bỏ qua không để lại dấu hiệu "còn nợ" nào trong app (AC-19).
-- Tắt công tắc → không thông báo nào nữa, và các lịch đang treo bị huỷ (AC-35).
+- Bỏ qua không để lại dấu hiệu "còn nợ" nào trong app (AC-17 + `../ux/uiux-spec.md` §4).
+- Tắt công tắc → không thông báo nào nữa, và các lịch đang treo bị huỷ (AC-30/AC-32).
 - Không dùng exact alarm, không tiến trình nền (ADR-002 D1).
 
 ## 5. Planned Outputs
@@ -144,5 +147,50 @@ tính năng.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-11
+- Status: BLOCKED (code + test của phase đã xong và xanh; chặn ở quyết định
+  ngoài phạm vi mobile-dev, xem §8)
+- Last updated: 2026-09-17
+- Evidence: `coding-plan/test-results.md` §P6
+- Visual fidelity:
+  `../visual-fidelity/implemented-evening-check-in-sheet.png`
+
+## 8. Blocker: AC4 của REQ-002/STORY-021 cấm đúng gói mà §3 bắt thêm
+
+`mobile/test/features/reminders/reminder_copy_guard_test.dart` là cổng tuân thủ
+của một story đã DONE và đã merge. Nó chặn cứng danh sách gói:
+
+```
+'android_alarm_manager', 'flutter_local_notifications', 'alarm',
+'awesome_notifications'
+```
+
+§3 dòng 75 của chính file này lại bắt "Thêm `flutter_local_notifications` +
+`timezone` vào `pubspec.yaml`". Hai điều này không thể cùng đúng:
+
+```
+flutter test test/features/reminders/reminder_copy_guard_test.dart
+  +1 -1: pubspec.yaml declares no native-alarm/local-notification dependency (AC4) [E]
+    Expected: false
+      Actual: <true>
+    pubspec.yaml must not declare the "flutter_local_notifications" dependency (AC4).
+```
+
+Không có đường vòng kỹ thuật: mọi gói thay thế cho thông báo cục bộ đã lên lịch
+(`alarm`, `awesome_notifications`) đều nằm trong cùng danh sách cấm.
+
+Đây là quyết định của Product Owner, không phải lỗi cài đặt. Header của chính
+test đó ghi "do not delete this test to unblock a copy change", nên mobile-dev
+không tự sửa cổng của story khác. Ba hướng để PO chọn:
+
+1. Thu hẹp AC4 theo đúng ý định của nó — giữ nguyên lệnh cấm với
+   `android_alarm_manager`/`alarm`/`awesome_notifications`, và với
+   `flutter_local_notifications` chuyển từ "không được khai báo trong
+   `pubspec.yaml`" sang "`lib/features/reminders/**` không được import". Cách
+   này vẫn bảo vệ đúng thứ AC4 muốn bảo vệ (nhắc nhở đồng bộ không được biến
+   thành báo thức cục bộ) mà không cấm một tính năng không liên quan.
+2. Giữ nguyên AC4 và bỏ thông báo cục bộ khỏi REQ-016 — nhắc 23h khi đó phải
+   đến từ push phía máy chủ, tức là đổi phạm vi của P6.
+3. Giữ nguyên cả hai và chấp nhận suite đỏ — không nên, vì cổng sẽ mất giá trị.
+
+Cho tới khi có quyết định, P6 ở trạng thái BLOCKED dù toàn bộ test của riêng nó
+đã xanh.

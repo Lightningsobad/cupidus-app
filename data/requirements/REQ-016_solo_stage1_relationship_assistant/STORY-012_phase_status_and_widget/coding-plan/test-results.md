@@ -9,7 +9,7 @@
 | P3 | Mobile Developer | DONE | 2026-09-17 |
 | P4 | Mobile Developer | DONE | 2026-09-17 |
 | P5 | Mobile Developer | DONE | 2026-09-17 |
-| P6 | Mobile Developer | NOT_STARTED | — |
+| P6 | Mobile Developer | BLOCKED | 2026-09-17 |
 | P7 | Mobile Developer | DONE | 2026-09-17 |
 | P8 | Mobile Developer | NOT_STARTED | — |
 
@@ -907,3 +907,139 @@ test` giữ nguyên 224 issue / 0 error.
 ### Next phase
 
 - **P6**, **P8** — không phụ thuộc P5, vẫn sẵn sàng.
+
+## P6 – Nhắc 23h + sheet check-in buổi tối
+
+Trạng thái: **BLOCKED**. Toàn bộ code và test của riêng phase đã xong và xanh;
+chặn ở một mâu thuẫn acceptance criteria giữa hai requirement, xem
+"Blocker" bên dưới.
+
+### Files shipped
+
+- `mobile/lib/features/phase_status/data/local_notification_scheduler.dart`
+  (mới) — interface `LocalNotificationScheduler` +
+  `PluginLocalNotificationScheduler`, không chứa chuỗi hiển thị nào.
+- `mobile/lib/features/phase_status/domain/evening_check_in_scheduler.dart`
+  (mới) — luật một-lần-mỗi-thẻ, `eveningCheckInNotificationId`, `setEnabled`.
+- `mobile/lib/features/phase_status/presentation/evening_check_in_sheet.dart`
+  (mới) — sheet hai lối + wiring production (`buildEveningCheckInScheduler`).
+- `mobile/lib/features/account/presentation/screens/notification_settings_screen.dart`
+  — thêm đúng hai hàng công tắc vào nhóm ENGAGEMENT sẵn có.
+- `mobile/ios/Runner/AppDelegate.swift` — gán
+  `UNUserNotificationCenter.current().delegate` trước khi app xong khởi động,
+  nếu không một cú chạm khởi động nguội sẽ không đến được ai.
+- `mobile/lib/features/phase_status/presentation/phase_status_cubit.dart`,
+  `mobile/lib/features/activity_cards/presentation/screens/activity_card_hub_view.dart`
+  — chỗ duy nhất gọi `sync()`, chạy sau khi pha đã giải xong.
+- `mobile/android/app/src/main/AndroidManifest.xml` — **không sửa**.
+  `POST_NOTIFICATIONS` đã có sẵn (FCM), và manifest vốn không khai
+  `SCHEDULE_EXACT_ALARM`/`USE_EXACT_ALARM` — đúng thứ ADR-002 D1 cần. Có test
+  khoá cả ba điều đó lại để một thay đổi sau này không lặng lẽ thêm exact alarm.
+- `mobile/lib/l10n/arb/app_en.arb`, `app_vi.arb` — 9 getter mới, đã chạy
+  `flutter gen-l10n`.
+- `mobile/pubspec.yaml` — `flutter_local_notifications: ^22.3.1`,
+  `timezone: ^0.11.1`.
+- `mobile/test/features/phase_status/evening_check_in_scheduler_test.dart`
+  (mới, 21 test).
+- `mobile/test/features/phase_status/evening_check_in_sheet_test.dart`
+  (mới, 12 test + 1 capture).
+- `mobile/test/features/account/presentation/screens/notification_settings_screen_test.dart`
+  — +6 test (tổng 10).
+
+### Commands run
+
+```
+flutter test test/features/phase_status test/features/journal \
+             test/features/account test/features/activity_cards
+  +592 ~11: All other tests passed!
+
+flutter analyze lib test
+  225 issues found.    # 0 error; mốc nền 224 / 0 error
+```
+
+Chênh lệch +1 issue so với mốc nền là **một info** `prefer_initializing_formals`
+tại `phase_status_cubit.dart:75`, cùng loại với hai info đã có sẵn trong chính
+constructor đó. Không có error mới.
+
+### Assumption A-3 đã kiểm tra trước khi thêm gói
+
+§3 yêu cầu dừng lại nếu ràng buộc bản dựng không thoả. Đã đo:
+
+```
+Flutter 3.44.1 • Dart 3.12.1          # cần >= 3.38.1
+flutter.compileSdkVersion = 36        # cần >= 35
+minSdkVersion = 24, targetSdkVersion = 36
+```
+
+Thoả, nên không phải hạ cấp ràng buộc nào.
+
+### Điều đáng ghi lại
+
+**1. `REMIND-REPEAT` được chốt ở prefs, không ở bộ nhớ tiến trình.** Khoá
+`phase_status.reminded_on.<cardId>` được ghi **cả trên nhánh bị từ chối quyền**.
+Nhờ vậy một lần từ chối kết thúc bằng im lặng thay vì cùng một hộp thoại xin
+quyền mỗi lần mở app. Test mô phỏng mở app 5 lần trong ngày → đúng 1 lần
+`schedule`, và còn dựng lại một `EveningCheckInScheduler` hoàn toàn mới để
+chứng minh bản ghi sống qua vòng đời tiến trình.
+
+**2. Id thông báo phải tự fold, không dùng `String.hashCode`.** `hashCode` của
+Dart không ổn định giữa các lần chạy, mà lệnh huỷ phát ở lần chạy sau phải tìm
+lại đúng id cũ. Vì vậy `eveningCheckInNotificationId` fold 31 và mask
+`& 0x3FFFFFFF` — test khẳng định id ổn định, không âm, và `< 2^31`.
+
+**3. Không cần `initializeTimeZones()`.** `tz.TZDateTime.from(at.toUtc(),
+tz.UTC)` là đủ cho một lịch một-lần, nên không phải kéo thêm plugin đọc múi giờ
+thiết bị chỉ để đặt một thông báo.
+
+**4. Hai công tắc đọc/ghi đúng khoá mà scheduler đọc.** Chúng **không** đi qua
+`NotificationPreferencesStore`: blob `cupid_notification_preferences_v1` bị xoá
+khi đăng xuất, và một lời nhắc sống lâu hơn cái công tắc tắt nó là đúng thứ
+AC-30 cấm. Có test khẳng định blob đó vẫn `null` sau khi bật/tắt hai hàng mới.
+
+**5. Một hàng mới làm đỏ một test không liên quan.** Thêm 2 hàng đẩy nhóm INFO
+ra ngoài khung 800x600 mặc định, `ListView` không dựng hàng ngoài màn, và
+`find.text('INFO')` tìm thấy 0 widget. Sửa bằng `_pumpScreen` đặt
+`physicalSize = Size(800, 2400)` ở dpr 1 (giữ nguyên bề ngang logic 800).
+
+**6. `no_fork_guard_test` bắt nhầm `context.cupidColors.colorSurface`.** Guard
+so khớp chuỗi con `"Colors."`, mà `cupidColors.` chứa đúng chuỗi đó. Đã hoisted
+thành biến cục bộ `tokens`. Guard trở lại đúng 7 vi phạm có sẵn từ trước
+BaseHead, không thêm vi phạm nào từ diff của P6.
+
+### Visual fidelity
+
+`../visual-fidelity/implemented-evening-check-in-sheet.png` — chụp
+`RepaintBoundary` trong chính widget test (`CAPTURE_VISUALS=true`), 412x915 dpr
+1, nền `CupidColorTokens.dark()`, đã nạp Nunito / Roboto / Roboto Mono /
+Material Symbols Rounded + `MaterialIcons-Regular.otf` của framework. Đã mở ảnh
+ra nhìn: dấu tiếng Việt đúng, không có ô tofu, glyph icon hiện, và cả hai lối ra
+("Để sau" / "Lưu") đều nằm trong khung.
+
+### Blocker: AC4 của REQ-002/STORY-021 cấm đúng gói mà P6 §3 bắt thêm
+
+```
+flutter test test/features/reminders/reminder_copy_guard_test.dart
+  +1 -1: pubspec.yaml declares no native-alarm/local-notification dependency (AC4) [E]
+    Expected: false
+      Actual: <true>
+    pubspec.yaml must not declare the "flutter_local_notifications" dependency (AC4).
+    test/features/reminders/reminder_copy_guard_test.dart 84:9  main.<fn>
+```
+
+Chi tiết và ba hướng xử lý nằm ở `phase-P6-evening-check-in.md` §8. Đây là
+quyết định Product Owner, không phải lỗi cài đặt, nên mobile-dev không sửa cổng
+tuân thủ của một story khác đã DONE.
+
+Chạy `flutter test` toàn bộ cho ra 15 test đỏ. 14 trong số đó đã đỏ sẵn tại
+BaseHead `4d60113f` ở những vùng không nằm trong diff của P6
+(`design_system/shared_backdrop_occlusion_guard_test.dart`,
+`design_system/no_fork_guard_test.dart`,
+`design_system/shared_backdrop_occlusion_test.dart`, 3x `love_contracts`,
+3x `auth`, `gallery_cubit_test.dart`,
+`in_app_notifications/dialogs_theme_test.dart`,
+2x `zodiac_red_flag_screen_golden_test.dart`). Cái thứ 15 là guard AC4 ở trên,
+và nó đỏ trực tiếp vì P6.
+
+### Next phase
+
+- **P8** — phụ thuộc P3 và P7, cả hai đã DONE, không phụ thuộc P6.

@@ -10,6 +10,7 @@ import '../../../../design_system/tokens/cupid_typography_tokens.dart';
 import '../../../gift_ideas/gift_ideas_entry_point.dart';
 import '../../../phase_status/data/home_widget_bridge.dart';
 import '../../../phase_status/data/phase_content_repository.dart';
+import '../../../phase_status/presentation/evening_check_in_sheet.dart';
 import '../../../phase_status/presentation/phase_status_cubit.dart';
 import '../../../phase_status/presentation/phase_status_line.dart';
 import '../../domain/activity_card.dart';
@@ -66,6 +67,7 @@ class ActivityCardHubView extends StatelessWidget {
                 content: phaseContent,
                 clock: today == null ? null : () => today!,
               ),
+          eveningCheckIn: buildEveningCheckInScheduler(content: phaseContent),
           clock: today == null ? null : () => today!,
         ),
         child: _ActivityCardHubBody(repository: repository, today: today),

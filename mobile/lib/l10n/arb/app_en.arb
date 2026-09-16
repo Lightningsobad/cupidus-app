@@ -257,5 +257,14 @@
   "gift_ideas_effort_minutes": "{minutes}'",
   "gift_ideas_no_match": "No idea matches these filters yet.",
   "gift_ideas_guess_row": "Stuck? Try guessing what kind of gift they like",
-  "gift_ideas_guess_coming_soon": "The portrait and the compatibility table are coming in a later step."
+  "gift_ideas_guess_coming_soon": "The portrait and the compatibility table are coming in a later step.",
+  "notifs_row_evening_check_in_title": "Ask if you got home",
+  "notifs_row_evening_check_in_sub": "One gentle nudge on the evening of the date.",
+  "notifs_row_quiet_drip_title": "Quiet-phase drip",
+  "notifs_row_quiet_drip_sub": "Once a week at most.",
+  "evening_check_in_attach": "Attach a photo",
+  "evening_check_in_photos_attached": "{count} photos picked",
+  "evening_check_in_line_hint": "Write one line about today",
+  "evening_check_in_save": "Save to the journal",
+  "evening_check_in_later": "Later"
 }

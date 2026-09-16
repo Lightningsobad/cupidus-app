@@ -1192,5 +1192,46 @@
   "gift_ideas_guess_coming_soon": "Chân dung và bảng tra ăn khớp sẽ có ở bước sau.",
   "@gift_ideas_guess_coming_soon": {
     "description": "Answer when the bottom row is tapped before STORY-009/010 ship. Tapping says so rather than doing nothing, so the row is not a dead end (SC-5)."
+  },
+  "notifs_row_evening_check_in_title": "Nhắc về tới nhà chưa?",
+  "@notifs_row_evening_check_in_title": {
+    "description": "STORY-012 uiux-spec section 7 row 1 (SB-85). Turns the single 23h nudge of the date day on or off, independently of every other row (AC-32)."
+  },
+  "notifs_row_evening_check_in_sub": "Một lời nhắc nhẹ vào tối ngày hẹn.",
+  "@notifs_row_evening_check_in_sub": {
+    "description": "Says what the row controls: one gentle nudge, on the date day only. No repeat and no escalation (BR-10)."
+  },
+  "notifs_row_quiet_drip_title": "Nội dung nhỏ giọt khoảng lặng",
+  "@notifs_row_quiet_drip_title": {
+    "description": "STORY-012 uiux-spec section 7 row 2 (SB-99). Turns the quiet-phase drip line on or off, independently of row 1 (AC-32)."
+  },
+  "notifs_row_quiet_drip_sub": "Tối đa một lần mỗi tuần.",
+  "@notifs_row_quiet_drip_sub": {
+    "description": "States the cadence ceiling the drip policy enforces (BR-9), so the row is not read as a stream of notifications."
+  },
+  "evening_check_in_attach": "Đính ảnh",
+  "@evening_check_in_attach": {
+    "description": "Step (1) of the 23h check-in sheet: opens the OS photo picker (STORY-012 uiux-spec section 4). Chrome for the sheet, not story content - the question the sheet asks comes from nudges.v1.json."
+  },
+  "evening_check_in_photos_attached": "Đã chọn {count} ảnh",
+  "@evening_check_in_photos_attached": {
+    "description": "Replaces the attach label once photos are picked. A count of what the user chose, never a completion score.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "evening_check_in_line_hint": "Viết một câu cho hôm nay",
+  "@evening_check_in_line_hint": {
+    "description": "Placeholder of step (2), the single-sentence field. Asks about the user's own day and never about the other person (BR-14)."
+  },
+  "evening_check_in_save": "Lưu vào nhật ký",
+  "@evening_check_in_save": {
+    "description": "Hands the photos and the sentence to the journal composer (STORY-003). Leaving either blank still works - the two steps do not lock each other."
+  },
+  "evening_check_in_later": "Để sau",
+  "@evening_check_in_later": {
+    "description": "Closes the sheet. A valid ending: nothing is stored, nothing is marked incomplete, and the reminder does not come back (AC-17)."
   }
 }
