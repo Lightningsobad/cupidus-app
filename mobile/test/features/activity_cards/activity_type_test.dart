@@ -172,10 +172,10 @@ void main() {
     test('the column keeps its TEXT NULL storage and the converter introduces '
         'no migration of its own', () async {
       // The version moved 3 -> 4 for ruling B-1's five new columns, 4 -> 5 for
-      // `location` + `invite_messages`, and 5 -> 6 for the context-notebook
-      // tables, never for this converter: attaching it to an existing TEXT
-      // column emits no DDL.
-      expect(database.schemaVersion, 6);
+      // `location` + `invite_messages`, 5 -> 6 for the context-notebook tables
+      // and 6 -> 7 for `relationship_labels`, never for this converter:
+      // attaching it to an existing TEXT column emits no DDL.
+      expect(database.schemaVersion, 7);
       final GeneratedColumn<Object> column = database.activityCards.$columns
           .firstWhere((GeneratedColumn<Object> c) => c.name == 'activity_type');
       expect(column.type, DriftSqlType.string);

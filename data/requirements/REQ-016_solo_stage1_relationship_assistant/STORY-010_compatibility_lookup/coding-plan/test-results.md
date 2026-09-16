@@ -5,7 +5,7 @@
 | Phase | Owner | Status | Build Gate | Test Gate |
 |-------|-------|--------|------------|-----------|
 | P1 | Mobile Developer | COMPLETE | PASS | PASS (35/35) |
-| P2 | Mobile Developer | NOT_STARTED | — | — |
+| P2 | Mobile Developer | COMPLETE | PASS | PASS (19/19 + 102 hồi quy) |
 | P3 | Mobile Developer | NOT_STARTED | — | — |
 | P4 | Mobile Developer | NOT_STARTED | — | — |
 | P5 | Mobile Developer | NOT_STARTED | — | — |
@@ -73,6 +73,109 @@ Mỗi gói tra cứu hiện ship **2 giá trị trục / 4 ô**, hợp lệ y nh
 cổng suy `n` từ dữ liệu. Giá trị trục dùng id thật (`aries`/`taurus`,
 `intj`/`enfp`) nên P5/P6 chỉ **thêm** item, không phải viết lại. Bộ seed chưa
 qua kiểm duyệt lớp 2 (AC-35/D-15) — P5/P6 ghi vết duyệt.
+
+## P2 – Bảng nhãn tự khai `relationship_labels`
+
+Phase này chạy lại sau khi phiên trước mất liên lạc. Scrum Master đã niêm phong
+phần dở dang thành commit `406c0bc6`; mục 1 dưới đây là biên bản đối chiếu
+commit đó với yêu cầu của file phase, không phải mô tả công việc mới.
+
+### Inventory commit `406c0bc6` so với `phase-P2-relationship-labels-store.md`
+
+| Yêu cầu phase | Hiện trạng ở `406c0bc6` | Việc còn lại phiên này |
+|---|---|---|
+| §4 bảng `relationship_labels` | Có, 8 cột đúng §5, PK `id`, UNIQUE `(owner_key, subject, system)` | Không |
+| §4 DAO | Có, 4 truy vấn đều bắt buộc `ownerKey`, không có aggregate | Không |
+| §4 repository | Có, upsert trên khoá tự nhiên + đọc theo `owner_key` | Không |
+| §4 `cupid_database.dart` | `schemaVersion` 6 → 7, `onUpgrade` chỉ `createTable` | Không |
+| §4 `service_locator.dart` | Có, 2 `registerLazySingleton` (DAO + repository) | Không |
+| §4 test repository | Có, 19 test | Không |
+| §6.2 sửa test đỏ do bump | 7 file đã sửa | **Sót 1 file** — xem dưới |
+| §7 chạy test / §8 build gate | Không có bằng chứng nào trong artifact | Chạy lại toàn bộ |
+
+Kết luận: phần mã nguồn của P2 đã hoàn chỉnh trong `406c0bc6`; cái thiếu là một
+khẳng định `schemaVersion` bị sót và toàn bộ bằng chứng cổng.
+
+### Sửa trong phiên này
+
+`mobile/test/features/activity_cards/activity_type_test.dart:178` vẫn khẳng
+định `expect(database.schemaVersion, 6)`. Đây đúng là dư chấn bump mà §6.2 dự
+báo, ở file thứ tám mà phiên trước không quét tới. Sửa **con số khẳng định**
+thành `7` và nối thêm `6 -> 7 cho relationship_labels` vào chú thích lịch sử
+phiên bản ngay trên nó; hành vi của test không đổi. Đây là sửa hợp lệ theo §7
+("sửa con số khẳng định, không sửa hành vi"), không phải `SCHEMA_BUMP_BLOCKED`:
+không có story nào khác cùng nhắm v7.
+
+Đã quét cạn để chắc không còn file thứ chín: 9 file test nhắc `schemaVersion`,
+5 file nhắc `userVersion`/`allTables`; tất cả đều nằm trong các lệnh dưới đây.
+
+### Commands Run
+
+Chạy với `cwd` là `<worktree>/mobile`, `PATH` có prefix
+`${FLUTTER_SDK_PATH:-$HOME/flutter}/bin`. Không nối ống, không cắt đuôi.
+
+| Command | Source | Result |
+|---|---|---|
+| `flutter test test/features/compatibility_lookup/relationship_label_repository_test.dart` | runtime registry `mobile-app.testCommand` | **All tests passed!** — 19 passed, 0 failed |
+| `flutter test test/core/database` | §7 (mọi test đỏ do bump) | **All tests passed!** — 82 passed, 0 failed |
+| `flutter test test/features/activity_cards/activity_type_test.dart` | §7 (file sót, sau khi sửa) | **All tests passed!** — 19+0; trước khi sửa: 1 failed |
+| `flutter test test/widget_test.dart` | hồi quy cho 2 đăng ký mới ở `service_locator.dart` | **All tests passed!** — 1 passed |
+| `dart run build_runner build --delete-conflicting-outputs` | §8 | OK, 1307 outputs; `git status` sạch sau đó → `.g.dart` đã commit là bản sinh hiện hành |
+| `flutter build apk --debug` | runtime registry `mobile-app.buildCommand` | **PASS** — `build/app/outputs/flutter-apk/app-local-debug.apk` (task `assembleLocalDebug`, 48.6s) |
+
+`flutter analyze` không chạy làm bằng chứng cổng, cùng lý do như P1: baseline
+repo 222 cảnh báo có sẵn nên lệnh không thể trả về 0.
+
+### Đối chiếu §10 Completion Criteria
+
+| Tiêu chí | Bằng chứng |
+|---|---|
+| Bảng, DAO, repository, migration tồn tại và biên dịch | build gate PASS |
+| Test repository và test cột-bị-cấm xanh | 19/19, gồm nhóm `ranh giới lưu trữ (AC-30 / AC-31 / AC-33)` 6 test |
+| Mọi test bị bump làm đỏ đã xanh | 82 + 19, không còn file nào khẳng định v6 |
+| Build gate xanh | `app-local-debug.apk` |
+
+### Kiểm chứng AC mà P2 trích dẫn
+
+Các id AC trong mã nguồn P2 đã đối chiếu trực tiếp với `requirements.md` và
+**đúng cả sáu** — khác với dư chấn lệch id ở P1 (mục 1 phần Findings):
+
+| Id trích trong mã P2 | Dòng `requirements.md` | Khớp nội dung |
+|---|---|---|
+| AC-8 (`certainty` giữ `guess` là phỏng đoán của người dùng) | 159 | Đúng |
+| AC-9 (sửa/xoá nhãn → upsert, không chồng lịch sử) | 164 | Đúng |
+| AC-29 (ngoại tuyến → lưu trên thiết bị) | 258 | Đúng |
+| AC-30 (không cột đo hành vi người kia) | 264 | Đúng |
+| AC-31 (không ghi kết quả tra vào sổ tay) | 268 | Đúng |
+| AC-33 (không cột đếm lần tra) | 277 | Đúng |
+
+### Ba phát hiện P1 chuyển tiếp — trạng thái với P2
+
+Wave này chỉ có làn Mobile, không có làn Tech Lead để phân xử, nên ghi lại như
+mục **đã ghi nhận / hoãn**. Không mục nào phá hợp đồng của chính P2:
+
+1. **Lệch id AC trong file phase P1** — không ảnh hưởng P2. Bảng ngay trên cho
+   thấy cả sáu id P2 trích đều đúng. Vẫn chờ Scrum Master quyết có sửa file
+   phase P1 hay không.
+2. **AC-32 (ngôn ngữ tiên tri / vận mệnh) chưa có chủ ở tầng dữ liệu** — đúng,
+   và P2 **không phải** chỗ nhận. `relationship_labels` không lưu văn xuôi nào;
+   `value` là một `axis_value.id`. AC-32 là ràng buộc nội dung, thuộc cổng nhập
+   (P1) hoặc nội dung (P5/P6). Vẫn hoãn.
+3. **`lookupCell` ship với `ContentPackage<CompatItem>`** — không chạm P2. P2
+   không gọi `lookupCell`; nó chỉ ghi id giá trị trục. Ràng buộc duy nhất là
+   `value` phải là `axis_value.id` của gói tương ứng, và điều đó đúng với cả hai
+   chữ ký. Vẫn hoãn cho P3/P4.
+
+### Một điểm mới, ghi ra để Reviewer không phải tự suy
+
+`AC-31` (dòng 270) viết: *"Sổ tay chỉ chứa **sở thích và sự kiện**, cộng nhãn
+tự khai của người dùng"*. Đọc thoáng dễ tưởng AC này **bắt** nhãn phải nằm
+trong sổ tay, mâu thuẫn với quyết định §2 của file phase (nhãn ở bảng riêng).
+Không mâu thuẫn: `chỉ chứa` là **trần** của những gì sổ tay được phép chứa, một
+lệnh cấm, không phải lệnh bắt lưu ở đó. Lưu nhãn ở nơi khác không vi phạm trần
+đó. Lập luận đầy đủ ở `../architecture/solution.md` §1 Key Discovery 5, và test
+`notebook_entries.kind stays the closed interest|event enum STORY-004 owns` là
+hàng rào cho đúng ranh giới này.
 
 ## Findings For Scrum Master / Tech Lead
 
