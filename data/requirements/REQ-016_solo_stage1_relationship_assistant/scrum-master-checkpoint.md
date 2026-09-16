@@ -17,17 +17,24 @@ weekly-limit-reset recovery):
 | STORY-008_date_script_three_parts | Alex-Mobile-Dev-2 | P4 three-exits-and-card-origin (P3 verified+committed 4b33d96b) | 4b33d96b |
 | STORY-009_your_view_portrait | Alex-Mobile-Dev-3 | P4 portrait-screen | c61256c2 |
 | STORY-010_compatibility_lookup | Alex-Mobile-Dev-4 | P4 entry-point-screen-and-label-capture (P3 verified+committed cfaccc28) | cfaccc28 |
-| STORY-012_phase_status_and_widget | Alex-Mobile-Dev-5 | P7 phase-line-and-countdown | 55836165 |
-| STORY-013_graceful_exit_and_return | Alex-Mobile-Dev-6 | P3 stage1-wipe-and-purge | 5b08a16a |
+| STORY-012_phase_status_and_widget | Alex-Mobile-Dev-5 | P3 counter-milestone-drip (P7 verified+committed 9743c172) | 9743c172 |
+| STORY-013_graceful_exit_and_return | Alex-Mobile-Dev-6 | P4 close-chapter-entry-ui (P3 verified+committed e1eec120) | e1eec120 |
 
-Round 11 (2026-09-17): STORY-008 and STORY-010 came back idle from the
-round-10 recovery dispatch with real, verified P3 completions (diff matched
-WriteScope, test-results.md AC coverage + visual fidelity eyeballed, phase
-file evidence solid). Committed both (`4b33d96b`, `cfaccc28`), refreshed
-their Git boundaries, re-activated both run files in place (no new RunIds),
-re-added both to `parallel-scheduler.json.active_runs`, and dispatched P4 to
-the same agents. STORY-005/009/012/013 remain mid-phase from round 10,
-still running per `ListAgents`, not yet returned.
+Round 11 (2026-09-17): STORY-008 and STORY-010 came back idle with real,
+verified P3 completions. Committed both (`4b33d96b`, `cfaccc28`),
+refresh-base, reactivated run files in place, redispatched P4 to same
+agents.
+
+Round 12 (2026-09-17), forced by `guard-open-parallel-runs-on-stop.sh
+[OPEN_RUNS]`: STORY-012 P7 (`status: COMPLETED`, genuine) and STORY-013 P3
+(`status: COMPLETION_INVALID` — SubagentStop just missed the literal marker
+string, work itself was genuine per diff+test-results.md AC coverage) both
+verified and committed (`9743c172`, `e1eec120`). Same reactivate/re-add/
+redispatch pattern applied; both agents now on next phase. STORY-012 P7
+commit flagged a merge-time follow-up: its countdown line also renders on
+already-merged STORY-002's card-detail screen, invalidating 2 of STORY-002's
+captured visual-fidelity PNGs — regen those at STORY-012/integration merge
+time, not now. STORY-005/009 still mid-phase, not yet returned.
 
 **Recurring patterns to apply again without re-deriving:**
 - Reuse the SAME RunId/RunState file for every phase of a story — never
@@ -56,24 +63,10 @@ still running per `ListAgents`, not yet returned.
   touches it (STORY-012 already added `home_widget`/
   `flutter_local_notifications`/`timezone`).
 
-**Round 10 recovery (2026-09-17, this note):** all 6 in-flight dispatches
-(STORY-005 P4, STORY-008 P3, STORY-009 P4, STORY-010 P3, STORY-012 P7,
-STORY-013 P3) simultaneously failed with `idleReason: failed`,
-`failureReason: "weekly limit · resets 3am (Asia/Saigon)"` — genuine
-Anthropic account exhaustion, not a guard block. Waited for reset (date
-advanced to 2026-09-17, system confirmed reset). Verified via `ListAgents`
-all 6 agents back `idle`; verified per-worktree `git status --porcelain`:
-STORY-005/008/010/012 dirty with real uncommitted progress, STORY-009/013
-clean (only exploratory reads before the failure hit). Sent
-Session-Recovery `SendMessage` to all 6 (same RunId/Worktree/Branch/
-BaseHead, no new RunIds), each told to inspect own existing diff first
-(dirty) or start fresh (clean), finish the declared phase, update
-test-results.md, and emit the literal `MOBILE_IMPLEMENTATION_COMPLETE: YES`
-marker in final text. STORY-010's resume also asks the agent to re-verify
-its own Completion Criteria itself, since its phase file's pre-interruption
-`Status: COMPLETE` was never backed by a genuine completion report. None of
-these 6 committed yet by Scrum Master — awaiting genuine verified
-completions before next commit/dispatch round.
+Round 10 recovery (2026-09-17): all 6 in-flight dispatches hit a genuine
+weekly account-limit exhaustion (not a guard block); resumed via
+Session-Recovery `SendMessage` (same RunId/Worktree/Branch/BaseHead) once
+the limit reset. Fully superseded by rounds 11-12 above.
 
 Full round 1-9 wave narrative (Tech Lead architecture/coding-plan dispatch,
 per-phase completions, STALE_WAIT guard fix discovery, the round-7 session
@@ -191,8 +184,8 @@ DEFERRED_ONLY`.
 | STORY-009 | STORY-004 | standard (mobile-dev P2 dispatched) |
 | STORY-010 | STORY-004 | standard (mobile-dev P2 dispatched) |
 | STORY-011 | STORY-001, STORY-004, STORY-005, STORY-008 | standard (BLOCKED) |
-| STORY-012 | STORY-001 | standard (mobile-dev P2 dispatched) |
-| STORY-013 | STORY-001, STORY-004 | standard (mobile-dev P1 dispatched) |
+| STORY-012 | STORY-001 | standard (mobile-dev P3 dispatched) |
+| STORY-013 | STORY-001, STORY-004 | standard (mobile-dev P4 dispatched) |
 
 Open, non-blocking bugs (cite, do not re-run repo-wide commands):
 `BUG-20260907-001` (repo-wide `flutter test` pre-existing failures),
