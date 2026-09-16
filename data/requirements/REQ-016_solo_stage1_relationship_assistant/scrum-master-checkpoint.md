@@ -343,6 +343,26 @@ fresh spawn, since the round-7 agent is still live/idle):
   phase, STORY-009 P3 is a domain-layer phase), so no new collision surface
   was added. Still resolve at merge time, not before.
 
+**Wave status (round 9, same session):**
+- STORY-013 P2 COMPLETE (32 new tests, 438 regression green, debug APK
+  green) -> committed `5b08a16a` -> dispatched P3 (stage1 wipe and purge) to
+  `Alex-Mobile-Dev-6`.
+- STORY-009 P3 COMPLETE (deterministic `composePortrait`, AC-29/AC-30) ->
+  discovered proactively via scheduler auto-prune (run file `status:
+  COMPLETED` with `phase_completed: P3` before the teammate notification
+  arrived) -> verified real diff matches Write Scope exactly
+  (`portrait_composer.dart` + test, phase-P3 §7 Status COMPLETE) despite a
+  `completion_error: "Missing completion marker in SubagentStop transcript"`
+  flag on the run file — treated as non-blocking since file evidence is
+  conclusive and `Alex-Mobile-Dev-3` was idle -> committed `c61256c2` ->
+  dispatched P4 (portrait screen) to `Alex-Mobile-Dev-3`, with a reminder to
+  emit the literal `MOBILE_IMPLEMENTATION_COMPLETE: YES` marker this time.
+- STORY-005 P4 (`Alex-Mobile-Dev`), STORY-008 P3 (`Alex-Mobile-Dev-2`),
+  STORY-010 P3 (`Alex-Mobile-Dev-4`), STORY-012 P7 (`Alex-Mobile-Dev-5`)
+  dispatches remain in flight as of this note.
+- Schema-version collision set still 4-way, unchanged (STORY-009 P3 is
+  domain-layer, no new touch to `cupid_database.dart`/`.g.dart`).
+
 ## Archival: STORY-006_before_you_go_checklist — DONE, merged
 
 standard, Depends-On STORY-001. Merged at `merge_sha
