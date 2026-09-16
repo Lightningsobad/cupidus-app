@@ -17,7 +17,7 @@ weekly-limit-reset recovery):
 | STORY-008_date_script_three_parts | Alex-Mobile-Dev-2 | DONE (P1-P4), commit 6818d2a2 — review dispatch BLOCKED, same GENERIC guard as STORY-005 | 6818d2a269b8e7dc78da21ba95b7bdf9f9574707 |
 | STORY-009_your_view_portrait | (released) | DONE (P1-P5), commit dc190a49 — review dispatch BLOCKED, same GENERIC guard as STORY-005/008 | dc190a4920609b283509c600d11df8ea1327b030 |
 | STORY-010_compatibility_lookup | (released) | DONE (P1-P6, all 6 phases COMPLETE), commit 8ee570cb — review dispatch BLOCKED, same GENERIC guard as STORY-005/008/009/013 | 8ee570cb4b733dbcdd96b12c425916b1dbcd22f5 |
-| STORY-012_phase_status_and_widget | Alex-Mobile-Dev-5 | P6 sealed BLOCKED (commit 62dd3297) — AC_CONFLICT_CROSS_REQUIREMENT, PO decision needed, escalated to user (see below). P8 (last phase) dispatched, in progress | 62dd329787800ff08e11ff1c1c94d75598fb17bf |
+| STORY-012_phase_status_and_widget | Alex-Mobile-Dev-5 (idle, kept alive — not released, see round-23) | Mobile lane exhausted: P1-P5,P7,P8 all DONE/sealed (commit 812f6ed6), P6 sealed BLOCKED — AC_CONFLICT_CROSS_REQUIREMENT, PO decision needed, escalated to user (see below) | 812f6ed60d8dfad2fa5658c9c0bf95617fa14fae |
 | STORY-013_graceful_exit_and_return | (released) | DONE (P1-P6, all 6 phases COMPLETE), commit 241b936d — review dispatch BLOCKED, same GENERIC guard as STORY-005/008/009 | 241b936dd2e2277732a31fcc103fab05ccc9c950 |
 
 Rounds 11-19 (2026-09-17), via repeated `guard-open-parallel-runs-on-stop.sh
@@ -157,6 +157,44 @@ human user as a required business decision (3 options in
 keep AC4 and move the 23h reminder to server push; or accept a permanently
 red gate). Do not re-attempt to resolve this blocker without a user/PO
 decision, and do not delete or weaken `reminder_copy_guard_test.dart`.
+
+Round 23 (2026-09-17): Alex-Mobile-Dev-5 reported STORY-012 P8 (counter and
+quiet surfaces, last mobile phase) genuinely DONE. Verified via the full
+3-part protocol: worktree diff matches the declared P8 Write Scope exactly
+(`wealth_counter_line.dart`, `gift_progress_block.dart`,
+`activity_card_hub_view.dart` modify-only, 3 new test files);
+`phase-P8-counter-and-quiet-surfaces.md` §7 reads `Status: DONE`;
+`master-plan.md` P8 row reads `DONE` (P6 row correctly still `BLOCKED`). The
+run file had independently surfaced a `RELEASE_MARKER_UNSATISFIABLE` blocker
+(same structural MARKER_MISSING defect class — `transcript_path` points at
+the parent/orchestrator jsonl, not the subagent's own transcript — confirmed
+a third time, this time diagnosed by the worker itself after trying 3+ marker
+wordings) requesting manual scheduler-slot release. Sealed P8 via
+`git-story-boundary.sh commit` at `812f6ed60d8dfad2fa5658c9c0bf95617fa14fae`
+(11 files, +1391/-17) and ran `refresh-base` (`BaseHead` now `812f6ed6`).
+STORY-012's mobile lane is now fully exhausted: P1-P5, P7, P8 all DONE/sealed;
+only P6 remains, still `BLOCKED` on the round-22 `AC_CONFLICT_CROSS_REQUIREMENT`
+pending the same PO/user decision. Reconciled the run file to terminal
+`status: BLOCKED` (single full-file `Write` after a fresh `Read`, since a
+prior sequential `Edit` hit the same concurrent-modification race documented
+in the recurring-patterns list) with only the `AC_CONFLICT_CROSS_REQUIREMENT`
+blocker remaining, `release_note` documenting the manual release rationale,
+and `worktree_head`/`base_head` at `812f6ed6`. Moved the run id from
+`parallel-scheduler.json.active_runs` to `blocked_runs` (this is a genuinely
+blocked run, not a completed one, so it stays indexed for when the PO
+decision lands). Ran `list-releasable-agents.sh` — it did **not** print
+`Alex-Mobile-Dev-5` (its run is indexed in `blocked_runs`, not unindexed), so
+per the release-agent rule it was **not** `TaskStop`'d; it remains idle and
+addressable via `SendMessage` for when P6 can resume. The other 4 previously
+stale handles (`Alex-Mobile-Dev-3/4/6`, bare `Alex-Mobile-Dev`) were still
+printed by the hook and re-attempted via `TaskStop`; all returned "No task
+found" (already gone, confirmed harmless, no further action). No other
+parallel run is active in this wave — STORY-005/008/009/010/013 remain
+sealed/DONE but review-gate-blocked by the round-19 `GENERIC` guard cohort
+(unresolved, no new information this round), and STORY-012 is now blocked on
+the same AC4 PO decision as P6. No runnable next step exists in this
+requirement without external input (PO/user decision on AC4, or a guard-code
+fix for the GENERIC review-gate block).
 
 Round 10 recovery (2026-09-17): all 6 in-flight dispatches hit a genuine
 weekly account-limit exhaustion (not a guard block); resumed via
