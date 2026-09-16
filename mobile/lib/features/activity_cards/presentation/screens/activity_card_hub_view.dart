@@ -10,9 +10,14 @@ import '../../../../design_system/tokens/cupid_typography_tokens.dart';
 import '../../../gift_ideas/gift_ideas_entry_point.dart';
 import '../../../phase_status/data/home_widget_bridge.dart';
 import '../../../phase_status/data/phase_content_repository.dart';
+import '../../../phase_status/data/phase_status_prefs.dart';
+import '../../../phase_status/domain/drip_cadence_policy.dart';
+import '../../../phase_status/domain/milestone_resolver.dart';
 import '../../../phase_status/presentation/evening_check_in_sheet.dart';
+import '../../../phase_status/presentation/gift_progress_block.dart';
 import '../../../phase_status/presentation/phase_status_cubit.dart';
 import '../../../phase_status/presentation/phase_status_line.dart';
+import '../../../phase_status/presentation/wealth_counter_line.dart';
 import '../../domain/activity_card.dart';
 import '../../domain/activity_card_repository.dart';
 import '../activity_card_list_cubit.dart';
@@ -33,6 +38,7 @@ class ActivityCardHubView extends StatelessWidget {
     this.repository,
     this.phaseContent,
     this.phaseWidgetPublisher,
+    this.phaseStatusPrefs,
     this.today,
   });
 
@@ -46,6 +52,10 @@ class ActivityCardHubView extends StatelessWidget {
   /// Test/preview seam. Left null in production so the hub publishes through
   /// the real bridge, on the same pass it draws the line.
   final PhaseWidgetPublisher? phaseWidgetPublisher;
+
+  /// Test/preview seam for the milestone and drip cursors, which are the only
+  /// two device-local stores screen (1) reads.
+  final PhaseStatusPrefs? phaseStatusPrefs;
 
   /// Clock seam shared by the phase line and the per-card countdown, so both
   /// read the same day and a test can pin it.
@@ -68,6 +78,8 @@ class ActivityCardHubView extends StatelessWidget {
                 clock: today == null ? null : () => today!,
               ),
           eveningCheckIn: buildEveningCheckInScheduler(content: phaseContent),
+          milestone: MilestoneResolver(phaseStatusPrefs ?? PhaseStatusPrefs()),
+          drip: DripCadencePolicy(phaseStatusPrefs ?? PhaseStatusPrefs()),
           clock: today == null ? null : () => today!,
         ),
         child: _ActivityCardHubBody(repository: repository, today: today),
@@ -142,6 +154,28 @@ class _ActivityCardHubBodyState extends State<_ActivityCardHubBody>
                 key: const Key('activity_card_hub'),
                 slivers: <Widget>[
                   if (!minuteOne) ...<Widget>[
+                    // Above the quick-entry strip and outside the sticky
+                    // header, which is where `ux/uiux-spec.md` §6 puts the
+                    // counter: a static line under the screen title, not a
+                    // chrome element that follows the user down the list.
+                    SliverToBoxAdapter(
+                      child: BlocBuilder<PhaseStatusCubit, PhaseStatusState>(
+                        builder: (BuildContext context, PhaseStatusState phase) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              WealthCounterLine(
+                                label: phase.counterLabel,
+                                milestone: phase.milestone,
+                              ),
+                              GiftProgressBlock(line: phase.giftProgress),
+                              DripCaptionLine(line: phase.drip),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.only(top: CupidSpacing.md),

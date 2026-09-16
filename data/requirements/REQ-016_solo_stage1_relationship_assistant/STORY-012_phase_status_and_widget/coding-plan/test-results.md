@@ -11,7 +11,7 @@
 | P5 | Mobile Developer | DONE | 2026-09-17 |
 | P6 | Mobile Developer | BLOCKED | 2026-09-17 |
 | P7 | Mobile Developer | DONE | 2026-09-17 |
-| P8 | Mobile Developer | NOT_STARTED | — |
+| P8 | Mobile Developer | DONE | 2026-09-17 |
 
 ## P1 – Ba gói nội dung preset + cổng nhập luật bất biến
 
@@ -1043,3 +1043,132 @@ và nó đỏ trực tiếp vì P6.
 ### Next phase
 
 - **P8** — phụ thuộc P3 và P7, cả hai đã DONE, không phụ thuộc P6.
+
+## P8 – Bộ đếm và các bề mặt khoảng lặng
+
+### Files shipped
+
+- `mobile/lib/features/phase_status/presentation/wealth_counter_line.dart`
+  (mới) — dòng bộ đếm + caption cột mốc J12, khoá
+  `wealthCounterLineKey` / `wealthCounterMilestoneKey`, trả
+  `SizedBox.shrink()` khi không có câu nào để nói.
+- `mobile/lib/features/phase_status/presentation/gift_progress_block.dart`
+  (mới) — `GiftProgressBlock` (khoá `giftProgressBlockKey`) và
+  `DripCaptionLine` (khoá `dripCaptionLineKey`). Hai widget nằm chung một file
+  vì WriteScope của phase chỉ mở ba file nguồn và cả hai là cùng một mối quan
+  tâm "bề mặt khoảng lặng"; pha quiet không có dòng pha nào trên màn nên caption
+  nhỏ giọt phải có widget riêng.
+- `mobile/lib/features/phase_status/presentation/phase_status_cubit.dart` (sửa)
+  — `PhaseStatusState` thêm `counterValue` / `counterLabel` / `milestone` /
+  `giftProgress` / `drip` và `copyWith`; `refresh()` đọc
+  `countsByStatus()` qua `WealthCounter`; lượt hai `_resolveQuietExtras()` hỏi
+  `MilestoneResolver` và `DripCadencePolicy`.
+- `mobile/lib/features/activity_cards/presentation/screens/activity_card_hub_view.dart`
+  (sửa) — seam `phaseStatusPrefs`, dựng `MilestoneResolver` +
+  `DripCadencePolicy`, và một `SliverToBoxAdapter` mới đặt ba bề mặt trên dải
+  quick-entry, ngoài sticky header (uiux §6).
+- Ba file test mới dưới `mobile/test/features/phase_status/`:
+  `wealth_counter_line_test.dart` (12), `gift_progress_block_test.dart` (7),
+  `quiet_surfaces_capture_test.dart` (1 + 1 chụp ảnh).
+
+### Commands run
+
+```
+flutter analyze lib/features/phase_status lib/features/activity_cards
+  → 12 issues, 0 error (toàn bộ là info prefer_initializing_formals,
+    đúng khuôn có sẵn của file)
+flutter analyze lib test
+  → 227 issues found, 0 error (baseline 225/0; +2 info
+    prefer_initializing_formals từ hai fake repository trong test mới)
+flutter test test/features/phase_status/wealth_counter_line_test.dart
+  → +12: All tests passed!
+flutter test test/features/phase_status/gift_progress_block_test.dart
+  → +7: All tests passed!
+flutter test test/features/phase_status/quiet_surfaces_capture_test.dart
+  → +1 ~1: All other tests passed! (test chụp ảnh bị skip theo mặc định)
+flutter test test/features/phase_status/quiet_surfaces_capture_test.dart \
+  --dart-define=CAPTURE_VISUALS=true
+  → +2: All tests passed!
+flutter test test/features/phase_status/ test/features/activity_cards/ \
+  --reporter failures-only
+  → +439 ~8: All other tests passed! (8 skip là các test chụp ảnh)
+```
+
+### Assertion evidence
+
+- **AC-24/AC-25** — `it shows the number of memory cards`: dòng bộ đếm bằng
+  đúng câu shipped trong `nudges.v1.json` với `{n}` = số thẻ `memory`.
+- **AC-24** — `it rises on resume`: đổi kho rồi
+  `handleAppLifecycleStateChanged(resumed)`, số nhảy 3 → 4 mà repository không
+  mọc thêm `watchCountsByStatus` (BR-12).
+- **AC-29** — `it falls when a card is deleted, with no warning`: 3 → 2, không
+  `AlertDialog`, không `SnackBar`.
+- **BR-5/AC-26** — `the same store 60 days later reads the same`: cùng tập thẻ,
+  hai `today` cách nhau 60 ngày, cùng một chuỗi hiển thị.
+- **BR-6** — `a kept set of zero still reads as a fact`: 0 vẫn là một câu bình
+  thường, không trách móc, không đếm ngày vắng.
+- **AC-28/BR-8** — caption cột mốc hiện đúng một lần ở ngưỡng 5, không có tổ
+  tiên `ButtonStyleButton`, không quay lại ở lần mở sau, và dưới ngưỡng đầu tiên
+  thì không có gì.
+- **BR-5/BR-7** — quét mọi `Text` được dựng: không `%`, `streak`, `chuỗi`,
+  `liên tiếp`, `tuần trước`, không khớp `\d+\s*ngày\s*(liên|liền)`; không
+  `LinearProgressIndicator` / `CircularProgressIndicator`. Dòng bộ đếm cũng
+  không chứa `/` hay `%` (AC-27).
+- **AC-20** — `a gift in progress gets the shipped progress line`: khi có thẻ
+  `activityType: gift` thì khối quà hiện đúng câu `gift_progress` đã shipped.
+- **AC-21** — không có quà: `giftProgressBlockKey` findsNothing, widget vẫn tồn
+  tại với `line == null` — khoảng trống không bị dùng để mời tạo dữ liệu.
+- **AC-22/BR-9** — pha quiet mang được một caption nhỏ giọt; lần mở thứ hai
+  trong cùng tuần không nói gì thêm.
+- **AC-38** — seed đủ 8 id vào `phaseStatusDripSeenIdsKey`: im lặng hoàn toàn,
+  không `Text` nào chứa "đã hết" / "còn lại" / "lần sau".
+- **AC-21/AC-38** — màn quiet rỗng hoàn toàn: `find.byType(ButtonStyleButton)`
+  findsNothing, tức không mọc lối kêu gọi thứ hai bên cạnh nút thêm nhanh sẵn có.
+- **uiux §5/§6** — `counterTop < stripTop` và dòng bộ đếm không có tổ tiên
+  `SliverPersistentHeader`.
+- **BR-12** — test chạy `git diff --name-only HEAD` và khẳng định
+  `activity_card_repository.dart` không nằm trong diff.
+
+### Findings
+
+**1. `drip.memory_count.v1` mang `{n}`, bản nháp đầu sẽ đẩy `{n}` nguyên văn ra
+màn hình.** `drip.v1.json` có một mục nhỏ giọt nói về số kỷ niệm đã cất, nên
+`drip = item?.body` không thay thế gì là một lỗi hiển thị thật. Đã sửa thành
+`_fill(item.body, counterValue)` và có test khẳng định caption dựng ra không
+chứa `phaseContentNumberPlaceholder`.
+
+**2. Nguồn "quà đang làm" không cần kho mới.** `GiftRepository` chỉ là catalogue
+đọc-một-chiều, không có khái niệm quà đang chạy, còn BR-12 cấm sửa
+`ActivityCardRepository`. Đáp án nằm sẵn trong hợp đồng thẻ của STORY-001:
+`activityType == gift` hoặc `origin == giftSuggestion`, đọc từ danh sách thẻ
+cubit vốn đã tải. Cộng với câu `gift_progress` không mang số trong
+`nudges.v1.json`, điều này thoả AC-20 ("tiến triển của việc người dùng đang
+làm") mà không bịa ra tỉ lệ X/Y.
+
+**3. Cột mốc và nhỏ giọt chạy ở lượt hai, không `await` trước khi emit.** Cả hai
+con trỏ nằm trong `SharedPreferences`; nếu `await` trước khi emit thì một
+MethodChannel treo trong widget test không mock prefs sẽ làm trắng cả màn hub.
+Đã theo đúng khuôn `unawaited(eveningCheckIn.sync(...))` có sẵn; toàn bộ
+`test/features/activity_cards/` xanh xác nhận không có hồi quy.
+
+**4. Suite làm bẩn PNG của STORY-002.** Lần chạy test ghi đè hai ảnh
+visual-fidelity của `STORY-002_invite_message_composer`. Đã `git checkout --`
+khôi phục; diff cuối cùng chỉ còn đúng phạm vi P8.
+
+### Visual fidelity
+
+`../visual-fidelity/implemented-quiet-surfaces.png` — chụp `RepaintBoundary`
+trong `quiet_surfaces_capture_test.dart` (`CAPTURE_VISUALS=true`), 412x915 dpr
+1, nền `CupidColorTokens.dark()`, đã nạp Nunito / Roboto / Roboto Mono /
+Material Symbols Rounded. Kho dựng ảnh là trạng thái ồn nhất mà pha quiet được
+phép có: 5 kỷ niệm (cột mốc sống) + 1 thẻ quà + một dòng nhỏ giọt chưa xem. Đã
+mở ảnh ra nhìn: từ trên xuống là icon lấp lánh + "Bạn đang giữ 5 kỷ niệm.",
+caption "Bạn vừa cất tới kỷ niệm thứ 5.", khối quà "Món bạn đang làm đã đi được
+một chặng." kèm icon quà, caption nhỏ giọt, rồi mới tới dải quick-entry ba ô và
+sticky filter. Dấu tiếng Việt đúng, không có ô tofu, không có thanh phần trăm
+hay huy hiệu nào.
+
+### Next phase
+
+- Không còn. P8 là phase cuối của STORY-012; P6 vẫn BLOCKED chờ quyết định
+  Product Owner về AC4 của REQ-002/STORY-021.

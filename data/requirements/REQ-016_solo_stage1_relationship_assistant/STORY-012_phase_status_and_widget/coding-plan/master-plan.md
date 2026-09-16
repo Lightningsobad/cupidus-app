@@ -61,7 +61,7 @@
 | P5 | Mobile Developer | Mobile | P4 | NO | DONE |
 | P6 | Mobile Developer | Mobile | P1, P2 | YES | BLOCKED |
 | P7 | Mobile Developer | Mobile | P2 | NO | DONE |
-| P8 | Mobile Developer | Mobile | P3, P7 | NO | NOT_STARTED |
+| P8 | Mobile Developer | Mobile | P3, P7 | NO | DONE |
 
 Phase file mapping:
 

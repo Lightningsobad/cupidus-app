@@ -130,5 +130,11 @@ thần: đây là của cải đang lớn của người dùng, không phải b�
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-11
+- Status: DONE
+- Last updated: 2026-09-17
+- Design-Screen: `../ux/uiux-spec.md` §5/§6 (dòng bộ đếm và các bề mặt khoảng
+  lặng của màn (1)) tại khung tham chiếu Android 412×915, chụp bằng
+  `RepaintBoundary` trong
+  `mobile/test/features/phase_status/quiet_surfaces_capture_test.dart`
+- Evidence: `coding-plan/test-results.md` §P8,
+  `../visual-fidelity/implemented-quiet-surfaces.png`

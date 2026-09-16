@@ -5,11 +5,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/content/content_package.dart';
 import '../../activity_cards/domain/activity_card.dart';
 import '../../activity_cards/domain/activity_card_repository.dart';
+import '../../activity_cards/domain/activity_type.dart';
 import '../data/phase_content_repository.dart';
+import '../domain/drip_cadence_policy.dart';
 import '../domain/evening_check_in_scheduler.dart';
+import '../domain/milestone_resolver.dart';
 import '../domain/phase_content.dart';
 import '../domain/solo_phase.dart';
 import '../domain/solo_phase_resolver.dart';
+import '../domain/wealth_counter.dart';
 import 'phase_status_line.dart';
 
 /// The seam the home-screen widget is published through.
@@ -29,7 +33,16 @@ abstract interface class PhaseWidgetPublisher {
 /// Holds strings rather than a phase plus a lookup, so no second copy of the
 /// "which line for which phase" decision can grow in the widget layer.
 class PhaseStatusState {
-  const PhaseStatusState({this.anchorCardId, this.primary, this.secondary});
+  const PhaseStatusState({
+    this.anchorCardId,
+    this.primary,
+    this.secondary,
+    this.counterValue = 0,
+    this.counterLabel,
+    this.milestone,
+    this.giftProgress,
+    this.drip,
+  });
 
   /// The card the line hangs above, `null` when the line has no card of its
   /// own or when there is no line.
@@ -38,17 +51,52 @@ class PhaseStatusState {
   final String? primary;
   final String? secondary;
 
+  /// Cardinality of the kept-memory set, and only that: no term of this value
+  /// comes from a clock, a day count, or an activity rate (BR-5/AC-25).
+  final int counterValue;
+
+  final String? counterLabel;
+  final String? milestone;
+  final String? giftProgress;
+  final String? drip;
+
   bool get hasLine => primary != null;
+
+  PhaseStatusState copyWith({String? milestone, String? drip}) =>
+      PhaseStatusState(
+        anchorCardId: anchorCardId,
+        primary: primary,
+        secondary: secondary,
+        counterValue: counterValue,
+        counterLabel: counterLabel,
+        milestone: milestone ?? this.milestone,
+        giftProgress: giftProgress,
+        drip: drip ?? this.drip,
+      );
 
   @override
   bool operator ==(Object other) =>
       other is PhaseStatusState &&
       other.anchorCardId == anchorCardId &&
       other.primary == primary &&
-      other.secondary == secondary;
+      other.secondary == secondary &&
+      other.counterValue == counterValue &&
+      other.counterLabel == counterLabel &&
+      other.milestone == milestone &&
+      other.giftProgress == giftProgress &&
+      other.drip == drip;
 
   @override
-  int get hashCode => Object.hash(anchorCardId, primary, secondary);
+  int get hashCode => Object.hash(
+        anchorCardId,
+        primary,
+        secondary,
+        counterValue,
+        counterLabel,
+        milestone,
+        giftProgress,
+        drip,
+      );
 }
 
 /// Resolves the solo phase once and turns it into the line screen (1) shows.
@@ -68,11 +116,15 @@ class PhaseStatusCubit extends Cubit<PhaseStatusState> {
     PhaseContentRepository? content,
     PhaseWidgetPublisher? widgetPublisher,
     EveningCheckInScheduler? eveningCheckIn,
+    MilestoneResolver? milestone,
+    DripCadencePolicy? drip,
     DateTime Function()? clock,
   })  : _repository = repository,
         _content = content ?? PhaseContentRepository(),
         _widgetPublisher = widgetPublisher,
         _eveningCheckIn = eveningCheckIn,
+        _milestone = milestone,
+        _drip = drip,
         _clock = clock ?? DateTime.now,
         super(const PhaseStatusState());
 
@@ -85,14 +137,21 @@ class PhaseStatusCubit extends Cubit<PhaseStatusState> {
   final PhaseContentRepository _content;
   final PhaseWidgetPublisher? _widgetPublisher;
   final EveningCheckInScheduler? _eveningCheckIn;
+  final MilestoneResolver? _milestone;
+  final DripCadencePolicy? _drip;
+  static const WealthCounter _counter = WealthCounter();
   final DateTime Function() _clock;
 
   Future<void> refresh() async {
     final DateTime today = _clock();
 
     final PhaseResolution resolution;
+    final List<ActivityCard> cards;
+    final int counterValue;
     try {
-      resolution = resolveSoloPhase(cards: await _cards(), today: today);
+      cards = await _cards();
+      resolution = resolveSoloPhase(cards: cards, today: today);
+      counterValue = _counter.count(await _repository.countsByStatus());
     } catch (_) {
       // A store read that fails leaves the hub without its phase line and with
       // its card list intact, which is the degraded state BR-2 asks for.
@@ -133,18 +192,106 @@ class PhaseStatusCubit extends Cubit<PhaseStatusState> {
       resolution.phase,
       days,
     );
-    if (item == null) {
-      _emit(const PhaseStatusState());
+
+    // The quiet phase is the only one that may carry a gift block or a drip
+    // caption (AC-20/AC-22): during a countdown or on the date itself the user
+    // already has something in front of them.
+    final bool quiet = resolution.phase == SoloPhase.quiet;
+    final String? giftLine = quiet && _hasGiftInProgress(cards)
+        ? _nudgeBody(catalogue.nudges, NudgeSlot.giftProgress, null)
+        : null;
+
+    final PhaseStatusState next = PhaseStatusState(
+      anchorCardId: item == null ? null : resolution.cardId,
+      primary: item == null ? null : _fill(item.primary, days),
+      secondary: item?.secondary == null ? null : _fill(item!.secondary!, days),
+      counterValue: counterValue,
+      counterLabel: _nudgeBody(
+        catalogue.nudges,
+        NudgeSlot.counter,
+        counterValue,
+      ),
+      giftProgress: giftLine,
+    );
+    _emit(next);
+
+    // Deliberately not awaited, for the same reason the evening reminder is
+    // not: both cursors live in `SharedPreferences`, and the counter above must
+    // never wait on a platform channel to reach the screen.
+    unawaited(_resolveQuietExtras(next, catalogue, counterValue, today, quiet));
+  }
+
+  /// Second pass for the two surfaces that own a durable cursor.
+  ///
+  /// Both `resolve` and `nextItem` consume their slot as a side effect, so they
+  /// run once per refresh and only when the phase they belong to is current —
+  /// asking the drip policy outside the quiet phase would burn a week's quota
+  /// on a screen that never shows the line (BR-9).
+  Future<void> _resolveQuietExtras(
+    PhaseStatusState base,
+    PhaseContentCatalogue catalogue,
+    int counterValue,
+    DateTime today,
+    bool quiet,
+  ) async {
+    String? milestone;
+    String? drip;
+    try {
+      final MilestoneResolution? crossed = await _milestone?.resolve(
+        counterValue: counterValue,
+        thresholds: catalogue.milestoneThresholds,
+        nudges: catalogue.nudges,
+      );
+      if (crossed != null) {
+        milestone = _fill(crossed.item.body, crossed.value);
+      }
+      if (quiet) {
+        final DripItem? item = await _drip?.nextItem(
+          drip: catalogue.drip,
+          today: today,
+        );
+        // The shipped pack has a drip line that names the kept count, so the
+        // same substitution the phase line uses has to run here too: an
+        // unfilled `{n}` would reach the screen as literal text.
+        drip = item == null ? null : _fill(item.body, counterValue);
+      }
+    } catch (_) {
+      // No cursor store on this device means no milestone and no drip line.
+      // Silence is the defined empty state for both (AC-38), so there is
+      // nothing to tell the user about it.
       return;
     }
 
-    _emit(
-      PhaseStatusState(
-        anchorCardId: resolution.cardId,
-        primary: _fill(item.primary, days),
-        secondary: item.secondary == null ? null : _fill(item.secondary!, days),
-      ),
-    );
+    if (milestone == null && drip == null) {
+      return;
+    }
+    _emit(base.copyWith(milestone: milestone, drip: drip));
+  }
+
+  /// A gift the user is making that has not been finished yet. Read-only use of
+  /// the STORY-001 card contract: no field is added and no status is moved on
+  /// the user's behalf (BR-12).
+  bool _hasGiftInProgress(List<ActivityCard> cards) => cards.any(
+        (ActivityCard card) =>
+            card.activityType == ActivityType.gift ||
+            card.origin == ActivityCardOrigin.giftSuggestion,
+      );
+
+  String? _nudgeBody(
+    ContentPackage<NudgeItem> package,
+    NudgeSlot slot,
+    int? value,
+  ) {
+    for (final NudgeItem item in package.items) {
+      if (item.slot != slot) {
+        continue;
+      }
+      if (item.body.contains(phaseContentNumberPlaceholder) && value == null) {
+        return null;
+      }
+      return _fill(item.body, value);
+    }
+    return null;
   }
 
   Future<List<ActivityCard>> _cards() async {
