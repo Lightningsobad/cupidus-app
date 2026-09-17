@@ -1352,7 +1352,48 @@ Chưa đi được xa hơn màn đăng nhập trong lượt này: qua được n
 đăng nhập, mà việc đó nằm ngoài WriteScope của handoff. Rule 12g đòi "khởi
 chạy và tới được màn đầu tiên mà không crash" — vế đó đã thoả.
 
-### Android — BLOCKED
+### Android — PASS
+
+Gỡ ngày 2026-09-17. `BLOCKER: ANDROID_BUILD_DESUGARING_MISSING` đã đóng.
+
+Sửa duy nhất một file, `mobile/android/app/build.gradle.kts`:
+
+- trong `android { compileOptions { ... } }`: thêm
+  `isCoreLibraryDesugaringEnabled = true`. `sourceCompatibility` /
+  `targetCompatibility` **giữ nguyên** `JavaVersion.VERSION_17` — đã là Java 17,
+  cao hơn mức Java 11 mà `flutter_local_notifications` đòi, nên không hạ.
+  `minSdk` cũng không đụng tới: nó vẫn đọc từ `flutter.minSdkVersion`.
+- thêm khối `dependencies { coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4") }`.
+
+Version `2.1.4` không phải chọn bừa: nó lấy từ chính build file của plugin,
+`~/.pub-cache/hosted/pub.dev/flutter_local_notifications-22.3.1/android/build.gradle:45`
+(`coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'`), khớp
+`flutter_local_notifications: ^22.3.1` đang pin trong `mobile/pubspec.yaml:65`.
+README của plugin (dòng 270) cũng nêu đúng con số đó cho dự án dùng
+`build.gradle.kts`.
+
+Build lại **đúng lệnh đã fail trước đó**:
+
+```
+flutter gen-l10n && flutter build apk --debug --split-per-abi --target-platform android-arm64
+
+Running Gradle task 'assembleLocalDebug'...                        53.6s
+✓ Built build/app/outputs/flutter-apk/app-arm64-v8a-local-debug.apk
+
+[exited with code 0]
+```
+
+Sản phẩm: `mobile/build/app/outputs/flutter-apk/app-arm64-v8a-local-debug.apk`
+(113.9 MB). Task `:app:checkLocalDebugAarMetadata` — chỗ trước đây nổ — nay qua
+sạch. Cảnh báo KGP của `home_widget` / `mobile_scanner` /
+`sign_in_with_apple` vẫn còn nhưng là cảnh báo hướng tới phiên bản Flutter
+tương lai, không chặn build và không thuộc phạm vi story này.
+
+Phạm vi lượt sửa này là **build-config + xác minh build**, không phải cài đặt
+lên thiết bị hay chụp màn. Mục smoke khởi động phía Android vì thế vẫn chưa có
+bằng chứng chạy thật; phần iOS ở trên không đổi, vẫn PASS.
+
+### Android — BLOCKED (lịch sử, đã khắc phục ở trên)
 
 `BLOCKER: ANDROID_BUILD_DESUGARING_MISSING`
 
@@ -1387,9 +1428,12 @@ compileOptions { isCoreLibraryDesugaringEnabled = true }
 dependencies { coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:<ver>") }
 ```
 
-File đó **ngoài WriteScope** của handoff này (`WriteScope` chỉ gồm
+File đó **ngoài WriteScope** của handoff lúc đó (`WriteScope` chỉ gồm
 `visual-fidelity/` và `coding-plan/test-results.md`), và handoff cấm sửa logic
 sản xuất của mọi phase. Nên ghi thành blocker thay vì tự sửa.
+
+> Đã khép: Scrum Master giao lại phạm vi sửa Gradle trong cùng ngày; nội dung
+> thay đổi và bằng chứng build PASS nằm ở mục `### Android — PASS` phía trên.
 
 Hệ quả cần nói rõ: P4 (`CupidPhaseWidgetProvider` + layout RemoteViews) mới
 chỉ được xác minh **tĩnh** — manifest, `appwidget-provider`, layout, sự tồn
