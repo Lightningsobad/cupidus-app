@@ -142,5 +142,5 @@ ra cùng đầu ra, không mạng, không AI, không ngẫu nhiên.
 
 ## 7. Status
 
-- Status: COMPLETE
+- Status: DONE
 - Last updated: 2026-09-16

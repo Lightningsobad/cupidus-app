@@ -467,3 +467,145 @@ tính cả câu giải thích là vi phạm sẽ đẩy phần giải thích ra 
 
 Không còn. P5 là phase cuối của `master-plan.md`; cả P1–P5 đều COMPLETE. Bước
 kế tiếp thuộc Scrum Master: seal commit cho P5 rồi đưa story qua cổng review.
+
+---
+
+## Vòng vá sau review (2026-09-17)
+
+`review/review-report.md` trả `PATCH_REQUIRED` với ba phát hiện, cả ba là cổng
+bằng chứng chứ không đòi sửa mã sản phẩm. Vòng này **không thay đổi một dòng nào
+dưới `mobile/lib`**; toàn bộ thay đổi nằm ở artifact bằng chứng.
+
+### F-1 — Bằng chứng design fidelity
+
+Đã giải quyết. `.ai-team-bundle/runtime/tools/render-design-canvas.js` đã chạy
+được trở lại (DevOps sửa defect `VISUAL_RUNTIME_MISSING` toàn repo), nên bản
+render tham chiếu và báo cáo so sánh đã có:
+
+- `visual-fidelity/design-reference-8-chan-dung-theo-cach-ban-nhin-ios.png`
+  (415x900), sinh bằng
+  `node .ai-team-bundle/runtime/tools/render-design-canvas.js --surface=cupid-ch-ng-1 --screen=8-chan-dung-theo-cach-ban-nhin --out=<visual-fidelity>`
+- `visual-fidelity/visual-fidelity-report.md` — `VISUAL_FIDELITY: PASS`,
+  `Design-Screen: 8-chan-dung-theo-cach-ban-nhin`, 6 mục `DESIGN_SPEC_CONFLICT`
+  và 1 mục `DESIGN_DELTA_OPEN` cần phán quyết sản phẩm
+
+## Entry Point Reachability
+
+`Reachable: YES` — màn chân dung đến được từ `main()` đã ship, không qua harness
+preview, không thêm route. Đã **xác nhận ở runtime** trên `emulator-5554`, không
+chỉ bằng đọc mã.
+
+| Bước | Bằng chứng tại HEAD hiện tại | Bằng chứng runtime |
+| --- | --- | --- |
+| 1. `main()` → màn (1) "Muốn làm" | Bề mặt đã tồn tại trước story này | `visual-fidelity/runtime-smoke-main-first-screen-emulator-5554.png` |
+| 2. Chạm ô nhanh "Gợi ý quà" | `activity_card_hub_view.dart:232` `_openQuickEntryCell`, nhánh `cell == QuickEntryCell.giftIdeas` gọi `openGiftIdeasScreen(context)` ở dòng 247. Strip ô nhanh có ở **cả hai** trạng thái hub, gồm Minute-1 — hub đầu tiên người dùng mới thấy (`_EmptyPane`, dòng 274) | mở đúng màn (5) |
+| 3. Màn (5) "Gợi ý quà" dựng | `gift_ideas_entry_point.dart:23` `openGiftIdeasScreen` push `GiftIdeasScreen` trên Navigator của luồng nguồn | `visual-fidelity/runtime-smoke-gift-ideas-guess-row-emulator-5554.png` |
+| 4. Hàng đoán ở cuối màn (5) | `_GuessRow` ở `gift_ideas_screen.dart:353`, key `gift-ideas-guess-row`, có `Semantics(button: true)`, đĩa glyph `?` và chevron `›` | hàng "Bí quá thì thử đoán xem người ấy thích kiểu quà nào" hiện rõ trong ảnh bước 3 |
+| 5. Chạm hàng đoán → mở chân dung | `gift_ideas_screen.dart:368` `onTap: () => openYourViewPortrait(context, from: PortraitEntrySource.giftIdeas)` → `your_view_portrait_entry_point.dart:28` push `YourViewPortraitScreen` | `visual-fidelity/runtime-smoke-portrait-first-question-emulator-5554.png` |
+
+Không có route mới, không `routeName`, không mục menu, không tab, không deep
+link. Cửa vào là một hàng bấm được có thật trong luồng (5), không phải
+direct-URL. Khoá vị trí được cưỡng chế ở mức biên dịch và có test quét tĩnh
+`lib/` chứng minh (`portrait_location_lock_test.dart`, 4 xanh, đã chứng minh bắt
+được vi phạm cố ý — xem §P5).
+
+Đường đi này cũng được kiểm bằng test chứ không chỉ bằng mắt:
+`tapping the guess row opens the portrait (SC-5, AC-2)` trong
+`gift_ideas_screen_test.dart` pump `GiftIdeasScreen` thật; nếu điểm gắn cửa vào
+bị gỡ thì test đó đỏ.
+
+## Story Runtime Startup Smoke
+
+**Status: PASS.** Chạy trên `main()` đã ship, không phải `main_preview.dart`.
+
+Runtime registry entry: `data/devops/system/runtime-command-registry.json` →
+`mobile-app` (`path: mobile`, `buildCommand: flutter build apk --debug`).
+Thiết bị: `emulator-5554` (`sdk_gphone64_arm64`, `device:emu64a`), đã ở trạng
+thái `device` từ trước — tái sử dụng, không boot AVD mới.
+
+```
+flutter gen-l10n
+flutter build apk --debug --flavor local -t lib/main.dart --split-per-abi \
+  --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:21020
+adb install -r build/app/outputs/flutter-apk/app-arm64-v8a-local-debug.apk
+adb shell am force-stop com.snapsofts.cupid
+adb shell am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+```
+
+| Tín hiệu | Kết quả |
+| --- | --- |
+| Build | `✓ Built build/app/outputs/flutter-apk/app-arm64-v8a-local-debug.apk`, exit 0 |
+| Install trên `emulator-5554` | `Success` |
+| `am start -W` | `Status: ok`, `LaunchState: COLD`, `TotalTime: 3087`, `WaitTime: 3116` |
+| Readiness probe (`dumpsys activity activities`) | `topResumedActivity=…com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity` |
+| `adb logcat -d -s AndroidRuntime:E flutter:E` | rỗng — 0 `FATAL EXCEPTION`, 0 `E/flutter` |
+
+Màn hình đầu tiên:
+`../visual-fidelity/runtime-smoke-main-first-screen-emulator-5554.png` — đúng màn
+(1), tab `Muốn làm`, đã vẽ xong hoàn toàn (tiêu đề "Bắt đầu từ một điều nhỏ
+nhé.", hai thẻ hành động, ba ô nhanh `Gợi ý quà` / `Mồi chuyện` / `Vỏ hoàng
+đạo`, thanh điều hướng dưới đủ 4 mục), **không phải khung splash** — ảnh đầu
+chụp ở giây thứ 8 còn là splash, đã chờ thêm rồi chụp lại. Ảnh đã xem tận mắt:
+chữ tiếng Việt đủ dấu, không ô tofu, icon dựng đúng.
+
+### Đường schema chạy thật, không chỉ chạy trong test
+
+Story này bump `schemaVersion` 6→7 và thêm bảng `portrait_answers`, nên bản thân
+việc mở app là bằng chứng đường schema không làm chết app. Đã kiểm trực tiếp
+trên file DB của thiết bị (kéo về bằng `run-as … cat`, đọc bằng `sqlite3`):
+
+| Kiểm | Kết quả |
+| --- | --- |
+| `app_flutter/cupid.sqlite` được tạo sau lần mở đầu | có, 122880 byte |
+| `PRAGMA user_version` | `7` |
+| `SELECT name FROM sqlite_master WHERE name='portrait_answers'` | `portrait_answers` |
+| `SELECT count(*) FROM portrait_answers` sau khi trả lời câu 1 trên thiết bị | `1` |
+
+**Giới hạn đã biết, ghi rõ để không bị đọc quá lời:** thiết bị này chưa từng có
+file DB nào (`app_flutter/` chỉ có `flutter_assets` trước lần chạy này), nên
+đường chạy thật trên máy là `onCreate` thẳng lên v7, **không phải** `onUpgrade`
+6→7. Nhánh `onUpgrade` vẫn chỉ có bằng chứng ở mức test
+(`test/core/database`, +82 xanh gồm `migration_v5_test` — xem §P2). Muốn bằng
+chứng `onUpgrade` trên thiết bị thì phải cài bản build trước story để tạo DB v6
+rồi cài đè, việc đó cần một bản dựng từ nhánh tích hợp và nằm ngoài WriteScope
+của handoff này.
+
+### Đi hết đường cửa vào trên thiết bị
+
+Sau màn (1), đã đi đúng năm bước của mục `## Entry Point Reachability` bằng
+`adb shell input tap`: ô nhanh "Gợi ý quà" → cuộn tới cuối màn (5) → chạm hàng
+đoán → màn `Chân dung tưởng tượng` mở ra ở câu 1/8, đủ nhãn xuất xứ, 5 lựa chọn
+cộng ô tự viết, "Bỏ qua" ngang hàng với "Tiếp". Chạm một lựa chọn rồi "Tiếp" đưa
+sang câu 2/8 và ghi đúng một dòng vào `portrait_answers`. Không khung lỗi, không
+spinner treo, không dòng đỏ nào trong logcat suốt lượt đi.
+
+### Cách dựng phiên đăng nhập, để lần sau khỏi mất thời gian
+
+Thiết bị không còn phiên đã seed (prefs chỉ còn `auth.last_email_v1`), nên lần
+mở đầu ra màn "Đăng nhập lại để tiếp tục" —
+`/tmp/story009-smoke1.png` lúc chạy, đây cũng là một lần khởi động sạch hợp lệ.
+`adb shell input text` không gõ được vào ô văn bản Flutter, nên phiên được dựng
+qua API local của devstack rồi seed thẳng vào prefs:
+
+1. `POST http://127.0.0.1:21020/auth/register`, lấy OTP từ mailpit
+   (`http://127.0.0.1:8025/api/v1/search`), rồi
+   `POST /auth/verify-otp` với trường **`code`** (không phải `otp`) → trả
+   `accessToken` + `user.id` thật.
+2. Ghi ba khoá của `JwtTokenProvider` vào
+   `shared_prefs/FlutterSharedPreferences.xml` qua `run-as`:
+   `flutter.cupid_jwt_access_token`, `flutter.cupid_user_email`,
+   `flutter.cupid_user_id`. `CupidSession._init()` đọc đúng ba khoá này để quyết
+   định `CupidSessionSignedIn`.
+3. Build phải kèm `--dart-define=CUPID_API_BASE_URL=http://10.0.2.2:21020`:
+   `CupidApiConfig.localBaseUrl` mặc định là `http://localhost:3000`, mà trên
+   emulator `localhost` là chính emulator, còn cổng API thật của devstack là
+   `DEVSTACK_PORT_API=21020` trên host (alias `10.0.2.2`). Không có define này
+   thì app vẫn mở được màn chân dung (feature này offline hoàn toàn) nhưng mọi
+   lời gọi mạng khác đều hỏng, và smoke sẽ không phản ánh app thật.
+
+### Không chạm mã sản phẩm
+
+`git status` của worktree sau vòng vá này chỉ có artifact bằng chứng dưới
+`data/requirements/.../STORY-009_your_view_portrait/`. Không file nào dưới
+`mobile/lib` hay `mobile/test` thay đổi, nên mọi kết quả test ở §P1–§P5 vẫn còn
+hiệu lực nguyên vẹn.

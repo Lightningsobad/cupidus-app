@@ -166,5 +166,5 @@ vào sổ tay STORY-004 qua **đúng một** cửa ghi hẹp, có kiểu, ghi t�
 
 ## 7. Status
 
-- Status: COMPLETE
+- Status: DONE
 - Last updated: 2026-09-16

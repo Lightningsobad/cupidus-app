@@ -148,5 +148,5 @@ không menu, không tab bar, không deep link. Khoá vị trí trở thành tín
 
 ## 7. Status
 
-- Status: COMPLETE
+- Status: DONE
 - Last updated: 2026-09-17

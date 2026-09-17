@@ -167,7 +167,7 @@ hỏi đầu vào (AC-37).
 
 ## 7. Status
 
-- Status: COMPLETE
+- Status: DONE
 - Last updated: 2026-09-11
 - Evidence: `test-results.md` → `Phase P1`
 - Implementation notes:
