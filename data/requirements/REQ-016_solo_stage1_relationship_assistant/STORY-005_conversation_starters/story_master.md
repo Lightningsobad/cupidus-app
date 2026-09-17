@@ -18,7 +18,16 @@ F (3c, C1, C7)
       `architecture/contract-summary.md`
 - [x] Implementation (Development) — mobile-dev P1-P4 complete, committed
       3ff29be43d1e754548767a87246df3e0c1e181a2
-- [ ] Review (Reviewer) — Tier 3 scoped-slice dispatched 2026-09-17
+- [x] Review (Reviewer) — Outcome: DEFERRED_ONLY (2026-09-17,
+      `review/review-report.md`). Merged into
+      `codex/REQ-016_solo_stage1_relationship_assistant-integration`
+      (merge `2b5d841f`). Held at merged/not-DONE: `guard-story-done-evidence.sh`
+      blocks `Status: DONE` because `design-reference-<screen>-*.png` was never
+      rendered (`VISUAL_RUNTIME_MISSING` — `.ai-team-bundle/runtime/tools/
+      render-design-canvas.js` has no `node_modules`). `VISUAL_FIDELITY: PASS`
+      and `implemented-6-moi-chuyen-a-a-material.png` already exist; only the
+      design-reference side is missing. Owner: devops (reinstall visual
+      runtime), then re-render + confirm before Status: DONE.
 
 ## Depends On
 - STORY-001 — bản A+ đổi thẳng thành thẻ trong kho chung.
