@@ -822,4 +822,72 @@ asset JSON và một file `test/` mới, không file `lib/` nào, nên không c�
 nào để dữ liệu MBTI ảnh hưởng hình học hay semantics của màn hợp đồng. P6 không
 sửa vì nằm ngoài phạm vi.
 
+## Vá F-6 mục 5 và mục 6 (phán quyết "Theo DESIGN", 2026-09-17)
+
+Hai chênh lệch canvas-vs-bản-dựng đã được người dùng phán quyết trong Design
+Ruling Log của `req_master.md`; lượt này dựng theo canvas.
+
+| Mục | Trước | Sau |
+| --- | --- | --- |
+| 5 — kiểu tiêu đề khối "hợp"/"va" | `type.body` + `FontWeight.w600`, sentence case | token `type.caption`, glyph IN HOA qua `.toUpperCase()` ở tầng hiển thị |
+| 6 — hành động "1 hoạt động nên thử" | outline chip `--r-button` có icon + chữ | nút tròn `(+)` chỉ-icon, vùng chạm 44x44 |
+
+Chuỗi nguồn l10n **không** đổi: `compat_block_fit_title` vẫn là "Chỗ dễ hợp",
+`compat_block_friction_title` vẫn là "Chỗ dễ va". IN HOA chỉ là kiểu hiển thị,
+nên `Semantics(label: <chuỗi sentence case>, excludeSemantics: true)` bọc quanh
+`Text` để trình đọc màn hình vẫn đọc cụm từ bình thường thay vì đánh vần. Nút
+`(+)` giữ nguyên `Semantics(button: true, label: compat_add_to_my_store_action)`
+nên tên trợ năng không mất dù chữ hiển thị đã bỏ.
+
+`compat_facet_block.dart` vẫn là **một** widget cho cả hai mặt, nên `titleStyle`
+đổi một lần là hai khối đổi cùng nhau — luật đối xứng R-7/AC-33 không thể lệch
+qua đường này.
+
+### Lệnh và kết quả
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `flutter test test/features/compatibility_lookup/` | `+88 ~3: All tests passed!` (3 `~` là test chụp ảnh, `skip` khi không bật cờ) |
+| `flutter test test/features/compatibility_lookup/compat_result_widgets_test.dart --dart-define=CAPTURE_VISUALS=true` | `+7: All tests passed!` |
+
+Hai test mới trong `compat_result_widgets_test.dart` khoá đúng hai luật vừa
+dựng, để chúng không trôi ngược:
+
+- `facet titles render upper case without upper-casing the label` — tiêu đề hiển
+  thị bằng `<chuỗi>.toUpperCase()`, cỡ/độ đậm khớp `type.caption` đọc từ theme
+  (không hard-code 13), và `find.bySemanticsLabel(<chuỗi sentence case>)` vẫn
+  tìm thấy node cho cả hai khối.
+- `the add-to-store action is a round icon-only button` — `find.text(nhãn)` là
+  `findsNothing` trong khi `find.bySemanticsLabel(nhãn)` là `findsOneWidget`,
+  `BoxDecoration.shape` là `BoxShape.circle`, và `tester.getSize` của nút
+  `>= 44x44`.
+
+Các test có sẵn không phải sửa: chúng so sánh hai khối với nhau qua
+`_facetGeometry` và bấm nút qua `Key('compat_activity_add_to_store')`, nên không
+khẳng định kiểu chữ cũ hay chữ trong chip.
+
+### Bằng chứng hình ảnh
+
+`build/visual-fidelity/STORY-010/compat-result-block-material.png` (chụp lại ở
+lượt này, đã soi mắt): tiêu đề hiện "CHỖ DỄ HỢP"/"CHỖ DỄ VA" đủ dấu, không ô
+tofu; nút `(+)` là vòng tròn viền tím, không chữ. Ảnh nằm trong `build/` vì
+`visual-fidelity/` của story **không** thuộc WriteScope của lượt vá này — xem
+mục còn mở bên dưới.
+
+### Còn mở sau lượt vá
+
+1. `visual-fidelity/visual-fidelity-report.md` và bộ ảnh
+   `implemented-10-bang-tra-an-khop-md*.png` nằm ngoài WriteScope được cấp, nên
+   chưa cập nhật. Cần cập nhật: mục 5 và mục 6 ở phần "Chênh lệch so với design
+   reference" giờ **không còn là chênh lệch**, và dòng bảng "không thu xuống
+   `caption`" ở §"Đối chiếu từng luật" cần diễn đạt lại theo luật đối xứng mới.
+2. Tiêu đề "1 hoạt động nên thử" (`compat_activity_block.dart`) vẫn là
+   `body`+`600` sentence case, còn canvas vẽ "1 ĐIỀU NÊN THỬ" IN HOA. Phán quyết
+   mục 5 chỉ nêu đích danh hai khối "hợp"/"va" nên lượt này không mở rộng; hệ
+   quả là trong cùng một chồng kết quả đang có hai kiểu tiêu đề khối. Cần một
+   phán quyết bổ sung nếu muốn đồng bộ.
+3. Canvas đặt `(+)` **cùng hàng, bên phải** đoạn văn hoạt động; bản dựng vẫn đặt
+   nút ở hàng riêng, canh trái. Phán quyết chỉ nói về hình dạng nút, không nói
+   vị trí, nên bố cục giữ nguyên.
+
 MOBILE_IMPLEMENTATION_COMPLETE

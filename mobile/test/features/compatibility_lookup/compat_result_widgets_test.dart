@@ -228,6 +228,80 @@ void main() {
     );
   });
 
+  testWidgets('facet titles render upper case without upper-casing the label', (
+    WidgetTester tester,
+  ) async {
+    _useReferenceViewport(tester);
+    final SemanticsHandle semantics = tester.ensureSemantics();
+    await tester.pumpWidget(_host(_resultBlock()));
+    await tester.pumpAndSettle();
+
+    final BuildContext context = tester.element(
+      find.byKey(const Key('compat_facet_block_fit')),
+    );
+    final AppL10n l10n = AppL10n.of(context);
+    final _FacetGeometry fit = _facetGeometry(tester, CompatFacetKind.fit);
+    final _FacetGeometry friction = _facetGeometry(
+      tester,
+      CompatFacetKind.friction,
+    );
+
+    expect(fit.titleText, l10n.compat_block_fit_title.toUpperCase());
+    expect(friction.titleText, l10n.compat_block_friction_title.toUpperCase());
+
+    // The shared heading is the design system's `caption` token, not `body`
+    // with a hand-rolled weight.
+    final CupidTypographyTokens type = context.cupidType;
+    expect(fit.titleStyle.fontSize, type.caption.fontSize);
+    expect(fit.titleStyle.fontWeight, type.caption.fontWeight);
+
+    // Upper case is glyph-level only: the accessible name stays the ordinary
+    // sentence-case phrase.
+    expect(find.bySemanticsLabel(l10n.compat_block_fit_title), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(l10n.compat_block_friction_title),
+      findsOneWidget,
+    );
+    expect(fit.titleStyle.fontWeight, friction.titleStyle.fontWeight);
+
+    semantics.dispose();
+  });
+
+  testWidgets('the add-to-store action is a round icon-only button', (
+    WidgetTester tester,
+  ) async {
+    _useReferenceViewport(tester);
+    final SemanticsHandle semantics = tester.ensureSemantics();
+    await tester.pumpWidget(_host(_resultBlock(onAddToMyStore: () {})));
+    await tester.pumpAndSettle();
+
+    final Finder button = find.byKey(const Key('compat_activity_add_to_store'));
+    final AppL10n l10n = AppL10n.of(tester.element(button));
+
+    // No visible label glyph anywhere in the block...
+    expect(find.text(l10n.compat_add_to_my_store_action), findsNothing);
+    // ...but the button still has an accessible name.
+    expect(
+      find.bySemanticsLabel(l10n.compat_add_to_my_store_action),
+      findsOneWidget,
+    );
+
+    final BoxDecoration decoration = tester
+            .widget<DecoratedBox>(
+              find.descendant(of: button, matching: find.byType(DecoratedBox)),
+            )
+            .decoration
+        as BoxDecoration;
+    expect(decoration.shape, BoxShape.circle);
+    expect(decoration.gradient, isNull);
+
+    final Size tapTarget = tester.getSize(button);
+    expect(tapTarget.width, greaterThanOrEqualTo(44));
+    expect(tapTarget.height, greaterThanOrEqualTo(44));
+
+    semantics.dispose();
+  });
+
   testWidgets('friction block is never hidden behind a disclosure', (
     WidgetTester tester,
   ) async {

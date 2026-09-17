@@ -18,9 +18,11 @@ enum CompatFacetKind { fit, friction }
 /// padding, radius, border, gap, font size and font weight are read once below
 /// and shared by both builds.
 ///
-/// The friction block is therefore forbidden to shrink to `caption`, move to
-/// the bottom of the screen, collapse into an accordion, or tint lighter
-/// (AC-33).
+/// The friction block is therefore forbidden to move to the bottom of the
+/// screen, collapse into an accordion, tint lighter, or take a smaller/lighter
+/// heading than the fit block (AC-33). Both headings share the uppercase
+/// `caption` style below; the symmetry rule is what matters, not the absolute
+/// size.
 class CompatFacetBlock extends StatelessWidget {
   const CompatFacetBlock({super.key, required this.kind, required this.text});
 
@@ -55,8 +57,7 @@ class CompatFacetBlock extends StatelessWidget {
     final CupidPlatformTokens platform = context.cupidPlatform;
     final AppL10n l10n = AppL10n.of(context);
 
-    final TextStyle titleStyle = type.body.copyWith(
-      fontWeight: FontWeight.w600,
+    final TextStyle titleStyle = type.caption.copyWith(
       color: colors.colorText,
     );
     final TextStyle bodyStyle = type.body.copyWith(color: colors.colorText);
@@ -84,7 +85,17 @@ class CompatFacetBlock extends StatelessWidget {
                   color: colors.colorText,
                 ),
                 const SizedBox(width: _titleGap),
-                Expanded(child: Text(_title(l10n), style: titleStyle)),
+                // Upper case is a display treatment, not content: the l10n
+                // string stays sentence-case and is what a screen reader
+                // announces, so "CHỖ DỄ VA" is not spelled out letter by
+                // letter or read as shouting.
+                Expanded(
+                  child: Semantics(
+                    label: _title(l10n),
+                    excludeSemantics: true,
+                    child: Text(_title(l10n).toUpperCase(), style: titleStyle),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: _bodyGap),

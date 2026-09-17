@@ -12,14 +12,20 @@ import '../../domain/compat_content.dart';
 /// belongs to P4. Keeping the signal and the effect apart is what lets this
 /// phase ship before the screen exists.
 ///
-/// The action is drawn as an outline chip rather than a filled `--grad` pill:
-/// per `ux/uiux-spec.md` section 3.4 it is a secondary action, and the filled
-/// treatment is reserved for the screen's primary action.
+/// The action is drawn as a round outlined `(+)` rather than a filled `--grad`
+/// pill: per `ux/uiux-spec.md` section 3.4 it is a secondary action, and the
+/// filled treatment is reserved for the screen's primary action.
 class CompatActivityBlock extends StatelessWidget {
   const CompatActivityBlock({super.key, required this.cell, this.onAddToMyStore});
 
   final CompatCell cell;
   final VoidCallback? onAddToMyStore;
+
+  /// The `(+)` glyph is far smaller than this, but dropping the label also
+  /// dropped the chip padding that used to carry the hit area, so the tap
+  /// target is restated here (`ux/uiux-spec.md` section 3.4).
+  static const double _minTapTarget = 44;
+  static const double _addIconSize = 20;
 
   @override
   Widget build(BuildContext context) {
@@ -74,40 +80,24 @@ class CompatActivityBlock extends StatelessWidget {
                   key: const Key('compat_activity_add_to_store'),
                   behavior: HitTestBehavior.opaque,
                   onTap: onAddToMyStore,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(platform.radiusButton),
-                      border: Border.all(color: colors.colorAccentPurple),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: CupidSpacing.md,
-                        vertical: CupidSpacing.sm,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          CupidIcon(
+                  child: SizedBox(
+                    width: _minTapTarget,
+                    height: _minTapTarget,
+                    child: Center(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: colors.colorAccentPurple),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(CupidSpacing.xs),
+                          child: CupidIcon(
                             CupidIcons.add,
                             variant: CupidIconVariant.line,
-                            size: 18,
+                            size: _addIconSize,
                             color: colors.colorAccentPurple,
                           ),
-                          const SizedBox(width: CupidSpacing.xs),
-                          // The label is the longest string in the block and
-                          // runs past the 415pt reference width at `body` size,
-                          // so it wraps inside the chip rather than being cut
-                          // or shrunk below the secondary-action type scale.
-                          Flexible(
-                            child: Text(
-                              l10n.compat_add_to_my_store_action,
-                              style: type.body.copyWith(
-                                fontWeight: FontWeight.w400,
-                                color: colors.colorAccentPurple,
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
