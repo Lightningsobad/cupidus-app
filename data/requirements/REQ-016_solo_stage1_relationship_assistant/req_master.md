@@ -245,12 +245,12 @@ thân thẻ trên canvas là nội dung mẫu, không phải hợp đồng field
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
-| STORY-001 | Danh sách việc-cần-làm — kho chung và vòng đời thẻ | complex | TODO | `STORY-001_activity_card_hub/story_master.md` |
-| STORY-002 | Xuất lời mời — khung nhại + mad-libs | complex | TODO | `STORY-002_invite_message_composer/story_master.md` |
-| STORY-003 | Nhật ký riêng | standard | TODO | `STORY-003_private_journal/story_master.md` |
-| STORY-004 | Gợi ý quà, và sổ tay / hồ sơ kỹ năng thu thập tại chỗ | complex | TODO | `STORY-004_relationship_notebook_and_gift_ideas/story_master.md` |
+| STORY-001 | Danh sách việc-cần-làm — kho chung và vòng đời thẻ | complex | DONE | `STORY-001_activity_card_hub/story_master.md` |
+| STORY-002 | Xuất lời mời — khung nhại + mad-libs | complex | DONE | `STORY-002_invite_message_composer/story_master.md` |
+| STORY-003 | Nhật ký riêng | standard | DONE | `STORY-003_private_journal/story_master.md` |
+| STORY-004 | Gợi ý quà, và sổ tay / hồ sơ kỹ năng thu thập tại chỗ | complex | DONE | `STORY-004_relationship_notebook_and_gift_ideas/story_master.md` |
 | STORY-005 | Mồi chuyện — kho câu thường xanh và sự kiện có lịch | standard | DONE | `STORY-005_conversation_starters/story_master.md` |
-| STORY-006 | "Trước giờ đi" — checklist tất định (SB-211) | standard | TODO | `STORY-006_before_you_go_checklist/story_master.md` |
+| STORY-006 | "Trước giờ đi" — checklist tất định (SB-211) | standard | DONE | `STORY-006_before_you_go_checklist/story_master.md` |
 | STORY-007 | "Cảm ơn + chốt việc kế tiếp" (SB-212) | standard | TODO | `STORY-007_thank_you_and_next_plan/story_master.md` |
 | STORY-008 | Kịch bản buổi hẹn 3 phần | standard | TODO | `STORY-008_date_script_three_parts/story_master.md` |
 | STORY-009 | Chân dung "theo cách BẠN nhìn" | standard | DONE | `STORY-009_your_view_portrait/story_master.md` |
