@@ -375,6 +375,7 @@ void main() {
 
   group('bằng chứng visual-fidelity', () {
     testWidgets('captures 10-bang-tra-an-khop', (WidgetTester tester) async {
+      const captureName = 'implemented-10-bang-tra-an-khop-md.png';
       // One complete axis and one half-declared axis in the same frame, with a
       // guessed partner label, so the capture carries the states the spec makes
       // rules about (result block order, guess marking, clear action).
@@ -407,16 +408,18 @@ void main() {
             loader: diskLoader,
           ),
         ),
-        '10-bang-tra-an-khop.png',
+        captureName,
       );
 
       expect(
-        File('$_visualOutputDir/10-bang-tra-an-khop.png').existsSync(),
+        File('$_visualOutputDir/$captureName').existsSync(),
         isTrue,
       );
     }, skip: !kCaptureVisuals);
 
     testWidgets('captures the no-label state', (WidgetTester tester) async {
+      const captureName =
+          'implemented-10-bang-tra-an-khop-md-chua-co-nhan.png';
       // Nothing declared yet: the evidence AC-6 needs is a frame where no
       // value is preselected on any card, least of all the other person's.
       await _captureScreen(
@@ -429,12 +432,11 @@ void main() {
             loader: diskLoader,
           ),
         ),
-        '10-bang-tra-an-khop-chua-co-nhan.png',
+        captureName,
       );
 
       expect(
-        File('$_visualOutputDir/10-bang-tra-an-khop-chua-co-nhan.png')
-            .existsSync(),
+        File('$_visualOutputDir/$captureName').existsSync(),
         isTrue,
       );
     }, skip: !kCaptureVisuals);

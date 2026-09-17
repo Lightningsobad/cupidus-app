@@ -8,8 +8,12 @@
 | P2 | Mobile Developer | COMPLETE | PASS | PASS (19/19 + 102 hồi quy) |
 | P3 | Mobile Developer | COMPLETE | PASS | PASS (4/4 + 1 chụp ảnh + 4 ARB parity) |
 | P4 | Mobile Developer | COMPLETE | PASS | PASS (12/12 mới + 377 hồi quy) |
-| P5 | Mobile Developer | NOT_STARTED | — | — |
-| P6 | Mobile Developer | NOT_STARTED | — | — |
+| P5 | Mobile Developer | COMPLETE | PASS | PASS (8/8 mới + 213 hồi quy) |
+| P6 | Mobile Developer | COMPLETE | PASS | PASS (8/8 mới + 86 feature; 3 đỏ có sẵn ngoài scope — Finding 11) |
+
+Hai dòng P5/P6 được sửa trong lượt vá F-1..F-5. Trước đó chúng vẫn ghi
+`NOT_STARTED` dù phần thân của chính file này đã có đủ lệnh và kết quả của cả
+hai phase (F-5 trong `review/review-report.md`).
 
 ## P1 – Lược đồ gói nội dung và cổng nhập
 
@@ -28,7 +32,9 @@ Chạy với `cwd` là `<worktree>/mobile`, `PATH` có prefix
 `flutter analyze` không chạy làm bằng chứng cổng: baseline repo là 222 cảnh báo
 có sẵn nên lệnh này không thể trả về 0 (coding-agent-guide §3).
 
-Runtime startup smoke: NOT_APPLICABLE (phase file §9).
+Runtime startup smoke: xem `## Story Runtime Startup Smoke` (chạy một lần cho
+cả story ở cuối, sau lượt vá F-2; file phase §9 ghi NOT_APPLICABLE nhưng story
+có đổi `schemaVersion` và thêm asset lớn nên vẫn phải chạy thật).
 
 ### Files Delivered
 
@@ -317,7 +323,9 @@ vào WriteScope của handoff P4. Không tự ghi ra ngoài WriteScope trong phi
 | `flutter build apk --debug` | runtime registry `mobile-app.buildCommand` | **PASS** — `build/app/outputs/flutter-apk/app-local-debug.apk` (task `assembleLocalDebug`, 9.5s) |
 
 `flutter analyze` không dùng làm cổng (baseline 222 cảnh báo có sẵn).
-Runtime startup smoke: NOT_APPLICABLE (phase file §9).
+Runtime startup smoke: xem `## Story Runtime Startup Smoke` (chạy một lần cho
+cả story ở cuối, sau lượt vá F-2; file phase §9 ghi NOT_APPLICABLE nhưng story
+có đổi `schemaVersion` và thêm asset lớn nên vẫn phải chạy thật).
 
 ### Files Delivered
 
@@ -383,7 +391,9 @@ vẫn kín. Đã soi mắt: không tofu.
 | `flutter build apk --debug` | runtime registry `mobile-app.buildCommand` | **PASS** — `build/app/outputs/flutter-apk/app-local-debug.apk` (task `assembleLocalDebug`, 8.8s) |
 
 `flutter analyze` không dùng làm cổng (baseline 222 cảnh báo có sẵn).
-Runtime startup smoke: NOT_APPLICABLE (phase file §9).
+Runtime startup smoke: xem `## Story Runtime Startup Smoke` (chạy một lần cho
+cả story ở cuối, sau lượt vá F-2; file phase §9 ghi NOT_APPLICABLE nhưng story
+có đổi `schemaVersion` và thêm asset lớn nên vẫn phải chạy thật).
 
 ### Files Delivered
 
@@ -433,7 +443,9 @@ vết rằng nội dung đã sẵn sàng cho user kiểm duyệt; nó không t�
 | `flutter build apk --debug` | runtime registry `mobile-app.buildCommand` | **PASS** — `build/app/outputs/flutter-apk/app-local-debug.apk` (task `assembleLocalDebug`, 8.7s) |
 
 `flutter analyze` không dùng làm cổng (baseline 222 cảnh báo có sẵn).
-Runtime startup smoke: NOT_APPLICABLE (phase file §9).
+Runtime startup smoke: xem `## Story Runtime Startup Smoke` (chạy một lần cho
+cả story ở cuối, sau lượt vá F-2; file phase §9 ghi NOT_APPLICABLE nhưng story
+có đổi `schemaVersion` và thêm asset lớn nên vẫn phải chạy thật).
 
 ### Files Delivered
 
@@ -490,6 +502,181 @@ và 144 ô của P5 (Finding 9 vẫn mở, nhưng P6 không tạo giọng thứ 
 Bộ seed này **chưa** được phê duyệt để vào bản dựng người dùng thật. P6 chỉ ghi
 vết rằng nội dung đã sẵn sàng cho user kiểm duyệt; nó không tự phê duyệt, đúng
 §6 của `master-plan.md`.
+
+## Lượt vá F-1..F-5 — Commands Run
+
+Chạy với `cwd` là `<worktree>/mobile`, `PATH` có prefix `$HOME/flutter/bin`.
+Không nối ống.
+
+| Command | Result |
+|---|---|
+| `flutter test test/core/database test/features/compatibility_lookup test/features/gift_ideas --reporter=failures-only` | **All other tests passed!** — `+275 ~4`, 0 đỏ |
+| `flutter test test/features/compatibility_lookup/compatibility_lookup_screen_test.dart --dart-define=CAPTURE_VISUALS=true` | 7 passed — sinh lại 2 ảnh dưới tên mới (F-4) |
+| `flutter build apk --debug --flavor local -t lib/main.dart --split-per-abi` | **PASS** — `assembleLocalDebug` 10.7s, 3 APK theo ABI |
+
+`flutter analyze` vẫn không dùng làm cổng (baseline 222 cảnh báo có sẵn).
+
+## Entry Point Reachability
+
+Reachable: YES
+
+AC-1/AC-2/AC-3 khoá vị trí màn (10): không route gõ tay, không mục menu/tab,
+chỉ mở được từ một dòng ở cuối màn (5) "Gợi ý quà". Đường đó có thật và đã
+được đi trên máy thật, không chỉ suy ra từ code.
+
+| Bước | Bằng chứng trong source | Bằng chứng lúc chạy |
+|---|---|---|
+| Màn (5) dựng hàng dẫn là con cuối của danh sách | `mobile/lib/features/gift_ideas/presentation/screens/gift_ideas_screen.dart:182` gắn `_GuessRow`; widget ở `:356-410` | ảnh `/tmp` bước giữa cho thấy hàng "Bí quá thì thử đoán xem người ấy thích kiểu quà nào" nằm dưới thẻ quà cuối cùng |
+| Hàng có key ổn định để test bám | `:369` `key: const Key('gift-ideas-guess-row')` | — |
+| Chữ hiển thị lấy từ l10n, không hardcode | `:393` `l10n.gift_ideas_guess_row` | chữ trên máy khớp đúng chuỗi ARB, đủ dấu |
+| Chạm hàng thì mở màn (10) kèm nguồn vào | `:375-378` `onTap: () => openCompatibilityLookup(context, from: CompatibilityEntry.giftIdeas)` | chạm toạ độ `(540, 2222)` → AppBar đổi thành "Bảng tra ăn khớp" |
+| Route là `MaterialPageRoute` ẩn danh, không `settings.name` | `mobile/lib/features/compatibility_lookup/compatibility_lookup_entry_point.dart` | không có deep link nào gõ tới được — đúng AC-2/AC-3 |
+
+Ảnh bằng chứng:
+`visual-fidelity/runtime-entry-10-bang-tra-an-khop-emulator-5554.png`
+(màn (10) ngay sau khi tới từ màn (5), trạng thái chưa có nhãn) và
+`visual-fidelity/runtime-result-10-bang-tra-an-khop-emulator-5554.png`
+(sau khi chọn nhãn cho cả hai bên).
+
+Ảnh thứ hai cũng là bằng chứng chạy thật cho AC-6, AC-16/AC-17 và AC-19:
+không chip nào được chọn sẵn ở trạng thái đầu; khối DẢI là chip chữ
+("Dễ bắt nhịp"), không thanh/vòng/gradient; thứ tự đúng DẢI → Chỗ dễ hợp →
+Chỗ dễ va → 1 hoạt động nên thử → 1 câu để hỏi; và gói nội dung 147.975 byte
+đọc được từ asset lúc chạy thật, không chỉ trong test.
+
+## Story Runtime Startup Smoke
+
+**Status: PASS.**
+
+Trước lượt vá này, cả bốn phase đều ghi `Runtime startup smoke: NOT_APPLICABLE
+(phase file §9)`. Đó là lý do F-2 mở: story có đổi `schemaVersion` và thêm một
+asset lớn, nên khởi động thật là thứ duy nhất chứng minh được không có lỗi migrate
+hay lỗi nạp asset. Mục này thay thế bốn dòng `NOT_APPLICABLE` đó.
+
+- Registry: `data/devops/system/runtime-command-registry.json` → `mobile-app`
+- Máy đích: `emulator-5554` (Android), gói `com.snapsofts.cupid`
+- Activity: `com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`
+
+```
+flutter build apk --debug --flavor local -t lib/main.dart --split-per-abi \
+  --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:21020
+adb -s emulator-5554 install -r <app-local-debug apk>
+adb -s emulator-5554 shell am force-stop com.snapsofts.cupid
+adb -s emulator-5554 logcat -c
+adb -s emulator-5554 shell am start -W \
+  -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+adb -s emulator-5554 logcat -d -s AndroidRuntime:E flutter:E FlutterError:E DartError:E
+```
+
+| Tín hiệu | Giá trị |
+|---|---|
+| `Status` | `ok` |
+| `LaunchState` | `COLD` |
+| `TotalTime` / `WaitTime` | `3627` / `3646` ms |
+| pid sau khi khởi động | `16495` |
+| pid sau khi đi hết đường vào màn (10) | `16495` — không restart, không crash |
+| Dòng log gắn tag lỗi | 0 |
+| Màn đầu tiên | màn (1) home, ảnh `visual-fidelity/runtime-smoke-main-first-screen-emulator-5554.png` |
+
+`adb` không gõ được vào `TextField` của Flutter, nên phiên đăng nhập được seed
+sẵn vào `shared_prefs/FlutterSharedPreferences.xml` (khoá có tiền tố `flutter.`)
+bằng JWT lấy từ API local; `POST /auth/verify-otp` nhận trường `code`, không phải
+`otp`.
+
+### Kiểm chứng quyền sở hữu bản cài trước và sau mỗi lần chụp
+
+Máy này dùng chung với các lane mobile khác, và trong lượt chạy đầu bản dựng của
+tôi **đã bị đè** giữa chừng: `pm path` + `stat` cho thấy `base.apk` mang mtime
+`08:41:35`, muộn hơn cả lần cài lẫn lần khởi động của tôi, và đường đi khi đó mở
+nhầm sang "Chân dung tưởng tượng". Lượt chạy tính là bằng chứng ở trên được cài
+lại và kiểm mốc trước **và** sau mỗi lần chụp:
+
+- `pm path` → `/data/app/~~ONRiQwg43HcoizZLHSMvEw==/com.snapsofts.cupid-QN4pby12LisI4BR_qbOELg==/base.apk`
+- `stat` mtime → `2026-09-17 08:45:38`, không đổi suốt lượt chạy
+- `pidof` → `16495`, không đổi trước/sau mỗi ảnh
+
+### Va chạm `schemaVersion` giữa các nhánh song song — cần Scrum Master xử lý
+
+Lần đi đường đầu tiên tới đúng màn (10) nhưng **thân màn trống**, và logcat có:
+
+```
+Unhandled Exception: SqliteException(1): while preparing statement,
+no such table: relationship_labels, SQL logic error (code 1)
+  Causing statement: SELECT * FROM "relationship_labels" WHERE "owner_key" = ? ...
+  ... RelationshipLabelRepository.labels
+  ... CompatibilityLookupCubit._refresh
+```
+
+Không phải lỗi của STORY-010. Rút file DB khỏi máy và đọc trực tiếp:
+
+| Kiểm tra | Kết quả |
+|---|---|
+| `PRAGMA user_version` | `7` |
+| Bảng có mặt | `activity_cards`, `journal_entries`, `invite_messages`, `notebook_entries`, `skill_profile_entries`, `ask_prompt_state`, **`portrait_answers`**, … |
+| Bảng vắng mặt | **`relationship_labels`** |
+
+DB đã ở v7 rồi, nhưng là **v7 của một nhánh story khác** (nhánh đó thêm
+`portrait_answers`). Bản dựng của STORY-010 cũng khai `schemaVersion => 7`, nên
+`from == to == 7` và `onUpgrade` không bao giờ chạy bước
+`if (from < 7) await m.createTable(relationshipLabels)` — bảng không được tạo,
+query đổ.
+
+Đây là rủi ro cấp requirement, không sửa được từ trong lane này: nhiều story
+song song cùng nâng `schemaVersion` 6 → 7 với những bảng khác nhau. Trên bất kỳ
+máy nào đã chạy nhánh này rồi chạy nhánh kia, nhánh chạy sau sẽ im lặng không
+migrate. Khi gộp vào nhánh integration cần một bước dàn xếp số phiên bản: hoặc
+mỗi story chiếm một số riêng (7, 8, 9…), hoặc bước v7 gộp đủ `createTable` của
+mọi story. **Đề nghị Scrum Master/Tech Lead quyết trước khi merge.**
+
+Đã xoá `app_flutter/cupid.sqlite` trên máy (giữ nguyên `shared_prefs` nên phiên
+đăng nhập còn) rồi khởi động lại: DB được tạo mới qua `onCreate` → `createAll()`,
+màn (10) dựng đủ, logcat sạch. Bản sao DB cũ giữ ở `/tmp/s010-dbcopy.sqlite` để
+hoàn tác được nếu lane khác cần.
+
+## Phủ test đường nâng cấp v6 → v7
+
+F-3 mở vì `schemaVersion` nhảy 6 → 7 mà không có test nào đi qua `onUpgrade`;
+mọi test hiện có chỉ chạm đường `onCreate`, vốn không chứng minh gì về máy đã
+cài bản v6.
+
+File mới: `mobile/test/core/database/relationship_labels_migration_test.dart`
+(5 test, group `v6 -> v7`).
+
+Điểm mấu chốt của fixture: drift phát `CREATE TABLE IF NOT EXISTS`, nên một
+fixture để nguyên bảng sẽ xanh **dù `onUpgrade` có chạy hay không**. Vì vậy
+fixture mở schema hiện tại trên file thật, seed một dòng cho mỗi họ bảng
+client-owned có từ v6, rồi `DROP TABLE relationship_labels` và
+`PRAGMA user_version = 6`. Hai khẳng định "fixture đúng là v6" được chạy **trên
+chính connection đang seed, trước khi đóng** — mở lại file để kiểm tra sẽ kích
+hoạt đúng migration đang được kiểm, và fixture sẽ luôn trông đúng.
+
+Năm test: lên đúng v7 và có bảng; đủ 8 cột
+(`id, owner_key, subject, system, value, certainty, created_at, updated_at`);
+mọi dòng client-owned có sẵn còn nguyên sau nâng cấp (activity_cards,
+journal_entries, invite_messages, notebook_entries); bảng ghi được ngay sau nâng
+cấp; khoá duy nhất `(owner_key, subject, system)` còn hiệu lực.
+
+Đã chứng minh test thật sự bắt lỗi bằng mutation: đổi
+`cupid_database.dart:136` thành `if (from < 7 && false)` làm **4/5 test đỏ**.
+Đã hoàn nguyên; `git diff --stat` trên file đó rỗng.
+
+## Đổi tên ảnh visual-fidelity theo quy ước cổng
+
+F-4: hai ảnh "implemented" trước đây đặt tên `10-bang-tra-an-khop.png` và
+`10-bang-tra-an-khop-chua-co-nhan.png`, không mang tiền tố `implemented-` mà
+`verify-story-visual-fidelity-gate.sh` nhận diện.
+
+| Trước | Sau |
+|---|---|
+| `10-bang-tra-an-khop.png` | `implemented-10-bang-tra-an-khop-md.png` |
+| `10-bang-tra-an-khop-chua-co-nhan.png` | `implemented-10-bang-tra-an-khop-md-chua-co-nhan.png` |
+
+Đổi bằng `git mv`; tên trong
+`compatibility_lookup_screen_test.dart` sửa theo; bảng trong
+`visual-fidelity/visual-fidelity-report.md` cập nhật kèm đoạn giải thích hậu tố
+`-md` (bản dựng chụp ở Material, canvas chỉ có frame `ios`). Chạy lại harness
+với `--dart-define=CAPTURE_VISUALS=true` để sinh lại ảnh dưới tên mới và đã soi
+mắt cả hai.
 
 ## Findings For Scrum Master / Tech Lead
 

@@ -13,8 +13,13 @@ Design-Screen: 10-bang-tra-an-khop
 
 | Design screen id | Platform | Design reference | Implemented |
 | --- | --- | --- | --- |
-| `10-bang-tra-an-khop` | ios | `design-reference-10-bang-tra-an-khop-ios.png` (415x900) | `10-bang-tra-an-khop.png` (415x1900, full height) |
-| `10-bang-tra-an-khop` (chưa có nhãn) | — | không có frame tương ứng | `10-bang-tra-an-khop-chua-co-nhan.png` (415x1900) |
+| `10-bang-tra-an-khop` | ios | `design-reference-10-bang-tra-an-khop-ios.png` (415x900) | `implemented-10-bang-tra-an-khop-md.png` (415x1900, full height) |
+| `10-bang-tra-an-khop` (chưa có nhãn) | — | không có frame tương ứng | `implemented-10-bang-tra-an-khop-md-chua-co-nhan.png` (415x1900) |
+
+Hậu tố `-md` là platform dựng thật của ảnh: bản dựng chụp ở Material, trong khi
+frame tham chiếu của canvas chỉ có bản `ios`. Tên theo quy ước
+`implemented-<screen>-<platform>[-<biến thể>].png` mà `verify-story-visual-fidelity-gate.sh`
+nhận diện, và mà STORY-001/002/003/004/006 đã dùng.
 
 Design source resolution: `data/devops/system/design-fidelity-config.json` khai
 4 nguồn; surface mang màn này là `cupid-ch-ng-1` (entry `Cupid Chặng 1.dc.html`,
