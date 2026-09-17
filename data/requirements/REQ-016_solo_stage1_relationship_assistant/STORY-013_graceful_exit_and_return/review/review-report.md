@@ -6,6 +6,9 @@
 - Branch: `codex/REQ-016_solo_stage1_relationship_assistant-STORY-013_graceful_exit_and_return`
 - BaseHead: `b58afbe073eff4e1ebb9151735221532a9cf5a82` → HEAD `241b936d`
 - Worktree sạch (`git status --porcelain` rỗng)
+- Vòng tái kiểm F1 (2026-09-17, `Mode: completion/resume`): HEAD `e80eb387`,
+  worktree vẫn sạch. Giữa `241b936d` và `e80eb387` đúng hai commit: `4fc891e3`
+  (ghi kết quả PATCH_REQUIRED) và `e80eb387` (vá F1). Xem mục "F1 re-check".
 
 ## Scope Gate
 
@@ -50,7 +53,7 @@
 | Phân loại gắn người sai → mất tài sản (P2) | `chapter_closure_service_test.dart` — vị từ chỉ tín hiệu dương tính + 2 ca biên + ca không dứt khoát giữ lại (AC-6/AC-7/AC-10) | PASS |
 | Rò rỉ vật liệu đã đóng ra luồng thường ngày (P2/P5) | duyệt cả 5 ô, `countsByStatus`, `watchCardsByStatus`, `closedCardsCalls == 0` (AC-11) | PASS |
 | Phân trang sai do lọc sau khi đọc (P2) | `excludes closed ids inside SQL, so LIMIT still fills the page` + bảng số hàng từng trang | PASS |
-| Dư lượng sau xoá sạch (P3) | số hàng trước/sau `wipeAll()`, `existsSync()` gốc media, khoá prefs | **FAIL — xem F1** |
+| Dư lượng sau xoá sạch (P3) | số hàng trước/sau `wipeAll()`, `existsSync()` gốc media, khoá prefs | PASS sau vá F1 (`e80eb387`) — xem "F1 re-check" |
 | Cột cấm lọt vào schema (P1) | `chapter_closure_migration_test.dart` → `cột bị cấm vĩnh viễn` (AC-5/BR-9) | PASS |
 | Màn J13 trở thành cổng chặn (P6) | bốn lối ra + X, `the screen cannot be popped back to`, `markOpenedCalls == 1` (AC-24) | PASS |
 | Migration phá dữ liệu người dùng (P1) | `v6 -> v7` 4 test có số hàng trước/sau và kiểm nội dung | PASS |
@@ -87,7 +90,10 @@ chứng minh không có khung riêng cho kho đã đóng). Đây là bằng ch�
 
 ## Findings
 
-### F1 — PATCH_REQUIRED: `req016.last_opened_at` chưa nằm trong `Stage1WipeRegistry.preferenceKeys` (AC-27)
+### F1 — RESOLVED (đã vá ở `e80eb387`): `req016.last_opened_at` chưa nằm trong `Stage1WipeRegistry.preferenceKeys` (AC-27)
+
+Phần dưới đây giữ nguyên nội dung phát hiện ban đầu; kết luận tái kiểm ở mục
+"F1 re-check" ngay sau F3.
 
 - Tệp: `mobile/lib/features/chapter_closure/data/stage1_wipe_registry.dart:150-152`
   (`preferenceKeys` chỉ có `'before_you_go.dismissed_on.'`).
@@ -137,6 +143,42 @@ chứng minh không có khung riêng cho kho đã đóng). Đây là bằng ch�
   nhiều khả năng đạt một cách hiển nhiên. Vẫn cần một dòng coverage: hoặc một
   khẳng định phủ định, hoặc `NOT_APPLICABLE` kèm lý do.
 - AC-31 và AC-32 là AC phủ định cấp story; cần một dòng lý giải, không cần test mới.
+- Cập nhật sau vòng vá: phần AC-27 của F3 **đã đóng** — `test-results.md` P3 mục 3,
+  mục 4 và bảng AC coverage mục 7 nay có bốn dòng AC-27 riêng. Phần còn lại của
+  F3 (AC-13, AC-31, AC-32) vẫn DEFERRED, không chặn.
+
+## F1 re-check (tái kiểm hẹp, 2026-09-17)
+
+Chỉ kiểm bốn tệp của commit vá `e80eb387`; không mở lại P1..P6, không kiểm lại
+visual fidelity (vá không chạm tệp UI nào).
+
+1. **`preferenceKeys` đã có khoá.**
+   `mobile/lib/features/chapter_closure/data/stage1_wipe_registry.dart:153` thêm
+   `Stage1LastOpenedStore.preferenceKey`, và
+   `stage1_last_opened_store.dart:13` cho thấy hằng đó đúng bằng
+   `'req016.last_opened_at'`. Dùng hằng thay vì chuỗi lặp lại là chặt hơn mức
+   khuyến nghị tối thiểu: đổi tên khoá sẽ kéo registry theo.
+2. **Khẳng định sau `wipeAll()` chứng minh thật, không vacuous.**
+   `stage1_wipe_service_test.dart` gieo khoá trong `setMockInitialValues`, khẳng
+   định `getInt(...) isNotNull` **trước** `wipeAll()` (nên phép phủ định sau đó
+   không thể xanh giả), rồi khẳng định khoá vắng mặt trong `prefs.getKeys()` và
+   `absentAtLeast(kReturnAbsenceThreshold, now: DateTime(2030))` trả `false`.
+   Reviewer tự chạy lại: `flutter test
+   test/features/chapter_closure/stage1_wipe_service_test.dart` →
+   `00:05 +16: All tests passed!`, dòng bằng chứng in ra
+   `BẰNG CHỨNG khoá prefs sau wipeAll — còn lại: {theme.selected, auth.signed_in_before}`
+   — đúng hai khoá của tính năng khác, không còn khoá REQ-016 nào.
+3. **Parity test vẫn xanh với khoá mới.** Reviewer tự chạy lại:
+   `flutter test test/features/chapter_closure/stage1_wipe_registry_parity_test.dart`
+   → `00:02 +6: All tests passed!`. Test nay đối chiếu cả danh sách
+   `preferenceKeys`, bù được đúng khoảng trống đã để F1 lọt qua P3..P6.
+4. **`coding-plan/test-results.md` ghi mạch lạc.** Mục 11 mới của P3 ghi commit,
+   lý do vá ở P3 thay vì P6, ba tệp sửa, dòng bằng chứng in ra, năm lệnh kiểm và
+   ghi chú phạm vi tripwire. Quan sát #3 và P6 mục 7 được đánh dấu đã lật, nên
+   không còn hai chỗ trong artifact nói ngược nhau.
+
+F2 và F3 không bị vá này chạm tới (không tệp điều hướng, không tệp UI trong
+diff), nên phân loại DEFERRED của chúng giữ nguyên; không có phát hiện chặn mới.
 
 ## Residual risks
 
@@ -149,8 +191,9 @@ chứng minh không có khung riêng cho kho đã đóng). Đây là bằng ch�
 
 ## Recommendation
 
-Sửa F1 (một dòng trong `preferenceKeys` + một khẳng định test), gắn lại nhãn AC-27
-cho bằng chứng P3 đã có, rồi quay lại cổng review. F2 và F3 (phần AC-13/AC-31/AC-32)
-ghi nhận làm việc tiếp theo, không chặn.
+F1 đã sửa và tái kiểm xong ở `e80eb387`; nhãn AC-27 đã gắn lại cho bằng chứng P3.
+Không còn phát hiện chặn nào. F2 (ba đích J13 gộp về một shell) và phần còn lại
+của F3 (AC-13, AC-31, AC-32 thiếu dòng coverage) ghi nhận làm việc tiếp theo ở
+backlog, không chặn story này.
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
