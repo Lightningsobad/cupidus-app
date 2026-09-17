@@ -1212,3 +1212,187 @@ hay huy hiệu nào.
 
 - Không còn. P8 là phase cuối của STORY-012; P6 vẫn BLOCKED chờ quyết định
   Product Owner về AC4 của REQ-002/STORY-021.
+
+## Entry Point Reachability
+
+Reachable: YES
+
+Ghi ngày 2026-09-17 để đóng gap `G-2` trong `review/review-report.md`
+(rule 12e1). `story_master.md:91-92` khai hai bề mặt vào; dưới đây là đường đi
+cụ thể của từng bề mặt, truy theo mã chứ không khẳng định suông.
+
+### Bề mặt 1 — widget màn hình chính của hệ điều hành
+
+Reachable: YES · Cơ chế: người dùng tự thêm từ kho widget của HĐH (đúng như
+`ux/uiux-spec.md` §4 và AC-13: **không** có banner "thêm widget đi" trong app).
+
+Android — chuỗi đăng ký đầy đủ, không mắt xích nào thiếu:
+
+1. `mobile/android/app/src/main/AndroidManifest.xml` khai
+   `<receiver android:name="com.snapsofts.cupid.CupidPhaseWidgetProvider">`
+   với `<intent-filter>` bắt `android.appwidget.action.APPWIDGET_UPDATE` và
+   `<meta-data android:name="android.appwidget.provider"
+   android:resource="@xml/cupid_phase_widget_info" />`.
+2. `mobile/android/app/src/main/res/xml/cupid_phase_widget_info.xml` đặt
+   `android:widgetCategory="home_screen"` — đây chính là thuộc tính khiến
+   provider **hiện trong kho widget của launcher**; kèm
+   `android:previewLayout="@layout/cupid_phase_widget"` để ô xem trước trong
+   kho không rỗng, và `minWidth 180dp × minHeight 40dp` (vừa lưới 4×1 của mọi
+   launcher chuẩn).
+3. Lớp provider `CupidPhaseWidgetProvider` tồn tại tại
+   `mobile/android/app/src/main/kotlin/com/snapsofts/cupid/CupidPhaseWidgetProvider.kt`
+   — tên trong manifest khớp tên lớp thật, nên receiver không chết khi HĐH
+   khởi tạo.
+4. `android:exported="false"` là đúng và **không** chặn kho widget: hệ thống
+   AppWidgetHost gọi provider qua chính `AppWidgetManager` của HĐH, không cần
+   export cho app bên thứ ba.
+
+iOS — đã xác nhận trên **sản phẩm build ra**, không chỉ trên mã nguồn:
+
+1. `mobile/ios/CupidPhaseWidget/CupidPhaseWidget.swift:125-135` khai
+   `@main struct CupidPhaseWidget: Widget` với `StaticConfiguration(kind:
+   CupidWidgetContract.kind, provider: CupidPhaseProvider())` và
+   `.supportedFamilies([.systemSmall, .systemMedium])` — hai cỡ này là thứ kho
+   widget của iOS liệt kê.
+2. Target đã nhúng thật vào app: sau `flutter build ios --simulator --debug
+   --flavor local`, file
+   `mobile/build/ios/iphonesimulator/Runner.app/PlugIns/CupidPhaseWidget.appex`
+   tồn tại. `Info.plist` của chính bundle đã build đọc ra
+   `NSExtensionPointIdentifier = com.apple.widgetkit-extension` và
+   `CFBundleDisplayName = CupidPhaseWidget`. Đây là bằng chứng mạnh hơn việc
+   đọc `project.pbxproj`: build phase `Embed App Extensions` đã chạy thật.
+3. Ghi chú không chặn: `StaticConfiguration` chưa gắn
+   `.configurationDisplayName(...)` / `.description(...)`, nên kho widget iOS
+   sẽ hiển thị tên bundle (`CupidPhaseWidget`) thay vì một tên tiếng Việt.
+   Widget vẫn **hiện và thêm được**; đây là vấn đề chữ hiển thị, và theo
+   AC-37/BR-15 chuỗi hiển thị phải đến từ gói nội dung chứ không hardcode
+   trong mã widget — nên sửa nó cần quyết định gói nội dung, không sửa ở lượt
+   này. Đã ghi song song thành `D-10` trong
+   `../visual-fidelity/visual-fidelity-report.md`.
+
+Dữ liệu chảy vào widget: `PhaseStatusCubit` (`phase_status_cubit.dart:162`)
+gọi `_widgetPublisher?.pushWidgetPayload(resolution)`; publisher thật là
+`HomeWidgetPhasePublisher`, được nối tại
+`lib/features/activity_cards/presentation/screens/activity_card_hub_view.dart:75`.
+Nghĩa là widget được nạp nội dung ngay khi màn (1) dựng, không cần người dùng
+thao tác gì thêm sau khi thêm widget.
+
+Chạm vào widget: `CupidPhaseWidget.swift:120` gắn `.widgetURL(entry.deepLink)`,
+mở thẳng chi tiết thẻ theo `card_id` trong payload — đúng `ux/uiux-spec.md`
+§4 ("chạm widget mở thẳng thẻ, không có hành động thứ hai").
+
+### Bề mặt 2 — các pha hiện trong màn (1)
+
+Reachable: YES · Cơ chế: tự hiện, không cần thao tác thêm.
+
+Chuỗi điều hướng, mỗi mắt xích là một dòng mã thật:
+
+1. `mobile/lib/core/navigation/app_shell.dart:150` —
+   `buildBody: () => const HomeScreen()`. Đây là tab mặc định của thanh điều
+   hướng, tức màn đầu tiên sau đăng nhập.
+2. `mobile/lib/features/home/presentation/home_screen.dart:199-210` —
+   `_SoloHomeGate` chọn nhánh solo và dựng
+   `_SoloStageOneShell(muonLamBuilder: ... ActivityCardHubView(...))`.
+3. `ActivityCardHubView` là nơi cả bốn bề mặt theo pha của story này sống:
+   - `activity_card_hub_view.dart:301` — `PhaseStatusLine(` (AC-1/AC-2/AC-3:
+     dòng trạng thái theo pha, gồm cả đếm ngược).
+   - `activity_card_hub_view.dart:168` — `WealthCounterLine(` (AC-5: bộ đếm
+     "của cải đang lớn").
+   - `activity_card_hub_view.dart:172` — `GiftProgressBlock(line:
+     phase.giftProgress)` (SB-87, In Scope #5).
+   - Nhỏ giọt (SB-99, In Scope #6) hiển thị trong cùng khối quiet.
+4. Không có cổng nào chắn: không cần bật cờ, không cần menu ẩn, không cần
+   settings. Pha nào hợp lệ thì phần tử của pha đó xuất hiện; pha không có
+   nội dung thì im lặng theo BR-2 (đã chụp ở
+   `../visual-fidelity/implemented-hub-quiet.png`).
+
+### Bề mặt phụ — nhắc 23h dẫn vào sheet
+
+Reachable: YES. `mobile/lib/features/phase_status/presentation/evening_check_in_sheet.dart:257-284`
+— `_openFromPayload(...)` nhận payload của thông báo đã chạm và gọi
+`EveningCheckInSheet.show(navigator.context, ...)`, vốn là
+`showModalBottomSheet<void>(` ở dòng 80. Đường vào này phụ thuộc thông báo nên
+không phải điểm vào độc lập, ghi lại để reviewer không phải truy lại.
+
+## Story Runtime Startup Smoke
+
+Ghi ngày 2026-09-17 để đóng gap `G-3` trong `review/review-report.md`
+(rule 12g). Kết quả **một phần**: iOS PASS bằng chứng thật, Android BLOCKED
+bởi một lỗi cấu hình build có thật.
+
+### iOS — PASS
+
+| Bước | Lệnh | Kết quả |
+|---|---|---|
+| Build | `flutter build ios --simulator --debug --flavor local` | `✓ Built build/ios/iphonesimulator/Runner.app`, `Xcode build done. 151.7s`, exit code 0 |
+| Cài | `xcrun simctl install DE4B4E1A-… build/ios/iphonesimulator/Runner.app` | thành công |
+| Chạy | `xcrun simctl launch DE4B4E1A-… com.snapsofts.cupid` | `com.snapsofts.cupid: 88426` |
+| Sống sót | `ps -p 88426 -o pid=,stat=` | `88426 Ss` — tiến trình còn sống sau khi màn đầu dựng xong |
+| Ảnh màn | `xcrun simctl io … screenshot` | `../visual-fidelity/runtime-smoke-ios-first-screen.png` |
+| Crash log | quét `~/Library/Logs/DiagnosticReports` cho `Runner*` trong 20 phút gần nhất | không có file nào |
+
+Thiết bị: iPhone 17 simulator, UDID `DE4B4E1A-2653-440B-A41A-0ED8DA27BE56`.
+
+Đã **mở ảnh ra nhìn**, không chỉ kiểm tra exit code: màn đầu dựng đúng — nền
+gradient tím-hồng, chữ "Cupid", ba nút "Tiếp tục với Apple" / "Tiếp tục với
+Google" / "Dùng email", dòng chân màn. **Không** màn đỏ lỗi Flutter, **không**
+màn trắng, **không** exception overlay. Dấu tiếng Việt dựng đủ, không ô tofu.
+Hộp thoại hệ thống "Cupid Mobile Would Like to Send You Notifications" nổi lên
+— đây là tín hiệu tích cực chứ không phải lỗi: nó chứng minh đường khởi tạo
+thông báo của P6 chạy tới nơi và gọi được API hệ thống.
+
+Đây đúng là lớp thay đổi mà rule 12g nhắm tới: build này mang theo
+`AppDelegate.swift` đã sửa, file entitlements mới, và target Xcode mới của
+P5. Nếu bất kỳ thứ nào trong đó sai, app sẽ chết ngay lúc khởi chạy — nó
+không chết. Ngoài ra `Runner.app/PlugIns/CupidPhaseWidget.appex` có mặt trong
+sản phẩm build, nên target P5 không chỉ biên dịch được mà còn được nhúng đúng
+chỗ.
+
+Chưa đi được xa hơn màn đăng nhập trong lượt này: qua được nó cần gieo phiên
+đăng nhập, mà việc đó nằm ngoài WriteScope của handoff. Rule 12g đòi "khởi
+chạy và tới được màn đầu tiên mà không crash" — vế đó đã thoả.
+
+### Android — BLOCKED
+
+`BLOCKER: ANDROID_BUILD_DESUGARING_MISSING`
+
+Emulator có sẵn và đã chạy (`adb devices` liệt kê `emulator-5554`), nhưng
+**không cài được app vì không build được APK**:
+
+```
+flutter gen-l10n && flutter build apk --debug --split-per-abi --target-platform android-arm64
+
+FAILURE: Build failed with an exception.
+* What went wrong:
+Execution failed for task ':app:checkLocalDebugAarMetadata'.
+> A failure occurred while executing com.android.build.gradle.internal.tasks.CheckAarMetadataWorkAction
+   > An issue was found when checking AAR metadata:
+
+       1.  Dependency ':flutter_local_notifications' requires core library desugaring to be enabled
+           for :app.
+
+BUILD FAILED in 39s
+Gradle task assembleLocalDebug failed with exit code 1
+```
+
+Đã xác nhận đây là thiếu sót thật, không phải cache bẩn:
+`grep -rn "coreLibraryDesugaring\|isCoreLibraryDesugaringEnabled\|desugar"
+mobile/android` chỉ khớp trong cache Gradle nhị phân, **không** khớp dòng cấu
+hình nào trong `mobile/android/app/build.gradle.kts`.
+
+Chỗ sửa đúng là `mobile/android/app/build.gradle.kts`:
+
+```kotlin
+compileOptions { isCoreLibraryDesugaringEnabled = true }
+dependencies { coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:<ver>") }
+```
+
+File đó **ngoài WriteScope** của handoff này (`WriteScope` chỉ gồm
+`visual-fidelity/` và `coding-plan/test-results.md`), và handoff cấm sửa logic
+sản xuất của mọi phase. Nên ghi thành blocker thay vì tự sửa.
+
+Hệ quả cần nói rõ: P4 (`CupidPhaseWidgetProvider` + layout RemoteViews) mới
+chỉ được xác minh **tĩnh** — manifest, `appwidget-provider`, layout, sự tồn
+tại của lớp Kotlin — chứ chưa từng chạy trên máy ảo. Không ghi
+`Runtime-Smoke: WAIVED` ở đâu cả: chỉ Scrum Master mới được ghi dòng đó vào
+`story_master.md`, và điều kiện waive chưa thoả vì lỗi này sửa được.
