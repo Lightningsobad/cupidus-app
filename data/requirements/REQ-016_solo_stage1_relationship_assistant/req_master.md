@@ -252,7 +252,7 @@ thân thẻ trên canvas là nội dung mẫu, không phải hợp đồng field
 | STORY-006 | "Trước giờ đi" — checklist tất định (SB-211) | standard | TODO | `STORY-006_before_you_go_checklist/story_master.md` |
 | STORY-007 | "Cảm ơn + chốt việc kế tiếp" (SB-212) | standard | TODO | `STORY-007_thank_you_and_next_plan/story_master.md` |
 | STORY-008 | Kịch bản buổi hẹn 3 phần | standard | TODO | `STORY-008_date_script_three_parts/story_master.md` |
-| STORY-009 | Chân dung "theo cách BẠN nhìn" | standard | TODO | `STORY-009_your_view_portrait/story_master.md` |
+| STORY-009 | Chân dung "theo cách BẠN nhìn" | standard | DONE | `STORY-009_your_view_portrait/story_master.md` |
 | STORY-010 | Bảng tra ăn khớp | complex | TODO | `STORY-010_compatibility_lookup/story_master.md` |
 | STORY-011 | Vỏ hoàng đạo / trắc nghiệm | standard | TODO | `STORY-011_zodiac_quiz_shell/story_master.md` |
 | STORY-012 | Trạng thái theo pha, widget, và bộ đếm "của cải đang lớn" | complex | TODO | `STORY-012_phase_status_and_widget/story_master.md` |
