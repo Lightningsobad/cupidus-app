@@ -1,63 +1,58 @@
-# Scope Gate — REQ-016 / STORY-010 Bảng tra ăn khớp
+# Scope Gate — REQ-016 / STORY-010 Bảng tra ăn khớp (lượt 2, patch re-review)
 
 Phase: SCOPE_GATE
 SCOPE_GATE_COMPLETE: YES
 
-Review type: compact-story-review
+Review type: compact-story-review (patch re-review của F-1…F-5)
 Review report path: `data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-010_compatibility_lookup/review/review-report.md`
 
-Ghi chú lệch WriteScope: handoff và `reviewer/SKILL.md` §5a đều nói **không** tạo
-file này cho `compact-story-review`, nhưng `validate-reviewer-two-phase.sh` chặn
-Stop bằng `SCOPE_GATE_MISSING` kể cả với review compact. File này được ghi thêm
-để thoả cổng; mục `Scope Gate` nội tuyến trong `review-report.md` vẫn là bản
-chính. Đã báo cáo lệch này cho Scrum Master.
+Diff của vòng này: `git -C <worktree> diff 47233dac aaa2021a` — 12 file
+(1 file test mới, 1 file test sửa tên hằng, `test-results.md` +193 dòng,
+`visual-fidelity-report.md` +7/-2, 5 PNG thêm/đổi tên, review artifacts của
+lượt 1). **Không file `lib/` nào.** Vì vậy các bề mặt đã PASS ở lượt 1 không
+được kiểm lại — đúng chỉ dẫn của handoff.
 
 ## Source/Test Files In Scope
 
-- `mobile/lib/features/compatibility_lookup/compatibility_lookup_entry_point.dart`
-- `mobile/lib/features/gift_ideas/presentation/screens/gift_ideas_screen.dart` (hunk cửa vào)
-- `mobile/lib/core/database/cupid_database.dart` (hunk `schemaVersion` + `onUpgrade`)
-- `mobile/test/core/database/migration_v5_test.dart`
-- `mobile/test/core/database/context_notebook_migration_test.dart`
-
-Diff baseline: `git -C <worktree> diff b58afbe0` — 57 file thay đổi, trong đó 3
-JSON seed sinh sẵn, 2 file `.g.dart` sinh máy, 8 file test chỉ đổi con số
-`schemaVersion`. Vượt trần 8 file của mode; xem ghi chú phạm vi trong
-`review-report.md`.
+- `mobile/test/core/database/relationship_labels_migration_test.dart` (mới, F-3)
+- `mobile/test/features/compatibility_lookup/compatibility_lookup_screen_test.dart`
+  (hunk hằng tên ảnh, F-4)
 
 ## Evidence Files In Scope
 
-- `coding-plan/test-results.md` — `## Phase Status`; P2 `### Commands Run` / `### Đối chiếu §10`; P4 toàn phần; P5/P6 `### Commands Run` / `### Files Delivered` / `### Bộ seed được ghim bằng test`
-- `visual-fidelity/visual-fidelity-report.md`
-- `visual-fidelity/10-bang-tra-an-khop.png`
-- `visual-fidelity/design-reference-10-bang-tra-an-khop-ios.png`
-- `story_master.md`
-- `requirements/requirements.md` — AC-16, AC-17, AC-35, AC-36, AC-38
-- `../req_master.md` — bảng phán quyết canvas (D-1…D-19)
+- `coding-plan/test-results.md` — `## Phase Status`; `## Lượt vá F-1..F-5 — Commands Run`;
+  `## Entry Point Reachability`; `## Story Runtime Startup Smoke`;
+  `## Phủ test đường nâng cấp v6 → v7`; `## Đổi tên ảnh visual-fidelity theo quy ước cổng`
+- `visual-fidelity/visual-fidelity-report.md` — bảng `## Screens under audit`,
+  `## Chênh lệch so với design reference`
+- `visual-fidelity/implemented-10-bang-tra-an-khop-md.png`
+- `visual-fidelity/implemented-10-bang-tra-an-khop-md-chua-co-nhan.png`
+- `visual-fidelity/runtime-entry-10-bang-tra-an-khop-emulator-5554.png`
+- `visual-fidelity/runtime-result-10-bang-tra-an-khop-emulator-5554.png`
+- `visual-fidelity/runtime-smoke-main-first-screen-emulator-5554.png`
+- `review/review-report.md` lượt 1 (baseline F-1…F-6, D-1…D-4)
+- `../req_master.md` — `## Design Ruling Log` (đọc theo dòng, không đọc toàn file 51 KB)
 
 ## Query Keys
 
-`AC-16`, `AC-17`, `AC-38`, `AC-35`, `AC-36`, `schemaVersion`, `relationship_labels`,
-`openCompatibilityLookup`, `Entry Point Reachability`, `Runtime startup smoke`,
-`VISUAL_FIDELITY`, `implemented-*.png`, `Design-Screen`
+`F-1`, `F-2`, `F-3`, `F-4`, `F-5`, `F-6`, `Entry Point Reachability`,
+`Story Runtime Startup Smoke`, `from < 7`, `relationship_labels`,
+`implemented-*.png`, `Phase Status`, `Design Ruling Log`, `STORY-010`
 
-## Touched Risk Surfaces And Critical Gates
+## Touched Risk Surfaces And Critical Gates (vòng này)
 
-| Bề mặt rủi ro | Cổng tới hạn cần kiểm |
-|---|---|
-| persistence/schema/migration (v6→v7) | test đường nâng cấp có khẳng định bảng mới |
-| typed/generated contract | `build_runner` sinh lại sạch |
-| local storage/offline | test repository + ranh giới cột bị cấm |
-| mobile interaction | test widget/hành vi màn (10) |
-| mobile navigation/discoverability | mục `Entry Point Reachability` + tự đọc mã cửa vào |
-| app lifecycle / khởi động | `## Story Runtime Startup Smoke` |
-| nội dung dạng dữ liệu (400 ô) | cổng nhập + test ghim seed, phủ 100% |
-| build/type-check | `flutter build apk --debug` |
-| design fidelity (làn mobile, 12e3) | hai ảnh thật + `VISUAL_FIDELITY` có đối chiếu cụ thể |
+| Bề mặt rủi ro | Cổng tới hạn cần kiểm | Kết quả |
+|---|---|---|
+| persistence/schema/migration (v6→v7) | test đi qua `onUpgrade`, fixture thật là v6 | PASS |
+| app lifecycle / khởi động | `## Story Runtime Startup Smoke` + ảnh màn đầu | PASS |
+| mobile navigation/discoverability | `Entry Point Reachability` + mã cửa vào (kế thừa lượt 1) | PASS |
+| design fidelity (12e3) | hai ảnh thật đúng màn + phán quyết cho các chênh lệch | CHẶN (F-6) |
 
 ## Phase 2 Approval
 
-Phase 2 được duyệt: phạm vi đủ hẹp để xác minh bằng diff cộng năm file nguồn/test
-ở trên. Không cần mở rộng sang cây `lib/` hay toàn bộ requirement.
+Phase 2 được duyệt và đã hoàn tất. Phạm vi nằm gọn trong 2 file test + 6 file bằng
+chứng ở trên; không mở rộng sang cây `lib/` hay toàn bộ requirement.
 
-Kết quả Phase 2 nằm trong `review-report.md` (một dòng verdict duy nhất ở đầu file).
+Kết luận: `Outcome` duy nhất nằm ở đầu `review-report.md`. Story không đóng được ở
+vòng này vì thiếu một đầu vào do Scrum Master/user sở hữu (dòng phán quyết thiết kế
+cho STORY-010), không phải vì làn Mobile còn việc.
