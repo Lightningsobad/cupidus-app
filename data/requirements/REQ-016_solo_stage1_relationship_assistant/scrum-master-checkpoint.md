@@ -16,7 +16,7 @@ weekly-limit-reset recovery):
 | STORY-005_conversation_starters | Alex-Mobile-Dev | DONE (P1-P4), Implementation checkbox checked, commit 5be5a4d — review dispatch BLOCKED, see note below | 5be5a4dfd667925093a33b5c54b115b1d98ace0f |
 | STORY-008_date_script_three_parts | Alex-Mobile-Dev-2 | DONE (P1-P4), commit 6818d2a2 — review dispatch BLOCKED, same GENERIC guard as STORY-005 | 6818d2a269b8e7dc78da21ba95b7bdf9f9574707 |
 | STORY-009_your_view_portrait | (released) | DONE (P1-P5), commit dc190a49 — review dispatch BLOCKED, same GENERIC guard as STORY-005/008 | dc190a4920609b283509c600d11df8ea1327b030 |
-| STORY-010_compatibility_lookup | (released) | DONE (P1-P6, all 6 phases COMPLETE), commit 8ee570cb — review dispatch BLOCKED, same GENERIC guard as STORY-005/008/009/013 | 8ee570cb4b733dbcdd96b12c425916b1dbcd22f5 |
+| STORY-010_compatibility_lookup | (released) | DONE (P1-P6, all 6 phases COMPLETE), checkbox sealed + commit 47233dac — review dispatch CONFIRMED BLOCKED round 27 (live-tested, not inferred), same GENERIC guard as STORY-005/008/009/013 | 47233dac (was 8ee570cb) |
 | STORY-012_phase_status_and_widget | Alex-Mobile-Dev-5 (idle, kept alive — not released, see round-23) | Mobile lane exhausted: P1-P5,P7,P8 all DONE/sealed (commit 812f6ed6), P6 run status WAITING_EXTERNAL (see round-25) — AC_CONFLICT_CROSS_REQUIREMENT, PO decision needed, escalated to user (see below) | 812f6ed60d8dfad2fa5658c9c0bf95617fa14fae |
 | STORY-013_graceful_exit_and_return | (released) | DONE (P1-P6, all 6 phases COMPLETE), commit 241b936d — review dispatch BLOCKED, same GENERIC guard as STORY-005/008/009 | 241b936dd2e2277732a31fcc103fab05ccc9c950 |
 
@@ -95,6 +95,38 @@ documented below literally: deleted the `completion_marker` key entirely from
 the run file (it should only reappear once a Stop event completes ALL
 remaining phases, which P6 has not). Left `status: WAITING_EXTERNAL` and all
 waiting_reason/next_resume_action/checkpoint_path fields untouched.
+
+**Round 27** (2026-09-17): Closed the one open lever from round 21 — STORY-010
+had never actually had an Iris-QC dispatch attempted (only inferred as a likely
+5th GENERIC-cohort member). Found its worktree `story_master.md` "Implementation
+(Development)" checkbox still unchecked despite `master-plan.md` showing all 6
+phases `COMPLETE`; checked it and committed in the story worktree
+(`47233dac`, story branch `codex/REQ-016_solo_stage1_relationship_assistant-STORY-010_compatibility_lookup`,
+`BaseHead` now `8ee570cb...` -> new commit `47233dac`, boundary `status:
+COMMITTED` again after `git-story-boundary.sh start` first refused on a dirty
+worktree). This checkbox gap does NOT explain the GENERIC guard (STORY-005's
+checkbox was already checked and still blocked, round 24). Re-ran
+`handoff-build.sh spawn --target reviewer --mode compact-story-review` for both
+STORY-005 (unchanged, re-confirmed) and STORY-010 (first-ever live attempt):
+both handoff blocks built cleanly, but both `Agent(name: Iris-QC, ...)` spawns
+hit the byte-identical `guard-parallel-spawn.sh [GENERIC]` block — "story-review
+blocked; no completed implementation lane with durable completion marker found
+for `<REQ>/<STORY>`". `guard-doc.sh GENERIC` again returns "section not found".
+STORY-010 is now a **confirmed** (not inferred) 5th member of the GENERIC
+cohort: STORY-005/008/009/010/013 all genuinely implementation-complete,
+committed, and review-gate-blocked by the same undocumented guard code. No
+other schedulable work exists this wave: STORY-007/011 remain BLOCKED on
+STORY-005/008 merging (which needs their reviews to pass first); STORY-012 P6
+remains BLOCKED on the round-22 `AC_CONFLICT_CROSS_REQUIREMENT` PO decision (3
+options in `phase-P6-evening-check-in.md` §8), P1-P5/P7/P8 already sealed.
+Re-ran `prune-parallel-runs.sh --apply --quiet` (quiescent) and
+`list-releasable-agents.sh` (nothing new to release beyond the already-idle
+`Alex-Mobile-Dev-5`, correctly still indexed in `paused_runs` and not printed).
+**Conclusion: this requirement cannot progress further without one of (a) a
+guard-code fix or explicit user go-ahead to bypass GENERIC for STORY-005/008/
+009/010/013 review dispatch, or (b) the user/PO's AC4 decision for STORY-012
+P6.** Both are unchanged, real, external blockers — do not re-attempt either
+without new input.
 
 **Recurring patterns to apply again without re-deriving:**
 - Reuse the SAME RunId/RunState file for every phase of a story — never
