@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cupid_mobile/core/database/cupid_database.dart';
 import 'package:cupid_mobile/core/journal/journal_media_store.dart';
+import 'package:cupid_mobile/features/chapter_closure/data/stage1_last_opened_store.dart';
 import 'package:cupid_mobile/features/chapter_closure/data/stage1_wipe_registry.dart';
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
@@ -136,7 +137,10 @@ void main() {
     );
     expect(
       Stage1WipeRegistry.preferenceKeys,
-      <String>['before_you_go.dismissed_on.'],
+      <String>[
+        'before_you_go.dismissed_on.',
+        Stage1LastOpenedStore.preferenceKey,
+      ],
     );
   });
 }

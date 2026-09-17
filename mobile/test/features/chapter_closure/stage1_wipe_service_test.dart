@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:cupid_mobile/core/database/cupid_database.dart';
 import 'package:cupid_mobile/core/journal/journal_media_store.dart';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
+import 'package:cupid_mobile/features/chapter_closure/data/stage1_last_opened_store.dart';
 import 'package:cupid_mobile/features/chapter_closure/data/stage1_wipe_registry.dart';
 import 'package:cupid_mobile/features/chapter_closure/data/stage1_wipe_service.dart';
 import 'package:cupid_mobile/features/chapter_closure/domain/chapter_closure_gate.dart';
+import 'package:cupid_mobile/features/chapter_closure/domain/return_gate_resolver.dart';
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -259,6 +261,7 @@ void main() {
       SharedPreferences.setMockInitialValues(<String, Object>{
         'before_you_go.dismissed_on.card-user-1': '2026-09-16',
         'before_you_go.dismissed_on.card-cu': '2026-01-01',
+        Stage1LastOpenedStore.preferenceKey: 1757980800000,
         'theme.selected': 'aurora',
         'auth.signed_in_before': true,
       });
@@ -329,14 +332,33 @@ void main() {
       );
     });
 
-    test('khoá tuỳ chọn của REQ-016 bị xoá, khoá tính năng khác ở lại',
+    test('khoá tuỳ chọn của REQ-016 bị xoá, khoá tính năng khác ở lại (AC-27)',
         () async {
+      final SharedPreferences before = await SharedPreferences.getInstance();
+      expect(before.getInt(Stage1LastOpenedStore.preferenceKey), isNotNull);
+
       await service.wipeAll();
 
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       expect(
         prefs.getKeys().where((String k) => k.startsWith('before_you_go.')),
         isEmpty,
+      );
+      // ignore: avoid_print
+      print(
+        'BẰNG CHỨNG khoá prefs sau wipeAll — còn lại: ${prefs.getKeys()}',
+      );
+      expect(
+        prefs.getKeys(),
+        isNot(contains(Stage1LastOpenedStore.preferenceKey)),
+      );
+      expect(
+        await Stage1LastOpenedStore().absentAtLeast(
+          kReturnAbsenceThreshold,
+          now: DateTime(2030),
+        ),
+        isFalse,
+        reason: 'không còn mốc nào, nên lần quay lại kế tiếp là cài mới',
       );
       expect(prefs.getString('theme.selected'), 'aurora');
       expect(prefs.getBool('auth.signed_in_before'), isTrue);

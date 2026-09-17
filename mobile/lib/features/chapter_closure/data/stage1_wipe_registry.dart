@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 
 import '../../../core/database/cupid_database.dart';
 import '../../../core/journal/journal_media_store.dart';
+import 'stage1_last_opened_store.dart';
 
 /// One REQ-016 table plus the predicate that selects a single owner's rows in
 /// it.
@@ -149,6 +150,7 @@ class Stage1WipeRegistry {
   /// and must survive leaving stage 1.
   static const List<String> preferenceKeys = <String>[
     'before_you_go.dismissed_on.',
+    Stage1LastOpenedStore.preferenceKey,
   ];
 
   String _ownedBy(GeneratedColumn<String> ownerColumn) =>

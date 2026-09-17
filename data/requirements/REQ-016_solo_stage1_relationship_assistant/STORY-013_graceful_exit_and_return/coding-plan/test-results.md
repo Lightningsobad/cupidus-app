@@ -339,7 +339,7 @@ Sửa:
 - `mobile/lib/core/di/service_locator.dart` — thêm đúng hai đăng ký
   `Stage1WipeRegistry` và `Stage1WipeService` (append-only, không đụng đăng ký cũ)
 
-### 3. Bằng chứng số hàng trước/sau `wipeAll()` (AC-14)
+### 3. Bằng chứng số hàng trước/sau `wipeAll()` (AC-14, AC-27)
 
 Số đếm do chính vị từ trong registry sinh ra (cùng SQL mà lệnh xoá chạy), in ra
 từ test `mọi bảng trong registry về 0 hàng cho chủ sở hữu`:
@@ -361,7 +361,7 @@ từ test `mọi bảng trong registry về 0 hàng cho chủ sở hữu`:
 Cùng phép đếm chạy cho tài khoản thứ hai (`user-2`) trên cùng máy cho kết quả
 **không đổi** trước/sau, nên phạm vi xoá đúng bằng một chủ sở hữu.
 
-### 4. Bằng chứng `existsSync()` của gốc media (AC-14)
+### 4. Bằng chứng `existsSync()` của gốc media (AC-14, AC-27)
 
 In ra từ test `gốc media biến mất khỏi đĩa, gốc của người khác thì không`:
 
@@ -416,8 +416,12 @@ bốn cặp khoá ngoại.
 |---|---|---|---|
 | AC-14 | Sau `wipeAll()` không còn hàng nào của chủ sở hữu trong mọi bảng registry | `mọi bảng trong registry về 0 hàng cho chủ sở hữu` | PASS |
 | AC-14 | Gốc media biến mất khỏi đĩa, không còn tệp mồ côi | `gốc media biến mất khỏi đĩa...`, `không còn tệp ảnh mồ côi...` | PASS |
-| AC-14 | Khoá tuỳ chọn của REQ-016 bị xoá, khoá tính năng khác ở lại | `khoá tuỳ chọn của REQ-016 bị xoá, khoá tính năng khác ở lại` | PASS |
+| AC-14 | Khoá tuỳ chọn của REQ-016 bị xoá, khoá tính năng khác ở lại | `khoá tuỳ chọn của REQ-016 bị xoá, khoá tính năng khác ở lại (AC-27)` | PASS |
 | AC-14 | `hasAnyClosure()` false và mọi đường đọc rỗng mà không ném lỗi | `hasAnyClosure về false và mọi đọc đều rỗng, không ném lỗi` | PASS |
+| AC-27 | Không dư lượng hàng: 0 hàng cho chủ sở hữu ở cả 10 bảng registry (số hàng trước/sau ở mục 3) | `mọi bảng trong registry về 0 hàng cho chủ sở hữu` | PASS |
+| AC-27 | Không file ảnh mồ côi: gốc media biến mất khỏi đĩa và `journal_media/` chỉ còn segment của tài khoản khác (mục 4) | `gốc media biến mất khỏi đĩa...`, `không còn tệp ảnh mồ côi...` | PASS |
+| AC-27 | Không dư lượng khoá prefs: mọi khoá REQ-016 — kể cả `req016.last_opened_at` do P6 tạo — không còn sau `wipeAll()` | `khoá tuỳ chọn của REQ-016 bị xoá, khoá tính năng khác ở lại (AC-27)` | PASS (vá F1, xem mục 11) |
+| AC-27 | Không hàng đợi hoàn tác/bản nháp sót: `wipeAll()` chạy hai lần liên tiếp vẫn im lặng và vẫn rỗng | `xoá hai lần liên tiếp vẫn im lặng và vẫn rỗng` | PASS |
 | AC-15 | Vật liệu đã đóng biến mất thật, vật liệu giữ lại còn nguyên từng id | 3 test trong nhóm `purgeClosed ...` (mục 5) | PASS |
 | AC-29 | Không đi qua `clearOnSignOut()`; phiên đăng nhập sống sót | `phiên đăng nhập sống sót: vẫn ghi được ngay sau khi xoá (AC-29)` — `messages` (bộ đệm do đăng xuất sở hữu) còn nguyên, `resolve()` vẫn trả chủ sở hữu, ghi mới thành công | PASS |
 | AC-8, BR-6 | Hồ sơ kỹ năng và nhật ký riêng không bị purge chạm vào | `hồ sơ kỹ năng và nhật ký riêng không bao giờ bị purge chạm vào` | PASS |
@@ -445,6 +449,8 @@ NOT_APPLICABLE — P3 không dựng hay đổi màn hình nào (đúng như `pha
 3. **`req016.last_opened_at` chưa có trong `preferenceKeys`.** Khoá đó do P6 tạo;
    ở BaseHead `5b08a16a` chưa có mã nào trong `lib/` viết khoá đó. P6 phải thêm
    nó vào registry khi tạo.
+   → ĐÃ XỬ LÝ ở vòng vá F1 (mục 11): khoá đã nằm trong `preferenceKeys` và có
+   khẳng định test rằng nó không còn sau `wipeAll()`.
 4. **`activity_card_photos` được xoá hàng nhưng không xoá tệp.** `localPath` trỏ
    tới đường dẫn mà app này chưa từng sao chép vào thư mục của riêng nó, nên xoá
    tệp sẽ với ra ngoài vùng dữ liệu của app và phá ảnh gốc của người dùng. Gốc
@@ -458,6 +464,57 @@ NOT_APPLICABLE — P3 không dựng hay đổi màn hình nào (đúng như `pha
 `chat shows the shared sky wash` (`pumpAndSettle` timed out). Đã ghi ở P1 mục 6
 và P2 mục 8. Không nằm trong các thư mục mà lệnh 3 chạy nên không xuất hiện
 trong lần chạy này; vẫn là lỗi có sẵn, ngoài write scope P3.
+
+### 11. Vòng vá sau review — F1 (`req016.last_opened_at`, AC-27)
+
+Ngày chạy: 2026-09-17, sau `review/review-report.md` `Outcome: PATCH_REQUIRED`.
+Vá ở đây chứ không ở P6 vì `stage1_wipe_registry.dart` là tệp do P3 sở hữu;
+lý do "write scope của phase" mà P6 viện ra là lý do cấp phase, không phải cấp
+story (đúng như F1 lập luận).
+
+Sửa:
+
+- `mobile/lib/features/chapter_closure/data/stage1_wipe_registry.dart` —
+  `preferenceKeys` thêm `Stage1LastOpenedStore.preferenceKey`. Dùng chính hằng
+  của store thay vì gõ lại chuỗi `'req016.last_opened_at'`, nên đổi tên khoá sẽ
+  đi kèm registry thay vì âm thầm để lại dư lượng.
+- `mobile/test/features/chapter_closure/stage1_wipe_service_test.dart` — test
+  `khoá tuỳ chọn của REQ-016 bị xoá, khoá tính năng khác ở lại (AC-27)` nay gieo
+  khoá đó trong `setMockInitialValues`, khẳng định nó **có mặt trước** `wipeAll()`
+  (nếu không, phép phủ định sau đó là vô nghĩa), và sau `wipeAll()` khẳng định ba
+  điều: khoá không còn trong `prefs.getKeys()`, `Stage1LastOpenedStore
+  .absentAtLeast(kReturnAbsenceThreshold, now: DateTime(2030))` trả `false`
+  (không còn mốc nào → lần quay lại kế tiếp là cài mới, không phải "vắng 30 ngày"),
+  và `theme.selected` / `auth.signed_in_before` của tính năng khác vẫn còn.
+- `mobile/test/features/chapter_closure/stage1_wipe_registry_parity_test.dart` —
+  khẳng định danh sách `preferenceKeys` cập nhật theo, giữ tripwire không rỗng
+  nghĩa.
+
+Bằng chứng in ra từ test (`BẰNG CHỨNG khoá prefs sau wipeAll`):
+`{theme.selected, auth.signed_in_before}` — đúng hai khoá của tính năng khác,
+không còn khoá REQ-016 nào.
+
+Lưu ý phạm vi tripwire: parity test chỉ đối chiếu `tables` với
+`CupidDatabase.allTables`, nên nó **không** thể bắt thiếu sót ở `preferenceKeys`
+(đó là lý do F1 lọt qua P3..P6). Khẳng định danh sách khoá ở trên là phần bù thủ
+công cho khoảng trống đó.
+
+| # | Lệnh | Kết quả |
+|---|---|---|
+| 1 | `flutter test test/features/chapter_closure/stage1_wipe_registry_parity_test.dart` | `00:02 +6: All tests passed!` |
+| 2 | `flutter test test/features/chapter_closure/stage1_wipe_service_test.dart` | `00:00 +16: All tests passed!` |
+| 3 | `flutter test test/features/chapter_closure` | `00:07 +81 ~1: All tests passed!` |
+| 4 | `flutter analyze lib/features/chapter_closure test/features/chapter_closure` | `15 issues found` — 0 error, 0 warning, 0 info mới |
+| 5 | `flutter build apk --debug --flavor local` | `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk` (exit 0) |
+
+Lệnh 4: cả 15 issue đều là `info • prefer_initializing_formals` có sẵn trên
+constructor của `chapter_closure_service` / `stage1_wipe_registry` /
+`stage1_wipe_service` / `return_gate_resolver`; không issue nào rơi vào dòng mới.
+Nền analyze của repo không bao giờ exit 0 (xem P6 mục 1).
+
+Nhãn AC-27: mục 3, mục 4 và bảng AC coverage mục 7 đã gắn lại đúng AC-27 cho
+bằng chứng dư lượng đã có sẵn (F3 phần AC-27). AC-13, AC-31, AC-32 của F3 vẫn là
+DEFERRED, không thuộc vá này.
 
 ## Phase P4 — Lối vào đóng ngăn và hộp thoại xác nhận
 
@@ -834,6 +891,12 @@ tệp đó nằm ngoài write scope của phase, và mốc mở app được là
 splash của chính lần chạy đó, nên sau khi xoá sạch J13 không thể hiện lại. Ghi
 lại ở đây để reviewer quyết định có muốn gom khoá này vào registry ở một phase
 sau hay không.
+
+→ **Quyết định đã lật: reviewer chặn (F1).** Lý do write scope là lý do cấp
+phase, không phải cấp story, và AC-27 nói về dư lượng trên thiết bị chứ không
+nói về hành vi màn hình, nên lập luận "splash làm mới mốc ngay" không gỡ được
+AC-27. Khoá đã được thêm vào `preferenceKeys` cùng test khẳng định — xem mục 11
+của phase P3.
 
 ### 8. AC coverage
 
