@@ -84,6 +84,18 @@ review-gate block for STORY-005/008/009/010/013 is unrelated and still
 unresolved (guard-doc.sh GENERIC: section not found; re-verified live twice
 this session with clean completion markers).
 
+**Round 26** (2026-09-17): The `OPEN_RUNS` block text changed after round-25's
+status fix — it now names the run `WAITING_EXTERNAL` explicitly and adds a new
+reason: "completion_marker present but run status is still parked". This is
+new, useful signal (the guard IS reading the corrected status; the remaining
+conflict is the stale `completion_marker: MOBILE_IMPLEMENTATION_COMPLETE`
+field left over from sealing P8, contradicting a run that is honestly still
+parked because P6 is not done). Applied the "Recurring patterns" rule already
+documented below literally: deleted the `completion_marker` key entirely from
+the run file (it should only reappear once a Stop event completes ALL
+remaining phases, which P6 has not). Left `status: WAITING_EXTERNAL` and all
+waiting_reason/next_resume_action/checkpoint_path fields untouched.
+
 **Recurring patterns to apply again without re-deriving:**
 - Reuse the SAME RunId/RunState file for every phase of a story — never
   invent a new RunId for a `SendMessage` continuation.
