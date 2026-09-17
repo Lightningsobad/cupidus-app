@@ -7,6 +7,7 @@ import '../../../../design_system/tokens/cupid_color_tokens.dart';
 import '../../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../../design_system/tokens/cupid_spacing.dart';
 import '../../../../design_system/tokens/cupid_typography_tokens.dart';
+import '../../../conversation_starters/conversation_starters_entry_point.dart';
 import '../../../gift_ideas/gift_ideas_entry_point.dart';
 import '../../domain/activity_card.dart';
 import '../../domain/activity_card_repository.dart';
@@ -234,17 +235,21 @@ Future<void> _openQuickEntryCell(
   ActivityCardListCubit cubit,
   QuickEntryCell cell,
 ) async {
-  if (cell != QuickEntryCell.giftIdeas) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        key: const Key('activity_quick_entry_coming_soon'),
-        content: Text(activityHubText(context, 'Sắp có', 'Coming soon')),
-      ),
-    );
-    return;
+  switch (cell) {
+    case QuickEntryCell.giftIdeas:
+      await openGiftIdeasScreen(context);
+    case QuickEntryCell.conversationStarters:
+      await openConversationStartersScreen(context);
+    case QuickEntryCell.zodiacShell:
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          key: const Key('activity_quick_entry_coming_soon'),
+          content: Text(activityHubText(context, 'Sắp có', 'Coming soon')),
+        ),
+      );
+      return;
   }
 
-  await openGiftIdeasScreen(context);
   if (cubit.isClosed) {
     return;
   }

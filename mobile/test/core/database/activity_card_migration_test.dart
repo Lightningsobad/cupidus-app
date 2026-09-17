@@ -69,7 +69,7 @@ void main() {
       final expenses = await upgraded.select(upgraded.expenses).get();
       final timeline = await upgraded.select(upgraded.timelineEntries).get();
 
-      expect(await readUserVersion(upgraded), 6);
+      expect(await readUserVersion(upgraded), 7);
       expect(expenses.single.description, 'cache row written under v2');
       expect(timeline.single.title, 'cache row written under v1');
     });
@@ -201,7 +201,7 @@ void main() {
           .get();
       final names = columns.map((row) => row.read<String>('name')).toSet();
 
-      expect(await readUserVersion(upgraded), 6);
+      expect(await readUserVersion(upgraded), 7);
       expect(
         names,
         containsAll(<String>[

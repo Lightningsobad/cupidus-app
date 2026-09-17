@@ -175,7 +175,7 @@ void main() {
       // `location` + `invite_messages`, and 5 -> 6 for the context-notebook
       // tables, never for this converter: attaching it to an existing TEXT
       // column emits no DDL.
-      expect(database.schemaVersion, 6);
+      expect(database.schemaVersion, 7);
       final GeneratedColumn<Object> column = database.activityCards.$columns
           .firstWhere((GeneratedColumn<Object> c) => c.name == 'activity_type');
       expect(column.type, DriftSqlType.string);
