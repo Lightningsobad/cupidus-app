@@ -1,6 +1,59 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-## CURRENT (read this first) — refreshed 2026-09-17 after full state reconciliation
+## CURRENT (read this first) — refreshed 2026-09-17 round 32 (this segment)
+
+Verified/updated this round (3-part protocol applied):
+
+- **STORY-013**: reviewer `Iris-QC-2` (`completion/resume`) COMPLETED —
+  verified the already-applied F1 fix (`req016.last_opened_at` added to
+  `Stage1WipeRegistry`, commit `e80eb387`) with no remaining blockers.
+  `Outcome: DEFERRED_ONLY`. Committed the reviewer's report update in the
+  story worktree (`6aa2f84b`). Story is **review-passed and merge-eligible**,
+  but `git-story-boundary.sh merge` for STORY-013 was attempted and rejected:
+  the REQ-016 integration worktree is still mid-merge
+  (`MERGE_HEAD b5750ae4...`) from the pre-existing STORY-010 conflict (see
+  Immediate blocker below). STORY-013's own `story_master.md` still reads
+  `Status: TODO` — do NOT try to set `Status: DONE` there directly;
+  `guard-story-done-evidence.sh` (`DONE_WITHOUT_VISUAL_EVIDENCE`) rejected a
+  direct edit in the pre-merge story worktree even though all 3
+  design-reference/implemented PNG pairs exist — DONE-marking for a merged
+  story happens on the **integration worktree's copy** post-merge (confirmed
+  pattern from STORY-004's integration copy: `Status: DONE` there,
+  `Status: TODO` still in its own abandoned story worktree). STORY-013 DONE
+  marking is deferred until it can actually merge.
+- **STORY-012**: reviewer final-synthesis (`Iris-QC`) COMPLETED earlier this
+  session — `Outcome: PATCH_REQUIRED` (C-1 10 install/visual deltas
+  BLOCKING-FOR-DONE, C-2 D-6/D-10 need Scrum Master/PO decision, C-3 iOS
+  `Info.plist` missing `CFBundleURLTypes`). Committed (`322c4276`), boundary
+  `base_head` refreshed, and dispatched `Alex-Mobile-Dev-2`
+  (`mobile-implementation`, `RUN-...STORY-012...mobile-dev`, spawn_slot
+  `mobile-dev-3`) to patch **C-1 + C-3 only** (C-2 excluded — needs the
+  Scrum Master/PO decision below). **Still ACTIVE** as of this round;
+  reconcile via SubagentStop, do not re-dispatch.
+- **STORY-008**: `Alex-Mobile-Dev` mobile-verification run (`RUN-...
+  STORY-008...mobile-dev`, spawn_slot `mobile-dev-1`) **still ACTIVE**;
+  reconcile via SubagentStop, do not re-dispatch.
+- **STORY-005**: worktree confirmed to still exist
+  (`story-REQ-016_solo_stage1_relationship_assistant-STORY-005_conversation_starters`)
+  and its own `.ai-team-bundle/tooling/playwright/node_modules` is non-empty
+  (visual-runtime tooling present in that worktree). However STORY-005 is
+  already **merged into integration** — the actionable copy is the
+  integration worktree's `STORY-005_conversation_starters/visual-fidelity/`,
+  which has only `implemented-6-moi-chuyen-a-a-material.png`, no
+  `design-reference-*.png` (confirmed `VISUAL_RUNTIME_MISSING` is real, not
+  stale). **The integration worktree cannot be touched right now** — it is
+  mid-merge (`MERGE_HEAD` set) for the unrelated STORY-010 conflict. No
+  dispatch made for STORY-005 this round; next actor must wait for the
+  STORY-010 merge to clear before working the integration copy, or produce
+  the design-reference PNGs in STORY-005's own worktree and remerge later.
+- Released idle reviewer agents this round via
+  `list-releasable-agents.sh` + `TaskStop`: `Iris-QC-2@session-8177545a`,
+  `Iris-QC@session-8177545a`.
+- STORY-007 and STORY-011 have **no worktree yet** (never started) — both
+  depend on STORY-005 (not DONE) and, for STORY-011, STORY-008 (still
+  ACTIVE). Not ready to dispatch this round.
+
+### Prior round narrative (2026-09-17, full state reconciliation) — still authoritative for what it covers below
 
 Round-31 checkpoint below this section was STALE: it described dispatches
 (`Iris-QC`, `Iris-QC-2`, `Alex-Mobile-Dev-3`) that no longer exist as active
