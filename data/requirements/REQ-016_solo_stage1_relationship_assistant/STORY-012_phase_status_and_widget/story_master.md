@@ -9,6 +9,9 @@ Screen: Trạng thái đặc biệt của màn (1) + widget màn hình chính h�
 Không phải màn hình thứ 12.
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục A (J4, J5,
 J10, J12), B (Ngày 7, Ngày 30), F (SB-83/84/85, SB-87, SB-99)
+Design-Surface: cupid-ch-ng-1
+Design-Screen: hub-waiting, hub-upcoming, hub-date_day, hub-quiet,
+  evening-check-in-sheet, quiet-surfaces, widget-phases
 
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
