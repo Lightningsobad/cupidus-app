@@ -42,6 +42,26 @@ line (round 12) was found to also render on already-merged STORY-002's
 card-detail screen, invalidating 2 of STORY-002's captured visual-fidelity
 PNGs — regen those at STORY-012/integration merge time, not now.
 
+**Round 24** (2026-09-17): 5th consecutive identical `guard-open-parallel-runs-on-stop.sh
+[OPEN_RUNS]` Stop block for the STORY-012 run (still `BLOCKED`), despite the
+block's own remedy already applied (durable `waiting_reason`/`next_resume_action`,
+fully unindexed from `active_runs`/`blocked_runs`). Its own `next:` text said
+"dispatch every ready sibling NOW", so re-tested the GENERIC review-gate block
+against FRESH state before re-classifying: ruled out the "malformed completion_marker"
+theory by confirming both STORY-005 (`completion_marker: "MOBILE_IMPLEMENTATION_COMPLETE: YES"`)
+and STORY-008 (`completion_marker: "MOBILE_IMPLEMENTATION_COMPLETE"`, clean string,
+`status: COMPLETED`) still hit the byte-identical `guard-parallel-spawn.sh [GENERIC]`
+block ("no completed implementation lane with durable completion marker found").
+`.claude/hooks/guard-doc.sh GENERIC` confirms `section not found` — no documented
+remedy exists for this code. Checked `.parallel-spawn-input.*` temp files for a
+diagnostic payload from the live attempt: none was left (only one stale unrelated
+file from 2026-07-31, REQ-001/STORY-016). Confirmed: no ready sibling is actually
+dispatchable right now (STORY-012 P6 = PO decision pending; STORY-005/008/009/010/013
+review = undocumented GENERIC block). Both guards (`OPEN_RUNS` and `GENERIC`)
+re-classified `GUARD_FEEDBACK_INSUFFICIENT` on fresh evidence, not stale
+assumption. No further blind retries without a guard-code fix or explicit user
+decision on the AC4 conflict.
+
 **Recurring patterns to apply again without re-deriving:**
 - Reuse the SAME RunId/RunState file for every phase of a story — never
   invent a new RunId for a `SendMessage` continuation.
