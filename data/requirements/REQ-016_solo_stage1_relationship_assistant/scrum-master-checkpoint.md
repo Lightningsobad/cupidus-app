@@ -17,7 +17,7 @@ weekly-limit-reset recovery):
 | STORY-008_date_script_three_parts | Alex-Mobile-Dev-2 | DONE (P1-P4), commit 6818d2a2 — review dispatch BLOCKED, same GENERIC guard as STORY-005 | 6818d2a269b8e7dc78da21ba95b7bdf9f9574707 |
 | STORY-009_your_view_portrait | (released) | DONE (P1-P5), commit dc190a49 — review dispatch BLOCKED, same GENERIC guard as STORY-005/008 | dc190a4920609b283509c600d11df8ea1327b030 |
 | STORY-010_compatibility_lookup | (released) | DONE (P1-P6, all 6 phases COMPLETE), commit 8ee570cb — review dispatch BLOCKED, same GENERIC guard as STORY-005/008/009/013 | 8ee570cb4b733dbcdd96b12c425916b1dbcd22f5 |
-| STORY-012_phase_status_and_widget | Alex-Mobile-Dev-5 (idle, kept alive — not released, see round-23) | Mobile lane exhausted: P1-P5,P7,P8 all DONE/sealed (commit 812f6ed6), P6 sealed BLOCKED — AC_CONFLICT_CROSS_REQUIREMENT, PO decision needed, escalated to user (see below) | 812f6ed60d8dfad2fa5658c9c0bf95617fa14fae |
+| STORY-012_phase_status_and_widget | Alex-Mobile-Dev-5 (idle, kept alive — not released, see round-23) | Mobile lane exhausted: P1-P5,P7,P8 all DONE/sealed (commit 812f6ed6), P6 run status WAITING_EXTERNAL (see round-25) — AC_CONFLICT_CROSS_REQUIREMENT, PO decision needed, escalated to user (see below) | 812f6ed60d8dfad2fa5658c9c0bf95617fa14fae |
 | STORY-013_graceful_exit_and_return | (released) | DONE (P1-P6, all 6 phases COMPLETE), commit 241b936d — review dispatch BLOCKED, same GENERIC guard as STORY-005/008/009 | 241b936dd2e2277732a31fcc103fab05ccc9c950 |
 
 Rounds 11-19 (2026-09-17), via repeated `guard-open-parallel-runs-on-stop.sh
@@ -61,6 +61,28 @@ review = undocumented GENERIC block). Both guards (`OPEN_RUNS` and `GENERIC`)
 re-classified `GUARD_FEEDBACK_INSUFFICIENT` on fresh evidence, not stale
 assumption. No further blind retries without a guard-code fix or explicit user
 decision on the AC4 conflict.
+
+**Round 25** (2026-09-17): Found the actual fix in
+`.agent-contract/parallel-execution-policy.md` lines 259-263 (Runtime State
+section) — `BLOCKED` and `ESCALATED` run statuses are explicitly documented as
+"not capacity-consuming... but Stop/status flows must report them until Scrum
+Master routes rework, escalates them to a durable backlog artifact, or
+intentionally parks them as `PAUSED` or `WAITING_EXTERNAL`". Lines 230-235 and
+245-252 confirm only `PAUSED`/`WAITING_EXTERNAL` (with `waiting_reason` +
+`checkpoint_path` + `next_resume_action`, exactly what round-23 already added)
+are the sanctioned park states the Stop hook can honor for a durable external
+reason such as human input — `BLOCKED` was never going to satisfy `OPEN_RUNS`
+no matter what metadata it carried. Fixed: changed the STORY-012 mobile-dev
+run file's `status` from `BLOCKED` to `WAITING_EXTERNAL` (same durable
+`waiting_reason`/`next_resume_action`/`checkpoint_path` fields kept), and
+re-added the run id to `parallel-scheduler.json.paused_runs` (removed from
+`active_runs`/`blocked_runs`, matching "PAUSED and WAITING_EXTERNAL do not
+consume capacity" but "must remain visible in the scheduler"). If this
+resolves `OPEN_RUNS`, apply the same status correction to any future
+externally-blocked run instead of leaving it as bare `BLOCKED`. The GENERIC
+review-gate block for STORY-005/008/009/010/013 is unrelated and still
+unresolved (guard-doc.sh GENERIC: section not found; re-verified live twice
+this session with clean completion markers).
 
 **Recurring patterns to apply again without re-deriving:**
 - Reuse the SAME RunId/RunState file for every phase of a story — never
