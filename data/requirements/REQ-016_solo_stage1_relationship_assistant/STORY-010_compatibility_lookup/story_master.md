@@ -20,7 +20,8 @@ F (3f); `req_master.md` R-7, R-8, R-13
   `architecture/contract-summary.md`
 - [x] Coding Plan (Tech Lead) — `coding-plan/master-plan.md`,
   `coding-plan/coding-agent-guide.md`, sáu file phase P1–P6
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — mobile-dev P1-P6 complete per
+  `coding-plan/master-plan.md` Phases Overview (all Status: COMPLETE)
 - [ ] Review (Reviewer)
 
 ## Depends On
