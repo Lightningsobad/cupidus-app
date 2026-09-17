@@ -1,58 +1,56 @@
-# Scope Gate — REQ-016 / STORY-010 Bảng tra ăn khớp (lượt 2, patch re-review)
+# Scope Gate — REQ-016 / STORY-010 Bảng tra ăn khớp
 
 Phase: SCOPE_GATE
 SCOPE_GATE_COMPLETE: YES
 
-Review type: compact-story-review (patch re-review của F-1…F-5)
-Review report path: `data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-010_compatibility_lookup/review/review-report.md`
+- Review type: `completion/resume` trên `compact-story-review` — **lượt 3**
+- Lane: mobile · Story-Class: standard
+- BaseHead lượt này: `1651702fa5f39eb82fd4aa4d87e89eb570dafeb8`
+- Lượt trước: `b58afbe0` (PATCH_REQUIRED), `aaa2021a` (BLOCKED trên F-6)
+- Report path:
+  `data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-010_compatibility_lookup/review/review-report.md`
 
-Diff của vòng này: `git -C <worktree> diff 47233dac aaa2021a` — 12 file
-(1 file test mới, 1 file test sửa tên hằng, `test-results.md` +193 dòng,
-`visual-fidelity-report.md` +7/-2, 5 PNG thêm/đổi tên, review artifacts của
-lượt 1). **Không file `lib/` nào.** Vì vậy các bề mặt đã PASS ở lượt 1 không
-được kiểm lại — đúng chỉ dẫn của handoff.
+## Phạm vi lượt này
 
-## Source/Test Files In Scope
+Đúng bằng phần handoff nêu: diff `aaa2021a → 1651702f`, cộng hai file bằng chứng
+đang sửa trong working tree. Các bề mặt đã PASS ở lượt 1/2 không mở lại.
 
-- `mobile/test/core/database/relationship_labels_migration_test.dart` (mới, F-3)
-- `mobile/test/features/compatibility_lookup/compatibility_lookup_screen_test.dart`
-  (hunk hằng tên ảnh, F-4)
+**Source/Test**
+- `mobile/lib/features/compatibility_lookup/presentation/widgets/compat_facet_block.dart`
+- `mobile/lib/features/compatibility_lookup/presentation/widgets/compat_activity_block.dart`
+- `mobile/test/features/compatibility_lookup/compat_result_widgets_test.dart`
 
-## Evidence Files In Scope
+**Evidence**
+- `visual-fidelity/visual-fidelity-report.md` (bản dựng lại, chưa commit)
+- `visual-fidelity/implemented-10-bang-tra-an-khop-md.png` (chụp lại, chưa commit)
+- `visual-fidelity/design-reference-10-bang-tra-an-khop-ios.png`
+- `coding-plan/test-results.md` §"Vá F-6 mục 5 và mục 6"
+- `coding-plan/master-plan.md` bảng Phases Overview
+- `ux/uiux-spec.md` §3.2/§3.3/§3.4 — **chỉ phần diff**
+- `../req_master.md` `## Design Ruling Log` — đọc ở **control checkout**, nơi có
+  bốn dòng phán quyết STORY-010 ngày 2026-09-17; bản trong worktree đang cũ
+- `requirements/requirements.md` AC-33 và `../req_master.md` R-7 — chỉ tra
+  nguyên văn theo dòng để kiểm một luật bị bản vá spec chạm tới
 
-- `coding-plan/test-results.md` — `## Phase Status`; `## Lượt vá F-1..F-5 — Commands Run`;
-  `## Entry Point Reachability`; `## Story Runtime Startup Smoke`;
-  `## Phủ test đường nâng cấp v6 → v7`; `## Đổi tên ảnh visual-fidelity theo quy ước cổng`
-- `visual-fidelity/visual-fidelity-report.md` — bảng `## Screens under audit`,
-  `## Chênh lệch so với design reference`
-- `visual-fidelity/implemented-10-bang-tra-an-khop-md.png`
-- `visual-fidelity/implemented-10-bang-tra-an-khop-md-chua-co-nhan.png`
-- `visual-fidelity/runtime-entry-10-bang-tra-an-khop-emulator-5554.png`
-- `visual-fidelity/runtime-result-10-bang-tra-an-khop-emulator-5554.png`
-- `visual-fidelity/runtime-smoke-main-first-screen-emulator-5554.png`
-- `review/review-report.md` lượt 1 (baseline F-1…F-6, D-1…D-4)
-- `../req_master.md` — `## Design Ruling Log` (đọc theo dòng, không đọc toàn file 51 KB)
+**Không đọc lại** (theo `Do Not Re-read` của handoff): `ux/uiux-spec.md` toàn
+phần, `coding-plan/master-plan.md` ngoài bảng trạng thái, `architecture/solution.md`,
+`architecture/contract-summary.md`, `requirements/requirements.md` toàn phần.
 
-## Query Keys
+**Query keys**
+`F-6`, `mục 5`, `mục 6`, `caption`, `toUpperCase`, `Semantics`, `44`,
+`_minTapTarget`, `BoxShape.circle`, `Design Ruling Log`, `R-7`, `AC-33`,
+`VISUAL_FIDELITY`
 
-`F-1`, `F-2`, `F-3`, `F-4`, `F-5`, `F-6`, `Entry Point Reachability`,
-`Story Runtime Startup Smoke`, `from < 7`, `relationship_labels`,
-`implemented-*.png`, `Phase Status`, `Design Ruling Log`, `STORY-010`
+## Bề mặt rủi ro được xét lượt này
 
-## Touched Risk Surfaces And Critical Gates (vòng này)
-
-| Bề mặt rủi ro | Cổng tới hạn cần kiểm | Kết quả |
+| Bề mặt rủi ro | Cổng tới hạn | Có bị lượt này chạm không |
 |---|---|---|
-| persistence/schema/migration (v6→v7) | test đi qua `onUpgrade`, fixture thật là v6 | PASS |
-| app lifecycle / khởi động | `## Story Runtime Startup Smoke` + ảnh màn đầu | PASS |
-| mobile navigation/discoverability | `Entry Point Reachability` + mã cửa vào (kế thừa lượt 1) | PASS |
-| design fidelity (12e3) | hai ảnh thật đúng màn + phán quyết cho các chênh lệch | CHẶN (F-6) |
+| design fidelity (làn mobile, SKILL 12e3) | hai ảnh thật + `VISUAL_FIDELITY: PASS` có đối chiếu, mọi chênh lệch đã đóng bằng phán quyết đúng thẩm quyền | **CÓ** — đây là lý do lượt 2 trả BLOCKED |
+| mobile interaction / trợ năng | test widget khoá hình dạng, vùng chạm ≥44x44, nhãn `Semantics` | **CÓ** — affordance `(+)` đổi kiểu |
+| nội dung dạng dữ liệu (chuỗi l10n) | IN HOA nằm ở tầng glyph, chuỗi nguồn không đổi | **CÓ** — kiểm để trình đọc màn hình không đánh vần |
+| mobile navigation · app lifecycle · persistence/migration · typed contract · local storage/offline · build/type-check | đã PASS ở lượt 1/2 | Không |
 
-## Phase 2 Approval
+## Phê duyệt Phase 2
 
-Phase 2 được duyệt và đã hoàn tất. Phạm vi nằm gọn trong 2 file test + 6 file bằng
-chứng ở trên; không mở rộng sang cây `lib/` hay toàn bộ requirement.
-
-Kết luận: `Outcome` duy nhất nằm ở đầu `review-report.md`. Story không đóng được ở
-vòng này vì thiếu một đầu vào do Scrum Master/user sở hữu (dòng phán quyết thiết kế
-cho STORY-010), không phải vì làn Mobile còn việc.
+Phạm vi trên đủ để kết luận F-6 mà không mở rộng ra ngoài handoff. Chuyển sang
+Phase 2 (đọc mã, mở ảnh, đối chiếu phán quyết, chốt `Outcome:`).

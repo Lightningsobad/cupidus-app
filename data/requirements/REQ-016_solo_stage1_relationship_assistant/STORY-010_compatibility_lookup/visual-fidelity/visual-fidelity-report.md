@@ -61,6 +61,13 @@ Regular.otf` của framework nạp qua `FontLoader`.
 
 Đã soi mắt cả hai ảnh: chữ tiếng Việt đủ dấu, không ô tofu, icon hiện đúng.
 
+`implemented-10-bang-tra-an-khop-md.png` đã được **chụp lại ở SHA `1651702f`**
+sau khi vá F-6 mục 5/6, nên ảnh bằng chứng khớp với mã hiện tại chứ không còn
+mô tả bản dựng cũ. Soi mắt lại bản mới: tiêu đề hiện đúng "CHỖ DỄ HỢP"/"CHỖ DỄ
+VA" đủ dấu (Ỗ, Ễ không bị rơi), nút hoạt động là vòng tròn viền tím có dấu `+`,
+không còn chữ trong chip. Ảnh `…-chua-co-nhan.png` không đổi byte nào — đúng
+như mong đợi, vì trạng thái thiếu nhãn không dựng khối kết quả nào.
+
 ## Đối chiếu từng luật đo được (`ux/uiux-spec.md` §3)
 
 | Luật | AC | Kết quả |
@@ -68,8 +75,8 @@ Regular.otf` của framework nạp qua `FontLoader`.
 | DẢI là **một chip nhãn văn bản tĩnh**, cấm thanh/vòng/gradient/sao | AC-16/AC-17 | PASS — pill "Khác nhịp, bù nhau", nền đặc một màu, không có thành phần nào trả lời được "đầy bao nhiêu phần" |
 | Thứ tự cố định: DẢI → Chỗ dễ hợp → Chỗ dễ va → 1 hoạt động nên thử → 1 câu để hỏi | AC-19 | PASS — đúng thứ tự trong ảnh |
 | "Chỗ dễ va" ngay sau "Chỗ dễ hợp", cùng container/cỡ chữ/độ đậm/bề rộng, khác **chỉ** ở icon | R-7 | PASS — hai khối đối xứng thị giác, cùng `--r-sm` full-width, khác icon đầu tiêu đề |
-| "Chỗ dễ va" không bị gập accordion, không thu xuống caption, không tô nhạt | R-7 | PASS |
-| Hành động phụ "Thêm vào kho của tôi" là outline chip, không tô đặc `--grad` | §3.4 | PASS |
+| "Chỗ dễ va" không bị gập accordion, không tô nhạt, và tiêu đề/đoạn văn của nó không nhỏ hơn khối "hợp" | R-7 | PASS — từ SHA `1651702f` hai khối dùng **chung** một kiểu tiêu đề `caption` IN HOA; luật bị cấm là lệch nhau, không phải bản thân cỡ `caption` (spec §3.3 đã vá cùng lượt) |
+| Hành động phụ "Thêm vào kho của tôi" là nút outline, không tô đặc `--grad`, và có tên trợ năng | §3.4 | PASS — từ SHA `1651702f` là nút tròn `(+)` chỉ-icon, viền outline, vùng chạm 44x44, nhãn `Semantics` giữ nguyên chuỗi đầy đủ |
 | "1 câu để hỏi" khác tông, nền tách lớp, icon `help_outline` | AC-19 | PASS |
 | Dòng xuất xứ "Dựa trên nhãn bạn đã nhập: …" ở đầu kết quả, kiểu STORY-009 §3 | — | PASS |
 | Nhãn "đoán": icon nhỏ + chữ "bạn đang đoán", không đậm như trường đã xác nhận | AC-8 | PASS |
@@ -101,12 +108,20 @@ Regular.otf` của framework nạp qua `FontLoader`.
    đề tĩnh "Bảng tra ăn khớp" cộng dòng xuất xứ. Lý do: AC-11 cho phép hai hệ
    nhãn cùng ra kết quả trong một màn, nên "tên cặp" không xác định được; dòng
    xuất xứ của spec §3.1 mang đúng thông tin đó cho từng hệ.
-5. **Kiểu tiêu đề khối**: canvas dùng caption in hoa ("CHỖ DỄ HỢP"); bản dựng
-   dùng tiêu đề phụ `600` sentence case theo spec §3.2/§3.3. Chênh lệch kiểu
-   chữ thuần tuý, cả hai khối "hợp"/"va" vẫn đối xứng tuyệt đối với nhau.
-6. **Hành động "1 hoạt động nên thử"**: canvas là nút `(+)` tròn icon-only; bản
-   dựng là outline chip có chữ theo spec §3.4 ("text button/outline chip, body
-   17pt/400"). Chip có chữ cũng dễ chạm và dễ đọc hơn icon-only.
+5. **Kiểu tiêu đề khối** — ĐÃ GIẢI QUYẾT ở SHA `1651702f`, không còn chênh
+   lệch. Phán quyết F-6 mục 5 trong Design Ruling Log của `req_master.md` là
+   "Theo DESIGN (chữ IN HOA)", nên `compat_facet_block.dart` đổi `titleStyle`
+   sang token `type.caption` và hiển thị `.toUpperCase()`; `ux/uiux-spec.md`
+   §3.2/§3.3 đã vá theo. Chuỗi nguồn l10n giữ nguyên sentence case và vẫn là
+   nhãn trợ năng, nên IN HOA chỉ nằm ở tầng glyph. Vì cả hai mặt dùng chung
+   một widget, đối xứng "hợp"/"va" không thể lệch qua đường này.
+6. **Hành động "1 hoạt động nên thử"** — ĐÃ GIẢI QUYẾT ở SHA `1651702f`, không
+   còn chênh lệch. Phán quyết F-6 mục 6 là "Theo DESIGN (nút tròn icon-only)",
+   nên `compat_activity_block.dart` bỏ chữ và decoration pill, dựng nút tròn
+   `(+)` chỉ-icon; `ux/uiux-spec.md` §3.4 đã vá theo. Điều kiện trợ năng mà
+   phán quyết kèm theo được giữ bằng vùng chạm 44x44 và
+   `Semantics(button: true, label: compat_add_to_my_store_action)`, nên nút vẫn
+   có tên đọc được dù không còn chữ hiển thị.
 7. **Thẻ nhập nhãn**: canvas chỉ vẽ trạng thái đã đủ nhãn nên không có chúng;
    bản dựng đặt chúng **dưới** kết quả theo spec §2 (hỏi-tại-chỗ khi thiếu
    nhãn) và AC-9 (sửa/xoá tại chỗ).

@@ -1,147 +1,170 @@
 # Review Report — REQ-016 / STORY-010 Bảng tra ăn khớp
 
-Outcome: BLOCKED
+Outcome: DEFERRED_ONLY
 
-- Review type: `compact-story-review` — **lượt 2 (patch re-review)**
-- Lane: mobile (không có làn backend/frontend — `architecture/solution.md` §1 Key Discovery 1)
-- Baseline lượt này: `git -C <worktree> diff 47233dac aaa2021a` (12 file, worktree sạch, HEAD `aaa2021a`)
-- Baseline story gốc: `b58afbe0` (đã review đầy đủ ở lượt 1)
-- F-1…F-5: **ĐÃ ĐÓNG cả năm** · F-6 còn mở · Deferred: 4
+- Review type: `completion/resume` trên `compact-story-review` — **lượt 3**
+- Lane: mobile · Story-Class standard · HEAD `1651702f`
+- Lượt 1 (`b58afbe0`): PATCH_REQUIRED, F-1…F-6 · Lượt 2 (`aaa2021a`): BLOCKED, F-1…F-5 đóng, F-6 còn mở
+- Lượt 3 (`1651702f`): **F-6 đóng** · Blocking findings: 0 · Deferred: 8
 
 ## Scope Gate
 
 Phase: SCOPE_GATE
 SCOPE_GATE_COMPLETE: YES
 
-**Review type:** compact-story-review, patch re-review (parallel-story, Story-Class standard)
+Phạm vi vòng này đúng bằng phần handoff nêu: diff `aaa2021a → 1651702f` cộng hai
+file bằng chứng đang sửa trong working tree. Không mở lại các bề mặt đã PASS ở
+lượt 1/2 và không đọc lại `uiux-spec.md` toàn phần, `master-plan.md`,
+`architecture/*`, `requirements.md` (chỉ tra nguyên văn AC-33 và R-7 theo dòng để
+kiểm một luật bị chạm — xem F-6 dưới).
 
-**Source/Test Files In Scope (chỉ phần patch chạm)**
-- `mobile/test/core/database/relationship_labels_migration_test.dart` (mới)
-- `mobile/test/features/compatibility_lookup/compatibility_lookup_screen_test.dart` (hunk tên ảnh)
-
-Patch **không chạm file `lib/` nào** (`git diff --stat 47233dac aaa2021a`), nên mọi
-kết luận PASS về mã sản phẩm ở lượt 1 còn nguyên hiệu lực và không được kiểm lại.
+**Source/Test Files In Scope**
+- `mobile/lib/features/compatibility_lookup/presentation/widgets/compat_facet_block.dart`
+- `mobile/lib/features/compatibility_lookup/presentation/widgets/compat_activity_block.dart`
+- `mobile/test/features/compatibility_lookup/compat_result_widgets_test.dart` (2 test mới)
 
 **Evidence Files In Scope**
-- `coding-plan/test-results.md` — `## Phase Status`; `## Lượt vá F-1..F-5 — Commands Run`;
-  `## Entry Point Reachability`; `## Story Runtime Startup Smoke`;
-  `## Phủ test đường nâng cấp v6 → v7`; `## Đổi tên ảnh visual-fidelity theo quy ước cổng`
-- `visual-fidelity/visual-fidelity-report.md`
-- 5 ảnh PNG trong `visual-fidelity/` (đã mở mắt thường từng ảnh)
-- `../req_master.md` — `## Design Ruling Log` (kiểm có/không dòng phán quyết STORY-010)
+- `visual-fidelity/visual-fidelity-report.md` (bản đã dựng lại, **chưa commit**)
+- `visual-fidelity/implemented-10-bang-tra-an-khop-md.png` (chụp lại, **chưa commit**)
+- `coding-plan/test-results.md` §"Vá F-6 mục 5 và mục 6"
+- `coding-plan/master-plan.md` bảng Phases Overview
+- `ux/uiux-spec.md` §3.2/§3.3/§3.4 (chỉ phần diff)
+- `../req_master.md` `## Design Ruling Log` — **đọc ở control checkout**, xem ghi chú D-8
 
 **Query Keys**
-`F-1`…`F-6`, `Entry Point Reachability`, `Story Runtime Startup Smoke`, `from < 7`,
-`relationship_labels`, `implemented-*.png`, `Phase Status`, `Design Ruling Log`
+`F-6`, `mục 5`, `mục 6`, `caption`, `toUpperCase`, `Semantics`, `44`,
+`Design Ruling Log`, `R-7`, `AC-33`, `VISUAL_FIDELITY`
 
-## Kết quả F-1 … F-5
+## F-6 — ĐÓNG
 
-| # | Nội dung | Kết quả | Bằng chứng đã tự kiểm |
-|---|---|---|---|
-| F-1 | Thiếu mục `## Entry Point Reachability` | **ĐÓNG** | Mục có thật, `Reachable: YES`, bảng 5 bước có cả trích mã lẫn hành vi lúc chạy. Đường đi khớp đúng mã mà lượt 1 đã tự đọc (`gift_ideas_screen.dart` `_GuessRow.onTap` → `openCompatibilityLookup`), và patch không chạm `lib/` nên kết luận đó còn nguyên. Ảnh `runtime-entry-…-emulator-5554.png`: màn (10) thật, AppBar "Bảng tra ăn khớp", đủ dấu tiếng Việt, không chip nào chọn sẵn |
-| F-2 | Không có runtime startup smoke, không có miễn trừ | **ĐÓNG** | `## Story Runtime Startup Smoke` = `PASS`, có registry `mobile-app`, `emulator-5554`, `am start -W` → `Status: ok`, `LaunchState: COLD`, `TotalTime 3627ms`, 0 dòng logcat gắn tag lỗi, pid `16495` không đổi trước/sau. Ảnh `runtime-smoke-main-first-screen-…png`: màn (1) home dựng đủ, không red screen. Bốn dòng `NOT_APPLICABLE` cũ đã được thay bằng con trỏ tới mục này |
-| F-3 | Migration v6→v7 không test nào phủ | **ĐÓNG** | `relationship_labels_migration_test.dart` mới, group `v6 -> v7`, 5 test. Fixture đúng chỗ khó: `DROP TABLE relationship_labels` + `PRAGMA user_version = 6`, và hai khẳng định "fixture đúng là v6" chạy **trên chính connection đang seed trước khi đóng** (`:90-91`) — đúng cách tránh bẫy `CREATE TABLE IF NOT EXISTS` của drift. Phủ: lên v7 + có bảng, đủ 8 cột, 4 họ dòng client-owned còn nguyên, ghi được ngay sau nâng cấp, khoá duy nhất `(owner_key, subject, system)` còn hiệu lực. Có chứng minh mutation (`if (from < 7 && false)` → 4/5 đỏ) và đã hoàn nguyên |
-| F-4 | Ảnh visual-fidelity sai quy ước tên | **ĐÓNG** | Thư mục nay chỉ còn `implemented-10-bang-tra-an-khop-md.png` và `implemented-10-bang-tra-an-khop-md-chua-co-nhan.png`; hai tên cũ đã biến mất khỏi cây. Hằng số trong `compatibility_lookup_screen_test.dart:376,411` sửa theo, hai dòng bảng trong `visual-fidelity-report.md` cập nhật kèm giải thích hậu tố `-md`. Đã mở cả hai ảnh mới: đúng màn của story, không tofu, không khung lỗi, không spinner |
-| F-5 | `## Phase Status` mâu thuẫn thân file | **ĐÓNG** | P5/P6 nay ghi `COMPLETE / PASS / PASS`, khớp §P5/§P6 và `master-plan.md` |
+Bốn phán quyết cho STORY-010 tồn tại thật, ngày 2026-09-17, trong
+`data/requirements/REQ-016_solo_stage1_relationship_assistant/req_master.md`
+`## Design Ruling Log` dòng 213-216 (control checkout):
 
-Lệnh của lượt vá đã ghi vết, không nối ống: `flutter test test/core/database
-test/features/compatibility_lookup test/features/gift_ideas` → `+275 ~4`, 0 đỏ;
-harness chụp ảnh 7 passed; `flutter build apk --debug --flavor local
---split-per-abi` PASS.
-
-## Blocking finding còn mở
-
-**F-6 · `VISUAL_FIDELITY: PASS` vẫn chưa có căn cứ: ba chênh lệch canvas-vs-spec do chính báo cáo tự phân xử.**
-
-Patch không chạm phần `## Chênh lệch so với design reference` của
-`visual-fidelity-report.md` (diff lượt này chỉ đổi hai dòng bảng tên ảnh + thêm
-đoạn giải thích hậu tố `-md`). Ba mục 4/5/6 của mục đó vẫn là tranh chấp
-**canvas vs `uiux-spec.md`** thuần tuý, và vẫn đang được kết luận ngay trong báo
-cáo bằng lý lẽ của chính làn Mobile:
-
-- mục 5 — tiêu đề khối: canvas dùng caption IN HOA ("CHỖ DỄ HỢP"); bản dựng dùng
-  tiêu đề phụ sentence-case theo spec §3.2/§3.3
-- mục 6 — hành động "1 hoạt động nên thử": canvas là nút tròn `(+)` icon-only;
-  bản dựng là outline chip có chữ theo spec §3.4
-- mục 4 — tiêu đề màn: canvas dùng tên cặp; bản dựng dùng tiêu đề tĩnh + dòng
-  xuất xứ (mục này **có** viện dẫn AC-11, khác hai mục trên)
-
-Đã kiểm trực tiếp: `req_master.md` `## Design Ruling Log` (dòng 146-213) **không
-có dòng phán quyết nào cho STORY-010** — mọi hàng đều thuộc STORY-001. Tham
-chiếu STORY-010 duy nhất trong file là hàng Story Seeds `:250`. Tiền lệ của
-chính requirement này (hàng `:207`: mục chưa từng ruling thì "áp cùng tiền lệ
-anchor on design — Design canvas thắng") nói rằng mục 5 và 6 nhiều khả năng sẽ
-phải rework theo canvas, nhưng **phán quyết đó chưa tồn tại**, và quy tắc
-reviewer 12e2 cấm chấp nhận một phân xử do chính báo cáo tự đưa ra.
-
-Vì sao `BLOCKED` chứ không phải `PATCH_REQUIRED`: sau lượt vá này **làn Mobile
-không còn việc nào có thể làm**. Mục 4 và mục 1 (xem D-1) là xung đột có trích
-dẫn AC đối chiếu với phần tử thiết kế — đúng dạng `DESIGN_SPEC_CONFLICT` mà quy
-tắc 12e2 yêu cầu trả `BLOCKED` để Scrum Master hỏi user bên nào là mốc neo, chứ
-không phải ra lệnh vá; mục 5 và 6 cần một dòng `D-xx` trước khi bất kỳ ai chạm
-mã. Định tuyến `PATCH_REQUIRED` sẽ trả story về một làn có danh sách việc rỗng.
-
-**Đầu vào còn thiếu để gỡ chặn (Scrum Master/user sở hữu):**
-1. Một dòng trong `req_master.md` `## Design Ruling Log` cho STORY-010 phán
-   quyết mục 4/5/6 (mẫu sẵn có: các hàng D-18/D-19/D-28/G-3).
-2. Quyết định cho mục 1 (khối DẢI) — xem D-1 dưới đây; đây là mục canvas vẽ một
-   UI vi phạm AC-16/AC-17 của chính story, nên không thể đóng bằng "canvas thắng"
-   theo lối thông thường.
-
-Sau khi có hai dòng đó: nếu phán quyết giữ nguyên bản dựng thì
-`visual-fidelity-report.md` chỉ cần trích dòng `D-xx` thay cho lý lẽ tự phân xử
-và story đóng được; nếu phán quyết chọn canvas thì mở một lượt vá Mobile hẹp.
-
-## Deferred (giữ nguyên từ lượt 1, ngoài phạm vi vòng này)
-
-**D-1 · Frame canvas `10-bang-tra-an-khop` đang vẽ một UI vi phạm AC của chính story.**
-Canvas vẽ "HAI ĐỨA HỢP TỚI ĐÂU" là thanh gradient 3 mốc + nhãn "khá hợp"; AC-16/AC-17,
-`uiux-spec.md` §3.1 và R-8 cấm tuyệt đối mọi thành phần trả lời được "đầy bao nhiêu
-phần". Bản dựng làm đúng (chip chữ tĩnh "Khác nhịp, bù nhau") — mục do AC chi phối,
-không rework. Cần UI/UX sửa frame; ngoài write scope của làn Mobile. Ghi chú lượt 2:
-mục này có trích dẫn AC đối chiếu phần tử canvas, nên nó là một nửa căn cứ của
-`BLOCKED: DESIGN_SPEC_CONFLICT` ở F-6, không còn thuần "không chặn story".
-
-**D-2 · Kiểm duyệt lớp 2 (AC-35 / D-15) chưa được cấp.** 400 ô seed sẵn sàng nhưng
-chưa được user duyệt để vào bản dựng người dùng thật. P5/P6 ghi vết đúng, không tự
-phê duyệt. Scrum Master đưa bộ seed cho user duyệt trước khi phát hành.
-
-**D-3 · Ba test đỏ có sẵn ở `test/features/love_contracts`.** Đã chứng minh có trước
-bằng `git stash` asset P6 + chạy lại (`+80 -3`, đúng ba test đó). Ngoài phạm vi story.
-
-**D-4 · Findings 1/2/5/7/9 của `test-results.md`** (lệch AC id trong file phase P1;
-AC-32 chưa có chủ ở tầng dữ liệu; `frequencyProbe` áp cả bốn trường; gỡ khoá
-`gift_ideas_guess_coming_soon` cần đối soát STORY-009; quy ước giọng của `question`)
-— đều ghi vết rõ, không mục nào phá AC đã duyệt của story này.
-
-**D-5 (mới, không chặn) · Va chạm `schemaVersion` 6→7 giữa các nhánh song song.**
-Lượt vá phát hiện lúc chạy thật: máy đã có DB v7 của một nhánh khác
-(`portrait_answers`), nên `from == to == 7` và bước `if (from < 7) createTable
-(relationshipLabels)` không bao giờ chạy — màn (10) dựng trống,
-`SqliteException: no such table: relationship_labels`. Đã ghi vết đầy đủ trong
-`test-results.md` §"Va chạm `schemaVersion`…". Không phải lỗi của STORY-010 và
-không sửa được trong làn này; đúng như handoff nêu, đây là việc của
-`requirement-integration-review` (đánh số riêng cho mỗi story, hoặc gộp đủ
-`createTable` vào bước v7). Ghi ở đây để bước integration không phải tìm lại.
-
-## Bề mặt rủi ro — trạng thái sau lượt vá
-
-| Bề mặt rủi ro (12b) | Cổng tới hạn | Kết quả |
+| Mục | Phán quyết | Bản dựng có khớp không |
 |---|---|---|
-| persistence/schema/migration (v6→v7) | test đường nâng cấp | **PASS** (F-3 đóng) |
-| app lifecycle / khởi động | runtime startup smoke | **PASS** (F-2 đóng) |
-| mobile navigation/discoverability | `Entry Point Reachability` + tự đọc mã | **PASS** (F-1 đóng) |
-| design fidelity (làn mobile, 12e3) | hai ảnh thật + `VISUAL_FIDELITY` có đối chiếu | **CHẶN** — ảnh đạt, phán quyết chênh lệch chưa có (F-6) |
-| typed/generated contract · local storage/offline · mobile interaction · nội dung dạng dữ liệu · build/type-check | — | PASS từ lượt 1, patch không chạm `lib/`, không kiểm lại |
+| 1 — khối DẢI gradient | Đóng bởi Scrum Master: canvas tự vi phạm AC-16/AC-17 nên **không** thắng bằng thẩm quyền "design thắng"; bản dựng đúng, đây là **design-source defect**, **không chặn STORY-010** | Có — không sửa mã, đúng như phán quyết yêu cầu |
+| 4 — tiêu đề màn | Đóng bởi Scrum Master: AC-11 cho phép hai hệ nhãn cùng ra kết quả nên "tên cặp" không tổng quát được; bản dựng đúng | Có — không sửa mã |
+| 5 — kiểu tiêu đề khối | **User chốt qua AskUserQuestion: Theo DESIGN (IN HOA)**; mobile-dev được uỷ quyền vá `uiux-spec.md` §3.2/§3.3 phạm vi hẹp | Có — xem dưới |
+| 6 — hành động "1 hoạt động nên thử" | **User chốt qua AskUserQuestion: Theo DESIGN (nút tròn icon-only)**, kèm điều kiện "target chạm đủ lớn" | Có — xem dưới |
+
+Đây chính là đầu vào mà lượt 2 trả `BLOCKED` để chờ. Nó đã có, và có thẩm quyền
+đúng loại (user cho hai mục thuần kiểu dáng, Scrum Master cho hai mục do AC chi
+phối). Không còn mục nào do chính báo cáo tự phân xử.
+
+**Đã tự kiểm mã, không tin tiêu đề mục:**
+
+- Mục 5 — `compat_facet_block.dart:60` đổi `titleStyle` từ `type.body` +
+  `w600` sang token `type.caption`, và `:88-95` bọc
+  `Semantics(label: _title(l10n), excludeSemantics: true)` quanh
+  `Text(_title(l10n).toUpperCase())`. IN HOA nằm đúng ở tầng glyph; chuỗi l10n
+  nguồn không đổi nên trình đọc màn hình không đánh vần từng chữ cái.
+- Mục 6 — `compat_activity_block.dart:75-105`: `Semantics(button: true,
+  label: compat_add_to_my_store_action, excludeSemantics: true)` bọc
+  `GestureDetector` (`HitTestBehavior.opaque`) → `SizedBox(44, 44)` →
+  `DecoratedBox(shape: BoxShape.circle)` + `CupidIcon(add, size 20)`. Điều kiện
+  trợ năng mà phán quyết kèm theo được thoả bằng cả vùng chạm lẫn tên đọc được.
+
+**Luật R-7 không bị phá.** Đã tra nguyên văn: R-7 ở `req_master.md`
+`## Invariant Design Rules` mục 7 là luật **nội dung** ("không AI ở runtime",
+"mỗi ô bắt buộc có ít nhất một điểm cọ xát"), không nói gì về kiểu chữ; AC-33
+(`requirements.md:277`) nói về chỉ số gắn kết. Cấm "thu nhỏ cỡ chữ xuống
+`caption`" chỉ tồn tại trong văn xuôi `uiux-spec.md` §3.3 — đúng tầng mà tiền lệ
+neo-thiết-kế của REQ-016 cho phép vá, và phán quyết mục 5 uỷ quyền vá tường
+minh. Bản vá spec giữ nguyên bất biến thật (đối xứng "hợp"/"va"), chỉ viết lại
+cho đúng: "điều bị cấm là lệch nhau, không phải bản thân cỡ `caption`". Vì cả hai
+mặt dùng chung một widget, đối xứng không thể lệch qua đường này.
+
+**Ảnh bằng chứng đã mở mắt thường** (`implemented-10-bang-tra-an-khop-md.png`
+bản chụp lại): "CHỖ DỄ HỢP"/"CHỖ DỄ VA" hiện IN HOA, cùng cỡ cùng độ đậm cùng
+màu, đủ dấu (Ỗ/Ễ không rơi), không ô tofu; nút hoạt động là vòng tròn viền tím
+có dấu `+`, không còn chữ. Ảnh khớp với mã ở `1651702f` và không mâu thuẫn
+`VISUAL_FIDELITY: PASS`.
+
+**Test khoá đúng hai luật vừa dựng** (`compat_result_widgets_test.dart`, 2 test
+mới): khẳng định glyph `.toUpperCase()`, cỡ/độ đậm đọc từ `type.caption` của
+theme chứ không hard-code, `find.bySemanticsLabel(<chuỗi sentence case>)` tìm
+thấy cho cả hai khối, `find.text(nhãn)` là `findsNothing` trong khi
+`find.bySemanticsLabel(nhãn)` là `findsOneWidget`, `BoxDecoration.shape ==
+BoxShape.circle`, và `tester.getSize(button) >= 44x44`. Đây là test chống trôi
+ngược thật, không phải test hình thức.
+
+Lệnh: `flutter test test/features/compatibility_lookup/` → `+88 ~3` (3 `~` là
+test chụp ảnh `skip` khi không bật cờ), và bản chạy có
+`--dart-define=CAPTURE_VISUALS=true` → `+7`. `master-plan.md` Phases Overview
+đổi cả sáu phase `COMPLETE` → `DONE`.
+
+## Bề mặt rủi ro — trạng thái cuối
+
+| Bề mặt rủi ro | Cổng tới hạn | Kết quả |
+|---|---|---|
+| design fidelity (làn mobile, 12e3) | hai ảnh thật + `VISUAL_FIDELITY: PASS` có đối chiếu, mọi chênh lệch đã đóng | **PASS** |
+| persistence/schema/migration (v6→v7) | test đường nâng cấp | PASS (F-3, lượt 2) |
+| app lifecycle / khởi động | runtime startup smoke trên `emulator-5554` | PASS (F-2, lượt 2) |
+| mobile navigation/discoverability | `Entry Point Reachability` + tự đọc mã cửa vào | PASS (F-1, lượt 2) |
+| mobile interaction | test widget/hành vi + 2 test mới cho affordance đã đổi | PASS |
+| typed/generated contract · local storage/offline · nội dung dạng dữ liệu · build/type-check | — | PASS (lượt 1, vòng này không chạm) |
+
+## Deferred (không mục nào chặn story)
+
+**D-1 · Frame canvas `10-bang-tra-an-khop` vẫn vẽ một UI vi phạm AC-16/AC-17.**
+ĐÃ ĐÓNG về mặt phán quyết (dòng 213): design-source defect, bản dựng đúng, không
+sửa mã, **không chặn STORY-010**. Việc còn lại là UI/UX sửa frame ở một lượt UX
+riêng — ngoài write scope làn Mobile.
+
+**D-2 · Kiểm duyệt lớp 2 (AC-35 / D-15) chưa được cấp.** 400 ô seed sẵn sàng
+nhưng chưa được user duyệt để vào bản dựng người dùng thật. P5/P6 ghi vết đúng,
+không tự phê duyệt. Scrum Master đưa bộ seed cho user duyệt **trước khi phát
+hành**, không phải trước khi merge.
+
+**D-3 · Ba test đỏ có sẵn ở `test/features/love_contracts`.** Đã chứng minh có
+trước (`git stash` asset P6 → vẫn `+80 -3` đúng ba test đó). Ngoài phạm vi story.
+
+**D-4 · Findings 1/2/5/7/9 của `test-results.md`** (lệch AC id trong file phase
+P1; AC-32 chưa có chủ ở tầng dữ liệu; `frequencyProbe` áp cả bốn trường; gỡ khoá
+`gift_ideas_guess_coming_soon` cần đối soát STORY-009; quy ước giọng của
+`question`) — đã ghi vết rõ, không mục nào phá AC đã duyệt của story này.
+
+**D-5 · Va chạm `schemaVersion` 6→7 giữa các nhánh song song.** STORY-010 và
+STORY-009 cùng nâng lên v7 với bảng khác nhau; trên máy đã chạy nhánh kia,
+`from == to == 7` nên `onUpgrade` bỏ qua `createTable(relationshipLabels)` và
+màn (10) dựng trống. Bắt được lúc chạy thật, ghi vết đầy đủ trong
+`test-results.md` §"Va chạm `schemaVersion`…". **Chuyển thẳng cho
+`requirement-integration-review`**: hoặc mỗi story một số riêng, hoặc bước v7 gộp
+đủ `createTable`.
+
+**D-6 · (mới) Tiêu đề "1 hoạt động nên thử" vẫn sentence-case.** Canvas vẽ IN
+HOA. Phán quyết mục 5 chỉ nêu đích danh hai khối "hợp"/"va", nên mobile-dev
+không tự mở rộng — đúng kỷ luật. Hệ quả: trong cùng một chồng kết quả đang có hai
+kiểu tiêu đề khối. Cần một dòng phán quyết bổ sung nếu Scrum Master muốn đồng bộ.
+Thuần thẩm mỹ, không chạm AC nào.
+
+**D-7 · (mới) Vị trí nút `(+)`.** Canvas đặt nút cùng hàng bên phải đoạn văn hoạt
+động; bản dựng đặt ở hàng riêng, canh trái. Phán quyết mục 6 chỉ nói về **hình
+dạng** nút, không nói vị trí, nên bố cục giữ nguyên. Thuần thẩm mỹ, chưa được
+phán quyết.
+
+**D-8 · (mới, dọn dẹp — Scrum Master) Ba việc trước khi merge.**
+1. `visual-fidelity/visual-fidelity-report.md` và
+   `visual-fidelity/implemented-10-bang-tra-an-khop-md.png` đang **chưa commit**
+   trong worktree. Cổng DONE và merge đọc trạng thái đã commit, nên phải commit
+   hai file này.
+2. Bản `req_master.md` **trong worktree story đang cũ**: không có dòng 213-216.
+   Bốn phán quyết chỉ có ở control checkout. Bất kỳ ai review chỉ từ worktree sẽ
+   thấy `visual-fidelity-report.md` trích một phán quyết "không tồn tại" — đúng
+   cái bẫy mà lượt 2 suýt kết luận sai. Merge nhánh integration sẽ tự mang vào,
+   nhưng nên biết trước.
+3. `test-results.md` §"Còn mở sau lượt vá" mục 1 nay đã cũ: nó nói
+   `visual-fidelity/` chưa cập nhật vì ngoài WriteScope, trong khi một lượt sau
+   đã cập nhật xong. Sửa một dòng hoặc bỏ qua.
 
 ## Khuyến nghị trạng thái
 
-- Để trống `Review (Reviewer)`; đặt story về `BLOCKED`.
-- Không trả về làn Mobile: F-1…F-5 đã đóng, làn này không còn việc.
-- Scrum Master/user xử: F-6 (dòng `D-xx` trong Design Ruling Log), D-1 (định tuyến
-  UI/UX sửa frame), D-2 (duyệt lớp 2). Gỡ xong F-6 thì story đóng được ngay hoặc
-  cần đúng một lượt vá Mobile hẹp, tuỳ phán quyết.
-- D-5 chuyển thẳng cho `requirement-integration-review`.
+- Giữ `Implementation (Development)` đã tích; **tích `Review (Reviewer)`**.
+- Story status: **DONE** (Scrum Master sở hữu thao tác này).
+- **Merge-eligible: CÓ**, sau khi commit hai file bằng chứng ở D-8 mục 1.
+- Chuyển D-5 cho `requirement-integration-review`; D-2 cho user trước phát hành;
+  D-1/D-6/D-7 cho một lượt UX/phán quyết riêng, không chặn.
 
 ## Ghi chú cấu hình
 
