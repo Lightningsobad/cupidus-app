@@ -2,7 +2,7 @@ import '../../../core/content/content_package.dart';
 import '../../../core/content/invariant_terms.dart';
 import 'context_content.dart';
 
-/// What a context-notebook pack can break. The first six pair by wire value
+/// What a context-notebook pack can break. The first seven pair by wire value
 /// with [InvariantRule] and the next three with [NotebookBoundaryRule], so the
 /// rules themselves stay in `core/content/invariant_terms.dart` and this enum
 /// only names them (D-15).
@@ -13,6 +13,7 @@ enum ContextGateRule {
   scoreOrRatio('score_or_ratio'),
   recipientBehaviour('recipient_behaviour'),
   manipulativeTone('manipulative_tone'),
+  assertiveClaim('assertive_claim'),
   frequencyProbe('frequency_probe'),
   behaviourProbe('behaviour_probe'),
   judgementProbe('judgement_probe'),

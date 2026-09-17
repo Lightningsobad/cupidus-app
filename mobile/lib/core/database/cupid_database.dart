@@ -18,6 +18,7 @@ import 'tables/invite_messages_table.dart';
 import 'tables/journal_entries.dart';
 import 'tables/journal_photos.dart';
 import 'tables/messages_table.dart';
+import 'tables/portrait_answers_table.dart';
 import 'tables/timeline_tables.dart';
 
 part 'cupid_database.g.dart';
@@ -55,6 +56,7 @@ typedef BackupExclusion = Future<void> Function(String absolutePath);
     SkillProfileEntries,
     AskPromptState,
     CalendarEventState,
+    PortraitAnswers,
   ],
   daos: [
     MessageDao,
@@ -85,8 +87,10 @@ class CupidDatabase extends _$CupidDatabase {
   /// (`architecture/solution.md` §1 Key Discovery 1 and 3). v4 adds the five
   /// B-1 activity-card columns. v5 adds `activity_cards.location` and the
   /// device-authoritative `invite_messages` table. v6 adds the three
-  /// device-authoritative context-notebook tables. Every migration step here
-  /// and onward must therefore be additive, or migrate the data explicitly.
+  /// device-authoritative context-notebook tables. v7 adds the
+  /// device-authoritative `calendar_event_state` and `portrait_answers`
+  /// tables. Every migration step here and onward must therefore be
+  /// additive, or migrate the data explicitly.
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
@@ -132,6 +136,7 @@ class CupidDatabase extends _$CupidDatabase {
           }
           if (from < 7) {
             await m.createTable(calendarEventState);
+            await m.createTable(portraitAnswers);
           }
         },
         // `ON DELETE CASCADE` on activity_card_photos.card_id,

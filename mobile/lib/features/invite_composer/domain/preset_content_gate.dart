@@ -14,7 +14,8 @@ enum PresetGateRule {
   streakDisplay('streak_display'),
   scoreOrRatio('score_or_ratio'),
   recipientBehaviour('recipient_behaviour'),
-  manipulativeTone('manipulative_tone');
+  manipulativeTone('manipulative_tone'),
+  assertiveClaim('assertive_claim');
 
   const PresetGateRule(this.wireValue);
 

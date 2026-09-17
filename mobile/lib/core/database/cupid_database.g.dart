@@ -6689,6 +6689,508 @@ class CalendarEventStateCompanion
   }
 }
 
+class $PortraitAnswersTable extends PortraitAnswers
+    with TableInfo<$PortraitAnswersTable, PortraitAnswerRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PortraitAnswersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _ownerKeyMeta = const VerificationMeta(
+    'ownerKey',
+  );
+  @override
+  late final GeneratedColumn<String> ownerKey = GeneratedColumn<String>(
+    'owner_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _questionIdMeta = const VerificationMeta(
+    'questionId',
+  );
+  @override
+  late final GeneratedColumn<String> questionId = GeneratedColumn<String>(
+    'question_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _optionIdMeta = const VerificationMeta(
+    'optionId',
+  );
+  @override
+  late final GeneratedColumn<String> optionId = GeneratedColumn<String>(
+    'option_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _answerValueMeta = const VerificationMeta(
+    'answerValue',
+  );
+  @override
+  late final GeneratedColumn<String> answerValue = GeneratedColumn<String>(
+    'answer_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notebookEntryIdMeta = const VerificationMeta(
+    'notebookEntryId',
+  );
+  @override
+  late final GeneratedColumn<String> notebookEntryId = GeneratedColumn<String>(
+    'notebook_entry_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    ownerKey,
+    questionId,
+    state,
+    optionId,
+    answerValue,
+    notebookEntryId,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'portrait_answers';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PortraitAnswerRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('owner_key')) {
+      context.handle(
+        _ownerKeyMeta,
+        ownerKey.isAcceptableOrUnknown(data['owner_key']!, _ownerKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerKeyMeta);
+    }
+    if (data.containsKey('question_id')) {
+      context.handle(
+        _questionIdMeta,
+        questionId.isAcceptableOrUnknown(data['question_id']!, _questionIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_questionIdMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('option_id')) {
+      context.handle(
+        _optionIdMeta,
+        optionId.isAcceptableOrUnknown(data['option_id']!, _optionIdMeta),
+      );
+    }
+    if (data.containsKey('answer_value')) {
+      context.handle(
+        _answerValueMeta,
+        answerValue.isAcceptableOrUnknown(
+          data['answer_value']!,
+          _answerValueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('notebook_entry_id')) {
+      context.handle(
+        _notebookEntryIdMeta,
+        notebookEntryId.isAcceptableOrUnknown(
+          data['notebook_entry_id']!,
+          _notebookEntryIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {ownerKey, questionId};
+  @override
+  PortraitAnswerRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PortraitAnswerRow(
+      ownerKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_key'],
+      )!,
+      questionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}question_id'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      optionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}option_id'],
+      ),
+      answerValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}answer_value'],
+      ),
+      notebookEntryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notebook_entry_id'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PortraitAnswersTable createAlias(String alias) {
+    return $PortraitAnswersTable(attachedDatabase, alias);
+  }
+}
+
+class PortraitAnswerRow extends DataClass
+    implements Insertable<PortraitAnswerRow> {
+  /// Backend `User.id`; every query filters on this column.
+  final String ownerKey;
+
+  /// Stable `items[].id` from `req016.portrait_questions.v1`.
+  final String questionId;
+
+  /// `answered` | `skipped` (§2). `skipped` is a first-class outcome, not a
+  /// failure (AC-27).
+  final String state;
+
+  /// Stable id of the chip the user picked, or NULL for free text and for a
+  /// skip.
+  final String? optionId;
+
+  /// The answer itself, stored here **only** when the question's target is
+  /// `portrait.guess`. A `notebook.*` answer lives in the notebook and is read
+  /// back from there, so editing or deleting the notebook entry thins the
+  /// portrait instead of leaving two copies that disagree (§4, AC-22).
+  final String? answerValue;
+
+  /// `notebook_entries.id` produced by `recordAnsweredQuestion`, set **only**
+  /// for a `notebook.*` target.
+  final String? notebookEntryId;
+  final DateTime updatedAt;
+  const PortraitAnswerRow({
+    required this.ownerKey,
+    required this.questionId,
+    required this.state,
+    this.optionId,
+    this.answerValue,
+    this.notebookEntryId,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['owner_key'] = Variable<String>(ownerKey);
+    map['question_id'] = Variable<String>(questionId);
+    map['state'] = Variable<String>(state);
+    if (!nullToAbsent || optionId != null) {
+      map['option_id'] = Variable<String>(optionId);
+    }
+    if (!nullToAbsent || answerValue != null) {
+      map['answer_value'] = Variable<String>(answerValue);
+    }
+    if (!nullToAbsent || notebookEntryId != null) {
+      map['notebook_entry_id'] = Variable<String>(notebookEntryId);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  PortraitAnswersCompanion toCompanion(bool nullToAbsent) {
+    return PortraitAnswersCompanion(
+      ownerKey: Value(ownerKey),
+      questionId: Value(questionId),
+      state: Value(state),
+      optionId: optionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(optionId),
+      answerValue: answerValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(answerValue),
+      notebookEntryId: notebookEntryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notebookEntryId),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory PortraitAnswerRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PortraitAnswerRow(
+      ownerKey: serializer.fromJson<String>(json['ownerKey']),
+      questionId: serializer.fromJson<String>(json['questionId']),
+      state: serializer.fromJson<String>(json['state']),
+      optionId: serializer.fromJson<String?>(json['optionId']),
+      answerValue: serializer.fromJson<String?>(json['answerValue']),
+      notebookEntryId: serializer.fromJson<String?>(json['notebookEntryId']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'ownerKey': serializer.toJson<String>(ownerKey),
+      'questionId': serializer.toJson<String>(questionId),
+      'state': serializer.toJson<String>(state),
+      'optionId': serializer.toJson<String?>(optionId),
+      'answerValue': serializer.toJson<String?>(answerValue),
+      'notebookEntryId': serializer.toJson<String?>(notebookEntryId),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  PortraitAnswerRow copyWith({
+    String? ownerKey,
+    String? questionId,
+    String? state,
+    Value<String?> optionId = const Value.absent(),
+    Value<String?> answerValue = const Value.absent(),
+    Value<String?> notebookEntryId = const Value.absent(),
+    DateTime? updatedAt,
+  }) => PortraitAnswerRow(
+    ownerKey: ownerKey ?? this.ownerKey,
+    questionId: questionId ?? this.questionId,
+    state: state ?? this.state,
+    optionId: optionId.present ? optionId.value : this.optionId,
+    answerValue: answerValue.present ? answerValue.value : this.answerValue,
+    notebookEntryId: notebookEntryId.present
+        ? notebookEntryId.value
+        : this.notebookEntryId,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  PortraitAnswerRow copyWithCompanion(PortraitAnswersCompanion data) {
+    return PortraitAnswerRow(
+      ownerKey: data.ownerKey.present ? data.ownerKey.value : this.ownerKey,
+      questionId: data.questionId.present
+          ? data.questionId.value
+          : this.questionId,
+      state: data.state.present ? data.state.value : this.state,
+      optionId: data.optionId.present ? data.optionId.value : this.optionId,
+      answerValue: data.answerValue.present
+          ? data.answerValue.value
+          : this.answerValue,
+      notebookEntryId: data.notebookEntryId.present
+          ? data.notebookEntryId.value
+          : this.notebookEntryId,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PortraitAnswerRow(')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('questionId: $questionId, ')
+          ..write('state: $state, ')
+          ..write('optionId: $optionId, ')
+          ..write('answerValue: $answerValue, ')
+          ..write('notebookEntryId: $notebookEntryId, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    ownerKey,
+    questionId,
+    state,
+    optionId,
+    answerValue,
+    notebookEntryId,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PortraitAnswerRow &&
+          other.ownerKey == this.ownerKey &&
+          other.questionId == this.questionId &&
+          other.state == this.state &&
+          other.optionId == this.optionId &&
+          other.answerValue == this.answerValue &&
+          other.notebookEntryId == this.notebookEntryId &&
+          other.updatedAt == this.updatedAt);
+}
+
+class PortraitAnswersCompanion extends UpdateCompanion<PortraitAnswerRow> {
+  final Value<String> ownerKey;
+  final Value<String> questionId;
+  final Value<String> state;
+  final Value<String?> optionId;
+  final Value<String?> answerValue;
+  final Value<String?> notebookEntryId;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const PortraitAnswersCompanion({
+    this.ownerKey = const Value.absent(),
+    this.questionId = const Value.absent(),
+    this.state = const Value.absent(),
+    this.optionId = const Value.absent(),
+    this.answerValue = const Value.absent(),
+    this.notebookEntryId = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PortraitAnswersCompanion.insert({
+    required String ownerKey,
+    required String questionId,
+    required String state,
+    this.optionId = const Value.absent(),
+    this.answerValue = const Value.absent(),
+    this.notebookEntryId = const Value.absent(),
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : ownerKey = Value(ownerKey),
+       questionId = Value(questionId),
+       state = Value(state),
+       updatedAt = Value(updatedAt);
+  static Insertable<PortraitAnswerRow> custom({
+    Expression<String>? ownerKey,
+    Expression<String>? questionId,
+    Expression<String>? state,
+    Expression<String>? optionId,
+    Expression<String>? answerValue,
+    Expression<String>? notebookEntryId,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (ownerKey != null) 'owner_key': ownerKey,
+      if (questionId != null) 'question_id': questionId,
+      if (state != null) 'state': state,
+      if (optionId != null) 'option_id': optionId,
+      if (answerValue != null) 'answer_value': answerValue,
+      if (notebookEntryId != null) 'notebook_entry_id': notebookEntryId,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PortraitAnswersCompanion copyWith({
+    Value<String>? ownerKey,
+    Value<String>? questionId,
+    Value<String>? state,
+    Value<String?>? optionId,
+    Value<String?>? answerValue,
+    Value<String?>? notebookEntryId,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return PortraitAnswersCompanion(
+      ownerKey: ownerKey ?? this.ownerKey,
+      questionId: questionId ?? this.questionId,
+      state: state ?? this.state,
+      optionId: optionId ?? this.optionId,
+      answerValue: answerValue ?? this.answerValue,
+      notebookEntryId: notebookEntryId ?? this.notebookEntryId,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (ownerKey.present) {
+      map['owner_key'] = Variable<String>(ownerKey.value);
+    }
+    if (questionId.present) {
+      map['question_id'] = Variable<String>(questionId.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (optionId.present) {
+      map['option_id'] = Variable<String>(optionId.value);
+    }
+    if (answerValue.present) {
+      map['answer_value'] = Variable<String>(answerValue.value);
+    }
+    if (notebookEntryId.present) {
+      map['notebook_entry_id'] = Variable<String>(notebookEntryId.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PortraitAnswersCompanion(')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('questionId: $questionId, ')
+          ..write('state: $state, ')
+          ..write('optionId: $optionId, ')
+          ..write('answerValue: $answerValue, ')
+          ..write('notebookEntryId: $notebookEntryId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$CupidDatabase extends GeneratedDatabase {
   _$CupidDatabase(QueryExecutor e) : super(e);
   $CupidDatabaseManager get managers => $CupidDatabaseManager(this);
@@ -6715,6 +7217,9 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
   late final $AskPromptStateTable askPromptState = $AskPromptStateTable(this);
   late final $CalendarEventStateTable calendarEventState =
       $CalendarEventStateTable(this);
+  late final $PortraitAnswersTable portraitAnswers = $PortraitAnswersTable(
+    this,
+  );
   late final Index activityCardsOwnerStatus = Index(
     'activity_cards_owner_status',
     'CREATE INDEX activity_cards_owner_status ON activity_cards (owner_key, status)',
@@ -6748,6 +7253,7 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
     skillProfileEntries,
     askPromptState,
     calendarEventState,
+    portraitAnswers,
     activityCardsOwnerStatus,
   ];
   @override
@@ -10961,6 +11467,260 @@ typedef $$CalendarEventStateTableProcessedTableManager =
       CalendarEventStateRow,
       PrefetchHooks Function()
     >;
+typedef $$PortraitAnswersTableCreateCompanionBuilder =
+    PortraitAnswersCompanion Function({
+      required String ownerKey,
+      required String questionId,
+      required String state,
+      Value<String?> optionId,
+      Value<String?> answerValue,
+      Value<String?> notebookEntryId,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$PortraitAnswersTableUpdateCompanionBuilder =
+    PortraitAnswersCompanion Function({
+      Value<String> ownerKey,
+      Value<String> questionId,
+      Value<String> state,
+      Value<String?> optionId,
+      Value<String?> answerValue,
+      Value<String?> notebookEntryId,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$PortraitAnswersTableFilterComposer
+    extends Composer<_$CupidDatabase, $PortraitAnswersTable> {
+  $$PortraitAnswersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get questionId => $composableBuilder(
+    column: $table.questionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get optionId => $composableBuilder(
+    column: $table.optionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get answerValue => $composableBuilder(
+    column: $table.answerValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notebookEntryId => $composableBuilder(
+    column: $table.notebookEntryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PortraitAnswersTableOrderingComposer
+    extends Composer<_$CupidDatabase, $PortraitAnswersTable> {
+  $$PortraitAnswersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get questionId => $composableBuilder(
+    column: $table.questionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get optionId => $composableBuilder(
+    column: $table.optionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get answerValue => $composableBuilder(
+    column: $table.answerValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notebookEntryId => $composableBuilder(
+    column: $table.notebookEntryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PortraitAnswersTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $PortraitAnswersTable> {
+  $$PortraitAnswersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get ownerKey =>
+      $composableBuilder(column: $table.ownerKey, builder: (column) => column);
+
+  GeneratedColumn<String> get questionId => $composableBuilder(
+    column: $table.questionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<String> get optionId =>
+      $composableBuilder(column: $table.optionId, builder: (column) => column);
+
+  GeneratedColumn<String> get answerValue => $composableBuilder(
+    column: $table.answerValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notebookEntryId => $composableBuilder(
+    column: $table.notebookEntryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$PortraitAnswersTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $PortraitAnswersTable,
+          PortraitAnswerRow,
+          $$PortraitAnswersTableFilterComposer,
+          $$PortraitAnswersTableOrderingComposer,
+          $$PortraitAnswersTableAnnotationComposer,
+          $$PortraitAnswersTableCreateCompanionBuilder,
+          $$PortraitAnswersTableUpdateCompanionBuilder,
+          (
+            PortraitAnswerRow,
+            BaseReferences<
+              _$CupidDatabase,
+              $PortraitAnswersTable,
+              PortraitAnswerRow
+            >,
+          ),
+          PortraitAnswerRow,
+          PrefetchHooks Function()
+        > {
+  $$PortraitAnswersTableTableManager(
+    _$CupidDatabase db,
+    $PortraitAnswersTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PortraitAnswersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PortraitAnswersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PortraitAnswersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> ownerKey = const Value.absent(),
+                Value<String> questionId = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<String?> optionId = const Value.absent(),
+                Value<String?> answerValue = const Value.absent(),
+                Value<String?> notebookEntryId = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PortraitAnswersCompanion(
+                ownerKey: ownerKey,
+                questionId: questionId,
+                state: state,
+                optionId: optionId,
+                answerValue: answerValue,
+                notebookEntryId: notebookEntryId,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String ownerKey,
+                required String questionId,
+                required String state,
+                Value<String?> optionId = const Value.absent(),
+                Value<String?> answerValue = const Value.absent(),
+                Value<String?> notebookEntryId = const Value.absent(),
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => PortraitAnswersCompanion.insert(
+                ownerKey: ownerKey,
+                questionId: questionId,
+                state: state,
+                optionId: optionId,
+                answerValue: answerValue,
+                notebookEntryId: notebookEntryId,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PortraitAnswersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $PortraitAnswersTable,
+      PortraitAnswerRow,
+      $$PortraitAnswersTableFilterComposer,
+      $$PortraitAnswersTableOrderingComposer,
+      $$PortraitAnswersTableAnnotationComposer,
+      $$PortraitAnswersTableCreateCompanionBuilder,
+      $$PortraitAnswersTableUpdateCompanionBuilder,
+      (
+        PortraitAnswerRow,
+        BaseReferences<
+          _$CupidDatabase,
+          $PortraitAnswersTable,
+          PortraitAnswerRow
+        >,
+      ),
+      PortraitAnswerRow,
+      PrefetchHooks Function()
+    >;
 
 class $CupidDatabaseManager {
   final _$CupidDatabase _db;
@@ -10993,4 +11753,6 @@ class $CupidDatabaseManager {
       $$AskPromptStateTableTableManager(_db, _db.askPromptState);
   $$CalendarEventStateTableTableManager get calendarEventState =>
       $$CalendarEventStateTableTableManager(_db, _db.calendarEventState);
+  $$PortraitAnswersTableTableManager get portraitAnswers =>
+      $$PortraitAnswersTableTableManager(_db, _db.portraitAnswers);
 }

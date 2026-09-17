@@ -216,6 +216,11 @@ void main() {
       dao: ActivityCardDao(database),
       ownerKeyStore: owner,
     );
+    // The guess row's door resolves its own storage from the composition root
+    // (STORY-009 P5), so screen (5) cannot be pumped without these two.
+    getIt
+      ..registerSingleton<CupidDatabase>(database)
+      ..registerSingleton<BackendUserIdStore>(owner);
   });
 
   tearDown(() async {
@@ -612,7 +617,7 @@ void main() {
       expect(tester.getTopLeft(row).dy, greaterThanOrEqualTo(lastCard));
     });
 
-    testWidgets('tapping the guess row answers instead of doing nothing (SC-5)',
+    testWidgets('tapping the guess row opens the portrait (SC-5, AC-2)',
         (WidgetTester tester) async {
       await pumpGiftScreen(tester);
 
@@ -622,13 +627,16 @@ void main() {
       await tester.tap(row);
       await tester.pumpAndSettle();
 
+      // The provenance label is the portrait's own chrome and renders in both
+      // of its states, so it identifies the destination without waiting on the
+      // content packs.
+      expect(find.byKey(const Key('portrait-provenance')), findsOneWidget);
+      // Pushed, not replaced: screen (5) is still underneath (AC-4). The route
+      // below a completed push is offstage, which the default finder skips.
       expect(
-        find.byKey(const Key('gift-ideas-guess-coming-soon')),
+        find.byType(GiftIdeasScreen, skipOffstage: false),
         findsOneWidget,
       );
-      // Still screen (5): the placeholder never pushes a route that does not
-      // exist yet.
-      expect(find.byType(GiftIdeasScreen), findsOneWidget);
     });
 
     testWidgets('the lead card is full, every following card is compact',

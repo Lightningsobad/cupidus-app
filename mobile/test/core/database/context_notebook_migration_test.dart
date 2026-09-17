@@ -103,7 +103,7 @@ void main() {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
-      expect(await readUserVersion(upgraded), upgraded.schemaVersion);
+      expect(await readUserVersion(upgraded), 7);
       expect(
         await tableNames(upgraded),
         containsAll(<String>[

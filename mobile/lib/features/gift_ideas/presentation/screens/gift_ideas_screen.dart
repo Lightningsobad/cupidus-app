@@ -6,6 +6,7 @@ import '../../../../design_system/design_system.dart';
 import '../../../../l10n/generated/app_l10n.dart';
 import '../../../activity_cards/domain/activity_card_repository.dart';
 import '../../../context_notebook/context_notebook_entry_point.dart';
+import '../../../your_view_portrait/your_view_portrait_entry_point.dart';
 import '../../data/gift_repository.dart';
 import '../../domain/gift_content.dart';
 import '../../domain/gift_selector.dart';
@@ -343,15 +344,12 @@ class _BasisBand extends StatelessWidget {
   }
 }
 
-/// The R-13 placeholder for the two surfaces STORY-009/010 own.
+/// The single door onto the portrait (R-13, AC-2/AC-3).
 ///
 /// The screen (5) canvas draws it as a card-like row with a `?` disc and a `›`
 /// chevron rather than as plain caption text, and the design canvas anchors for
 /// this screen. It is still a side path, not the destination of the screen: it
 /// sits under every suggestion and carries no gradient and no primary styling.
-/// Tapping it says the surfaces are not built yet — the same answer the hub's
-/// quick-entry strip gives for a cell it cannot open — so the row is never a
-/// tap that does nothing (SC-5).
 class _GuessRow extends StatelessWidget {
   const _GuessRow();
 
@@ -367,11 +365,9 @@ class _GuessRow extends StatelessWidget {
       child: GestureDetector(
         key: const Key('gift-ideas-guess-row'),
         behavior: HitTestBehavior.opaque,
-        onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            key: const Key('gift-ideas-guess-coming-soon'),
-            content: Text(l10n.gift_ideas_guess_coming_soon),
-          ),
+        onTap: () => openYourViewPortrait(
+          context,
+          from: PortraitEntrySource.giftIdeas,
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(

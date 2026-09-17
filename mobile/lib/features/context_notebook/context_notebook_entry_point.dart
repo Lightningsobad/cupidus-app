@@ -68,6 +68,53 @@ Future<void> openNotebookScreen(BuildContext context) {
   );
 }
 
+/// Writes **one** answered question into the notebook and returns the new
+/// `notebook_entries.id`.
+///
+/// The second write door, and the only one (`STORY-009/architecture/
+/// contract-summary.md` §3, amending §6 of the STORY-004 contract). §6 forbids
+/// a second door because a pre-fill flow would put words in the notebook the
+/// user never wrote; this door keeps that intact by being exactly as wide as
+/// one user-typed answer. There is deliberately no bulk, import, or pre-fill
+/// variant, no update, no delete, and no read-all here: those are the doors §6
+/// rules out, and this amendment does not open them.
+///
+/// [kind] is a [NotebookKind], so a skill can never arrive through here — the
+/// enum has two values and gaining a third is what AC-6 forbids.
+Future<String> recordAnsweredQuestion({
+  required String entryPointId,
+  required String questionId,
+  required NotebookKind kind,
+  required String value,
+  String? detail,
+  String? eventOn,
+}) async {
+  if (entryPointId.trim().isEmpty) {
+    throw ArgumentError.value(
+      entryPointId,
+      'entryPointId',
+      'must name the calling entry point',
+    );
+  }
+  final trimmedQuestionId = questionId.trim();
+  if (trimmedQuestionId.isEmpty) {
+    throw ArgumentError.value(
+      questionId,
+      'questionId',
+      'an answer written from $entryPointId must stay attached to its question',
+    );
+  }
+  final entry = await getIt<ContextNotebookRepository>().addEntry(
+    kind: kind,
+    value: value,
+    source: ContextEntrySource.askOnTheSpot,
+    detail: detail,
+    eventOn: eventOn,
+    questionId: trimmedQuestionId,
+  );
+  return entry.id;
+}
+
 /// Pushes the "Những gì bạn giỏi" screen, full-screen and on its own route.
 ///
 /// Same independence rule as [openNotebookScreen].
