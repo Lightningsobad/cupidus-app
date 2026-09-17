@@ -179,10 +179,15 @@ pending the same PO/user decision. Reconciled the run file to terminal
 prior sequential `Edit` hit the same concurrent-modification race documented
 in the recurring-patterns list) with only the `AC_CONFLICT_CROSS_REQUIREMENT`
 blocker remaining, `release_note` documenting the manual release rationale,
-and `worktree_head`/`base_head` at `812f6ed6`. Moved the run id from
-`parallel-scheduler.json.active_runs` to `blocked_runs` (this is a genuinely
-blocked run, not a completed one, so it stays indexed for when the PO
-decision lands). Ran `list-releasable-agents.sh` — it did **not** print
+and `worktree_head`/`base_head` at `812f6ed6`, plus `waiting_reason` and
+`next_resume_action` fields for durable OPEN_RUNS-guard parking. Pruned the
+run id from `parallel-scheduler.json` entirely (`active_runs` and
+`blocked_runs` both empty for it) per the "terminal run -> prune from all
+lists" rule — the run file itself (`status: BLOCKED` +
+`checkpoint_path`/`waiting_reason`/`next_resume_action`) is now the sole
+durable record; re-check `phase-P6-evening-check-in.md` §8 for the PO
+decision before re-registering this run. Ran `list-releasable-agents.sh` —
+it did **not** print
 `Alex-Mobile-Dev-5` (its run is indexed in `blocked_runs`, not unindexed), so
 per the release-agent rule it was **not** `TaskStop`'d; it remains idle and
 addressable via `SendMessage` for when P6 can resume. The other 4 previously
