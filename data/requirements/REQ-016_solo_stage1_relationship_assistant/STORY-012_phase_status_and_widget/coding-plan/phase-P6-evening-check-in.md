@@ -147,14 +147,31 @@ tính năng.
 
 ## 7. Status
 
-- Status: BLOCKED (code + test của phase đã xong và xanh; chặn ở quyết định
-  ngoài phạm vi mobile-dev, xem §8)
+- Status: COMPLETE (blocker §8 đã được người dùng gỡ ngày 2026-09-17 theo
+  hướng 1; cổng AC4 đã thu hẹp và toàn bộ phạm vi test xanh)
 - Last updated: 2026-09-17
 - Evidence: `coding-plan/test-results.md` §P6
 - Visual fidelity:
   `../visual-fidelity/implemented-evening-check-in-sheet.png`
 
-## 8. Blocker: AC4 của REQ-002/STORY-021 cấm đúng gói mà §3 bắt thêm
+## 8. RESOLVED — AC4 của REQ-002/STORY-021 cấm đúng gói mà §3 bắt thêm
+
+**Quyết định (người dùng, 2026-09-17): chọn hướng 1 bên dưới.** Nguyên văn lý
+do: "P6 sẽ được implement, requirement 002 có thể đã cũ". Quyết định này cho
+phép **thu hẹp** guard, không xoá nó, và không mở lại trạng thái DONE của
+REQ-002/STORY-021 — các AC về hình ảnh và câu chữ của story đó giữ nguyên.
+
+Đã thi hành trong `mobile/test/features/reminders/reminder_copy_guard_test.dart`:
+lệnh cấm khai báo trong `pubspec.yaml` giữ nguyên cho `android_alarm_manager`,
+`alarm`, `awesome_notifications`; riêng `flutter_local_notifications` chuyển
+thành cổng biên giới import — không file nào dưới `lib/features/reminders/`
+được import gói đó. Test mới `lib/features/reminders never imports a
+local-notification plugin (AC4)` quét 17 file Dart thật dưới thư mục đó và xanh;
+nơi duy nhất trong `lib/` import gói này là
+`lib/features/phase_status/data/local_notification_scheduler.dart`, tức đúng
+ranh giới mà AC4 muốn giữ.
+
+Phần dưới đây giữ lại nguyên trạng làm hồ sơ của blocker đã đóng.
 
 `mobile/test/features/reminders/reminder_copy_guard_test.dart` là cổng tuân thủ
 của một story đã DONE và đã merge. Nó chặn cứng danh sách gói:

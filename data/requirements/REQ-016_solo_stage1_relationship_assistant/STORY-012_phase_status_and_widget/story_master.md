@@ -15,7 +15,13 @@ J10, J12), B (Ngày 7, Ngày 30), F (SB-83/84/85, SB-87, SB-99)
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
 - [x] Coding Plan (Tech Lead) — `coding-plan/master-plan.md`, `coding-plan/coding-agent-guide.md`, P1–P8
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — mobile-dev P1-P8 complete per
+  `coding-plan/master-plan.md` Phases Overview (all Status: DONE). P6 blocker
+  (AC_CONFLICT_CROSS_REQUIREMENT vs REQ-002/STORY-021 AC4) resolved
+  2026-09-17 by user decision (Option 1: narrow the guard's
+  `flutter_local_notifications` clause to an import boundary under
+  `lib/features/reminders/**`, keep the ban on other 3 packages, keep
+  REQ-002/STORY-021 DONE). See `coding-plan/phase-P6-evening-check-in.md` §7/§8.
 - [ ] Review (Reviewer)
 
 ## Depends On

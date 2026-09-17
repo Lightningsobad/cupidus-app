@@ -9,7 +9,7 @@
 | P3 | Mobile Developer | DONE | 2026-09-17 |
 | P4 | Mobile Developer | DONE | 2026-09-17 |
 | P5 | Mobile Developer | DONE | 2026-09-17 |
-| P6 | Mobile Developer | BLOCKED | 2026-09-17 |
+| P6 | Mobile Developer | DONE | 2026-09-17 |
 | P7 | Mobile Developer | DONE | 2026-09-17 |
 | P8 | Mobile Developer | DONE | 2026-09-17 |
 
@@ -1040,9 +1040,49 @@ BaseHead `4d60113f` ở những vùng không nằm trong diff của P6
 2x `zodiac_red_flag_screen_golden_test.dart`). Cái thứ 15 là guard AC4 ở trên,
 và nó đỏ trực tiếp vì P6.
 
+### Blocker RESOLVED — 2026-09-17, quyết định của người dùng (hướng 1)
+
+Người dùng chọn đúng hướng 1 mà §8 của `phase-P6-evening-check-in.md` đã soạn:
+"P6 sẽ được implement, requirement 002 có thể đã cũ". Cho phép **thu hẹp** guard,
+không xoá, và không mở lại trạng thái DONE của REQ-002/STORY-021.
+
+Thay đổi duy nhất trong
+`mobile/test/features/reminders/reminder_copy_guard_test.dart`:
+
+- `_forbiddenDependencies` giữ nguyên lệnh cấm khai báo pubspec cho
+  `android_alarm_manager`, `alarm`, `awesome_notifications`.
+- `flutter_local_notifications` rời danh sách đó và chuyển thành hằng
+  `_remindersForbiddenImport`, phục vụ một test mới kiểm biên giới import.
+- Test mới `lib/features/reminders never imports a local-notification plugin
+  (AC4)` quét mọi dòng `import`/`export` trong các file `.dart` dưới
+  `lib/features/reminders/`.
+- Một dòng chú thích ngay tại chỗ sửa dẫn chiếu quyết định
+  ("narrowed 2026-09-17 per user decision, cross-requirement conflict with
+  REQ-016 STORY-012 P6 -- see phase-P6-evening-check-in.md §8").
+
+Không phải test rỗng nghĩa: thư mục `lib/features/reminders/` có 17 file Dart
+thật, và nơi duy nhất trong `lib/` import gói này là
+`lib/features/phase_status/data/local_notification_scheduler.dart` — đúng ranh
+giới AC4 muốn giữ. Gói import là URI `package:` tuyệt đối nên phép so khớp chuỗi
+không bị hụt như với import tương đối.
+
+`pubspec.yaml` đã mang sẵn `flutter_local_notifications: ^22.3.1` và
+`timezone: ^0.11.1` từ commit P6 `62dd3297`; SDK ràng buộc `^3.12.1` (Dart) trên
+Flutter 3.44.1 nên không phải hạ ràng buộc nào.
+
+```
+flutter test test/features/reminders/reminder_copy_guard_test.dart
+  00:00 +3: All tests passed!
+flutter test test/features/reminders/ test/features/phase_status/ \
+  test/features/journal/ test/features/account/ --reporter failures-only
+  +452 ~11: All other tests passed!   (11 skip là các test chụp ảnh)
+flutter analyze lib test
+  227 issues found, 0 error            (giữ nguyên mức sau P8)
+```
+
 ### Next phase
 
-- **P8** — phụ thuộc P3 và P7, cả hai đã DONE, không phụ thuộc P6.
+- Không còn phase nào của STORY-012. P6 và P8 đều DONE; toàn bộ P1–P8 đã xong.
 
 ## P8 – Bộ đếm và các bề mặt khoảng lặng
 

@@ -27,10 +27,17 @@ const List<String> _forbiddenTokens = [
 
 const List<String> _forbiddenDependencies = [
   'android_alarm_manager',
-  'flutter_local_notifications',
   'alarm',
   'awesome_notifications',
 ];
+
+// narrowed 2026-09-17 per user decision, cross-requirement conflict with
+// REQ-016 STORY-012 P6 -- see phase-P6-evening-check-in.md §8. AC4's intent is
+// that the synced-reminder feature never becomes a real device alarm, so the
+// ban on this one package moved from "not declared in pubspec.yaml" to "not
+// imported under lib/features/reminders/", leaving another feature free to
+// schedule its own local notification.
+const String _remindersForbiddenImport = 'flutter_local_notifications';
 
 void main() {
   test(
@@ -89,6 +96,40 @@ void main() {
               '(AC4).',
         );
       }
+    },
+  );
+
+  test(
+    'lib/features/reminders never imports a local-notification plugin (AC4)',
+    () {
+      final offenses = <String>[];
+      final dartFiles = Directory('lib/features/reminders')
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((file) => file.path.endsWith('.dart'));
+
+      for (final file in dartFiles) {
+        final lines = file.readAsLinesSync();
+        for (var lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+          final line = lines[lineIndex].trimLeft();
+          if (!line.startsWith('import ') && !line.startsWith('export ')) {
+            continue;
+          }
+          if (line.contains(_remindersForbiddenImport)) {
+            offenses.add('${file.path}:${lineIndex + 1}: $line');
+          }
+        }
+      }
+
+      expect(
+        offenses,
+        isEmpty,
+        reason:
+            'the synced-reminder feature must never schedule a device alarm or '
+            'local notification, so nothing under lib/features/reminders may '
+            'import "$_remindersForbiddenImport" (AC4).\n'
+            '${offenses.join('\n')}',
+      );
     },
   );
 }
