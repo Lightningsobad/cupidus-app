@@ -1,0 +1,20 @@
+{
+  "id": "req016.compat_bands",
+  "version": "1.0.0",
+  "schema_id": "req016.compat_bands.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "easy_sync",
+      "label": "Dễ bắt nhịp"
+    },
+    {
+      "id": "needs_tuning",
+      "label": "Cần chỉnh nhịp"
+    },
+    {
+      "id": "complementary",
+      "label": "Khác nhịp, bù nhau"
+    }
+  ]
+}

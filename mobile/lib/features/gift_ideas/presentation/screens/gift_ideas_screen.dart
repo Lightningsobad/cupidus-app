@@ -5,6 +5,7 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/generated/app_l10n.dart';
 import '../../../activity_cards/domain/activity_card_repository.dart';
+import '../../../compatibility_lookup/compatibility_lookup_entry_point.dart';
 import '../../../context_notebook/context_notebook_entry_point.dart';
 import '../../../your_view_portrait/your_view_portrait_entry_point.dart';
 import '../../data/gift_repository.dart';
@@ -179,7 +180,31 @@ class _GiftIdeasBody extends StatelessWidget {
                       compact: !identical(suggestion, visible.first),
                     ),
                   ),
-                const _GuessRow(),
+                _EntryRow(
+                  key: const Key('gift-ideas-guess-row'),
+                  icon: CupidIcons.help,
+                  label: l10n.gift_ideas_guess_row,
+                  onTap: () => openYourViewPortrait(
+                    context,
+                    from: PortraitEntrySource.giftIdeas,
+                  ),
+                ),
+                _EntryRow(
+                  key: const Key('gift-ideas-compat-row'),
+                  icon: CupidIcons.favorite,
+                  // Reuses screen (10)'s own approved title rather than a new
+                  // string, since this row's only job is to name where it goes.
+                  label: l10n.compat_screen_title,
+                  // The one call site of the compatibility table in `lib/`
+                  // (`coding-plan/phase-P4-...` §10). It is a direct call and
+                  // not a named route on purpose: screen (10) is reachable
+                  // only from a surface that already knows why the reader is
+                  // here (AC-2/AC-3).
+                  onTap: () => openCompatibilityLookup(
+                    context,
+                    from: CompatibilityEntry.giftIdeas,
+                  ),
+                ),
               ],
             );
           },
@@ -346,16 +371,30 @@ class _BasisBand extends StatelessWidget {
 
 /// The single door onto the portrait (R-13, AC-2/AC-3).
 ///
-/// The screen (5) canvas draws it as a card-like row with a `?` disc and a `›`
-/// chevron rather than as plain caption text, and the design canvas anchors for
-/// this screen. It is still a side path, not the destination of the screen: it
-/// sits under every suggestion and carries no gradient and no primary styling.
-class _GuessRow extends StatelessWidget {
-  const _GuessRow();
+/// The screen (5) canvas draws the guess row as a card-like row with a `?`
+/// disc and a `›` chevron rather than as plain caption text, and the design
+/// canvas anchors for this screen. Every row this widget renders is still a
+/// side path, not the destination of the screen: each sits under every
+/// suggestion and carries no gradient and no primary styling.
+///
+/// Two entry points share this shape (the "your view" portrait and the
+/// compatibility table), each with its own [key], icon, label and
+/// destination — never a shared `onTap`, so neither destination's own
+/// acceptance criteria depend on which one currently owns the row.
+class _EntryRow extends StatelessWidget {
+  const _EntryRow({
+    required Key key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  }) : super(key: key);
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final AppL10n l10n = AppL10n.of(context);
     final CupidColorTokens colors = context.cupidColors;
     final CupidTypographyTokens type = context.cupidType;
     final CupidPlatformTokens platform = context.cupidPlatform;
@@ -363,12 +402,8 @@ class _GuessRow extends StatelessWidget {
     return Semantics(
       button: true,
       child: GestureDetector(
-        key: const Key('gift-ideas-guess-row'),
         behavior: HitTestBehavior.opaque,
-        onTap: () => openYourViewPortrait(
-          context,
-          from: PortraitEntrySource.giftIdeas,
-        ),
+        onTap: onTap,
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: colors.colorSurface,
@@ -379,11 +414,11 @@ class _GuessRow extends StatelessWidget {
             padding: const EdgeInsets.all(CupidSpacing.sm),
             child: Row(
               children: <Widget>[
-                _GlyphDisc(icon: CupidIcons.help, color: colors.colorTextMuted),
+                _GlyphDisc(icon: icon, color: colors.colorTextMuted),
                 const SizedBox(width: CupidSpacing.sm),
                 Expanded(
                   child: Text(
-                    l10n.gift_ideas_guess_row,
+                    label,
                     style: type.caption.copyWith(color: colors.colorText),
                   ),
                 ),

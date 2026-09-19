@@ -7191,6 +7191,535 @@ class PortraitAnswersCompanion extends UpdateCompanion<PortraitAnswerRow> {
   }
 }
 
+class $RelationshipLabelsTable extends RelationshipLabels
+    with TableInfo<$RelationshipLabelsTable, RelationshipLabelRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RelationshipLabelsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerKeyMeta = const VerificationMeta(
+    'ownerKey',
+  );
+  @override
+  late final GeneratedColumn<String> ownerKey = GeneratedColumn<String>(
+    'owner_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _subjectMeta = const VerificationMeta(
+    'subject',
+  );
+  @override
+  late final GeneratedColumn<String> subject = GeneratedColumn<String>(
+    'subject',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _systemMeta = const VerificationMeta('system');
+  @override
+  late final GeneratedColumn<String> system = GeneratedColumn<String>(
+    'system',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _certaintyMeta = const VerificationMeta(
+    'certainty',
+  );
+  @override
+  late final GeneratedColumn<String> certainty = GeneratedColumn<String>(
+    'certainty',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ownerKey,
+    subject,
+    system,
+    value,
+    certainty,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'relationship_labels';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RelationshipLabelRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('owner_key')) {
+      context.handle(
+        _ownerKeyMeta,
+        ownerKey.isAcceptableOrUnknown(data['owner_key']!, _ownerKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerKeyMeta);
+    }
+    if (data.containsKey('subject')) {
+      context.handle(
+        _subjectMeta,
+        subject.isAcceptableOrUnknown(data['subject']!, _subjectMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_subjectMeta);
+    }
+    if (data.containsKey('system')) {
+      context.handle(
+        _systemMeta,
+        system.isAcceptableOrUnknown(data['system']!, _systemMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_systemMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    if (data.containsKey('certainty')) {
+      context.handle(
+        _certaintyMeta,
+        certainty.isAcceptableOrUnknown(data['certainty']!, _certaintyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_certaintyMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {ownerKey, subject, system},
+  ];
+  @override
+  RelationshipLabelRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RelationshipLabelRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ownerKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_key'],
+      )!,
+      subject: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject'],
+      )!,
+      system: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}system'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
+      certainty: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}certainty'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $RelationshipLabelsTable createAlias(String alias) {
+    return $RelationshipLabelsTable(attachedDatabase, alias);
+  }
+}
+
+class RelationshipLabelRow extends DataClass
+    implements Insertable<RelationshipLabelRow> {
+  /// Client-generated UUID v4, permanently stable — never a rowid/autoincrement.
+  final String id;
+
+  /// Backend `User.id`; every query filters on this column, which is what keeps
+  /// two users sharing one device from reading each other's labels.
+  final String ownerKey;
+
+  /// `self` | `partner`. Stored as text with Dart constants rather than an enum
+  /// index, because an index silently changes meaning the day someone inserts a
+  /// value into the middle of the enum.
+  final String subject;
+
+  /// `zodiac` | `mbti`.
+  final String system;
+
+  /// An `axis_value.id` from the matching `req016.compat_*` pack.
+  final String value;
+
+  /// `known` | `guess`. A guess stays visibly the *user's* guess wherever it is
+  /// rendered; the app never promotes it to a fact it confirms (AC-8).
+  final String certainty;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const RelationshipLabelRow({
+    required this.id,
+    required this.ownerKey,
+    required this.subject,
+    required this.system,
+    required this.value,
+    required this.certainty,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['owner_key'] = Variable<String>(ownerKey);
+    map['subject'] = Variable<String>(subject);
+    map['system'] = Variable<String>(system);
+    map['value'] = Variable<String>(value);
+    map['certainty'] = Variable<String>(certainty);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  RelationshipLabelsCompanion toCompanion(bool nullToAbsent) {
+    return RelationshipLabelsCompanion(
+      id: Value(id),
+      ownerKey: Value(ownerKey),
+      subject: Value(subject),
+      system: Value(system),
+      value: Value(value),
+      certainty: Value(certainty),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory RelationshipLabelRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RelationshipLabelRow(
+      id: serializer.fromJson<String>(json['id']),
+      ownerKey: serializer.fromJson<String>(json['ownerKey']),
+      subject: serializer.fromJson<String>(json['subject']),
+      system: serializer.fromJson<String>(json['system']),
+      value: serializer.fromJson<String>(json['value']),
+      certainty: serializer.fromJson<String>(json['certainty']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ownerKey': serializer.toJson<String>(ownerKey),
+      'subject': serializer.toJson<String>(subject),
+      'system': serializer.toJson<String>(system),
+      'value': serializer.toJson<String>(value),
+      'certainty': serializer.toJson<String>(certainty),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  RelationshipLabelRow copyWith({
+    String? id,
+    String? ownerKey,
+    String? subject,
+    String? system,
+    String? value,
+    String? certainty,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => RelationshipLabelRow(
+    id: id ?? this.id,
+    ownerKey: ownerKey ?? this.ownerKey,
+    subject: subject ?? this.subject,
+    system: system ?? this.system,
+    value: value ?? this.value,
+    certainty: certainty ?? this.certainty,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  RelationshipLabelRow copyWithCompanion(RelationshipLabelsCompanion data) {
+    return RelationshipLabelRow(
+      id: data.id.present ? data.id.value : this.id,
+      ownerKey: data.ownerKey.present ? data.ownerKey.value : this.ownerKey,
+      subject: data.subject.present ? data.subject.value : this.subject,
+      system: data.system.present ? data.system.value : this.system,
+      value: data.value.present ? data.value.value : this.value,
+      certainty: data.certainty.present ? data.certainty.value : this.certainty,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RelationshipLabelRow(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('subject: $subject, ')
+          ..write('system: $system, ')
+          ..write('value: $value, ')
+          ..write('certainty: $certainty, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ownerKey,
+    subject,
+    system,
+    value,
+    certainty,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RelationshipLabelRow &&
+          other.id == this.id &&
+          other.ownerKey == this.ownerKey &&
+          other.subject == this.subject &&
+          other.system == this.system &&
+          other.value == this.value &&
+          other.certainty == this.certainty &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class RelationshipLabelsCompanion
+    extends UpdateCompanion<RelationshipLabelRow> {
+  final Value<String> id;
+  final Value<String> ownerKey;
+  final Value<String> subject;
+  final Value<String> system;
+  final Value<String> value;
+  final Value<String> certainty;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const RelationshipLabelsCompanion({
+    this.id = const Value.absent(),
+    this.ownerKey = const Value.absent(),
+    this.subject = const Value.absent(),
+    this.system = const Value.absent(),
+    this.value = const Value.absent(),
+    this.certainty = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RelationshipLabelsCompanion.insert({
+    required String id,
+    required String ownerKey,
+    required String subject,
+    required String system,
+    required String value,
+    required String certainty,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       ownerKey = Value(ownerKey),
+       subject = Value(subject),
+       system = Value(system),
+       value = Value(value),
+       certainty = Value(certainty),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<RelationshipLabelRow> custom({
+    Expression<String>? id,
+    Expression<String>? ownerKey,
+    Expression<String>? subject,
+    Expression<String>? system,
+    Expression<String>? value,
+    Expression<String>? certainty,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownerKey != null) 'owner_key': ownerKey,
+      if (subject != null) 'subject': subject,
+      if (system != null) 'system': system,
+      if (value != null) 'value': value,
+      if (certainty != null) 'certainty': certainty,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RelationshipLabelsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerKey,
+    Value<String>? subject,
+    Value<String>? system,
+    Value<String>? value,
+    Value<String>? certainty,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return RelationshipLabelsCompanion(
+      id: id ?? this.id,
+      ownerKey: ownerKey ?? this.ownerKey,
+      subject: subject ?? this.subject,
+      system: system ?? this.system,
+      value: value ?? this.value,
+      certainty: certainty ?? this.certainty,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ownerKey.present) {
+      map['owner_key'] = Variable<String>(ownerKey.value);
+    }
+    if (subject.present) {
+      map['subject'] = Variable<String>(subject.value);
+    }
+    if (system.present) {
+      map['system'] = Variable<String>(system.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<String>(value.value);
+    }
+    if (certainty.present) {
+      map['certainty'] = Variable<String>(certainty.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RelationshipLabelsCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('subject: $subject, ')
+          ..write('system: $system, ')
+          ..write('value: $value, ')
+          ..write('certainty: $certainty, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$CupidDatabase extends GeneratedDatabase {
   _$CupidDatabase(QueryExecutor e) : super(e);
   $CupidDatabaseManager get managers => $CupidDatabaseManager(this);
@@ -7220,6 +7749,8 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
   late final $PortraitAnswersTable portraitAnswers = $PortraitAnswersTable(
     this,
   );
+  late final $RelationshipLabelsTable relationshipLabels =
+      $RelationshipLabelsTable(this);
   late final Index activityCardsOwnerStatus = Index(
     'activity_cards_owner_status',
     'CREATE INDEX activity_cards_owner_status ON activity_cards (owner_key, status)',
@@ -7234,6 +7765,8 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
   late final InviteMessageDao inviteMessageDao = InviteMessageDao(
     this as CupidDatabase,
   );
+  late final RelationshipLabelsDao relationshipLabelsDao =
+      RelationshipLabelsDao(this as CupidDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7254,6 +7787,7 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
     askPromptState,
     calendarEventState,
     portraitAnswers,
+    relationshipLabels,
     activityCardsOwnerStatus,
   ];
   @override
@@ -11721,6 +12255,276 @@ typedef $$PortraitAnswersTableProcessedTableManager =
       PortraitAnswerRow,
       PrefetchHooks Function()
     >;
+typedef $$RelationshipLabelsTableCreateCompanionBuilder =
+    RelationshipLabelsCompanion Function({
+      required String id,
+      required String ownerKey,
+      required String subject,
+      required String system,
+      required String value,
+      required String certainty,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$RelationshipLabelsTableUpdateCompanionBuilder =
+    RelationshipLabelsCompanion Function({
+      Value<String> id,
+      Value<String> ownerKey,
+      Value<String> subject,
+      Value<String> system,
+      Value<String> value,
+      Value<String> certainty,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$RelationshipLabelsTableFilterComposer
+    extends Composer<_$CupidDatabase, $RelationshipLabelsTable> {
+  $$RelationshipLabelsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subject => $composableBuilder(
+    column: $table.subject,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get system => $composableBuilder(
+    column: $table.system,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get certainty => $composableBuilder(
+    column: $table.certainty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$RelationshipLabelsTableOrderingComposer
+    extends Composer<_$CupidDatabase, $RelationshipLabelsTable> {
+  $$RelationshipLabelsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subject => $composableBuilder(
+    column: $table.subject,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get system => $composableBuilder(
+    column: $table.system,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get certainty => $composableBuilder(
+    column: $table.certainty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$RelationshipLabelsTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $RelationshipLabelsTable> {
+  $$RelationshipLabelsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerKey =>
+      $composableBuilder(column: $table.ownerKey, builder: (column) => column);
+
+  GeneratedColumn<String> get subject =>
+      $composableBuilder(column: $table.subject, builder: (column) => column);
+
+  GeneratedColumn<String> get system =>
+      $composableBuilder(column: $table.system, builder: (column) => column);
+
+  GeneratedColumn<String> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+
+  GeneratedColumn<String> get certainty =>
+      $composableBuilder(column: $table.certainty, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$RelationshipLabelsTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $RelationshipLabelsTable,
+          RelationshipLabelRow,
+          $$RelationshipLabelsTableFilterComposer,
+          $$RelationshipLabelsTableOrderingComposer,
+          $$RelationshipLabelsTableAnnotationComposer,
+          $$RelationshipLabelsTableCreateCompanionBuilder,
+          $$RelationshipLabelsTableUpdateCompanionBuilder,
+          (
+            RelationshipLabelRow,
+            BaseReferences<
+              _$CupidDatabase,
+              $RelationshipLabelsTable,
+              RelationshipLabelRow
+            >,
+          ),
+          RelationshipLabelRow,
+          PrefetchHooks Function()
+        > {
+  $$RelationshipLabelsTableTableManager(
+    _$CupidDatabase db,
+    $RelationshipLabelsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RelationshipLabelsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RelationshipLabelsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RelationshipLabelsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ownerKey = const Value.absent(),
+                Value<String> subject = const Value.absent(),
+                Value<String> system = const Value.absent(),
+                Value<String> value = const Value.absent(),
+                Value<String> certainty = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RelationshipLabelsCompanion(
+                id: id,
+                ownerKey: ownerKey,
+                subject: subject,
+                system: system,
+                value: value,
+                certainty: certainty,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String ownerKey,
+                required String subject,
+                required String system,
+                required String value,
+                required String certainty,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => RelationshipLabelsCompanion.insert(
+                id: id,
+                ownerKey: ownerKey,
+                subject: subject,
+                system: system,
+                value: value,
+                certainty: certainty,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$RelationshipLabelsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $RelationshipLabelsTable,
+      RelationshipLabelRow,
+      $$RelationshipLabelsTableFilterComposer,
+      $$RelationshipLabelsTableOrderingComposer,
+      $$RelationshipLabelsTableAnnotationComposer,
+      $$RelationshipLabelsTableCreateCompanionBuilder,
+      $$RelationshipLabelsTableUpdateCompanionBuilder,
+      (
+        RelationshipLabelRow,
+        BaseReferences<
+          _$CupidDatabase,
+          $RelationshipLabelsTable,
+          RelationshipLabelRow
+        >,
+      ),
+      RelationshipLabelRow,
+      PrefetchHooks Function()
+    >;
 
 class $CupidDatabaseManager {
   final _$CupidDatabase _db;
@@ -11755,4 +12559,6 @@ class $CupidDatabaseManager {
       $$CalendarEventStateTableTableManager(_db, _db.calendarEventState);
   $$PortraitAnswersTableTableManager get portraitAnswers =>
       $$PortraitAnswersTableTableManager(_db, _db.portraitAnswers);
+  $$RelationshipLabelsTableTableManager get relationshipLabels =>
+      $$RelationshipLabelsTableTableManager(_db, _db.relationshipLabels);
 }

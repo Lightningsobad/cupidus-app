@@ -1,6 +1,6 @@
 # Story Master: STORY-009 Chân dung "theo cách BẠN nhìn"
 
-Status: TODO
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: mobile-only (Tech Lead chốt: `owner_key` lấy từ

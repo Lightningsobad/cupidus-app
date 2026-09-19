@@ -3,7 +3,10 @@
 Status: TODO
 Complexity: complex
 Story-Class: standard
-Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
+Implementation Lane: mobile (Tech Lead chốt 2026-09-11 — **không có lane
+backend**: AC-28/AC-29 cấm mọi lời gọi mạng, phần "cổng nhập nội dung" là Dart
+validator chạy trong `mobile/test/`, không phải service. Xem
+`architecture/solution.md` §1 Key Discovery 1.)
 Requirement: REQ-016
 Screen: Bảng tra ăn khớp — màn (10), **nhóm KHOÁ VỊ TRÍ**. Chỉ vào được từ luồng
 (5) gợi ý quà hoặc (9) kịch bản buổi hẹn đang chạy.
@@ -13,8 +16,12 @@ F (3f); `req_master.md` R-7, R-8, R-13
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`,
+  `architecture/contract-summary.md`
+- [x] Coding Plan (Tech Lead) — `coding-plan/master-plan.md`,
+  `coding-plan/coding-agent-guide.md`, sáu file phase P1–P6
+- [x] Implementation (Development) — mobile-dev P1-P6 complete per
+  `coding-plan/master-plan.md` Phases Overview (all Status: COMPLETE)
 - [ ] Review (Reviewer)
 
 ## Depends On

@@ -9,6 +9,7 @@ import 'daos/expense_dao.dart';
 import 'daos/invite_message_dao.dart';
 import 'daos/journal_dao.dart';
 import 'daos/message_dao.dart';
+import 'daos/relationship_labels_dao.dart';
 import 'daos/timeline_dao.dart';
 import 'tables/activity_cards_table.dart';
 import 'tables/calendar_event_state_table.dart';
@@ -19,6 +20,7 @@ import 'tables/journal_entries.dart';
 import 'tables/journal_photos.dart';
 import 'tables/messages_table.dart';
 import 'tables/portrait_answers_table.dart';
+import 'tables/relationship_labels_table.dart';
 import 'tables/timeline_tables.dart';
 
 part 'cupid_database.g.dart';
@@ -57,6 +59,7 @@ typedef BackupExclusion = Future<void> Function(String absolutePath);
     AskPromptState,
     CalendarEventState,
     PortraitAnswers,
+    RelationshipLabels,
   ],
   daos: [
     MessageDao,
@@ -65,6 +68,7 @@ typedef BackupExclusion = Future<void> Function(String absolutePath);
     ActivityCardDao,
     JournalDao,
     InviteMessageDao,
+    RelationshipLabelsDao,
   ],
 )
 class CupidDatabase extends _$CupidDatabase {
@@ -72,7 +76,7 @@ class CupidDatabase extends _$CupidDatabase {
       : super(executor ?? _openConnection(excludeFromBackup));
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   /// From v3 onward this database is NO LONGER a disposable cache, and a
   /// destructive-recreate migration is forbidden.
@@ -89,8 +93,9 @@ class CupidDatabase extends _$CupidDatabase {
   /// device-authoritative `invite_messages` table. v6 adds the three
   /// device-authoritative context-notebook tables. v7 adds the
   /// device-authoritative `calendar_event_state` and `portrait_answers`
-  /// tables. Every migration step here and onward must therefore be
-  /// additive, or migrate the data explicitly.
+  /// tables. v8 adds the device-authoritative `relationship_labels` table.
+  /// Every migration step here and onward must therefore be additive, or
+  /// migrate the data explicitly.
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
@@ -137,6 +142,9 @@ class CupidDatabase extends _$CupidDatabase {
           if (from < 7) {
             await m.createTable(calendarEventState);
             await m.createTable(portraitAnswers);
+          }
+          if (from < 8) {
+            await m.createTable(relationshipLabels);
           }
         },
         // `ON DELETE CASCADE` on activity_card_photos.card_id,
