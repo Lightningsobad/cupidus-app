@@ -8,7 +8,14 @@ import 'package:get_it/get_it.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../features/activity_cards/data/activity_card_repository_impl.dart';
+import '../../features/activity_cards/data/closed_archive_reader_impl.dart';
 import '../../features/activity_cards/domain/activity_card_repository.dart';
+import '../../features/chapter_closure/data/chapter_closure_service.dart';
+import '../../features/chapter_closure/data/stage1_last_opened_store.dart';
+import '../../features/chapter_closure/data/stage1_wipe_registry.dart';
+import '../../features/chapter_closure/data/stage1_wipe_service.dart';
+import '../../features/chapter_closure/domain/chapter_closure_gate.dart';
+import '../../features/chapter_closure/domain/return_gate_resolver.dart';
 import '../../features/context_notebook/context_notebook_entry_point.dart';
 import '../../features/context_notebook/data/context_notebook_dao.dart';
 import '../../features/context_notebook/data/context_notebook_repository.dart';
@@ -21,6 +28,7 @@ import '../../features/gift_ideas/domain/gift_selector.dart';
 import '../../features/invite_composer/data/invite_payload_repository_impl.dart';
 import '../../features/invite_composer/domain/invite_payload_repository.dart';
 import '../../features/invite_composer/domain/preset_catalogue.dart';
+import '../database/daos/chapter_closure_dao.dart';
 import '../database/daos/invite_message_dao.dart';
 import '../../features/vibes/data/vibes_repository.dart';
 import '../../features/vibes/presentation/vibe_cubit.dart';
@@ -392,6 +400,34 @@ void setupServiceLocator() {
     ),
   );
 
+  // REQ-016 STORY-013 P2 (`architecture/contract-summary.md` §3): the closure
+  // ledger's writer and its read gate. Also not session-scoped -- a sign-out
+  // that deleted the ledger would silently un-close a chapter the user closed
+  // on purpose (AC-17).
+  //
+  // Nothing is injected into `ActivityCardDao` or `ContextNotebookRepository`
+  // here: both already exclude closed rows inside their own SQL, so their
+  // constructors and public signatures are unchanged.
+  getIt.registerLazySingleton<ChapterClosureDao>(
+    () => getIt<CupidDatabase>().chapterClosureDao,
+  );
+
+  getIt.registerLazySingleton<ChapterClosureGate>(
+    () => ChapterClosureGate(getIt<ChapterClosureDao>()),
+  );
+
+  // REQ-016 STORY-013 P5: the one reader allowed to see closed cards. It is a
+  // separate registration rather than extra methods on
+  // `ActivityCardRepository` so that every existing consumer keeps a store with
+  // the closed rows missing (AC-11).
+  getIt.registerLazySingleton<ClosedArchiveReader>(
+    () => ClosedArchiveReaderImpl(
+      dao: getIt<ActivityCardDao>(),
+      closureDao: getIt<ChapterClosureDao>(),
+      ownerKeyStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
   // REQ-016 STORY-010 P4: screen (10). The loader is a singleton because it is
   // stateless and every feature that ships a content pack wants the same one;
   // the cubit is a factory because it is per-screen and holds the packs it read
@@ -406,6 +442,47 @@ void setupServiceLocator() {
       cards: getIt<ActivityCardRepository>(),
       loader: getIt<ContentPackageLoader>(),
     ),
+  );
+
+  getIt.registerLazySingleton<ChapterClosureService>(
+    () => ChapterClosureService(
+      db: getIt<CupidDatabase>(),
+      dao: getIt<ChapterClosureDao>(),
+      ownerKeyStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  // REQ-016 STORY-013 P3 (`architecture/contract-summary.md` §4): the stage-1
+  // wipe registry and the service that executes it. Both resolve
+  // `JournalMediaStore` lazily, so this block stays independent of where that
+  // registration sits in this file.
+  getIt.registerLazySingleton<Stage1WipeRegistry>(
+    () => Stage1WipeRegistry(
+      db: getIt<CupidDatabase>(),
+      journalMediaStore: getIt<JournalMediaStore>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<Stage1WipeService>(
+    () => Stage1WipeService(
+      db: getIt<CupidDatabase>(),
+      dao: getIt<ChapterClosureDao>(),
+      gate: getIt<ChapterClosureGate>(),
+      ownerKeyStore: getIt<BackendUserIdStore>(),
+      registry: getIt<Stage1WipeRegistry>(),
+    ),
+  );
+
+  // REQ-016 STORY-013 P6 (`architecture/contract-summary.md` §2): the return
+  // gate. Not session-scoped -- the open mark describes this install's usage,
+  // not the signed-in session, and signing out must not make the next launch
+  // look like a fresh install.
+  getIt.registerLazySingleton<Stage1LastOpenedStore>(
+    () => Stage1LastOpenedStore(),
+  );
+
+  getIt.registerLazySingleton<ReturnGateResolver>(
+    () => ReturnGateResolver(store: getIt<Stage1LastOpenedStore>()),
   );
 
   // REQ-016 STORY-004 P6: the read/rank pair behind the gift flow. Neither one

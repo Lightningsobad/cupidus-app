@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/cupid_database.dart';
+import '../../chapter_closure/domain/chapter_closure_gate.dart';
 
 /// Row access for the three context-notebook tables.
 ///
@@ -17,12 +18,23 @@ class ContextNotebookDao {
 
   final CupidDatabase _db;
 
+  /// Backs `ContextNotebookRepository.entries()` and nothing else, which is why
+  /// the closure exclusion lives here rather than behind a flag: `skills()`
+  /// (AC-8) and `promptStateRows` read their own tables and are untouched.
   Future<List<NotebookEntryRow>> notebookRows({
     required String ownerKey,
     String? kind,
   }) {
     final query = _db.select(_db.notebookEntries)
-      ..where((t) => t.ownerKey.equals(ownerKey));
+      ..where(
+        (t) =>
+            t.ownerKey.equals(ownerKey) &
+            ChapterClosureGate.notClosed(
+              kind: ChapterClosureItemKind.notebookEntry,
+              itemId: t.id,
+              closureItems: _db.chapterClosureItems,
+            ),
+      );
     if (kind != null) {
       query.where((t) => t.kind.equals(kind));
     }

@@ -363,13 +363,22 @@ void main() {
         for (final String label in _paneLabels) {
           expect(find.text(label), findsOneWidget);
         }
-        expect(ActivityCardPane.values, hasLength(_paneLabels.length));
-        for (final ActivityCardPane pane in ActivityCardPane.values) {
+        // The archive pane is not drawn until a closure exists (STORY-013
+        // AC-16), so the strip this session opens on is still exactly five.
+        final List<ActivityCardPane> openPanes = ActivityCardPane.values
+            .where((ActivityCardPane pane) => !pane.isClosedArchive)
+            .toList(growable: false);
+        expect(openPanes, hasLength(_paneLabels.length));
+        for (final ActivityCardPane pane in openPanes) {
           expect(
             find.byKey(Key('activity_status_filter_cell_${pane.name}')),
             findsOneWidget,
           );
         }
+        expect(
+          find.byKey(const Key('activity_status_filter_cell_closed')),
+          findsNothing,
+        );
         // Leading position, not merely present.
         expect(ActivityCardPane.values.first, ActivityCardPane.all);
       },

@@ -7720,6 +7720,554 @@ class RelationshipLabelsCompanion
   }
 }
 
+class $ChapterClosuresTable extends ChapterClosures
+    with TableInfo<$ChapterClosuresTable, ChapterClosureRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChapterClosuresTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerKeyMeta = const VerificationMeta(
+    'ownerKey',
+  );
+  @override
+  late final GeneratedColumn<String> ownerKey = GeneratedColumn<String>(
+    'owner_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _closedAtMeta = const VerificationMeta(
+    'closedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> closedAt = GeneratedColumn<DateTime>(
+    'closed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, ownerKey, closedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'chapter_closures';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ChapterClosureRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('owner_key')) {
+      context.handle(
+        _ownerKeyMeta,
+        ownerKey.isAcceptableOrUnknown(data['owner_key']!, _ownerKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerKeyMeta);
+    }
+    if (data.containsKey('closed_at')) {
+      context.handle(
+        _closedAtMeta,
+        closedAt.isAcceptableOrUnknown(data['closed_at']!, _closedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_closedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChapterClosureRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChapterClosureRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ownerKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_key'],
+      )!,
+      closedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}closed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ChapterClosuresTable createAlias(String alias) {
+    return $ChapterClosuresTable(attachedDatabase, alias);
+  }
+}
+
+class ChapterClosureRow extends DataClass
+    implements Insertable<ChapterClosureRow> {
+  /// Client-generated UUID v4, permanently stable (R-15a).
+  final String id;
+
+  /// Backend `User.id` — chapter closure is a global event per owner because
+  /// stage 1 has exactly one relationship at a time (`ux/uiux-spec.md` §1).
+  final String ownerKey;
+
+  /// Internal ordering only. Never exposed as an elapsed-time measurement
+  /// (AC-19/AC-20).
+  final DateTime closedAt;
+  const ChapterClosureRow({
+    required this.id,
+    required this.ownerKey,
+    required this.closedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['owner_key'] = Variable<String>(ownerKey);
+    map['closed_at'] = Variable<DateTime>(closedAt);
+    return map;
+  }
+
+  ChapterClosuresCompanion toCompanion(bool nullToAbsent) {
+    return ChapterClosuresCompanion(
+      id: Value(id),
+      ownerKey: Value(ownerKey),
+      closedAt: Value(closedAt),
+    );
+  }
+
+  factory ChapterClosureRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChapterClosureRow(
+      id: serializer.fromJson<String>(json['id']),
+      ownerKey: serializer.fromJson<String>(json['ownerKey']),
+      closedAt: serializer.fromJson<DateTime>(json['closedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ownerKey': serializer.toJson<String>(ownerKey),
+      'closedAt': serializer.toJson<DateTime>(closedAt),
+    };
+  }
+
+  ChapterClosureRow copyWith({
+    String? id,
+    String? ownerKey,
+    DateTime? closedAt,
+  }) => ChapterClosureRow(
+    id: id ?? this.id,
+    ownerKey: ownerKey ?? this.ownerKey,
+    closedAt: closedAt ?? this.closedAt,
+  );
+  ChapterClosureRow copyWithCompanion(ChapterClosuresCompanion data) {
+    return ChapterClosureRow(
+      id: data.id.present ? data.id.value : this.id,
+      ownerKey: data.ownerKey.present ? data.ownerKey.value : this.ownerKey,
+      closedAt: data.closedAt.present ? data.closedAt.value : this.closedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChapterClosureRow(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('closedAt: $closedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, ownerKey, closedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChapterClosureRow &&
+          other.id == this.id &&
+          other.ownerKey == this.ownerKey &&
+          other.closedAt == this.closedAt);
+}
+
+class ChapterClosuresCompanion extends UpdateCompanion<ChapterClosureRow> {
+  final Value<String> id;
+  final Value<String> ownerKey;
+  final Value<DateTime> closedAt;
+  final Value<int> rowid;
+  const ChapterClosuresCompanion({
+    this.id = const Value.absent(),
+    this.ownerKey = const Value.absent(),
+    this.closedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ChapterClosuresCompanion.insert({
+    required String id,
+    required String ownerKey,
+    required DateTime closedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       ownerKey = Value(ownerKey),
+       closedAt = Value(closedAt);
+  static Insertable<ChapterClosureRow> custom({
+    Expression<String>? id,
+    Expression<String>? ownerKey,
+    Expression<DateTime>? closedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownerKey != null) 'owner_key': ownerKey,
+      if (closedAt != null) 'closed_at': closedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ChapterClosuresCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerKey,
+    Value<DateTime>? closedAt,
+    Value<int>? rowid,
+  }) {
+    return ChapterClosuresCompanion(
+      id: id ?? this.id,
+      ownerKey: ownerKey ?? this.ownerKey,
+      closedAt: closedAt ?? this.closedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ownerKey.present) {
+      map['owner_key'] = Variable<String>(ownerKey.value);
+    }
+    if (closedAt.present) {
+      map['closed_at'] = Variable<DateTime>(closedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChapterClosuresCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChapterClosureItemsTable extends ChapterClosureItems
+    with TableInfo<$ChapterClosureItemsTable, ChapterClosureItemRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChapterClosureItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _closureIdMeta = const VerificationMeta(
+    'closureId',
+  );
+  @override
+  late final GeneratedColumn<String> closureId = GeneratedColumn<String>(
+    'closure_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES chapter_closures (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _itemKindMeta = const VerificationMeta(
+    'itemKind',
+  );
+  @override
+  late final GeneratedColumn<String> itemKind = GeneratedColumn<String>(
+    'item_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _itemIdMeta = const VerificationMeta('itemId');
+  @override
+  late final GeneratedColumn<String> itemId = GeneratedColumn<String>(
+    'item_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [closureId, itemKind, itemId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'chapter_closure_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ChapterClosureItemRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('closure_id')) {
+      context.handle(
+        _closureIdMeta,
+        closureId.isAcceptableOrUnknown(data['closure_id']!, _closureIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_closureIdMeta);
+    }
+    if (data.containsKey('item_kind')) {
+      context.handle(
+        _itemKindMeta,
+        itemKind.isAcceptableOrUnknown(data['item_kind']!, _itemKindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemKindMeta);
+    }
+    if (data.containsKey('item_id')) {
+      context.handle(
+        _itemIdMeta,
+        itemId.isAcceptableOrUnknown(data['item_id']!, _itemIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {closureId, itemKind, itemId};
+  @override
+  ChapterClosureItemRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChapterClosureItemRow(
+      closureId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}closure_id'],
+      )!,
+      itemKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}item_kind'],
+      )!,
+      itemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}item_id'],
+      )!,
+    );
+  }
+
+  @override
+  $ChapterClosureItemsTable createAlias(String alias) {
+    return $ChapterClosureItemsTable(attachedDatabase, alias);
+  }
+}
+
+class ChapterClosureItemRow extends DataClass
+    implements Insertable<ChapterClosureItemRow> {
+  /// Cascades so that reopening a chapter is a single-row delete (AC-17). The
+  /// cascade only fires because `beforeOpen` switches `PRAGMA foreign_keys` on.
+  final String closureId;
+
+  /// `activity_card` | `notebook_entry` | `ask_prompt` (§2).
+  final String itemKind;
+  final String itemId;
+  const ChapterClosureItemRow({
+    required this.closureId,
+    required this.itemKind,
+    required this.itemId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['closure_id'] = Variable<String>(closureId);
+    map['item_kind'] = Variable<String>(itemKind);
+    map['item_id'] = Variable<String>(itemId);
+    return map;
+  }
+
+  ChapterClosureItemsCompanion toCompanion(bool nullToAbsent) {
+    return ChapterClosureItemsCompanion(
+      closureId: Value(closureId),
+      itemKind: Value(itemKind),
+      itemId: Value(itemId),
+    );
+  }
+
+  factory ChapterClosureItemRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChapterClosureItemRow(
+      closureId: serializer.fromJson<String>(json['closureId']),
+      itemKind: serializer.fromJson<String>(json['itemKind']),
+      itemId: serializer.fromJson<String>(json['itemId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'closureId': serializer.toJson<String>(closureId),
+      'itemKind': serializer.toJson<String>(itemKind),
+      'itemId': serializer.toJson<String>(itemId),
+    };
+  }
+
+  ChapterClosureItemRow copyWith({
+    String? closureId,
+    String? itemKind,
+    String? itemId,
+  }) => ChapterClosureItemRow(
+    closureId: closureId ?? this.closureId,
+    itemKind: itemKind ?? this.itemKind,
+    itemId: itemId ?? this.itemId,
+  );
+  ChapterClosureItemRow copyWithCompanion(ChapterClosureItemsCompanion data) {
+    return ChapterClosureItemRow(
+      closureId: data.closureId.present ? data.closureId.value : this.closureId,
+      itemKind: data.itemKind.present ? data.itemKind.value : this.itemKind,
+      itemId: data.itemId.present ? data.itemId.value : this.itemId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChapterClosureItemRow(')
+          ..write('closureId: $closureId, ')
+          ..write('itemKind: $itemKind, ')
+          ..write('itemId: $itemId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(closureId, itemKind, itemId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChapterClosureItemRow &&
+          other.closureId == this.closureId &&
+          other.itemKind == this.itemKind &&
+          other.itemId == this.itemId);
+}
+
+class ChapterClosureItemsCompanion
+    extends UpdateCompanion<ChapterClosureItemRow> {
+  final Value<String> closureId;
+  final Value<String> itemKind;
+  final Value<String> itemId;
+  final Value<int> rowid;
+  const ChapterClosureItemsCompanion({
+    this.closureId = const Value.absent(),
+    this.itemKind = const Value.absent(),
+    this.itemId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ChapterClosureItemsCompanion.insert({
+    required String closureId,
+    required String itemKind,
+    required String itemId,
+    this.rowid = const Value.absent(),
+  }) : closureId = Value(closureId),
+       itemKind = Value(itemKind),
+       itemId = Value(itemId);
+  static Insertable<ChapterClosureItemRow> custom({
+    Expression<String>? closureId,
+    Expression<String>? itemKind,
+    Expression<String>? itemId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (closureId != null) 'closure_id': closureId,
+      if (itemKind != null) 'item_kind': itemKind,
+      if (itemId != null) 'item_id': itemId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ChapterClosureItemsCompanion copyWith({
+    Value<String>? closureId,
+    Value<String>? itemKind,
+    Value<String>? itemId,
+    Value<int>? rowid,
+  }) {
+    return ChapterClosureItemsCompanion(
+      closureId: closureId ?? this.closureId,
+      itemKind: itemKind ?? this.itemKind,
+      itemId: itemId ?? this.itemId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (closureId.present) {
+      map['closure_id'] = Variable<String>(closureId.value);
+    }
+    if (itemKind.present) {
+      map['item_kind'] = Variable<String>(itemKind.value);
+    }
+    if (itemId.present) {
+      map['item_id'] = Variable<String>(itemId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChapterClosureItemsCompanion(')
+          ..write('closureId: $closureId, ')
+          ..write('itemKind: $itemKind, ')
+          ..write('itemId: $itemId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$CupidDatabase extends GeneratedDatabase {
   _$CupidDatabase(QueryExecutor e) : super(e);
   $CupidDatabaseManager get managers => $CupidDatabaseManager(this);
@@ -7751,9 +8299,18 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
   );
   late final $RelationshipLabelsTable relationshipLabels =
       $RelationshipLabelsTable(this);
+  late final $ChapterClosuresTable chapterClosures = $ChapterClosuresTable(
+    this,
+  );
+  late final $ChapterClosureItemsTable chapterClosureItems =
+      $ChapterClosureItemsTable(this);
   late final Index activityCardsOwnerStatus = Index(
     'activity_cards_owner_status',
     'CREATE INDEX activity_cards_owner_status ON activity_cards (owner_key, status)',
+  );
+  late final Index chapterClosureItemsKindItem = Index(
+    'chapter_closure_items_kind_item',
+    'CREATE INDEX chapter_closure_items_kind_item ON chapter_closure_items (item_kind, item_id)',
   );
   late final MessageDao messageDao = MessageDao(this as CupidDatabase);
   late final TimelineDao timelineDao = TimelineDao(this as CupidDatabase);
@@ -7767,6 +8324,9 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
   );
   late final RelationshipLabelsDao relationshipLabelsDao =
       RelationshipLabelsDao(this as CupidDatabase);
+  late final ChapterClosureDao chapterClosureDao = ChapterClosureDao(
+    this as CupidDatabase,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7788,7 +8348,10 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
     calendarEventState,
     portraitAnswers,
     relationshipLabels,
+    chapterClosures,
+    chapterClosureItems,
     activityCardsOwnerStatus,
+    chapterClosureItemsKindItem,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -7812,6 +8375,13 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('invite_messages', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'chapter_closures',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('chapter_closure_items', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -12525,6 +13095,588 @@ typedef $$RelationshipLabelsTableProcessedTableManager =
       RelationshipLabelRow,
       PrefetchHooks Function()
     >;
+typedef $$ChapterClosuresTableCreateCompanionBuilder =
+    ChapterClosuresCompanion Function({
+      required String id,
+      required String ownerKey,
+      required DateTime closedAt,
+      Value<int> rowid,
+    });
+typedef $$ChapterClosuresTableUpdateCompanionBuilder =
+    ChapterClosuresCompanion Function({
+      Value<String> id,
+      Value<String> ownerKey,
+      Value<DateTime> closedAt,
+      Value<int> rowid,
+    });
+
+final class $$ChapterClosuresTableReferences
+    extends
+        BaseReferences<
+          _$CupidDatabase,
+          $ChapterClosuresTable,
+          ChapterClosureRow
+        > {
+  $$ChapterClosuresTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $ChapterClosureItemsTable,
+    List<ChapterClosureItemRow>
+  >
+  _chapterClosureItemsRefsTable(_$CupidDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.chapterClosureItems,
+        aliasName: 'chapter_closures__id__chapter_closure_items__closure_id',
+      );
+
+  $$ChapterClosureItemsTableProcessedTableManager get chapterClosureItemsRefs {
+    final manager = $$ChapterClosureItemsTableTableManager(
+      $_db,
+      $_db.chapterClosureItems,
+    ).filter((f) => f.closureId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _chapterClosureItemsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$ChapterClosuresTableFilterComposer
+    extends Composer<_$CupidDatabase, $ChapterClosuresTable> {
+  $$ChapterClosuresTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> chapterClosureItemsRefs(
+    Expression<bool> Function($$ChapterClosureItemsTableFilterComposer f) f,
+  ) {
+    final $$ChapterClosureItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.chapterClosureItems,
+      getReferencedColumn: (t) => t.closureId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ChapterClosureItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.chapterClosureItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ChapterClosuresTableOrderingComposer
+    extends Composer<_$CupidDatabase, $ChapterClosuresTable> {
+  $$ChapterClosuresTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ChapterClosuresTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $ChapterClosuresTable> {
+  $$ChapterClosuresTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerKey =>
+      $composableBuilder(column: $table.ownerKey, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get closedAt =>
+      $composableBuilder(column: $table.closedAt, builder: (column) => column);
+
+  Expression<T> chapterClosureItemsRefs<T extends Object>(
+    Expression<T> Function($$ChapterClosureItemsTableAnnotationComposer a) f,
+  ) {
+    final $$ChapterClosureItemsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.chapterClosureItems,
+          getReferencedColumn: (t) => t.closureId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ChapterClosureItemsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.chapterClosureItems,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$ChapterClosuresTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $ChapterClosuresTable,
+          ChapterClosureRow,
+          $$ChapterClosuresTableFilterComposer,
+          $$ChapterClosuresTableOrderingComposer,
+          $$ChapterClosuresTableAnnotationComposer,
+          $$ChapterClosuresTableCreateCompanionBuilder,
+          $$ChapterClosuresTableUpdateCompanionBuilder,
+          (ChapterClosureRow, $$ChapterClosuresTableReferences),
+          ChapterClosureRow,
+          PrefetchHooks Function({bool chapterClosureItemsRefs})
+        > {
+  $$ChapterClosuresTableTableManager(
+    _$CupidDatabase db,
+    $ChapterClosuresTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChapterClosuresTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChapterClosuresTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChapterClosuresTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ownerKey = const Value.absent(),
+                Value<DateTime> closedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChapterClosuresCompanion(
+                id: id,
+                ownerKey: ownerKey,
+                closedAt: closedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String ownerKey,
+                required DateTime closedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ChapterClosuresCompanion.insert(
+                id: id,
+                ownerKey: ownerKey,
+                closedAt: closedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ChapterClosuresTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({chapterClosureItemsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (chapterClosureItemsRefs) db.chapterClosureItems,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (chapterClosureItemsRefs)
+                    await $_getPrefetchedData<
+                      ChapterClosureRow,
+                      $ChapterClosuresTable,
+                      ChapterClosureItemRow
+                    >(
+                      currentTable: table,
+                      referencedTable: $$ChapterClosuresTableReferences
+                          ._chapterClosureItemsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$ChapterClosuresTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).chapterClosureItemsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.closureId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ChapterClosuresTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $ChapterClosuresTable,
+      ChapterClosureRow,
+      $$ChapterClosuresTableFilterComposer,
+      $$ChapterClosuresTableOrderingComposer,
+      $$ChapterClosuresTableAnnotationComposer,
+      $$ChapterClosuresTableCreateCompanionBuilder,
+      $$ChapterClosuresTableUpdateCompanionBuilder,
+      (ChapterClosureRow, $$ChapterClosuresTableReferences),
+      ChapterClosureRow,
+      PrefetchHooks Function({bool chapterClosureItemsRefs})
+    >;
+typedef $$ChapterClosureItemsTableCreateCompanionBuilder =
+    ChapterClosureItemsCompanion Function({
+      required String closureId,
+      required String itemKind,
+      required String itemId,
+      Value<int> rowid,
+    });
+typedef $$ChapterClosureItemsTableUpdateCompanionBuilder =
+    ChapterClosureItemsCompanion Function({
+      Value<String> closureId,
+      Value<String> itemKind,
+      Value<String> itemId,
+      Value<int> rowid,
+    });
+
+final class $$ChapterClosureItemsTableReferences
+    extends
+        BaseReferences<
+          _$CupidDatabase,
+          $ChapterClosureItemsTable,
+          ChapterClosureItemRow
+        > {
+  $$ChapterClosureItemsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ChapterClosuresTable _closureIdTable(_$CupidDatabase db) => db
+      .chapterClosures
+      .createAlias('chapter_closure_items__closure_id__chapter_closures__id');
+
+  $$ChapterClosuresTableProcessedTableManager get closureId {
+    final $_column = $_itemColumn<String>('closure_id')!;
+
+    final manager = $$ChapterClosuresTableTableManager(
+      $_db,
+      $_db.chapterClosures,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_closureIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ChapterClosureItemsTableFilterComposer
+    extends Composer<_$CupidDatabase, $ChapterClosureItemsTable> {
+  $$ChapterClosureItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get itemKind => $composableBuilder(
+    column: $table.itemKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get itemId => $composableBuilder(
+    column: $table.itemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ChapterClosuresTableFilterComposer get closureId {
+    final $$ChapterClosuresTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.closureId,
+      referencedTable: $db.chapterClosures,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ChapterClosuresTableFilterComposer(
+            $db: $db,
+            $table: $db.chapterClosures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChapterClosureItemsTableOrderingComposer
+    extends Composer<_$CupidDatabase, $ChapterClosureItemsTable> {
+  $$ChapterClosureItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get itemKind => $composableBuilder(
+    column: $table.itemKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get itemId => $composableBuilder(
+    column: $table.itemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ChapterClosuresTableOrderingComposer get closureId {
+    final $$ChapterClosuresTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.closureId,
+      referencedTable: $db.chapterClosures,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ChapterClosuresTableOrderingComposer(
+            $db: $db,
+            $table: $db.chapterClosures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChapterClosureItemsTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $ChapterClosureItemsTable> {
+  $$ChapterClosureItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get itemKind =>
+      $composableBuilder(column: $table.itemKind, builder: (column) => column);
+
+  GeneratedColumn<String> get itemId =>
+      $composableBuilder(column: $table.itemId, builder: (column) => column);
+
+  $$ChapterClosuresTableAnnotationComposer get closureId {
+    final $$ChapterClosuresTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.closureId,
+      referencedTable: $db.chapterClosures,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ChapterClosuresTableAnnotationComposer(
+            $db: $db,
+            $table: $db.chapterClosures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChapterClosureItemsTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $ChapterClosureItemsTable,
+          ChapterClosureItemRow,
+          $$ChapterClosureItemsTableFilterComposer,
+          $$ChapterClosureItemsTableOrderingComposer,
+          $$ChapterClosureItemsTableAnnotationComposer,
+          $$ChapterClosureItemsTableCreateCompanionBuilder,
+          $$ChapterClosureItemsTableUpdateCompanionBuilder,
+          (ChapterClosureItemRow, $$ChapterClosureItemsTableReferences),
+          ChapterClosureItemRow,
+          PrefetchHooks Function({bool closureId})
+        > {
+  $$ChapterClosureItemsTableTableManager(
+    _$CupidDatabase db,
+    $ChapterClosureItemsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChapterClosureItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChapterClosureItemsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ChapterClosureItemsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> closureId = const Value.absent(),
+                Value<String> itemKind = const Value.absent(),
+                Value<String> itemId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChapterClosureItemsCompanion(
+                closureId: closureId,
+                itemKind: itemKind,
+                itemId: itemId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String closureId,
+                required String itemKind,
+                required String itemId,
+                Value<int> rowid = const Value.absent(),
+              }) => ChapterClosureItemsCompanion.insert(
+                closureId: closureId,
+                itemKind: itemKind,
+                itemId: itemId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ChapterClosureItemsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({closureId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (closureId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.closureId,
+                                referencedTable:
+                                    $$ChapterClosureItemsTableReferences
+                                        ._closureIdTable(db),
+                                referencedColumn:
+                                    $$ChapterClosureItemsTableReferences
+                                        ._closureIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ChapterClosureItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $ChapterClosureItemsTable,
+      ChapterClosureItemRow,
+      $$ChapterClosureItemsTableFilterComposer,
+      $$ChapterClosureItemsTableOrderingComposer,
+      $$ChapterClosureItemsTableAnnotationComposer,
+      $$ChapterClosureItemsTableCreateCompanionBuilder,
+      $$ChapterClosureItemsTableUpdateCompanionBuilder,
+      (ChapterClosureItemRow, $$ChapterClosureItemsTableReferences),
+      ChapterClosureItemRow,
+      PrefetchHooks Function({bool closureId})
+    >;
 
 class $CupidDatabaseManager {
   final _$CupidDatabase _db;
@@ -12561,4 +13713,8 @@ class $CupidDatabaseManager {
       $$PortraitAnswersTableTableManager(_db, _db.portraitAnswers);
   $$RelationshipLabelsTableTableManager get relationshipLabels =>
       $$RelationshipLabelsTableTableManager(_db, _db.relationshipLabels);
+  $$ChapterClosuresTableTableManager get chapterClosures =>
+      $$ChapterClosuresTableTableManager(_db, _db.chapterClosures);
+  $$ChapterClosureItemsTableTableManager get chapterClosureItems =>
+      $$ChapterClosureItemsTableTableManager(_db, _db.chapterClosureItems);
 }
