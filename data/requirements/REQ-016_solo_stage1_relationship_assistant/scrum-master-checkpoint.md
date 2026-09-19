@@ -16,18 +16,20 @@ stale runs left over from the 2026-09-17 session (session `8177545a`):
   `Alex-Mobile-Dev-2`): blocker `WRITE_SCOPE_TOO_NARROW_FOR_C1` (9 of 10 C-1
   deltas outside granted WriteScope; delivered C-3 iOS URL scheme
   registration only, uncommitted in worktree). Durable metadata
-  (`waiting_reason` + `next_resume_action`) written into the run file; a
-  first parking attempt kept `status: BLOCKED` and re-tripped
-  `guard-open-parallel-runs-on-stop.sh` [OPEN_RUNS] a second time (BLOCKED is
-  apparently not itself a recognized durable-park state for that guard — only
-  `WAITING_EXTERNAL`/`PAUSED` are, per `scheduler-loop.md`'s parking rule).
-  Fix applied: changed `status` to `WAITING_EXTERNAL` (this run genuinely
-  needs a Scrum-Master decision = external/human input, a legitimate durable
-  reason), moved the run id from `parallel-scheduler.json.blocked_runs` to
-  `.paused_runs`, re-normalized via `normalize-run-file.sh`. If `OPEN_RUNS`
-  still fires on this run after that change, treat it as
-  `GUARD_FEEDBACK_INSUFFICIENT` next time rather than repeating the same
-  metadata edit a third time. Story-scoped resume checkpoint (widen WriteScope
+  (`waiting_reason` + `next_resume_action`) written into the run file.
+  Two failed parking attempts before the fix: (1) `status: BLOCKED` re-tripped
+  `guard-open-parallel-runs-on-stop.sh` [OPEN_RUNS]; (2) `status:
+  WAITING_EXTERNAL` still tripped it, with the guard adding the diagnostic
+  "completion_marker present but run status is still parked" — i.e. because
+  this run's specialist already returned with `completion_marker:
+  MOBILE_COMPLETE` (value NO), the run's own lifecycle is over and it must be
+  a **terminal** status, not any flavor of "parked". Fix applied: `status ->
+  COMPLETED` and removed the run id from every scheduler list (`active_runs`/
+  `paused_runs`/`blocked_runs` all empty for it now) — matching the sibling
+  STORY-008 mobile-dev run's same pattern (`COMPLETED` with an unresolved
+  `next_step`/blocker, not indexed anywhere). The unresolved WriteScope/D-3
+  follow-up work is tracked via `next_resume_action` on the run file and the
+  story-worktree checkpoint below, not via keeping the run "open". Story-scoped resume checkpoint (widen WriteScope
   to 5 named files, resolve D-3 date-only `scheduledOn` decision, then
   re-dispatch) lives in the **story worktree**, not the control checkout
   (`guard-parallel-worktree-scope.sh` blocks the control-checkout copy while
