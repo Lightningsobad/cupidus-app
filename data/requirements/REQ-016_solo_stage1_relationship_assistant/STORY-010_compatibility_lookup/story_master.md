@@ -1,6 +1,6 @@
 # Story Master: STORY-010 Bảng tra ăn khớp
 
-Status: TODO
+Status: DONE
 Complexity: complex
 Story-Class: standard
 Implementation Lane: mobile (Tech Lead chốt 2026-09-11 — **không có lane
@@ -22,7 +22,8 @@ F (3f); `req_master.md` R-7, R-8, R-13
   `coding-plan/coding-agent-guide.md`, sáu file phase P1–P6
 - [x] Implementation (Development) — mobile-dev P1-P6 complete per
   `coding-plan/master-plan.md` Phases Overview (all Status: COMPLETE)
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — `review/review-report.md`, Outcome: DEFERRED_ONLY
+  (lượt 3, commit `1651702f`; 0 blocking findings, 8 deferred)
 
 ## Depends On
 - STORY-004 — vào từ luồng gợi ý quà; đọc sổ tay để lấy dữ liệu người dùng tự
