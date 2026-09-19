@@ -8,6 +8,10 @@ Implementation Lane: mobile-only (Tech Lead chốt: toàn bộ bề mặt nằm 
   backend — xem `architecture/solution.md` §1 Key Discovery 1)
 Requirement: REQ-016
 Screen: Mồi chuyện — màn (6), nhóm CỬA VÀO
+Design-Screen: `6-moi-chuyen-a-a` (surface `cupid-ch-ng-1`, biến thể ios; xem
+  `visual-fidelity/visual-fidelity-report.md`). Báo cáo đó mang
+  `DESIGN_ANCHOR_ADJUDICATION_REQUIRED: YES` — 6 chỗ canvas-vs-lời-văn-spec
+  chưa được phán quyết, xem §7 của báo cáo.
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục C.6, D (SC-2),
 F (3c, C1, C7)
 
