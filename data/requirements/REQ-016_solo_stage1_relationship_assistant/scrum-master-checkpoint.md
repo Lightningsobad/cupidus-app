@@ -13,20 +13,26 @@ While reconciling open runs to satisfy the Stop-hook guards, processed two
 stale runs left over from the 2026-09-17 session (session `8177545a`):
 
 - **STORY-012 mobile-dev** (`RUN-...-STORY-012_phase_status_and_widget-mobile-dev`,
-  `Alex-Mobile-Dev-2`): confirmed status `BLOCKED` /
-  `WRITE_SCOPE_TOO_NARROW_FOR_C1` (9 of 10 C-1 deltas outside granted
-  WriteScope; delivered C-3 iOS URL scheme registration only, uncommitted in
-  worktree). Parked with durable metadata: `waiting_reason` +
-  `next_resume_action` written into the run file (normalized via
-  `normalize-run-file.sh`) and into a new story checkpoint written in the
-  **story worktree** (control-checkout write was guard-blocked —
-  `guard-parallel-worktree-scope.sh` — because a run is still indexed for
-  this story; write story-scoped state there, not in the control checkout,
-  until merge):
+  `Alex-Mobile-Dev-2`): blocker `WRITE_SCOPE_TOO_NARROW_FOR_C1` (9 of 10 C-1
+  deltas outside granted WriteScope; delivered C-3 iOS URL scheme
+  registration only, uncommitted in worktree). Durable metadata
+  (`waiting_reason` + `next_resume_action`) written into the run file; a
+  first parking attempt kept `status: BLOCKED` and re-tripped
+  `guard-open-parallel-runs-on-stop.sh` [OPEN_RUNS] a second time (BLOCKED is
+  apparently not itself a recognized durable-park state for that guard — only
+  `WAITING_EXTERNAL`/`PAUSED` are, per `scheduler-loop.md`'s parking rule).
+  Fix applied: changed `status` to `WAITING_EXTERNAL` (this run genuinely
+  needs a Scrum-Master decision = external/human input, a legitimate durable
+  reason), moved the run id from `parallel-scheduler.json.blocked_runs` to
+  `.paused_runs`, re-normalized via `normalize-run-file.sh`. If `OPEN_RUNS`
+  still fires on this run after that change, treat it as
+  `GUARD_FEEDBACK_INSUFFICIENT` next time rather than repeating the same
+  metadata edit a third time. Story-scoped resume checkpoint (widen WriteScope
+  to 5 named files, resolve D-3 date-only `scheduledOn` decision, then
+  re-dispatch) lives in the **story worktree**, not the control checkout
+  (`guard-parallel-worktree-scope.sh` blocks the control-checkout copy while
+  this run is indexed):
   `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget/data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/scrum-master-checkpoint.md`.
-  Next actor must widen WriteScope (see that checkpoint's `Next Resume
-  Action`) and resolve the D-3 data-contract decision before re-dispatching
-  Alex-Mobile-Dev for C-1. Still in `parallel-scheduler.json.blocked_runs`.
 - **STORY-008 mobile-dev** (`Alex-Mobile-Dev@session-8177545a`): run file
   reads `COMPLETED` (`MOBILE_VERIFY_COMPLETE: YES`, but
   `completion_error: Missing completion marker in SubagentStop transcript` —
