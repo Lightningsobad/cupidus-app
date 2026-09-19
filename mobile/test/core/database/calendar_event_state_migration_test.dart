@@ -13,6 +13,13 @@ import 'package:flutter_test/flutter_test.dart';
 /// The fixture is built by opening the current schema on a file and then
 /// removing exactly the v7 addition, so the v6 shape tracks the real table
 /// definitions instead of being retyped by hand.
+///
+/// Landing at v8, not v7: a sibling story (STORY-010) also added a schema step
+/// (`relationship_labels`) at what it assumed would be v7, so it renumbered to
+/// v8 when both merged into the integration branch. `relationship_labels`
+/// already exists in this fixture (it comes from the current schema the
+/// fixture is built on), so the v8 upgrade step is a no-op `CREATE TABLE IF
+/// NOT EXISTS` here — it does not affect what this file is testing.
 void main() {
   Future<int> readUserVersion(CupidDatabase database) async {
     final row = await database.customSelect('PRAGMA user_version').getSingle();
@@ -105,16 +112,16 @@ void main() {
     await tempDir.delete(recursive: true);
   });
 
-  group('v6 -> v7', () {
+  group('v6 -> v8', () {
     setUp(() async {
       await seedV6(databaseFile);
     });
 
-    test('lands on v7 with calendar_event_state present', () async {
+    test('lands on v8 with calendar_event_state present', () async {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
-      expect(await readUserVersion(upgraded), 7);
+      expect(await readUserVersion(upgraded), 8);
       expect(await tableNames(upgraded), contains('calendar_event_state'));
     });
 
@@ -161,15 +168,15 @@ void main() {
     });
   });
 
-  group('v7 on a fresh install', () {
+  group('v8 on a fresh install', () {
     test('onCreate emits calendar_event_state without a migration', () async {
       final fresh = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(fresh.close);
 
       await fresh.select(fresh.calendarEventState).get();
 
-      expect(await readUserVersion(fresh), 7);
-      expect(fresh.schemaVersion, 7);
+      expect(await readUserVersion(fresh), 8);
+      expect(fresh.schemaVersion, 8);
     });
 
     test('calendar_event_state is keyed by (owner_key, event_id)', () async {

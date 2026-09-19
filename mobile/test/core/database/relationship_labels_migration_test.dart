@@ -5,16 +5,20 @@ import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Schema v7 adds `relationship_labels` (`architecture/contract-summary.md` §4).
+/// Schema v8 adds `relationship_labels` (`architecture/contract-summary.md` §4).
 /// The table is device-authoritative, so the upgrade path is the only thing
 /// standing between a user who installed v6 and the labels feature; the
 /// `onCreate` path exercised by the repository tests proves nothing about it.
 ///
 /// The v6 fixture is built by opening the current schema on a file and then
-/// dropping exactly the v7 addition, so the v6 shape tracks the real table
+/// dropping exactly the v8 addition, so the v6 shape tracks the real table
 /// definitions instead of being retyped by hand. Dropping matters: drift emits
 /// `CREATE TABLE IF NOT EXISTS`, so a fixture that leaves the table in place
 /// passes whether or not `onUpgrade` ever runs the step.
+///
+/// Landing at v8, not v7: a sibling story (STORY-009) also added a schema step
+/// (`calendar_event_state`/`portrait_answers`) at v7, so this story's own
+/// addition renumbered to v8 when both merged into the integration branch.
 void main() {
   Future<int> readUserVersion(CupidDatabase database) async {
     final row = await database.customSelect('PRAGMA user_version').getSingle();
@@ -105,16 +109,16 @@ void main() {
     await tempDir.delete(recursive: true);
   });
 
-  group('v6 -> v7', () {
+  group('v6 -> v8', () {
     setUp(() async {
       await seedV6(databaseFile);
     });
 
-    test('lands on v7 with relationship_labels present', () async {
+    test('lands on v8 with relationship_labels present', () async {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
-      expect(await readUserVersion(upgraded), 7);
+      expect(await readUserVersion(upgraded), 8);
       expect(
         await tableNames(upgraded),
         containsAll(<String>[
@@ -129,7 +133,7 @@ void main() {
       );
     });
 
-    test('the migrated table carries the full v7 column set', () async {
+    test('the migrated table carries the full v8 column set', () async {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 

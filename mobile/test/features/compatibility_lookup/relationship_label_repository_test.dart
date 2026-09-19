@@ -7,15 +7,19 @@ import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Schema v7 adds `relationship_labels`
+/// Schema v8 adds `relationship_labels`
 /// (`architecture/contract-summary.md` §4): the zodiac/MBTI labels the user
 /// declares for themselves and for the other person. The table is
 /// device-authoritative, so the migration is `CREATE TABLE` only and every
 /// older table must come through untouched.
 ///
 /// The v6 fixture is built by opening the current schema on a file and removing
-/// exactly the v7 addition, so it tracks the real table definitions instead of
+/// exactly the v8 addition, so it tracks the real table definitions instead of
 /// being retyped by hand.
+///
+/// Landing at v8, not v7: a sibling story (STORY-009) also added a schema step
+/// (`calendar_event_state`/`portrait_answers`) at v7, so this story's own
+/// addition renumbered to v8 when both merged into the integration branch.
 void main() {
   Future<int> readUserVersion(CupidDatabase database) async {
     final row = await database.customSelect('PRAGMA user_version').getSingle();
@@ -63,9 +67,9 @@ void main() {
     );
   }
 
-  group('migration v6 -> v7', () {
+  group('migration v6 -> v8', () {
     /// Seeds one row in each pre-existing client-owned table, then strips the
-    /// v7 addition and rewinds `user_version`, leaving a database that looks
+    /// v8 addition and rewinds `user_version`, leaving a database that looks
     /// exactly like one that stopped at v6.
     setUp(() async {
       final seeded = CupidDatabase(NativeDatabase(databaseFile));
@@ -96,11 +100,11 @@ void main() {
       await seeded.close();
     });
 
-    test('lands on v7 with relationship_labels present', () async {
+    test('lands on v8 with relationship_labels present', () async {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
-      expect(await readUserVersion(upgraded), 7);
+      expect(await readUserVersion(upgraded), 8);
       expect(await tableNames(upgraded), contains('relationship_labels'));
     });
 
@@ -134,15 +138,15 @@ void main() {
     });
   });
 
-  group('v7 on a fresh install', () {
+  group('v8 on a fresh install', () {
     test('onCreate emits relationship_labels without a migration', () async {
       final fresh = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(fresh.close);
 
       await fresh.select(fresh.relationshipLabels).get();
 
-      expect(await readUserVersion(fresh), 7);
-      expect(fresh.schemaVersion, 7);
+      expect(await readUserVersion(fresh), 8);
+      expect(fresh.schemaVersion, 8);
     });
 
     test('the natural key (owner_key, subject, system) is UNIQUE in the DDL',
