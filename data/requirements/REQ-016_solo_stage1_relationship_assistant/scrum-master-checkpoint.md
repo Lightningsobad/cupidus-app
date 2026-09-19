@@ -1,138 +1,88 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-## CURRENT (read this first) — refreshed 2026-09-17 round 32 (this segment)
+## CURRENT (read this first) — refreshed 2026-09-19
 
-Verified/updated this round (3-part protocol applied):
+`continue parallel` this session STOPPED at mandatory pre-flight before any
+requirement/story selection: `python3 .claude/hooks/lib/preflight_check.py`
+returned `FAIL: backend -- DEAD: backend-api` (`nest: command not found`,
+auto-start gave up after 60s). No new specialist was dispatched this
+invocation. Fix the local backend dependency install
+(`node_modules`/`@nestjs/cli` missing) before the next `continue parallel`.
 
-- **STORY-013**: reviewer `Iris-QC-2` (`completion/resume`) COMPLETED —
-  verified the already-applied F1 fix (`req016.last_opened_at` added to
-  `Stage1WipeRegistry`, commit `e80eb387`) with no remaining blockers.
-  `Outcome: DEFERRED_ONLY`. Committed the reviewer's report update in the
-  story worktree (`6aa2f84b`). Story is **review-passed and merge-eligible**,
-  but `git-story-boundary.sh merge` for STORY-013 was attempted and rejected:
-  the REQ-016 integration worktree is still mid-merge
-  (`MERGE_HEAD b5750ae4...`) from the pre-existing STORY-010 conflict (see
-  Immediate blocker below). STORY-013's own `story_master.md` still reads
-  `Status: TODO` — do NOT try to set `Status: DONE` there directly;
-  `guard-story-done-evidence.sh` (`DONE_WITHOUT_VISUAL_EVIDENCE`) rejected a
-  direct edit in the pre-merge story worktree even though all 3
-  design-reference/implemented PNG pairs exist — DONE-marking for a merged
-  story happens on the **integration worktree's copy** post-merge (confirmed
-  pattern from STORY-004's integration copy: `Status: DONE` there,
-  `Status: TODO` still in its own abandoned story worktree). STORY-013 DONE
-  marking is deferred until it can actually merge.
-- **STORY-012**: reviewer final-synthesis (`Iris-QC`) COMPLETED earlier this
-  session — `Outcome: PATCH_REQUIRED` (C-1 10 install/visual deltas
-  BLOCKING-FOR-DONE, C-2 D-6/D-10 need Scrum Master/PO decision, C-3 iOS
-  `Info.plist` missing `CFBundleURLTypes`). Committed (`322c4276`), boundary
-  `base_head` refreshed, and dispatched `Alex-Mobile-Dev-2`
-  (`mobile-implementation`, `RUN-...STORY-012...mobile-dev`, spawn_slot
-  `mobile-dev-3`) to patch **C-1 + C-3 only** (C-2 excluded — needs the
-  Scrum Master/PO decision below). **Still ACTIVE** as of this round;
-  reconcile via SubagentStop, do not re-dispatch.
-- **STORY-008**: `Alex-Mobile-Dev` mobile-verification run (`RUN-...
-  STORY-008...mobile-dev`, spawn_slot `mobile-dev-1`) **still ACTIVE**;
-  reconcile via SubagentStop, do not re-dispatch.
-- **STORY-005**: worktree confirmed to still exist
-  (`story-REQ-016_solo_stage1_relationship_assistant-STORY-005_conversation_starters`)
-  and its own `.ai-team-bundle/tooling/playwright/node_modules` is non-empty
-  (visual-runtime tooling present in that worktree). However STORY-005 is
-  already **merged into integration** — the actionable copy is the
-  integration worktree's `STORY-005_conversation_starters/visual-fidelity/`,
-  which has only `implemented-6-moi-chuyen-a-a-material.png`, no
-  `design-reference-*.png` (confirmed `VISUAL_RUNTIME_MISSING` is real, not
-  stale). **The integration worktree cannot be touched right now** — it is
-  mid-merge (`MERGE_HEAD` set) for the unrelated STORY-010 conflict. No
-  dispatch made for STORY-005 this round; next actor must wait for the
-  STORY-010 merge to clear before working the integration copy, or produce
-  the design-reference PNGs in STORY-005's own worktree and remerge later.
-- Released idle reviewer agents this round via
-  `list-releasable-agents.sh` + `TaskStop`: `Iris-QC-2@session-8177545a`,
-  `Iris-QC@session-8177545a`.
-- STORY-007 and STORY-011 have **no worktree yet** (never started) — both
-  depend on STORY-005 (not DONE) and, for STORY-011, STORY-008 (still
-  ACTIVE). Not ready to dispatch this round.
+While reconciling open runs to satisfy the Stop-hook guards, processed two
+stale runs left over from the 2026-09-17 session (session `8177545a`):
 
-### Prior round narrative (2026-09-17, full state reconciliation) — still authoritative for what it covers below
+- **STORY-012 mobile-dev** (`RUN-...-STORY-012_phase_status_and_widget-mobile-dev`,
+  `Alex-Mobile-Dev-2`): confirmed status `BLOCKED` /
+  `WRITE_SCOPE_TOO_NARROW_FOR_C1` (9 of 10 C-1 deltas outside granted
+  WriteScope; delivered C-3 iOS URL scheme registration only, uncommitted in
+  worktree). Parked with durable metadata: `waiting_reason` +
+  `next_resume_action` written into the run file (normalized via
+  `normalize-run-file.sh`) and into a new story checkpoint written in the
+  **story worktree** (control-checkout write was guard-blocked —
+  `guard-parallel-worktree-scope.sh` — because a run is still indexed for
+  this story; write story-scoped state there, not in the control checkout,
+  until merge):
+  `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget/data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/scrum-master-checkpoint.md`.
+  Next actor must widen WriteScope (see that checkpoint's `Next Resume
+  Action`) and resolve the D-3 data-contract decision before re-dispatching
+  Alex-Mobile-Dev for C-1. Still in `parallel-scheduler.json.blocked_runs`.
+- **STORY-008 mobile-dev** (`Alex-Mobile-Dev@session-8177545a`): run file
+  reads `COMPLETED` (`MOBILE_VERIFY_COMPLETE: YES`, but
+  `completion_error: Missing completion marker in SubagentStop transcript` —
+  treat as unverified, not sealed). Not currently in any scheduler index.
+  Unresolved per its own `next_step`: re-review F-3 in
+  `STORY-008/review/review-report.md`, and `runtime_smoke: BLOCKED` (Android
+  emulator adb unresponsive + host disk 1.1GiB free — devops/user scope,
+  Scrum Master must choose wait vs. `Runtime-Smoke: WAIVED`). Not re-verified
+  this round beyond reading the run file; do not trust `COMPLETED` as sealed
+  until F-3 and runtime smoke are actually resolved.
+- Cleared stale `data/runtime/scrum-master-active-scope.json` (pointed at
+  `Alex-Mobile-Dev` for STORY-012 but a name-reuse match against the
+  now-terminal STORY-008 run tripped `guard-active-scope-stale-on-stop.sh`;
+  no live agent to wait on either way).
+- `list-releasable-agents.sh` printed `Alex-Mobile-Dev@session-8177545a`,
+  `Iris-QC-2@session-8177545a`, `Iris-QC@session-8177545a`; `TaskStop` on
+  each returned "No task found" — that session is gone, nothing to release.
 
-Round-31 checkpoint below this section was STALE: it described dispatches
-(`Iris-QC`, `Iris-QC-2`, `Alex-Mobile-Dev-3`) that no longer exist as active
-runs (`parallel-scheduler.json` active/paused/blocked all empty after
-preflight prune) and were never reconciled before the session ended.
-`list-releasable-agents.sh` prints 9 handles from a now-dead
-`session-8177545a` (`Alex-Mobile-Dev-3`, `Alex-Mobile-Dev`, `Frank-Devops`,
-`Iris-QC` through `Iris-QC-6`); `TaskStop` on each returns "No task found" —
-that session is gone, not reachable, nothing left to release.
-
-Verified directly from git + story artifacts this round (3-part protocol —
-worktree diff + boundary state + story_master.md Status field):
-
-- **DONE, merged into integration** (`codex/REQ-016_solo_stage1_relationship_assistant-integration`):
-  STORY-001, STORY-002, STORY-003, STORY-004, STORY-006, STORY-009. All have
-  `story_master.md` `Status: DONE` (STORY-009's was cosmetically still `TODO`
-  in its own file despite being merged+boundary-`MERGED`+`MERGE_COMPLETE`;
-  fixed to `DONE` in the integration worktree this round — not yet part of a
-  commit since that worktree is mid-merge, see below). `req_master.md`
-  User Stories table synced to match (was showing stale `TODO` for
-  001/002/003/004/006; fixed, committed `46d31249`).
-- **STORY-005**: merged into integration, review `Outcome: DEFERRED_ONLY`,
-  but its own `story_master.md` genuinely reads `Status: TODO` —
-  `guard-story-done-evidence.sh` blocks DONE on missing
-  `design-reference-*.png` (`VISUAL_RUNTIME_MISSING`). A prior session's
-  commit had marked it `DONE` in `req_master.md`'s table incorrectly
-  (inconsistent with its own gate); reverted back to `TODO` (committed
-  `3f043f85` note commit today, table fix in `46d31249`). **Real next step**:
-  dispatch mobile-dev or devops to render `design-reference-*.png` for this
-  story's own merged/integration worktree (STORY-008's devops fix did NOT
-  propagate — per-worktree/gitignored), then re-run the DONE gate. Owner
-  undecided.
-- **STORY-010**: review passed round 3, `Outcome: DEFERRED_ONLY` (0 blocking,
-  8 deferred). Merge-eligible and merge was attempted into integration.
-  **BLOCKED — integration worktree is paused at `MERGE_HEAD`
-  (`b5750ae47abcb6e95a1a04d019779f94a51ff304`)**, 7/9 conflicted files already
-  resolved+staged, 2 remain unresolved:
-  `mobile/lib/features/gift_ideas/presentation/screens/gift_ideas_screen.dart`
-  and `mobile/test/features/gift_ideas/gift_ideas_screen_test.dart`. Root
-  cause (confirmed by reading the actual conflict markers, lines 369-381 of
-  the `.dart` file): STORY-009 and STORY-010 each test-enforce the SAME
-  `_GuessRow` widget (`Key('gift-ideas-guess-row')`, bottom of the Gợi ý quà
-  screen) as their own sole, locked entry point —
-  STORY-009's `onTap` must call `openYourViewPortrait` exclusively
-  (`phase-P5-locked-entry-point.md` lines 124-147), STORY-010's `onTap` must
-  call `openCompatibilityLookup` exclusively
-  (`phase-P4-entry-point-screen-and-label-capture.md` lines 108-111). Neither
-  spec anticipated the other. **User already ruled via `AskUserQuestion` on
-  2026-09-17: split into two separate entry points** (do not keep one and
-  break the other's reviewed test). Implementing that needs a NEW UI/UX spec
-  (second row's position/label/Key) for both stories' `ux/uiux-spec.md` —
-  out of scope for both existing coding plans. Per `role-map.md`, Scrum
-  Master cannot spawn Product Owner/UI-UX Designer directly (only
-  `brainstormer` can). **STOP — `MERGE_CONFLICT_RESOLUTION_BLOCKED`.**
-  Next step: route through `brainstormer` -> backlog to add the second
-  entry-point UX to STORY-009 and STORY-010, then resume this merge (do NOT
-  run `merge --continue`/`--abort` before that lands).
-- **STORY-012**: implementation P1-P8 complete (`Status` header line still
-  reads `TODO`; `[ ] Review` unchecked). Prior checkpoint claimed a 7-slice
-  scoped review (S1-S6b + final-synthesis) was mid-flight with S1-S6a PASSed
-  and S6b blocked on a gap-closer run — none of that is verifiable now (no
-  run files, no slice report artifacts confirmed this round). **Do not trust
-  the prior round's slice-review narrative without re-verifying
-  `review/` artifacts in the STORY-012 worktree first** in the next
-  invocation before dispatching Reviewer again.
-- **STORY-007, STORY-008, STORY-011, STORY-013**: not re-verified this
-  round; treat prior checkpoint's per-story notes (below, under Archival/
-  Cross-story) as unconfirmed until checked against actual worktree state.
+**Immediate blocker for this wave is still open (see below, unchanged since
+2026-09-17): `MERGE_CONFLICT_RESOLUTION_BLOCKED` on STORY-010.** This session
+never reached it because pre-flight failed first. Do not attempt
+`merge --continue`/`--abort` on the integration worktree until that routes
+through `brainstormer`.
 
 ## Immediate blocker for this wave
 
 `MERGE_CONFLICT_RESOLUTION_BLOCKED`: REQ-016 integration branch merge of
-STORY-010 cannot complete without new UX scope (second Gift Ideas entry-point
-row) that only a `brainstormer` → Product Owner/UI-UX Designer → backlog
-flow can add. No further story can merge into integration while this
-`MERGE_HEAD` sits open (`MAX_MERGES_GLOBAL: 1`), though other stories' own
-worktree implementation/review work is not technically blocked by it.
+STORY-010 cannot complete without new UX scope (second Gift Ideas
+entry-point row for STORY-009 vs STORY-010, both test-locking the same
+`Key('gift-ideas-guess-row')` widget to different destinations) that only a
+`brainstormer` -> Product Owner/UI-UX Designer -> backlog flow can add
+(Scrum Master cannot spawn PO/UI-UX directly). User already ruled via
+`AskUserQuestion` on 2026-09-17: split into two separate entry points. No
+further story can merge into integration while this `MERGE_HEAD`
+(`b5750ae47abcb6e95a1a04d019779f94a51ff304`, 7/9 files resolved, 2 remain:
+`mobile/lib/features/gift_ideas/presentation/screens/gift_ideas_screen.dart`,
+`mobile/test/features/gift_ideas/gift_ideas_screen_test.dart`) sits open
+(`MAX_MERGES_GLOBAL: 1`), though other stories' own worktree
+implementation/review work is not technically blocked by it.
 
-## 3-part verification protocol (unchanged, use before sealing any specialist's reported-complete work)
+## Other open per-story items (as of 2026-09-17, unverified since)
+
+- **STORY-005**: merged into integration, review `Outcome: DEFERRED_ONLY`,
+  own `story_master.md` genuinely `Status: TODO` — `VISUAL_RUNTIME_MISSING`
+  (no `design-reference-*.png` in the integration copy). Needs mobile-dev or
+  devops to render them in the integration worktree once STORY-010's merge
+  clears; owner undecided.
+- **STORY-013**: review-passed (`Outcome: DEFERRED_ONLY`, commit
+  `6aa2f84b`), merge-eligible, but blocked behind the same open
+  STORY-010 `MERGE_HEAD`. Its own `story_master.md` still reads `TODO` — do
+  NOT hand-edit to `DONE` pre-merge (`guard-story-done-evidence.sh` rejects
+  it); DONE-marking happens on the integration worktree's copy post-merge.
+- **STORY-007, STORY-011**: no worktree yet; STORY-011 depends on STORY-008
+  (unsealed) and STORY-005 (not DONE) — not ready to dispatch.
+
+## 3-part verification protocol (use before sealing any specialist's reported-complete work)
 
 (1) `ListAgents`/`list-releasable-agents.sh` shows the agent idle/gone; (2)
 worktree `git diff`/`git status` matches the declared WriteScope; (3) the
@@ -140,23 +90,23 @@ specialist's own output file / `story_master.md` Status field reads
 DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 `git-story-boundary.sh refresh-base` before the next spawn handoff.
 
-## Story Graph (from `requirements/requirements.md`) — Story-Class column still accurate, Status column below supersedes it
+## Story Graph (from `requirements/requirements.md`)
 
-| Story | Depends On | Story-Class |
+| Story | Depends On | Story-Class / Status |
 |---|---|---|
 | STORY-001 | NONE | shared-foundation (DONE, merged) |
 | STORY-002 | STORY-001 | shared-foundation (DONE, merged) |
 | STORY-003 | NONE | standard (DONE, merged) |
 | STORY-004 | STORY-001 | complex, shared-foundation (DONE, merged) |
-| STORY-005 | STORY-001, STORY-004 | standard (merged, review DEFERRED_ONLY, held TODO on VISUAL_RUNTIME_MISSING — unresolved) |
+| STORY-005 | STORY-001, STORY-004 | standard (merged, DEFERRED_ONLY, held TODO on VISUAL_RUNTIME_MISSING) |
 | STORY-006 | STORY-001 | standard (DONE, merged) |
-| STORY-007 | STORY-001, STORY-002, STORY-003, STORY-005 | standard (unverified this round) |
-| STORY-008 | STORY-001, STORY-002, STORY-003, STORY-004 | standard (unverified this round) |
+| STORY-007 | STORY-001, STORY-002, STORY-003, STORY-005 | standard (not started) |
+| STORY-008 | STORY-001, STORY-002, STORY-003, STORY-004 | standard (COMPLETED but unsealed — see above) |
 | STORY-009 | STORY-004 | standard (DONE, merged) |
-| STORY-010 | STORY-004 | standard (review DEFERRED_ONLY, merge BLOCKED — see above) |
-| STORY-011 | STORY-001, STORY-004, STORY-005, STORY-008 | standard (unverified this round) |
-| STORY-012 | STORY-001 | standard (impl P1-P8 done, review state unverified this round) |
-| STORY-013 | STORY-001, STORY-004 | standard (unverified this round) |
+| STORY-010 | STORY-004 | standard (DEFERRED_ONLY, merge BLOCKED — see Immediate blocker) |
+| STORY-011 | STORY-001, STORY-004, STORY-005, STORY-008 | standard (not started) |
+| STORY-012 | STORY-001 | standard (impl P1-P8 done, patch cycle BLOCKED — see above) |
+| STORY-013 | STORY-001, STORY-004 | standard (review-passed, merge blocked behind STORY-010) |
 
 Open, non-blocking bugs (cite, do not re-run repo-wide commands):
 `BUG-20260907-001` (repo-wide `flutter test` pre-existing failures),
@@ -170,7 +120,5 @@ warnings). Closed: `BUG-20260907-002`, `BUG-20260910-001`.
   for STORY-001/002/003/004/006/009 — superseded by this checkpoint's summary.
 - `test-results.md` files (can be 80KB+) — use `git diff`/`Read
   offset/limit`, never a full Read.
-- Prior round 1-31 narrative in git history of this file — superseded by
-  CURRENT above; only the STORY-012 slice-review claims need re-verification,
-  everything else in the old narrative that this file still repeats (Story
-  Graph, open bugs) is preserved above.
+- Prior round 1-32 narrative in git history of this file — superseded by
+  CURRENT above; Story Graph and open bugs are preserved above.
