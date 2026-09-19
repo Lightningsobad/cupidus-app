@@ -1,5 +1,17 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
+## Round 4 re-check (2026-09-19, same invocation series) — NO STATE CHANGE
+
+Pre-flight PASS (bootstrap/backend/prune/git all clean). Re-verified the
+sole remaining blocker directly rather than trusting the stale note: the
+integration worktree still has `MERGE_HEAD` set
+(`.git/worktrees/integration-REQ-016_solo_stage1_relationship_assistant/MERGE_HEAD`
+exists) — STORY-010's conflict is still open, unchanged since round 3.
+`master_requirements_list.md` confirms REQ-016 is the only `IN_PROGRESS`
+requirement (everything else DONE/CANCELLED), so there is no other
+requirement to select either. No specialist dispatched this round — same
+brainstormer-routing blocker as round 3, nothing new to act on.
+
 ## CURRENT (read this first) — refreshed 2026-09-19 (round 3)
 
 **STORY-012 patch2 run reconciled and SEALED as `COMPLETED`** (the
