@@ -370,10 +370,36 @@ void main() {
       await tester.pumpWidget(_hub(_storeFor[SoloPhase.upcoming]!));
       await tester.pumpAndSettle();
 
-      final Text countdown = tester.widget<Text>(
-        find.byKey(const Key('activity_card_countdown_u1')),
+      // D-4: the number is drawn at display size beside its unit, so the two
+      // halves are two `Text`s. What is asserted is still the whole reading.
+      expect(
+        tester
+            .widget<Text>(
+              find.byKey(const Key('activity_card_countdown_numeral_u1')),
+            )
+            .data,
+        '4',
       );
-      expect(countdown.data, 'còn 4 ngày');
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('activity_card_countdown_u1')))
+            .data,
+        'ngày nữa',
+      );
+      // AC-14's unit is whole days: a screen reader hears one sentence, and it
+      // carries no hour either.
+      expect(
+        tester
+            .widget<Semantics>(
+              find.ancestor(
+                of: find.byKey(const Key('activity_card_countdown_u1')),
+                matching: find.byType(Semantics),
+              ).first,
+            )
+            .properties
+            .label,
+        'còn 4 ngày',
+      );
       expect(find.textContaining(':'), findsNothing);
     });
 
@@ -392,11 +418,20 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('activity_card_countdown_p1')), findsNothing);
-      // The date itself stays on the card, unannotated.
       expect(
-        tester.widget<Text>(find.byKey(const Key('activity_card_meta_p1'))).data,
-        contains('2026-09-01'),
+        find.byKey(const Key('activity_card_countdown_numeral_p1')),
+        findsNothing,
       );
+      // The date itself stays on the card, unannotated — in the eyebrow, and
+      // read the way a reader writes a date rather than as the stored column
+      // value (D-3).
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('activity_card_eyebrow_p1')))
+            .data,
+        'ĐÃ HẸN NGÀY · T3 1/9',
+      );
+      expect(find.textContaining('2026-09-01'), findsNothing);
       // A passed date matches no phase branch, so no line claims one either.
       expect(find.byKey(phaseStatusLineKey), findsNothing);
     });
@@ -406,11 +441,19 @@ void main() {
       await tester.pumpWidget(_hub(_storeFor[SoloPhase.dateDay]!));
       await tester.pumpAndSettle();
 
+      // No numeral at all on the day itself: zero days is not a count the card
+      // ever prints. The eyebrow says the day in words instead, and drops the
+      // date beside it because "today" already is the date (D-2/D-5).
+      expect(find.byKey(const Key('activity_card_countdown_d1')), findsNothing);
+      expect(
+        find.byKey(const Key('activity_card_countdown_numeral_d1')),
+        findsNothing,
+      );
       expect(
         tester
-            .widget<Text>(find.byKey(const Key('activity_card_countdown_d1')))
+            .widget<Text>(find.byKey(const Key('activity_card_eyebrow_d1')))
             .data,
-        'Hôm nay',
+        'ĐÚNG HÔM NAY',
       );
     });
 

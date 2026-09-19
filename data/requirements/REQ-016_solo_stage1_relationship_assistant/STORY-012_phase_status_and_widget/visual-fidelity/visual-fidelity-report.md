@@ -5,11 +5,16 @@ VISUAL_FIDELITY: FAIL
 Lane: mobile · Ngày: 2026-09-17 · Tác giả: Alex-Mobile-Dev
 Đóng gap `G-1` trong `review/review-report.md` (rule 12e2/12e3).
 
-Cập nhật lượt patch C-1/C-3 (2026-09-17, lần 2): **1 trong 10 delta được giao đã
-đóng thật (D-7)**; 9 delta còn lại không sửa được trong WriteScope của lượt này.
-Verdict giữ nguyên `FAIL` — chi tiết và bằng chứng đo ở mục
-"Lượt patch C-1/C-3" cuối file. Đây không phải từ chối sửa: mỗi delta còn mở
-đều kèm đường dẫn file chứa chỗ sửa và lý do file đó nằm ngoài WriteScope.
+Cập nhật lượt patch #2 (2026-09-19): WriteScope đã mở tới thẻ, vỏ hub, ARB và
+hai file widget, nên **9/9 delta được giao trong lượt này đã đóng thật**
+(D-1..D-5, D-6, D-8, D-9, D-12; D-11 đóng phía iOS). Sáu ảnh `implemented-*` đã
+chụp lại và soi bằng mắt. Verdict tổng vẫn `FAIL` vì hai khoản còn lại — R-1
+(hai chip hành động cần chuỗi từ gói nội dung) và bề mặt widget (D-10 + R-3) —
+chi tiết ở mục "Lượt patch #2 — C-1". Mỗi khoản còn mở đều có tên chủ sở hữu,
+không phải việc lane mobile bỏ dở.
+
+Ghi chú lượt trước (2026-09-17, lần 2): chỉ D-7 và C-3 đóng được; 9 delta còn
+lại nằm ngoài WriteScope lúc đó.
 
 ## Design-Surface / Design-Screen đã giải (rule 12e2)
 
@@ -64,19 +69,23 @@ STORY-012.
 
 ## Đặt cặp ảnh
 
-Tên file design-reference ghép **nhãn của ảnh implemented + id canvas gốc**, ví
-dụ `design-reference-hub-waiting-ngan-da-hen-ngay-dang-doi-ios.png`: giữ được
-cả cặp so sánh lẫn truy vết về đúng frame đã render.
+Tên file design-reference là tên do chính `render-design-canvas.js` sinh ra,
+`design-reference-<id canvas>-ios.png`, không gắn thêm nhãn nào. Lượt trước có
+chèn nhãn của ảnh implemented vào giữa tiền tố và id canvas; tên ghép đó làm
+gate `validate-dev-design-render.sh` không tra được screen trên surface
+`cupid-ch-ng-1` nên đã xoá và render lại đúng 5 frame gốc. Nội dung ảnh không
+đổi (kích thước byte trùng khớp từng file), nên mọi so sánh đã ghi vẫn còn giá
+trị.
 
 | implemented | design-reference | id canvas |
 |---|---|---|
-| `implemented-hub-waiting.png` | `design-reference-hub-waiting-ngan-da-hen-ngay-dang-doi-ios.png` | `ngan-da-hen-ngay-dang-doi` |
-| `implemented-hub-upcoming.png` | `design-reference-hub-upcoming-ngan-da-hen-ngay-dang-doi-ios.png` | `ngan-da-hen-ngay-dang-doi` |
-| `implemented-hub-date_day.png` | `design-reference-hub-date_day-man-goc-muon-lam-ios.png` | `man-goc-muon-lam` |
-| `implemented-hub-quiet.png` | `design-reference-hub-quiet-man-goc-muon-lam-ios.png` | `man-goc-muon-lam` |
-| `implemented-evening-check-in-sheet.png` | `design-reference-evening-check-in-sheet-23h-vua-ve-j8-ios.png` | `23h-vua-ve-j8` |
-| `implemented-quiet-surfaces.png` | `design-reference-quiet-surfaces-j12-nhan-ra-cot-moc-ios.png` | `j12-nhan-ra-cot-moc` |
-| *(không có)* | `design-reference-widget-phases-sb-84-widget-bon-pha-ios.png` | `sb-84-widget-bon-pha` |
+| `implemented-hub-waiting.png` | `design-reference-ngan-da-hen-ngay-dang-doi-ios.png` | `ngan-da-hen-ngay-dang-doi` |
+| `implemented-hub-upcoming.png` | `design-reference-ngan-da-hen-ngay-dang-doi-ios.png` | `ngan-da-hen-ngay-dang-doi` |
+| `implemented-hub-date_day.png` | `design-reference-man-goc-muon-lam-ios.png` | `man-goc-muon-lam` |
+| `implemented-hub-quiet.png` | `design-reference-man-goc-muon-lam-ios.png` | `man-goc-muon-lam` |
+| `implemented-evening-check-in-sheet.png` | `design-reference-23h-vua-ve-j8-ios.png` | `23h-vua-ve-j8` |
+| `implemented-quiet-surfaces.png` | `design-reference-j12-nhan-ra-cot-moc-ios.png` | `j12-nhan-ra-cot-moc` |
+| *(không có)* | `design-reference-sb-84-widget-bon-pha-ios.png` | `sb-84-widget-bon-pha` |
 
 `ngan-da-hen-ngay-dang-doi` dùng cho **hai** trạng thái vì chính frame đó vẽ cả
 thẻ "đang đợi" lẫn thẻ "chốt rồi · còn 4 ngày" trong một khung.
@@ -219,7 +228,7 @@ Nói rõ vì sao và đã làm gì thay thế:
   được**. Đặt được widget lên launcher rồi chụp đòi thao tác launcher trên
   thiết bị — ngoài phạm vi per-story capture.
 - Đã render và **nhìn tận mắt** bản thiết kế
-  (`design-reference-widget-phases-sb-84-widget-bon-pha-ios.png`): đó là một
+  (`design-reference-sb-84-widget-bon-pha-ios.png`): đó là một
   tờ spec xếp chồng bốn biến thể pha, mỗi biến thể gồm chấm màu + nhãn-mí
   "PHA n · <TRẠNG THÁI>", dòng chính đậm, dòng phụ mờ; riêng PHA 3 có chữ số
   cỡ display ("**4**" cạnh "ngày nữa"); PHA 4 có nền gradient hồng.
@@ -248,20 +257,20 @@ Nói rõ vì sao và đã làm gì thay thế:
 
 ## Tổng kết delta
 
-| Id | Loại | Ảnh | Trạng thái sau lượt patch C-1/C-3 | File chứa chỗ sửa |
+| Id | Loại | Ảnh | Trạng thái sau lượt patch #2 (2026-09-19) | File chứa chỗ sửa |
 |---|---|---|---|---|
-| D-1 | delta cài đặt | hub-waiting | MỞ — ngoài WriteScope | `mobile/lib/features/activity_cards/presentation/screens/activity_card_hub_view.dart` + `.../widgets/activity_card_tile.dart` |
-| D-2 | delta cài đặt | hub-waiting | MỞ — ngoài WriteScope | `.../widgets/activity_card_tile.dart` |
-| D-3 | delta cài đặt (định dạng ngày ISO) | hub-upcoming, hub-date_day | MỞ — ngoài WriteScope, **và thiếu dữ liệu giờ** | `.../widgets/activity_card_tile.dart:242-250` (`_subtitle`) |
-| D-4 | delta cài đặt | hub-upcoming | MỞ — ngoài WriteScope | `.../widgets/activity_card_tile.dart:169-178` |
-| D-5 | delta cài đặt | hub-date_day | MỞ — ngoài WriteScope | `.../widgets/activity_card_tile.dart` |
-| D-6 | lệch spec-prose vs canvas | evening-check-in-sheet | MỞ — C-2, Scrum Master quyết trước | — |
-| D-7 | delta cài đặt | evening-check-in-sheet | **ĐÓNG** ✔ | `mobile/lib/features/phase_status/presentation/evening_check_in_sheet.dart` |
-| D-8 | delta cài đặt | evening-check-in-sheet | MỞ — cần chuỗi mới + tên thẻ | `mobile/lib/l10n/arb/app_vi.arb` + call site ở `activity_card_hub_view.dart` |
-| D-9 | delta cài đặt | evening-check-in-sheet | MỞ — cần chuỗi mới | `mobile/lib/l10n/arb/app_vi.arb` |
-| D-10 | ứng viên `DESIGN_SPEC_CONFLICT` (AC-37/BR-15 + hợp đồng 5 khoá) | widget | MỞ — C-2, Scrum Master/user quyết | — |
-| D-11 | delta cài đặt | widget | MỞ — ngoài WriteScope | `mobile/android/app/src/main/res/layout/cupid_phase_widget.xml`, `mobile/ios/CupidPhaseWidget/CupidPhaseWidget.swift` |
-| D-12 | delta cài đặt | widget | MỞ — ngoài WriteScope | cùng hai file trên |
+| D-1 | delta cài đặt | hub-waiting, hub-upcoming, hub-date_day | **ĐÓNG** ✔ (trừ hai chip hành động — xem tồn dư R-1) | `activity_card_hub_view.dart`, `phase_status_line.dart`, `activity_card_tile.dart` |
+| D-2 | delta cài đặt | mọi ảnh hub | **ĐÓNG** ✔ (trừ nửa giờ đồng hồ — tồn dư R-2) | `activity_card_tile.dart` (`_StatusEyebrow`, `activityCardStatusLabel/Color`) |
+| D-3 | delta cài đặt (định dạng ngày ISO) | hub-upcoming, hub-date_day | **ĐÓNG** ✔ (trừ nửa giờ đồng hồ — tồn dư R-2) | `activity_card_tile.dart` (`activityCardDateLabel`, `_subtitle`) |
+| D-4 | delta cài đặt | hub-upcoming | **ĐÓNG** ✔ | `activity_card_tile.dart` (`_CountdownBlock`) |
+| D-5 | delta cài đặt | hub-date_day | **ĐÓNG** ✔ | `activity_card_tile.dart` (nhánh `today0`) |
+| D-6 | lệch spec-prose vs canvas | evening-check-in-sheet | **ĐÓNG** ✔ — Scrum Master quyết: canvas thắng, dựng bản toàn màn | `evening_check_in_sheet.dart` |
+| D-7 | delta cài đặt | evening-check-in-sheet | **ĐÓNG** ✔ (lượt trước) | `evening_check_in_sheet.dart` |
+| D-8 | delta cài đặt | evening-check-in-sheet | **ĐÓNG** ✔ | `evening_check_in_sheet.dart` + `app_vi.arb`/`app_en.arb` |
+| D-9 | delta cài đặt | evening-check-in-sheet | **ĐÓNG** ✔ | `evening_check_in_sheet.dart` + `app_vi.arb`/`app_en.arb` |
+| D-10 | ứng viên `DESIGN_SPEC_CONFLICT` (AC-37/BR-15 + hợp đồng 5 khoá) | widget | MỞ — ngoài phạm vi lượt này theo chỉ thị handoff | — |
+| D-11 | delta cài đặt | widget | **ĐÓNG một nửa** — iOS xong, Android không với tới (tồn dư R-3) | `CupidPhaseWidget.swift` (xong) · `CupidPhaseWidgetProvider.kt` (ngoài WriteScope) |
+| D-12 | delta cài đặt | widget | **ĐÓNG** ✔ | `cupid_phase_widget.xml`, `CupidPhaseWidget.swift` |
 
 ## Lượt patch C-1/C-3 (2026-09-17)
 
@@ -329,6 +338,94 @@ Sau lượt này `hub-waiting`, `hub-upcoming`, `hub-date_day` không đổi m�
 nào (không file nào của chúng nằm trong WriteScope), nên ba màn đó vẫn FAIL y
 như trước; `evening-check-in-sheet` gần thiết kế hơn nhưng vẫn thiếu D-8, D-9
 và đang chờ quyết D-6. Lật verdict lúc này sẽ là một chữ ký sai.
+
+## Lượt patch #2 — C-1 (2026-09-19)
+
+WriteScope lượt này đã mở rộng đúng những file mà lượt trước phải ghi "ngoài
+WriteScope": `activity_card_tile.dart`, `activity_card_hub_view.dart`,
+`mobile/lib/l10n/arb`, layout RemoteViews Android, `CupidPhaseWidget.swift`.
+Nhờ vậy 9/9 delta được giao trong lượt này đã sửa được thật.
+
+Ảnh `implemented-*` đã chụp lại toàn bộ (6 ảnh) sau khi sửa, cùng harness cũ
+(412×915, dpr 1, `CAPTURE_VISUALS=true`), và đã soi bằng mắt từng ảnh: không có
+ô tofu, nền đục, dấu tiếng Việt đủ.
+
+### Đã đóng trong lượt này
+
+- **D-1** — khối hướng dẫn pha nay nằm **trong** thẻ nó nói về, trên mặt
+  `colorSurfaceAlt` bo góc có viền (`PhaseStatusLine` tự vẽ mặt của nó;
+  `ActivityCardTile.phaseBlock` là chỗ gắn). Không còn là tiêu đề chữ trần trên
+  toàn danh sách. Thẻ được chọn là thẻ mà `PhaseResolution.cardId` trỏ tới.
+- **D-2** — nhãn-mí trạng thái + chấm màu trên mọi thẻ
+  (`_StatusEyebrow`): `MỚI NGHĨ RA` / `ĐÃ HẸN NGÀY` / `ĐANG ĐỢI TRẢ LỜI` /
+  `CHỐT RỒI` / `ĐÚNG HÔM NAY` / `ĐÃ XONG` / `KỶ NIỆM`. Chấm màu là kênh **thứ
+  hai** trên một nhãn chữ, không bao giờ là kênh duy nhất
+  (`ux/uiux-spec.md` §5).
+- **D-3** — ngày hẹn không còn in chuỗi ISO thô. `activityCardDateLabel` in
+  `CN 20/9` / `T3 1/9` ở locale `vi` (`SUN 20/9` ở `en`), và `HÔM NAY` đúng
+  ngày. Ngày đã chuyển hẳn lên nhãn-mí; dòng meta chỉ còn khoảng cách + giá.
+- **D-4** — số ngày vẽ ở cỡ `display` (Nunito w900 34) màu hồng, đơn vị
+  "ngày nữa" ở cỡ `body` bên cạnh (`_CountdownBlock`). Trình đọc màn hình vẫn
+  nghe **một** câu "còn 4 ngày" nhờ `Semantics(excludeSemantics: true)`, không
+  nghe một chữ số rồi một danh từ.
+- **D-5** — thẻ đúng ngày hẹn được nâng một bậc: mặt `colorSurfaceAlt`, viền
+  `colorAccentPink` 1.5px, `glowShadow`, và CTA gradient kéo hết chiều ngang.
+- **D-6** — dựng bản **toàn màn** theo quyết định Scrum Master (canvas
+  `23h-vua-ve-j8` thắng chữ "sheet nhỏ" ở `ux/uiux-spec.md:78`; AC-16/AC-18 thoả
+  ở cả hai hình dạng). `EveningCheckInSheet.show` nay đẩy `MaterialPageRoute`
+  `fullscreenDialog`, không còn `showModalBottomSheet`. Ô viết câu nở thành
+  `minLines: 3 / maxLines: 5`.
+- **D-8** — khối ngữ cảnh đầu màn: nhãn-mí "TỐI NAY CỦA HAI NGƯỜI" + **tên
+  buổi hẹn** lấy từ `ActivityCardRepository.cardById` theo `cardId` của thông
+  báo. Thẻ không đọc được thì bỏ tên, không chặn màn.
+- **D-9** — dòng trấn an chân màn ("Không viết cũng chẳng sao. Mai app sẽ không
+  nhắc lại chuyện này.") + hai chip mô tả điểm đến của câu đã lưu.
+- **D-12** — widget dùng bảng màu thương hiệu thay vì màu theo theme máy:
+  layout Android đổi `?android:attr/colorBackground` → `#241B42`, chữ
+  `#F7EEFB`/`#B4A6CE`; iOS thêm `CupidWidgetPalette` và nền gradient
+  hồng→tím riêng cho pha `date_day`. Có test canh (`native_copy_scan_test.dart`)
+  cấm `?android:attr/` và `Color.clear` quay lại.
+
+### D-11 — đóng nửa, và nửa còn lại nói thẳng
+
+iOS xong: `CupidPhaseSplit.of` cắt chuỗi payload tại cụm chữ số đầu tiên và trả
+ba mảnh, nên widget **đổi cỡ đúng con số nó được đưa** mà không bỏ, không đảo,
+không viết lại một ký tự nào — tính chất "không có chuỗi hiển thị trong mã
+widget" (AC-37/BR-15) giữ nguyên. `native_copy_scan_test.dart` không bị nới
+lỏng: allowlist `Text(...)` siết lại thành đúng bốn biểu thức và có thêm một
+assert đòi `CupidPhaseSplit.of(entry.primaryLine)` phải còn đó.
+
+Android **không** làm được trong WriteScope này: cỡ chữ của một `RemoteViews`
+chỉ đặt được từ `CupidPhaseWidgetProvider.kt` (một `SpannableString` +
+`setTextViewText`), mà file đó không nằm trong WriteScope. Đây là tồn dư R-3.
+
+### Tồn dư đã ghi (không phải từ chối sửa)
+
+| Id | Tồn dư | Vì sao chưa đóng | Chủ sở hữu |
+|---|---|---|---|
+| R-1 | Hai chip hành động trong khối hướng dẫn pha (D-1) | Chip cần **chuỗi hiển thị mới**; AC-37/BR-15 bắt mọi chuỗi pha đến từ gói nội dung, không từ mã. Tự nghĩ chữ ở đây là vi phạm. | Product Owner trên `phase_content.v1.json` |
+| R-2 | Nửa giờ đồng hồ của D-2/D-3 ("19:20", "rủ từ 14:02") | `ActivityCard` chỉ mang ngày dân sự, không có trường giờ. Handoff lượt này chốt rõ: **không** sửa model, **không** thêm trường giờ. | Tech Lead / PO nếu muốn mở hợp đồng dữ liệu |
+| R-3 | Con số cỡ lớn trên widget Android (D-11) | Cần `CupidPhaseWidgetProvider.kt`, ngoài WriteScope | Scrum Master mở scope |
+| R-4 | Nút "Để sau" nằm dưới CTA ở màn 23h | Canvas không vẽ nút thoát nào. Bỏ nó đi thì trên một **toàn màn** chỉ còn cử chỉ back của hệ thống, và AC-17 đòi "bỏ qua" là một cái kết một chạm. Giữ lại là chọn AC trên canvas — ghi ra để Reviewer soi. | Reviewer |
+| D-10 | Nhãn pha + chấm màu trên widget | Handoff lượt này ghi rõ: ngoài phạm vi, giữ nguyên trạng thái blocker đã ghi nhận | Scrum Master / user |
+
+### Verdict sau lượt này
+
+| # | Ảnh implemented | Trước | Sau |
+|---|---|---|---|
+| 1 | `implemented-hub-waiting.png` | FAIL | FAIL — chỉ còn R-1 (hai chip) |
+| 2 | `implemented-hub-upcoming.png` | FAIL | PASS (R-2 là lệch đã được chấp nhận) |
+| 3 | `implemented-hub-date_day.png` | FAIL | PASS (R-2 như trên) |
+| 4 | `implemented-hub-quiet.png` | PASS | PASS |
+| 5 | `implemented-evening-check-in-sheet.png` | FAIL | PASS (còn R-4 để Reviewer soi) |
+| 6 | `implemented-quiet-surfaces.png` | PASS | PASS |
+| 7 | *(không có ảnh)* | NOT_COMPARED | NOT_COMPARED — D-10, R-3 |
+
+`VISUAL_FIDELITY` giữ `FAIL`: `hub-waiting` vẫn lệch canvas ở hai chip hành
+động (R-1), và bề mặt widget vẫn chưa có ảnh để so cùng hai khoản mở D-10/R-3.
+Năm màn còn lại đã lật sang PASS. Lật verdict tổng lúc này sẽ là một chữ ký sai
+— nhưng cả hai khoản còn lại đều có chủ sở hữu tên rõ ở bảng trên, không phải
+việc lane mobile bỏ dở.
 
 ## Ngoài bề mặt của story này (không tính delta)
 

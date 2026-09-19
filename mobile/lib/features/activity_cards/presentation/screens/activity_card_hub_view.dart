@@ -77,7 +77,10 @@ class ActivityCardHubView extends StatelessWidget {
                 content: phaseContent,
                 clock: today == null ? null : () => today!,
               ),
-          eveningCheckIn: buildEveningCheckInScheduler(content: phaseContent),
+          eveningCheckIn: buildEveningCheckInScheduler(
+            content: phaseContent,
+            cards: resolved,
+          ),
           milestone: MilestoneResolver(phaseStatusPrefs ?? PhaseStatusPrefs()),
           drip: DripCadencePolicy(phaseStatusPrefs ?? PhaseStatusPrefs()),
           clock: today == null ? null : () => today!,
@@ -265,45 +268,43 @@ class _ActivityCardHubBodyState extends State<_ActivityCardHubBody>
           delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) {
               final ActivityCard card = state.cards[index];
-              final Widget tile = Padding(
-                padding: const EdgeInsets.only(bottom: CupidSpacing.md),
-                child: GestureDetector(
-                  key: Key('activity_card_open_${card.id}'),
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => _openDetail(context, cubit, card),
-                  child: ActivityCardTile(
-                    card: card,
-                    replyState: state.replyStateOf(card),
-                    today: widget.today,
-                    onPrimaryAction: () => _openDetail(context, cubit, card),
-                    onToggleReply: () => cubit.toggleReplyState(card.id),
-                    onOverflowAction: (ActivityCardOverflowAction action) {
-                      if (action == ActivityCardOverflowAction.delete) {
-                        cubit.deleteCard(card.id);
-                        return;
-                      }
-                      // "Chuyển trạng thái" and "Sửa" are both modes of the
-                      // detail screen (AC-13), not two destinations.
-                      _openDetail(context, cubit, card);
-                    },
-                  ),
-                ),
-              );
               return BlocBuilder<PhaseStatusCubit, PhaseStatusState>(
                 builder: (BuildContext context, PhaseStatusState phase) {
-                  if (index != _anchorIndex(state.cards, phase)) {
-                    return tile;
-                  }
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      PhaseStatusLine(
-                        primary: phase.primary,
-                        secondary: phase.secondary,
+                  // D-1: the phase block belongs to the card it is about, so
+                  // the anchor card is handed the block and draws it inside
+                  // itself. Every other card is handed `null` and is built
+                  // exactly as it was.
+                  final bool anchored =
+                      index == _anchorIndex(state.cards, phase);
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: CupidSpacing.md),
+                    child: GestureDetector(
+                      key: Key('activity_card_open_${card.id}'),
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => _openDetail(context, cubit, card),
+                      child: ActivityCardTile(
+                        card: card,
+                        replyState: state.replyStateOf(card),
+                        today: widget.today,
+                        phaseBlock: anchored
+                            ? PhaseStatusLine(
+                                primary: phase.primary,
+                                secondary: phase.secondary,
+                              )
+                            : null,
+                        onPrimaryAction: () => _openDetail(context, cubit, card),
+                        onToggleReply: () => cubit.toggleReplyState(card.id),
+                        onOverflowAction: (ActivityCardOverflowAction action) {
+                          if (action == ActivityCardOverflowAction.delete) {
+                            cubit.deleteCard(card.id);
+                            return;
+                          }
+                          // "Chuyển trạng thái" and "Sửa" are both modes of
+                          // the detail screen (AC-13), not two destinations.
+                          _openDetail(context, cubit, card);
+                        },
                       ),
-                      tile,
-                    ],
+                    ),
                   );
                 },
               );

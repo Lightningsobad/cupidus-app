@@ -17,6 +17,7 @@ const String _title = 'Về tới nhà chưa?';
 const String _body =
     'Nếu bạn muốn, cất lại một tấm ảnh và viết một câu cho hôm nay.';
 const String _cardId = 'card-42';
+const String _cardTitle = 'Đi ăn lẩu ở Bà Triệu';
 
 class _Save {
   const _Save({
@@ -39,13 +40,16 @@ Widget _host(Widget child) => MaterialApp(
       locale: const Locale('vi'),
       localizationsDelegates: AppL10n.localizationsDelegates,
       supportedLocales: AppL10n.supportedLocales,
+      // D-6: the surface carries its own `Scaffold`, so the host must not add a
+      // second one — a page, not a sheet floated over a host page.
       home: CupidPlatformOverride(
         platform: CupidPlatform.material,
-        child: Scaffold(body: child),
+        child: child,
       ),
     );
 
 Widget _sheet({
+  String? cardTitle,
   EveningPhotoPicker? pickPhotos,
   EveningJournalRoute? openJournal,
 }) =>
@@ -54,6 +58,7 @@ Widget _sheet({
         title: _title,
         body: _body,
         cardId: _cardId,
+        cardTitle: cardTitle,
         pickPhotos: pickPhotos,
         openJournal: openJournal,
       ),
@@ -123,26 +128,11 @@ Future<void> _capture(WidgetTester tester, String fileName) async {
       child: ColoredBox(
         color: const CupidColorTokens.dark().colorBackground,
         child: _host(
-          Align(
-            alignment: Alignment.bottomCenter,
-            // The surface and the rounded top edge come from
-            // `showModalBottomSheet` in production, so the capture has to
-            // restate them or the sheet reads as a bare page.
-            child: Builder(
-              builder: (BuildContext context) => DecoratedBox(
-                decoration: BoxDecoration(
-                  color: context.cupidColors.colorSurface,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(context.cupidPlatform.radiusSheet),
-                  ),
-                ),
-                child: const EveningCheckInSheet(
-                  title: _title,
-                  body: _body,
-                  cardId: _cardId,
-                ),
-              ),
-            ),
+          const EveningCheckInSheet(
+            title: _title,
+            body: _body,
+            cardId: _cardId,
+            cardTitle: _cardTitle,
           ),
         ),
       ),
@@ -211,7 +201,15 @@ void main() {
       final TextField field =
           tester.widget<TextField>(find.byKey(eveningCheckInFieldKey));
       expect(field.enabled, isTrue);
-      expect(field.maxLines, 1);
+      // D-6: the full screen gives the sentence room to be several lines long.
+      // What AC-18 asks is that nothing locks or bounds what may be written, so
+      // what matters here is that no maximum length is imposed and the field
+      // opens already large enough to write into.
+      expect(field.maxLength, isNull);
+      expect(field.readOnly, isFalse);
+      expect(field.minLines, greaterThan(1));
+      expect(field.maxLines, greaterThan(field.minLines!));
+      expect(field.keyboardType, TextInputType.multiline);
     });
 
     testWidgets('saving with nothing filled in is allowed',
@@ -348,6 +346,74 @@ void main() {
       expect(find.byKey(eveningCheckInSaveKey), findsOneWidget);
       expect(find.byType(TextButton), findsOneWidget);
       expect(find.byType(FilledButton), findsOneWidget);
+    });
+  });
+
+  group('the shape the design canvas asks for (D-6/D-8/D-9)', () {
+    testWidgets('the surface is a full screen, not a low sheet',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(_sheet());
+
+      // Its own `Scaffold` over the brand background, sized to the whole
+      // viewport rather than to its content.
+      final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+      expect(scaffold.backgroundColor, const CupidColorTokens.dark().colorBackground);
+      expect(
+        tester.getSize(find.byKey(eveningCheckInSheetKey)).height,
+        tester.view.physicalSize.height / tester.view.devicePixelRatio,
+      );
+    });
+
+    testWidgets('the screen names the evening it is asking about (D-8)',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(_sheet(cardTitle: _cardTitle));
+
+      expect(find.byKey(eveningCheckInContextKey), findsOneWidget);
+      expect(find.byKey(eveningCheckInCardTitleKey), findsOneWidget);
+      expect(find.text(_cardTitle), findsOneWidget);
+    });
+
+    testWidgets('an unreadable card leaves the name out, not the screen',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(_sheet());
+
+      expect(find.byKey(eveningCheckInContextKey), findsOneWidget);
+      expect(find.byKey(eveningCheckInCardTitleKey), findsNothing);
+      expect(find.byKey(eveningCheckInFieldKey), findsOneWidget);
+      expect(find.byKey(eveningCheckInSaveKey), findsOneWidget);
+    });
+
+    testWidgets('the exit says in words that nothing is owed (D-9/AC-17)',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(_sheet());
+      final AppL10n l10n = AppL10n.of(
+        tester.element(find.byKey(eveningCheckInFieldKey)),
+      );
+
+      expect(find.byKey(eveningCheckInReassuranceKey), findsOneWidget);
+      expect(find.text(l10n.evening_check_in_reassurance), findsOneWidget);
+    });
+
+    testWidgets('the two statements about a saved sentence are not controls',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(_sheet());
+      final AppL10n l10n = AppL10n.of(
+        tester.element(find.byKey(eveningCheckInFieldKey)),
+      );
+
+      for (final String label in <String>[
+        l10n.evening_check_in_journal_chip,
+        l10n.evening_check_in_private_chip,
+      ]) {
+        expect(find.text(label), findsOneWidget);
+        expect(
+          find.ancestor(
+            of: find.text(label),
+            matching: find.byType(InkWell),
+          ),
+          findsNothing,
+        );
+      }
     });
   });
 

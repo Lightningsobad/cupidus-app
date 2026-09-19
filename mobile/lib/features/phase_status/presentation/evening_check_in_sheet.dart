@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/di/service_locator.dart';
+import '../../activity_cards/domain/activity_card_repository.dart';
 import '../../../design_system/theme/cupid_theme_context.dart';
 import '../../../design_system/tokens/cupid_color_tokens.dart';
 import '../../../design_system/tokens/cupid_platform_tokens.dart';
@@ -25,6 +26,9 @@ const Key eveningCheckInAttachKey = Key('evening_check_in_attach');
 const Key eveningCheckInFieldKey = Key('evening_check_in_field');
 const Key eveningCheckInSaveKey = Key('evening_check_in_save');
 const Key eveningCheckInLaterKey = Key('evening_check_in_later');
+const Key eveningCheckInContextKey = Key('evening_check_in_context');
+const Key eveningCheckInCardTitleKey = Key('evening_check_in_card_title');
+const Key eveningCheckInReassuranceKey = Key('evening_check_in_reassurance');
 
 /// Opaque provenance tag stored with the journal entry. The journal never
 /// parses or renders it.
@@ -42,12 +46,18 @@ typedef EveningJournalRoute = Future<void> Function(
 
 /// Where the 23h nudge lands (`ux/uiux-spec.md` §4).
 ///
-/// Two steps merged into one small sheet and nothing else: attach a photo, and
-/// write one sentence. Neither is required and neither locks the other, so a
-/// sheet closed untouched is a finished interaction, not an abandoned one —
-/// there is no score, no rating, no question about the other person, and
-/// nothing anywhere afterwards that says a thing is still owed (AC-16, AC-17,
-/// AC-19, BR-14).
+/// Two steps and nothing else: attach a photo, and write one sentence. Neither
+/// is required and neither locks the other, so a surface closed untouched is a
+/// finished interaction, not an abandoned one — there is no score, no rating,
+/// no question about the other person, and nothing anywhere afterwards that
+/// says a thing is still owed (AC-16, AC-17, AC-19, BR-14).
+///
+/// D-6: this is a full screen, not the low bottom sheet `ux/uiux-spec.md` §78
+/// still calls a "sheet nhỏ". AC-16/AC-18 are satisfied by either shape — both
+/// steps stay optional and the sentence field is never locked — so the design
+/// canvas (`23h-vua-ve-j8`) decides, per the REQ-016 design-anchor precedent.
+/// The class name is kept: it is the name the notification route, the tests
+/// and the AC text all already use.
 ///
 /// It writes nothing itself. Saving hands the sentence and the photos to
 /// [openJournalComposer], the journal's one-way entry point, which is the only
@@ -58,6 +68,7 @@ class EveningCheckInSheet extends StatefulWidget {
     required this.title,
     required this.body,
     required this.cardId,
+    this.cardTitle,
     this.pickPhotos,
     this.openJournal,
   });
@@ -70,6 +81,12 @@ class EveningCheckInSheet extends StatefulWidget {
 
   final String cardId;
 
+  /// The title of the card this evening was about (D-8), so the screen says
+  /// which evening it is asking about instead of leaving the user to guess.
+  /// User data, not copy — `null` when the card can no longer be read, and the
+  /// context block then simply carries no name.
+  final String? cardTitle;
+
   final EveningPhotoPicker? pickPhotos;
   final EveningJournalRoute? openJournal;
 
@@ -78,26 +95,21 @@ class EveningCheckInSheet extends StatefulWidget {
     String? title,
     required String body,
     required String cardId,
+    String? cardTitle,
     EveningPhotoPicker? pickPhotos,
     EveningJournalRoute? openJournal,
   }) {
-    final CupidPlatformTokens platform = context.cupidPlatform;
-    final CupidColorTokens tokens = context.cupidColors;
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: tokens.colorSurface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(platform.radiusSheet),
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (BuildContext _) => EveningCheckInSheet(
+          title: title,
+          body: body,
+          cardId: cardId,
+          cardTitle: cardTitle,
+          pickPhotos: pickPhotos,
+          openJournal: openJournal,
         ),
-      ),
-      builder: (BuildContext _) => EveningCheckInSheet(
-        title: title,
-        body: body,
-        cardId: cardId,
-        pickPhotos: pickPhotos,
-        openJournal: openJournal,
       ),
     );
   }
@@ -124,88 +136,216 @@ class _EveningCheckInSheetState extends State<EveningCheckInSheet> {
     final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
 
-    return Padding(
-      key: eveningCheckInSheetKey,
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: Padding(
-        padding: const EdgeInsets.all(CupidSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (widget.title != null)
-              Text(
-                widget.title!,
-                style: type.cardTitle.copyWith(color: colors.colorText),
+    return Scaffold(
+      backgroundColor: colors.colorBackground,
+      body: SafeArea(
+        child: Padding(
+          key: eveningCheckInSheetKey,
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(CupidSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      if (widget.title != null) ...<Widget>[
+                        Text(
+                          widget.title!,
+                          style: type.display.copyWith(
+                            fontSize: 28,
+                            color: colors.colorText,
+                          ),
+                        ),
+                        const SizedBox(height: CupidSpacing.sm),
+                      ],
+                      Text(
+                        widget.body,
+                        style: type.body.copyWith(color: colors.colorTextMuted),
+                      ),
+                      const SizedBox(height: CupidSpacing.lg),
+                      _Block(
+                        key: eveningCheckInContextKey,
+                        children: <Widget>[
+                          Text(
+                            l10n.evening_check_in_context_label,
+                            style: type.caption.copyWith(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.8,
+                              color: colors.colorTextMuted,
+                            ),
+                          ),
+                          if (widget.cardTitle != null) ...<Widget>[
+                            const SizedBox(height: CupidSpacing.xs),
+                            Text(
+                              widget.cardTitle!,
+                              key: eveningCheckInCardTitleKey,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: type.cardTitle.copyWith(
+                                fontSize: 19,
+                                color: colors.colorText,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: CupidSpacing.md),
+                          Row(
+                            children: <Widget>[
+                              for (int slot = 0;
+                                  slot < _photoSlotCount;
+                                  slot++) ...<Widget>[
+                                if (slot > 0)
+                                  const SizedBox(width: CupidSpacing.sm),
+                                Expanded(
+                                  child: _PhotoSlot(
+                                    key: slot == 0
+                                        ? eveningCheckInAttachKey
+                                        : Key('evening_check_in_slot_$slot'),
+                                    path: slot < _photos.length
+                                        ? _photos[slot]
+                                        : null,
+                                    onTap: _busy ? null : _attach,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          const SizedBox(height: CupidSpacing.sm),
+                          Text(
+                            _photos.isEmpty
+                                ? l10n.evening_check_in_attach
+                                : l10n.evening_check_in_photos_attached(
+                                    _photos.length,
+                                  ),
+                            style: type.body.copyWith(
+                              color: colors.colorAccentPink,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: CupidSpacing.md),
+                      _Block(
+                        children: <Widget>[
+                          Text(
+                            l10n.evening_check_in_line_label,
+                            style: type.body.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colors.colorText,
+                            ),
+                          ),
+                          const SizedBox(height: CupidSpacing.sm),
+                          TextField(
+                            key: eveningCheckInFieldKey,
+                            controller: _line,
+                            enabled: !_busy,
+                            minLines: 3,
+                            maxLines: 5,
+                            keyboardType: TextInputType.multiline,
+                            textInputAction: TextInputAction.newline,
+                            style: type.body.copyWith(color: colors.colorText),
+                            decoration: InputDecoration(
+                              hintText: l10n.evening_check_in_line_hint,
+                              hintStyle: type.body.copyWith(
+                                color: colors.colorTextMuted,
+                              ),
+                              filled: true,
+                              fillColor: colors.colorSurface,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  platform.radiusSmall,
+                                ),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: CupidSpacing.sm),
+                          Row(
+                            children: <Widget>[
+                              _Chip(label: l10n.evening_check_in_journal_chip),
+                              const SizedBox(width: CupidSpacing.sm),
+                              _Chip(label: l10n.evening_check_in_private_chip),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            const SizedBox(height: CupidSpacing.xs),
-            Text(
-              widget.body,
-              style: type.caption.copyWith(color: colors.colorTextMuted),
-            ),
-            const SizedBox(height: CupidSpacing.md),
-            Row(
-              children: <Widget>[
-                for (int slot = 0; slot < _photoSlotCount; slot++) ...<Widget>[
-                  if (slot > 0) const SizedBox(width: CupidSpacing.sm),
-                  Expanded(
-                    child: _PhotoSlot(
-                      key: slot == 0
-                          ? eveningCheckInAttachKey
-                          : Key('evening_check_in_slot_$slot'),
-                      path: slot < _photos.length ? _photos[slot] : null,
-                      onTap: _busy ? null : _attach,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  CupidSpacing.md,
+                  0,
+                  CupidSpacing.md,
+                  CupidSpacing.md,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: colors.gradientHot,
+                        borderRadius: BorderRadius.circular(
+                          platform.radiusButton,
+                        ),
+                      ),
+                      child: SizedBox(
+                        height: platform.tapTarget,
+                        child: FilledButton(
+                          key: eveningCheckInSaveKey,
+                          onPressed: _busy ? null : _save,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            disabledBackgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            foregroundColor: colors.colorOnAccent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                platform.radiusButton,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            l10n.evening_check_in_save,
+                            style: type.body.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ],
-            ),
-            const SizedBox(height: CupidSpacing.sm),
-            Text(
-              _photos.isEmpty
-                  ? l10n.evening_check_in_attach
-                  : l10n.evening_check_in_photos_attached(_photos.length),
-              style: type.body.copyWith(color: colors.colorAccentPink),
-            ),
-            const SizedBox(height: CupidSpacing.sm),
-            TextField(
-              key: eveningCheckInFieldKey,
-              controller: _line,
-              enabled: !_busy,
-              maxLines: 1,
-              textInputAction: TextInputAction.done,
-              style: type.body.copyWith(color: colors.colorText),
-              decoration: InputDecoration(
-                hintText: l10n.evening_check_in_line_hint,
-                hintStyle: type.body.copyWith(color: colors.colorTextMuted),
-                filled: true,
-                fillColor: colors.colorSurfaceAlt,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(platform.radiusSmall),
-                  borderSide: BorderSide.none,
+                    // AC-17: leaving is a finished ending, so it stays one tap
+                    // away from where the user already is. The design canvas
+                    // has no dismiss control of its own; on a full screen the
+                    // system back gesture is not enough on its own.
+                    TextButton(
+                      key: eveningCheckInLaterKey,
+                      onPressed: _busy ? null : () => Navigator.of(context).pop(),
+                      child: Text(
+                        l10n.evening_check_in_later,
+                        style: type.body.copyWith(color: colors.colorTextMuted),
+                      ),
+                    ),
+                    Text(
+                      l10n.evening_check_in_reassurance,
+                      key: eveningCheckInReassuranceKey,
+                      textAlign: TextAlign.center,
+                      style: type.caption.copyWith(
+                        color: colors.colorTextMuted,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(height: CupidSpacing.md),
-            Row(
-              children: <Widget>[
-                TextButton(
-                  key: eveningCheckInLaterKey,
-                  onPressed: _busy ? null : () => Navigator.of(context).pop(),
-                  child: Text(
-                    l10n.evening_check_in_later,
-                    style: type.body.copyWith(color: colors.colorTextMuted),
-                  ),
-                ),
-                const Spacer(),
-                FilledButton(
-                  key: eveningCheckInSaveKey,
-                  onPressed: _busy ? null : _save,
-                  child: Text(l10n.evening_check_in_save),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -239,6 +379,66 @@ class _EveningCheckInSheetState extends State<EveningCheckInSheet> {
       return;
     }
     navigator.pop();
+  }
+}
+
+/// One of the two rounded surfaces the full screen is built from: the context
+/// block that names the evening, and the block that holds the sentence field.
+class _Block extends StatelessWidget {
+  const _Block({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platform = context.cupidPlatform;
+
+    return Container(
+      padding: const EdgeInsets.all(CupidSpacing.md),
+      decoration: BoxDecoration(
+        color: colors.colorSurface,
+        borderRadius: BorderRadius.circular(platform.radiusCard),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: children,
+      ),
+    );
+  }
+}
+
+/// A statement about where a saved sentence goes and who can read it, not a
+/// control: there is no other destination to switch to and no sharing path in
+/// stage 1, so neither of these is tappable.
+class _Chip extends StatelessWidget {
+  const _Chip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platform = context.cupidPlatform;
+    final CupidTypographyTokens type = context.cupidType;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.colorSurfaceAlt,
+        borderRadius: BorderRadius.circular(platform.radiusSmall),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: CupidSpacing.sm,
+          vertical: CupidSpacing.xs,
+        ),
+        child: Text(
+          label,
+          style: type.caption.copyWith(color: colors.colorTextMuted),
+        ),
+      ),
+    );
   }
 }
 
@@ -307,6 +507,7 @@ class _PhotoSlot extends StatelessWidget {
 /// a reminder with no destination is exactly what AC-16 forbids.
 EveningCheckInScheduler? buildEveningCheckInScheduler({
   PhaseContentRepository? content,
+  ActivityCardRepository? cards,
 }) {
   if (!getIt.isRegistered<GlobalKey<NavigatorState>>()) {
     return null;
@@ -319,7 +520,7 @@ EveningCheckInScheduler? buildEveningCheckInScheduler({
   return EveningCheckInScheduler(
     notifications: PluginLocalNotificationScheduler(
       onSelected: (String? payload) =>
-          _openFromPayload(navigatorKey, repository, payload),
+          _openFromPayload(navigatorKey, repository, cards, payload),
     ),
     content: repository,
   );
@@ -328,6 +529,7 @@ EveningCheckInScheduler? buildEveningCheckInScheduler({
 Future<void> _openFromPayload(
   GlobalKey<NavigatorState> navigatorKey,
   PhaseContentRepository content,
+  ActivityCardRepository? cards,
   String? cardId,
 ) async {
   if (cardId == null || cardId.isEmpty) {
@@ -342,6 +544,17 @@ Future<void> _openFromPayload(
   if (nudge == null) {
     return;
   }
+  // D-8: the screen names the evening it is asking about. A card that no
+  // longer reads leaves the name out rather than blocking the screen — the
+  // question itself is still answerable without it.
+  String? cardTitle;
+  try {
+    cardTitle = (await (cards ?? getIt<ActivityCardRepository>())
+            .cardById(cardId))
+        ?.title;
+  } catch (_) {
+    cardTitle = null;
+  }
   final NavigatorState? navigator = navigatorKey.currentState;
   if (navigator == null || !navigator.mounted) {
     return;
@@ -351,6 +564,7 @@ Future<void> _openFromPayload(
     title: nudge.title,
     body: nudge.body,
     cardId: cardId,
+    cardTitle: cardTitle,
   );
 }
 

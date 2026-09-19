@@ -70,7 +70,10 @@ Các mục S6a bàn giao cho S6b:
 | `flutter test .../phase_status/ .../activity_cards/` | +439 ~8 |
 
 Bằng chứng ảnh: đã mở và nhìn trực tiếp `visual-fidelity/implemented-quiet-surfaces.png`
-và `visual-fidelity/design-reference-quiet-surfaces-j12-nhan-ra-cot-moc-ios.png`.
+và `visual-fidelity/design-reference-j12-nhan-ra-cot-moc-ios.png` (tên file đã được
+đổi lại đúng id canvas gốc trong lượt patch2, nội dung ảnh không đổi — Scrum Master
+cập nhật đường dẫn này ngày 2026-09-19 theo `followup_out_of_writescope` của run
+patch2).
 
 Finding 4 trong test-results.md tự khai rằng lượt chạy suite đã ghi đè PNG
 visual-fidelity của STORY-002 và đã khôi phục bằng `git checkout --`. Tôi xác nhận

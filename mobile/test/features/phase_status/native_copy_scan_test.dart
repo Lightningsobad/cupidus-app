@@ -339,7 +339,23 @@ void main() {
           .allMatches(swift)
           .map((Match m) => m.group(1)!.trim())
           .toList();
-      expect(drawn, <String>['entry.primaryLine', 'entry.secondaryLine']);
+      // Since D-11 the primary line is drawn in three pieces so the run of
+      // digits inside it can be re-sized, so the allowed set is wider than one
+      // expression per line — but it is still a closed set of payload-derived
+      // expressions, which is the property this test exists for. `split` is
+      // `CupidPhaseSplit.of(entry.primaryLine)` and holds no string of its own:
+      // `lead + number + trail` reassembles the payload character for
+      // character, and the `never a literal of its own` test above already
+      // rejects any Swift literal outside the contract set.
+      expect(
+        drawn,
+        <String>[
+          'split.lead',
+          'split.number',
+          'split.trail',
+          'entry.secondaryLine',
+        ],
+      );
       expect(
         swift.contains('configurationDisplayName'),
         isFalse,
@@ -347,6 +363,28 @@ void main() {
             'and the Android side deliberately omits android:label too',
       );
       expect(swift.contains('.description('), isFalse);
+      expect(
+        swift.contains('CupidPhaseSplit.of(entry.primaryLine)'),
+        isTrue,
+        reason: 'the three pieces must come from the payload line itself',
+      );
+    });
+
+    test('the widget paints brand colours, never the device theme (D-12)', () {
+      final String layout = _withoutComments(
+        File(_layoutPath).readAsStringSync(),
+      );
+      expect(
+        layout.contains('?android:attr/'),
+        isFalse,
+        reason: 'a system colour makes the widget read as the launcher, not '
+            'as this app',
+      );
+      final String swift = _withoutComments(
+        File(_widgetSwiftPath).readAsStringSync(),
+      );
+      expect(swift.contains('Color.clear'), isFalse);
+      expect(swift.contains('CupidWidgetPalette'), isTrue);
     });
 
     test('nothing wakes the extension on its own (WIDGET-STALE)', () {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/theme/cupid_theme_context.dart';
 import '../../../design_system/tokens/cupid_color_tokens.dart';
+import '../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../design_system/tokens/cupid_spacing.dart';
 import '../../../design_system/tokens/cupid_typography_tokens.dart';
 
@@ -35,6 +36,10 @@ int? civilDaysUntil({required String scheduledOnIso, required DateTime today}) {
 /// Nothing to say renders as [SizedBox.shrink] rather than as an empty box,
 /// blank row or placeholder — the quiet phase has no screen line of its own at
 /// this point, and a gap where a sentence used to be still reads as a message.
+///
+/// It draws its own rounded surface (D-1) and the hub mounts it inside the card
+/// it is about, rather than as bare text heading the whole list: the block
+/// explains one card, so it is bounded like one.
 class PhaseStatusLine extends StatelessWidget {
   const PhaseStatusLine({super.key, this.primary, this.secondary});
 
@@ -48,11 +53,17 @@ class PhaseStatusLine extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
     final String? support = secondary;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: CupidSpacing.md),
+    return Container(
+      padding: const EdgeInsets.all(CupidSpacing.md),
+      decoration: BoxDecoration(
+        color: colors.colorSurfaceAlt,
+        borderRadius: BorderRadius.circular(platform.radiusCard),
+        border: Border.all(color: colors.colorLine),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,

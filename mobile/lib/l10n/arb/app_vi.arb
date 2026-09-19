@@ -1233,5 +1233,25 @@
   "evening_check_in_later": "Để sau",
   "@evening_check_in_later": {
     "description": "Closes the sheet. A valid ending: nothing is stored, nothing is marked incomplete, and the reminder does not come back (AC-17)."
+  },
+  "evening_check_in_context_label": "TỐI NAY CỦA HAI NGƯỜI",
+  "@evening_check_in_context_label": {
+    "description": "Eyebrow of the context block (D-8). Names which evening the screen is about; the card title itself is user data and is drawn under it."
+  },
+  "evening_check_in_line_label": "Một câu để giữ tối nay",
+  "@evening_check_in_line_label": {
+    "description": "Label above the sentence field on the full-screen check-in (D-6). The field stays optional."
+  },
+  "evening_check_in_journal_chip": "+ ghi vào sổ tay",
+  "@evening_check_in_journal_chip": {
+    "description": "States where a saved sentence lands, so saving is not a guess. Not a button - the destination is fixed."
+  },
+  "evening_check_in_private_chip": "chỉ mình đọc",
+  "@evening_check_in_private_chip": {
+    "description": "States that the entry is private (BR-14). Not a toggle - there is no sharing path in stage 1."
+  },
+  "evening_check_in_reassurance": "Không viết cũng chẳng sao. Mai app sẽ không nhắc lại chuyện này.",
+  "@evening_check_in_reassurance": {
+    "description": "Footer of the full-screen check-in (D-9). Carries the AC-4 half that says skipping is not followed up."
   }
 }

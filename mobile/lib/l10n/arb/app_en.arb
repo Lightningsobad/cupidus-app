@@ -266,5 +266,10 @@
   "evening_check_in_photos_attached": "{count} photos picked",
   "evening_check_in_line_hint": "Write one line about today",
   "evening_check_in_save": "Save to the journal",
-  "evening_check_in_later": "Later"
+  "evening_check_in_later": "Later",
+  "evening_check_in_context_label": "TONIGHT, THE TWO OF YOU",
+  "evening_check_in_line_label": "One line to keep tonight",
+  "evening_check_in_journal_chip": "+ into your notebook",
+  "evening_check_in_private_chip": "only you can read it",
+  "evening_check_in_reassurance": "Not writing is fine too. The app will not bring this up again."
 }

@@ -189,8 +189,11 @@ void main() {
       testWidgets('${entry.key.wireValue} renders its mapped glyph', (
         WidgetTester tester,
       ) async {
+        // D-3 moved the scheduled date off line 2, so a date-only card now has
+        // no line 2 and therefore no leading glyph. Give the card a distance so
+        // line 2 exists and this test still measures the glyph mapping.
         await tester.pumpWidget(
-          _host(_tile(_card(activityType: entry.key))),
+          _host(_tile(_card(activityType: entry.key, distanceKm: 1.8))),
         );
 
         final Icon icon = tester.widget<Icon>(
@@ -243,7 +246,7 @@ void main() {
       final Text meta = tester.widget<Text>(
         find.byKey(const Key('activity_card_meta_x')),
       );
-      expect(meta.data, '2026-09-07 · 1.8 km · 70.000đ');
+      expect(meta.data, '1.8 km · 70.000đ');
       for (final ActivityType type in ActivityType.values) {
         expect(find.textContaining(type.wireValue), findsNothing);
       }

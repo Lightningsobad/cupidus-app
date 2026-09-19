@@ -36,6 +36,12 @@ const List<String> widgetPayloadKeys = <String>[
   widgetKeyComputedOn,
 ];
 
+/// The one `phase_id` value the native widget branches on, for the date-day
+/// background the design gives that phase alone (D-12). An identifier the
+/// payload already carries, not a sixth key and not display copy — the widget
+/// still draws only `primary_line` and `secondary_line`.
+const String widgetPhaseIdDateDay = 'date_day';
+
 const String widgetAndroidProviderName = 'CupidPhaseWidgetProvider';
 const String widgetIosName = 'CupidPhaseWidget';
 const String widgetAppGroupId = 'group.com.snapsofts.cupid';

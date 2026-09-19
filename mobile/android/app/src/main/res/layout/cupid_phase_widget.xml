@@ -3,12 +3,18 @@
      purpose: every readable character is pushed from Dart at runtime, so
      swapping the content source never touches this file (AC-37/BR-15). With no
      payload the two text views stay GONE and this inflates as a textless
-     frame. -->
+     frame.
+
+     D-12: colours are the brand dark palette from
+     lib/design_system/tokens/cupid_color_tokens.dart, written as literals
+     rather than as ?android:attr/... so the widget reads as part of this app
+     on any device theme. They are literals rather than @color/ references
+     because res/values is outside this story's write scope. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/cupid_phase_widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground"
+    android:background="#241B42"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:padding="12dp">
@@ -32,7 +38,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="2"
-            android:textColor="?android:attr/textColorPrimary"
+            android:textColor="#F7EEFB"
             android:textSize="14sp"
             android:textStyle="bold"
             android:visibility="gone" />
@@ -44,7 +50,7 @@
             android:layout_marginTop="2dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textColor="?android:attr/textColorSecondary"
+            android:textColor="#B4A6CE"
             android:textSize="12sp"
             android:visibility="gone" />
     </LinearLayout>
