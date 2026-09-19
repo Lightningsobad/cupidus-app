@@ -5,6 +5,12 @@ VISUAL_FIDELITY: FAIL
 Lane: mobile · Ngày: 2026-09-17 · Tác giả: Alex-Mobile-Dev
 Đóng gap `G-1` trong `review/review-report.md` (rule 12e2/12e3).
 
+Cập nhật lượt patch C-1/C-3 (2026-09-17, lần 2): **1 trong 10 delta được giao đã
+đóng thật (D-7)**; 9 delta còn lại không sửa được trong WriteScope của lượt này.
+Verdict giữ nguyên `FAIL` — chi tiết và bằng chứng đo ở mục
+"Lượt patch C-1/C-3" cuối file. Đây không phải từ chối sửa: mỗi delta còn mở
+đều kèm đường dẫn file chứa chỗ sửa và lý do file đó nằm ngoài WriteScope.
+
 ## Design-Surface / Design-Screen đã giải (rule 12e2)
 
 Design-Surface: `cupid-ch-ng-1` (`Cupid Chặng 1.dc.html`, `surface: mobile`,
@@ -160,8 +166,19 @@ khoảng cách giữa hàng lọc và thẻ đầu tiên ở `man-goc-muon-lam`.
   precedent design-anchor của REQ-016, loại lệch này thuộc nhóm "rework về
   canvas + sửa spec cho khớp", nhưng **báo cáo này không tự phân xử** — ghi
   nguyên và để Scrum Master quyết.
-- **D-7 (delta cài đặt).** Không có lưới ô ảnh: thiết kế cho thấy trước ba
-  chỗ cất ảnh; bản dựng chỉ có một nút chữ "Đính ảnh".
+- **D-7 — ĐÃ ĐÓNG (2026-09-17, lượt patch C-1/C-3).** Trước: chỉ một nút chữ
+  "Đính ảnh". Nay: lưới **ba ô vuông** bo góc, viền `colorLine`, nền
+  `colorSurfaceAlt`, mỗi ô rỗng vẽ `add_photo_alternate_outlined` — đúng số ô
+  và đúng cách "cho thấy trước chỗ cất ảnh" của thiết kế; ô đã có ảnh vẽ chính
+  tấm ảnh (`Image.file`, `BoxFit.cover`), hỏng đường dẫn thì rơi về glyph chứ
+  không ném lỗi trong sheet. Chỗ sửa:
+  `mobile/lib/features/phase_status/presentation/evening_check_in_sheet.dart`
+  (`_PhotoSlot`, `_photoSlotCount = 3`).
+  Bằng chứng: `implemented-evening-check-in-sheet.png` đã chụp lại ở lượt này
+  và **đã mở ra nhìn tận mắt** — ba ô hiện đủ, icon dựng đúng (không ô tofu),
+  dấu tiếng Việt nguyên vẹn. Test canh: `evening_check_in_sheet_test.dart`
+  "the photo step shows its three places before anything is picked" và
+  "a picked photo fills a place and leaves the rest empty".
 - **D-8 (delta cài đặt).** Không có khối ngữ cảnh nhắc lại buổi hẹn, nên người
   dùng không thấy sheet đang nói về thẻ nào.
 - **D-9 (delta cài đặt).** Thiếu dòng trấn an chân màn ("Không viết cũng chẳng
@@ -231,24 +248,87 @@ Nói rõ vì sao và đã làm gì thay thế:
 
 ## Tổng kết delta
 
-| Id | Loại | Ảnh | Ai sửa |
-|---|---|---|---|
-| D-1 | delta cài đặt | hub-waiting | mobile-dev |
-| D-2 | delta cài đặt | hub-waiting | mobile-dev |
-| D-3 | delta cài đặt (định dạng ngày ISO) | hub-upcoming, hub-date_day | mobile-dev |
-| D-4 | delta cài đặt | hub-upcoming | mobile-dev |
-| D-5 | delta cài đặt | hub-date_day | mobile-dev |
-| D-6 | lệch spec-prose vs canvas | evening-check-in-sheet | Scrum Master quyết trước |
-| D-7 | delta cài đặt | evening-check-in-sheet | mobile-dev |
-| D-8 | delta cài đặt | evening-check-in-sheet | mobile-dev |
-| D-9 | delta cài đặt | evening-check-in-sheet | mobile-dev |
-| D-10 | ứng viên `DESIGN_SPEC_CONFLICT` (AC-37/BR-15 + hợp đồng 5 khoá) | widget | Scrum Master / user quyết |
-| D-11 | delta cài đặt | widget | mobile-dev |
-| D-12 | delta cài đặt | widget | mobile-dev |
+| Id | Loại | Ảnh | Trạng thái sau lượt patch C-1/C-3 | File chứa chỗ sửa |
+|---|---|---|---|---|
+| D-1 | delta cài đặt | hub-waiting | MỞ — ngoài WriteScope | `mobile/lib/features/activity_cards/presentation/screens/activity_card_hub_view.dart` + `.../widgets/activity_card_tile.dart` |
+| D-2 | delta cài đặt | hub-waiting | MỞ — ngoài WriteScope | `.../widgets/activity_card_tile.dart` |
+| D-3 | delta cài đặt (định dạng ngày ISO) | hub-upcoming, hub-date_day | MỞ — ngoài WriteScope, **và thiếu dữ liệu giờ** | `.../widgets/activity_card_tile.dart:242-250` (`_subtitle`) |
+| D-4 | delta cài đặt | hub-upcoming | MỞ — ngoài WriteScope | `.../widgets/activity_card_tile.dart:169-178` |
+| D-5 | delta cài đặt | hub-date_day | MỞ — ngoài WriteScope | `.../widgets/activity_card_tile.dart` |
+| D-6 | lệch spec-prose vs canvas | evening-check-in-sheet | MỞ — C-2, Scrum Master quyết trước | — |
+| D-7 | delta cài đặt | evening-check-in-sheet | **ĐÓNG** ✔ | `mobile/lib/features/phase_status/presentation/evening_check_in_sheet.dart` |
+| D-8 | delta cài đặt | evening-check-in-sheet | MỞ — cần chuỗi mới + tên thẻ | `mobile/lib/l10n/arb/app_vi.arb` + call site ở `activity_card_hub_view.dart` |
+| D-9 | delta cài đặt | evening-check-in-sheet | MỞ — cần chuỗi mới | `mobile/lib/l10n/arb/app_vi.arb` |
+| D-10 | ứng viên `DESIGN_SPEC_CONFLICT` (AC-37/BR-15 + hợp đồng 5 khoá) | widget | MỞ — C-2, Scrum Master/user quyết | — |
+| D-11 | delta cài đặt | widget | MỞ — ngoài WriteScope | `mobile/android/app/src/main/res/layout/cupid_phase_widget.xml`, `mobile/ios/CupidPhaseWidget/CupidPhaseWidget.swift` |
+| D-12 | delta cài đặt | widget | MỞ — ngoài WriteScope | cùng hai file trên |
 
-Không delta nào ở trên được sửa trong lượt này: WriteScope của handoff chỉ gồm
-`visual-fidelity/` và `coding-plan/test-results.md`, và handoff cấm sửa logic
-sản xuất của bất kỳ phase nào.
+## Lượt patch C-1/C-3 (2026-09-17)
+
+WriteScope lượt này (đọc từ
+`data/runtime/parallel-runs/RUN-...-STORY-012_phase_status_and_widget-mobile-dev.json`,
+khoá `write_scope`): `mobile/lib/features/phase_status`,
+`mobile/test/features/phase_status`, `mobile/ios/Runner/Info.plist`,
+`.../visual-fidelity`, `.../coding-plan/test-results.md`,
+`.../deployment/configuration-guide.md`.
+
+### Đã đóng
+
+- **D-7** — lưới ba ô ảnh trong sheet 23h. Xem mục `5 · evening-check-in-sheet`.
+- **C-3** — scheme `cupidapp` đã đăng ký trong `mobile/ios/Runner/Info.plist`
+  (`CFBundleURLTypes` → `CFBundleURLSchemes` → `cupidapp`). Xác minh:
+  `plutil -lint ios/Runner/Info.plist` → `OK`;
+  `/usr/libexec/PlistBuddy -c "Print :CFBundleURLTypes:0:CFBundleURLSchemes:0"`
+  → `cupidapp`. Test canh mới trong `native_copy_scan_test.dart` đọc scheme ra
+  từ `CupidPhaseWidgetProvider.kt` rồi đòi plist đăng ký đúng giá trị đó, nên
+  một lần đổi tên scheme làm đỏ test thay vì làm chết cú chạm trên máy.
+  Bước này cũng đã ghi vào
+  `deployment/configuration-guide.md` §"Register the `cupidapp` URL scheme".
+  Giới hạn cần nói thẳng: đăng ký này chỉ đủ để iOS **mở lại app**; phía Dart
+  hiện **chưa** có chỗ nhận `cupidapp://card/<id>` (đã đo: 0 khớp
+  `cupidapp|deepLink|scheme` trong
+  `lib/features/phase_status/data/home_widget_bridge.dart`), nên chạm widget mở
+  app về màn mặc định chứ chưa nhảy tới đúng thẻ. Định tuyến sâu là việc riêng,
+  không nằm trong C-3.
+
+### Không đóng được trong WriteScope này
+
+Bảy delta (D-1, D-2, D-3, D-4, D-5, D-11, D-12) nằm ở file thuộc story khác:
+
+- D-1..D-5 sống trong `mobile/lib/features/activity_cards/**` — thẻ và vỏ danh
+  sách của STORY-001, không phải `features/phase_status`.
+- D-11, D-12 sống trong layout RemoteViews Android và `CupidPhaseWidget.swift`
+  — chỉ `mobile/ios/Runner/Info.plist` được mở trong WriteScope, không phải cả
+  `mobile/ios/` hay `mobile/android/`.
+
+Hai delta còn lại (D-8, D-9) nằm **trong** file sheet thuộc WriteScope nhưng
+đòi chuỗi hiển thị mới ("TỐI NAY CỦA HAI NGƯỜI", dòng trấn an chân màn), và
+mọi chuỗi chrome của sheet đến từ `mobile/lib/l10n/arb/app_vi.arb` +
+`app_en.arb` (đã đo: `l10n.evening_check_in_*`). Thư mục `lib/l10n/` ngoài
+WriteScope. Riêng D-8 còn cần tên buổi hẹn: `EveningCheckInSheet` hiện chỉ
+nhận `cardId`, nên phải sửa cả call site trong `activity_card_hub_view.dart`
+(cũng ngoài WriteScope).
+
+### Một ghi chú dữ liệu về D-3, không chỉ là chuyện phạm vi
+
+Thiết kế vẽ "CN 14/9, **19:20**" và "HÔM NAY, **19:20**". Phần thứ/ngày/tháng
+format được từ dữ liệu hiện có, nhưng **giờ thì không**: `ActivityCard` chỉ có
+`scheduledOn` dạng chuỗi ngày (`activity_card.dart:131`, giá trị kiểu
+`'2026-09-20'`), không có trường giờ nào. Vậy D-3 tách làm hai:
+
+1. phần sửa được ngay khi mở scope: bỏ chuỗi ISO thô, in `CN 14/9` / `HÔM NAY`
+   theo locale `vi`;
+2. phần cần quyết: hoặc chấp nhận lệch (không hiện giờ), hoặc mở rộng lược đồ
+   thẻ để mang giờ hẹn — việc sau là thay đổi hợp đồng dữ liệu, không phải
+   chỉnh hiển thị.
+
+### Vì sao verdict vẫn FAIL
+
+`VISUAL_FIDELITY` là verdict trên **màn**, không phải trên số delta đã đóng.
+Sau lượt này `hub-waiting`, `hub-upcoming`, `hub-date_day` không đổi một pixel
+nào (không file nào của chúng nằm trong WriteScope), nên ba màn đó vẫn FAIL y
+như trước; `evening-check-in-sheet` gần thiết kế hơn nhưng vẫn thiếu D-8, D-9
+và đang chờ quyết D-6. Lật verdict lúc này sẽ là một chữ ký sai.
 
 ## Ngoài bề mặt của story này (không tính delta)
 

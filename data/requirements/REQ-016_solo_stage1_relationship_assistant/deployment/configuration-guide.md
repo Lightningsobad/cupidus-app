@@ -69,6 +69,35 @@ base configuration references the same `Flutter/Debug.xcconfig` and
 `Flutter/Release.xcconfig` as Runner. This is what keeps the `.appex` version in
 lockstep with the app version; App Store validation rejects a mismatch.
 
+### Register the `cupidapp` URL scheme on Runner
+
+`mobile/ios/Runner/Info.plist` must declare the widget's deep link scheme,
+otherwise iOS has nobody to hand `cupidapp://card/<card_id>` to and a tap on the
+widget does nothing at all — the widget's only affordance. The build, the tests
+and the App Store validation all stay green without it, so it has to be checked
+by reading the file:
+
+```xml
+<key>CFBundleURLTypes</key>
+<array>
+	<dict>
+		<key>CFBundleTypeRole</key>
+		<string>Editor</string>
+		<key>CFBundleURLName</key>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+		<key>CFBundleURLSchemes</key>
+		<array>
+			<string>cupidapp</string>
+		</array>
+	</dict>
+</array>
+```
+
+`Runner/Info.plist` is one of the files `flutter create .` rewrites, so re-add
+this block after any platform-folder regeneration. `native_copy_scan_test.dart`
+reads the scheme back out of `CupidPhaseWidgetProvider.kt` and asserts the plist
+registers that same value.
+
 ### Apple Developer portal
 
 Signed builds (anything other than `--no-codesign`) additionally need, once per

@@ -1440,3 +1440,76 @@ chỉ được xác minh **tĩnh** — manifest, `appwidget-provider`, layout, s
 tại của lớp Kotlin — chứ chưa từng chạy trên máy ảo. Không ghi
 `Runtime-Smoke: WAIVED` ở đâu cả: chỉ Scrum Master mới được ghi dòng đó vào
 `story_master.md`, và điều kiện waive chưa thoả vì lỗi này sửa được.
+
+## Lượt patch C-1/C-3 (2026-09-17) — bằng chứng chạy
+
+Phạm vi lượt này: C-3 (đăng ký scheme `cupidapp` cho iOS) và phần C-1 sửa được
+bên trong WriteScope (D-7, lưới ba ô ảnh của sheet 23h). Delta nào đóng, delta
+nào còn mở và vì sao: `visual-fidelity/visual-fidelity-report.md`, mục
+"Lượt patch C-1/C-3".
+
+### Kiểm tra plist (C-3) — PASS
+
+```
+plutil -lint ios/Runner/Info.plist
+ios/Runner/Info.plist: OK
+
+/usr/libexec/PlistBuddy -c "Print :CFBundleURLTypes:0:CFBundleURLSchemes:0" ios/Runner/Info.plist
+cupidapp
+```
+
+Không chạy build Xcode ở lượt này, và đó là lựa chọn có lý do: đăng ký URL
+scheme là dữ liệu plist, một bản build iOS xanh **không** chứng minh được nó có
+mặt — thiếu nó build vẫn xanh, chỉ cú chạm widget là chết. Chỗ canh đúng vì vậy
+là đọc lại chính file, cộng một test đọc scheme ra từ
+`CupidPhaseWidgetProvider.kt` rồi đối chiếu với plist:
+`native_copy_scan_test.dart`, case "the app registers the scheme the widget tap
+opens".
+
+### Static analysis — 0 error
+
+```
+flutter analyze lib/features/phase_status
+5 issues found.   (5 info prefer_initializing_formals, tất cả ở
+                   phase_status_cubit.dart — nền sẵn có, không đụng lượt này)
+```
+
+Hai info `unnecessary_underscores` do chính lượt sửa sinh ra đã dọn trước khi
+chốt, nên lượt này không thêm issue mới nào.
+
+### Test đơn vị/widget — PASS
+
+```
+flutter test test/features/phase_status
++229 ~6: All tests passed!   (229 pass, 6 skipped, 0 fail)
+```
+
+6 skip đều thuộc nhóm `CAPTURE_VISUALS` (chỉ chạy khi bật dart-define), không
+bỏ assertion nào.
+
+Test mới trong lượt này:
+- `evening_check_in_sheet_test.dart` — "the photo step shows its three places
+  before anything is picked"; "a picked photo fills a place and leaves the rest
+  empty".
+- `native_copy_scan_test.dart` — "the app registers the scheme the widget tap
+  opens".
+
+Một assertion cũ được sửa cho đúng ý định của chính nó: "there are exactly two
+ways out and both are one tap" trước đây đếm `findsNWidgets(2)` trên
+`TextButton`, nhưng con số 2 đó gồm cả nút "Đính ảnh" — tức nó đang đếm nhầm
+lối-ra với điều khiển đính ảnh. Nút đính ảnh nay là ô lưới, nên assertion đổi
+thành `findsOneWidget` ("Để sau") cộng `FilledButton` ("Lưu vào nhật ký"); hai
+lối ra vẫn được canh qua `eveningCheckInLaterKey` và `eveningCheckInSaveKey`.
+
+### Chụp lại bằng chứng thị giác
+
+```
+flutter test test/features/phase_status/evening_check_in_sheet_test.dart \
+  --dart-define=CAPTURE_VISUALS=true
+All tests passed!
+```
+
+`visual-fidelity/implemented-evening-check-in-sheet.png` đã ghi đè và **mở ra
+nhìn tận mắt**: ba ô ảnh hiện đủ, icon dựng đúng (không ô tofu), dấu tiếng Việt
+nguyên vẹn. `git status` sau lượt chạy chỉ liệt kê đúng file PNG này — không có
+PNG của story khác bị chạy ké làm bẩn.

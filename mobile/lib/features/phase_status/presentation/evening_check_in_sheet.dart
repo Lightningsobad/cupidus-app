@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -13,6 +15,10 @@ import '../data/local_notification_scheduler.dart';
 import '../data/phase_content_repository.dart';
 import '../domain/evening_check_in_scheduler.dart';
 import '../domain/phase_content.dart';
+
+/// The design shows the places a photo can go before one is picked, so the
+/// sheet states its whole ask up front instead of hiding it behind a word.
+const int _photoSlotCount = 3;
 
 const Key eveningCheckInSheetKey = Key('evening_check_in_sheet');
 const Key eveningCheckInAttachKey = Key('evening_check_in_attach');
@@ -138,19 +144,28 @@ class _EveningCheckInSheetState extends State<EveningCheckInSheet> {
               style: type.caption.copyWith(color: colors.colorTextMuted),
             ),
             const SizedBox(height: CupidSpacing.md),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                key: eveningCheckInAttachKey,
-                onPressed: _busy ? null : _attach,
-                icon: Icon(Icons.image_outlined, color: colors.colorAccentPink),
-                label: Text(
-                  _photos.isEmpty
-                      ? l10n.evening_check_in_attach
-                      : l10n.evening_check_in_photos_attached(_photos.length),
-                  style: type.body.copyWith(color: colors.colorAccentPink),
-                ),
-              ),
+            Row(
+              children: <Widget>[
+                for (int slot = 0; slot < _photoSlotCount; slot++) ...<Widget>[
+                  if (slot > 0) const SizedBox(width: CupidSpacing.sm),
+                  Expanded(
+                    child: _PhotoSlot(
+                      key: slot == 0
+                          ? eveningCheckInAttachKey
+                          : Key('evening_check_in_slot_$slot'),
+                      path: slot < _photos.length ? _photos[slot] : null,
+                      onTap: _busy ? null : _attach,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: CupidSpacing.sm),
+            Text(
+              _photos.isEmpty
+                  ? l10n.evening_check_in_attach
+                  : l10n.evening_check_in_photos_attached(_photos.length),
+              style: type.body.copyWith(color: colors.colorAccentPink),
             ),
             const SizedBox(height: CupidSpacing.sm),
             TextField(
@@ -224,6 +239,62 @@ class _EveningCheckInSheetState extends State<EveningCheckInSheet> {
       return;
     }
     navigator.pop();
+  }
+}
+
+/// One place a photo can sit. Empty it is an outlined square; filled it shows
+/// the picked image, and falls back to a glyph when the path no longer reads,
+/// so a deleted file cannot throw inside the sheet.
+class _PhotoSlot extends StatelessWidget {
+  const _PhotoSlot({super.key, required this.path, required this.onTap});
+
+  final String? path;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platform = context.cupidPlatform;
+    final String? path = this.path;
+
+    return AspectRatio(
+      aspectRatio: 1,
+      child: Material(
+        color: colors.colorSurfaceAlt,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(platform.radiusSmall),
+          side: BorderSide(color: colors.colorLine),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          child: path == null
+              ? Center(
+                  child: Icon(
+                    Icons.add_photo_alternate_outlined,
+                    size: 24,
+                    color: colors.colorTextMuted,
+                  ),
+                )
+              : Image.file(
+                  File(path),
+                  fit: BoxFit.cover,
+                  errorBuilder: (
+                    BuildContext context,
+                    Object error,
+                    StackTrace? stackTrace,
+                  ) =>
+                      Center(
+                    child: Icon(
+                      Icons.image_outlined,
+                      size: 24,
+                      color: colors.colorAccentPink,
+                    ),
+                  ),
+                ),
+        ),
+      ),
+    );
   }
 }
 

@@ -24,6 +24,7 @@ const String _widgetPlistPath = '$_iosWidgetRoot/Info.plist';
 const String _widgetEntitlementsPath =
     '$_iosWidgetRoot/CupidPhaseWidget.entitlements';
 const String _runnerEntitlementsPath = 'ios/Runner/Runner.entitlements';
+const String _runnerPlistPath = 'ios/Runner/Info.plist';
 const String _pbxprojPath = 'ios/Runner.xcodeproj/project.pbxproj';
 
 const String _bridgePath =
@@ -73,6 +74,12 @@ Map<String, String> _dartWidgetConstants() {
       m.group(1)!: m.group(2)!,
   };
 }
+
+/// The scheme both native sides mint their tap URL with, read from the source
+/// that mints it so a rename cannot leave the app registered for the old one.
+String _deepLinkScheme() => RegExp(r'DEEP_LINK_SCHEME\s*=\s*"([^"\\\n]*)"')
+    .firstMatch(File(_providerPath).readAsStringSync())!
+    .group(1)!;
 
 Set<String> _deepLinkVocabulary() => RegExp(r'DEEP_LINK_[A-Z_]+\s*=\s*"([^"\\\n]*)"')
     .allMatches(File(_providerPath).readAsStringSync())
@@ -413,6 +420,25 @@ void main() {
             .allMatches(pbxproj)
             .length,
         configurations,
+      );
+    });
+
+    test('the app registers the scheme the widget tap opens', () {
+      // Without this registration iOS has nobody to hand `cupidapp://` to, so
+      // `widgetURL` resolves to nothing and the widget's only affordance is
+      // dead on the device while every build and test still passes.
+      final String plist = File(_runnerPlistPath).readAsStringSync();
+      expect(plist.contains('<key>CFBundleURLTypes</key>'), isTrue);
+      final RegExpMatch? schemes = RegExp(
+        r'<key>CFBundleURLSchemes</key>\s*<array>([\s\S]*?)</array>',
+      ).firstMatch(plist);
+      expect(schemes, isNotNull);
+      expect(
+        RegExp(r'<string>([^<]*)</string>')
+            .allMatches(schemes!.group(1)!)
+            .map((Match m) => m.group(1)!)
+            .toSet(),
+        contains(_deepLinkScheme()),
       );
     });
 

@@ -182,6 +182,28 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
     });
 
+    testWidgets('the photo step shows its three places before anything is '
+        'picked', (WidgetTester tester) async {
+      await tester.pumpWidget(_sheet());
+
+      expect(find.byKey(eveningCheckInAttachKey), findsOneWidget);
+      expect(find.byKey(const Key('evening_check_in_slot_1')), findsOneWidget);
+      expect(find.byKey(const Key('evening_check_in_slot_2')), findsOneWidget);
+      expect(find.byIcon(Icons.add_photo_alternate_outlined), findsNWidgets(3));
+    });
+
+    testWidgets('a picked photo fills a place and leaves the rest empty',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _sheet(pickPhotos: () async => <String>['/tmp/a.jpg']),
+      );
+
+      await tester.tap(find.byKey(eveningCheckInAttachKey));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.add_photo_alternate_outlined), findsNWidgets(2));
+    });
+
     testWidgets('the sentence field is never disabled or greyed out (AC-18)',
         (WidgetTester tester) async {
       await tester.pumpWidget(_sheet());
@@ -324,7 +346,7 @@ void main() {
 
       expect(find.byKey(eveningCheckInLaterKey), findsOneWidget);
       expect(find.byKey(eveningCheckInSaveKey), findsOneWidget);
-      expect(find.byType(TextButton), findsNWidgets(2));
+      expect(find.byType(TextButton), findsOneWidget);
       expect(find.byType(FilledButton), findsOneWidget);
     });
   });
