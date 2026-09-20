@@ -13,6 +13,16 @@ import 'package:flutter_test/flutter_test.dart';
 /// The fixture is built by opening the current schema on a file and then
 /// removing exactly the v6 additions, so the v5 shape tracks the real table
 /// definitions instead of being retyped by hand.
+///
+/// The fixture also drops `calendar_event_state` (v7) and the two
+/// chapter-closure ledger tables (v9), and lands the upgrade at v9, not v7:
+/// three sibling stories (STORY-009's `calendar_event_state`, STORY-010's
+/// `relationship_labels`, and STORY-013's chapter-closure tables) each added a
+/// schema step after this one, so the "current" version moved from v6 to v9 as
+/// they merged. `relationship_labels` already exists in this fixture (it
+/// comes from the current schema the fixture is built on), so the v8 upgrade
+/// step is a no-op `CREATE TABLE IF NOT EXISTS` here — it does not affect what
+/// this file is testing.
 void main() {
   Future<int> readUserVersion(CupidDatabase database) async {
     final row = await database.customSelect('PRAGMA user_version').getSingle();
@@ -73,6 +83,9 @@ void main() {
       'skill_profile_entries',
       'ask_prompt_state',
       'calendar_event_state',
+      // Items first: it holds the cascading foreign key onto chapter_closures.
+      'chapter_closure_items',
+      'chapter_closures',
     ]) {
       await seeded.customStatement('DROP TABLE $table');
     }
@@ -103,7 +116,7 @@ void main() {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
-      expect(await readUserVersion(upgraded), upgraded.schemaVersion);
+      expect(await readUserVersion(upgraded), 9);
       expect(
         await tableNames(upgraded),
         containsAll(<String>[
@@ -163,8 +176,8 @@ void main() {
       await fresh.select(fresh.skillProfileEntries).get();
       await fresh.select(fresh.askPromptState).get();
 
-      expect(await readUserVersion(fresh), 7);
-      expect(fresh.schemaVersion, 7);
+      expect(await readUserVersion(fresh), 9);
+      expect(fresh.schemaVersion, 9);
     });
 
     test('ask_prompt_state is keyed by (owner_key, question_id)', () async {

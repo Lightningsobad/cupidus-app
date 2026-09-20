@@ -1,6 +1,6 @@
 # Story Master: STORY-005 Mồi chuyện — kho câu thường xanh và sự kiện có lịch
 
-Status: TODO
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: mobile-only (Tech Lead chốt: toàn bộ bề mặt nằm trong
@@ -22,7 +22,18 @@ F (3c, C1, C7)
       `architecture/contract-summary.md`
 - [x] Implementation (Development) — mobile-dev P1-P4 complete, committed
       3ff29be43d1e754548767a87246df3e0c1e181a2
-- [ ] Review (Reviewer) — Tier 3 scoped-slice dispatched 2026-09-17
+- [x] Review (Reviewer) — Outcome: DEFERRED_ONLY (2026-09-17,
+      `review/review-report.md`). Merged into
+      `codex/REQ-016_solo_stage1_relationship_assistant-integration`
+      (merge `2b5d841f`, re-merged `2406c82e` after the visual-confirm patch).
+      `design-reference-6-moi-chuyen-a-a-ios.png` was produced 2026-09-20 (see
+      `visual-fidelity/visual-fidelity-report.md` §3) and directly eyeballed
+      against `implemented-6-moi-chuyen-a-a-material.png`;
+      `VISUAL_FIDELITY: PASS` confirmed. The report also carries
+      `DESIGN_ANCHOR_ADJUDICATION_REQUIRED: YES` for 6 canvas-vs-spec-text
+      items with no AC backing (§7) — a scope judgment call, not an
+      implementation defect, so it does not block `Status: DONE` (see report
+      §8). Open for a separate Scrum-Master/user decision.
 
 ## Depends On
 - STORY-001 — bản A+ đổi thẳng thành thẻ trong kho chung.

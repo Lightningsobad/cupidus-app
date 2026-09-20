@@ -6689,6 +6689,1585 @@ class CalendarEventStateCompanion
   }
 }
 
+class $PortraitAnswersTable extends PortraitAnswers
+    with TableInfo<$PortraitAnswersTable, PortraitAnswerRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PortraitAnswersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _ownerKeyMeta = const VerificationMeta(
+    'ownerKey',
+  );
+  @override
+  late final GeneratedColumn<String> ownerKey = GeneratedColumn<String>(
+    'owner_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _questionIdMeta = const VerificationMeta(
+    'questionId',
+  );
+  @override
+  late final GeneratedColumn<String> questionId = GeneratedColumn<String>(
+    'question_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _optionIdMeta = const VerificationMeta(
+    'optionId',
+  );
+  @override
+  late final GeneratedColumn<String> optionId = GeneratedColumn<String>(
+    'option_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _answerValueMeta = const VerificationMeta(
+    'answerValue',
+  );
+  @override
+  late final GeneratedColumn<String> answerValue = GeneratedColumn<String>(
+    'answer_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notebookEntryIdMeta = const VerificationMeta(
+    'notebookEntryId',
+  );
+  @override
+  late final GeneratedColumn<String> notebookEntryId = GeneratedColumn<String>(
+    'notebook_entry_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    ownerKey,
+    questionId,
+    state,
+    optionId,
+    answerValue,
+    notebookEntryId,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'portrait_answers';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PortraitAnswerRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('owner_key')) {
+      context.handle(
+        _ownerKeyMeta,
+        ownerKey.isAcceptableOrUnknown(data['owner_key']!, _ownerKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerKeyMeta);
+    }
+    if (data.containsKey('question_id')) {
+      context.handle(
+        _questionIdMeta,
+        questionId.isAcceptableOrUnknown(data['question_id']!, _questionIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_questionIdMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('option_id')) {
+      context.handle(
+        _optionIdMeta,
+        optionId.isAcceptableOrUnknown(data['option_id']!, _optionIdMeta),
+      );
+    }
+    if (data.containsKey('answer_value')) {
+      context.handle(
+        _answerValueMeta,
+        answerValue.isAcceptableOrUnknown(
+          data['answer_value']!,
+          _answerValueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('notebook_entry_id')) {
+      context.handle(
+        _notebookEntryIdMeta,
+        notebookEntryId.isAcceptableOrUnknown(
+          data['notebook_entry_id']!,
+          _notebookEntryIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {ownerKey, questionId};
+  @override
+  PortraitAnswerRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PortraitAnswerRow(
+      ownerKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_key'],
+      )!,
+      questionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}question_id'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      optionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}option_id'],
+      ),
+      answerValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}answer_value'],
+      ),
+      notebookEntryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notebook_entry_id'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PortraitAnswersTable createAlias(String alias) {
+    return $PortraitAnswersTable(attachedDatabase, alias);
+  }
+}
+
+class PortraitAnswerRow extends DataClass
+    implements Insertable<PortraitAnswerRow> {
+  /// Backend `User.id`; every query filters on this column.
+  final String ownerKey;
+
+  /// Stable `items[].id` from `req016.portrait_questions.v1`.
+  final String questionId;
+
+  /// `answered` | `skipped` (§2). `skipped` is a first-class outcome, not a
+  /// failure (AC-27).
+  final String state;
+
+  /// Stable id of the chip the user picked, or NULL for free text and for a
+  /// skip.
+  final String? optionId;
+
+  /// The answer itself, stored here **only** when the question's target is
+  /// `portrait.guess`. A `notebook.*` answer lives in the notebook and is read
+  /// back from there, so editing or deleting the notebook entry thins the
+  /// portrait instead of leaving two copies that disagree (§4, AC-22).
+  final String? answerValue;
+
+  /// `notebook_entries.id` produced by `recordAnsweredQuestion`, set **only**
+  /// for a `notebook.*` target.
+  final String? notebookEntryId;
+  final DateTime updatedAt;
+  const PortraitAnswerRow({
+    required this.ownerKey,
+    required this.questionId,
+    required this.state,
+    this.optionId,
+    this.answerValue,
+    this.notebookEntryId,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['owner_key'] = Variable<String>(ownerKey);
+    map['question_id'] = Variable<String>(questionId);
+    map['state'] = Variable<String>(state);
+    if (!nullToAbsent || optionId != null) {
+      map['option_id'] = Variable<String>(optionId);
+    }
+    if (!nullToAbsent || answerValue != null) {
+      map['answer_value'] = Variable<String>(answerValue);
+    }
+    if (!nullToAbsent || notebookEntryId != null) {
+      map['notebook_entry_id'] = Variable<String>(notebookEntryId);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  PortraitAnswersCompanion toCompanion(bool nullToAbsent) {
+    return PortraitAnswersCompanion(
+      ownerKey: Value(ownerKey),
+      questionId: Value(questionId),
+      state: Value(state),
+      optionId: optionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(optionId),
+      answerValue: answerValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(answerValue),
+      notebookEntryId: notebookEntryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notebookEntryId),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory PortraitAnswerRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PortraitAnswerRow(
+      ownerKey: serializer.fromJson<String>(json['ownerKey']),
+      questionId: serializer.fromJson<String>(json['questionId']),
+      state: serializer.fromJson<String>(json['state']),
+      optionId: serializer.fromJson<String?>(json['optionId']),
+      answerValue: serializer.fromJson<String?>(json['answerValue']),
+      notebookEntryId: serializer.fromJson<String?>(json['notebookEntryId']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'ownerKey': serializer.toJson<String>(ownerKey),
+      'questionId': serializer.toJson<String>(questionId),
+      'state': serializer.toJson<String>(state),
+      'optionId': serializer.toJson<String?>(optionId),
+      'answerValue': serializer.toJson<String?>(answerValue),
+      'notebookEntryId': serializer.toJson<String?>(notebookEntryId),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  PortraitAnswerRow copyWith({
+    String? ownerKey,
+    String? questionId,
+    String? state,
+    Value<String?> optionId = const Value.absent(),
+    Value<String?> answerValue = const Value.absent(),
+    Value<String?> notebookEntryId = const Value.absent(),
+    DateTime? updatedAt,
+  }) => PortraitAnswerRow(
+    ownerKey: ownerKey ?? this.ownerKey,
+    questionId: questionId ?? this.questionId,
+    state: state ?? this.state,
+    optionId: optionId.present ? optionId.value : this.optionId,
+    answerValue: answerValue.present ? answerValue.value : this.answerValue,
+    notebookEntryId: notebookEntryId.present
+        ? notebookEntryId.value
+        : this.notebookEntryId,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  PortraitAnswerRow copyWithCompanion(PortraitAnswersCompanion data) {
+    return PortraitAnswerRow(
+      ownerKey: data.ownerKey.present ? data.ownerKey.value : this.ownerKey,
+      questionId: data.questionId.present
+          ? data.questionId.value
+          : this.questionId,
+      state: data.state.present ? data.state.value : this.state,
+      optionId: data.optionId.present ? data.optionId.value : this.optionId,
+      answerValue: data.answerValue.present
+          ? data.answerValue.value
+          : this.answerValue,
+      notebookEntryId: data.notebookEntryId.present
+          ? data.notebookEntryId.value
+          : this.notebookEntryId,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PortraitAnswerRow(')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('questionId: $questionId, ')
+          ..write('state: $state, ')
+          ..write('optionId: $optionId, ')
+          ..write('answerValue: $answerValue, ')
+          ..write('notebookEntryId: $notebookEntryId, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    ownerKey,
+    questionId,
+    state,
+    optionId,
+    answerValue,
+    notebookEntryId,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PortraitAnswerRow &&
+          other.ownerKey == this.ownerKey &&
+          other.questionId == this.questionId &&
+          other.state == this.state &&
+          other.optionId == this.optionId &&
+          other.answerValue == this.answerValue &&
+          other.notebookEntryId == this.notebookEntryId &&
+          other.updatedAt == this.updatedAt);
+}
+
+class PortraitAnswersCompanion extends UpdateCompanion<PortraitAnswerRow> {
+  final Value<String> ownerKey;
+  final Value<String> questionId;
+  final Value<String> state;
+  final Value<String?> optionId;
+  final Value<String?> answerValue;
+  final Value<String?> notebookEntryId;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const PortraitAnswersCompanion({
+    this.ownerKey = const Value.absent(),
+    this.questionId = const Value.absent(),
+    this.state = const Value.absent(),
+    this.optionId = const Value.absent(),
+    this.answerValue = const Value.absent(),
+    this.notebookEntryId = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PortraitAnswersCompanion.insert({
+    required String ownerKey,
+    required String questionId,
+    required String state,
+    this.optionId = const Value.absent(),
+    this.answerValue = const Value.absent(),
+    this.notebookEntryId = const Value.absent(),
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : ownerKey = Value(ownerKey),
+       questionId = Value(questionId),
+       state = Value(state),
+       updatedAt = Value(updatedAt);
+  static Insertable<PortraitAnswerRow> custom({
+    Expression<String>? ownerKey,
+    Expression<String>? questionId,
+    Expression<String>? state,
+    Expression<String>? optionId,
+    Expression<String>? answerValue,
+    Expression<String>? notebookEntryId,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (ownerKey != null) 'owner_key': ownerKey,
+      if (questionId != null) 'question_id': questionId,
+      if (state != null) 'state': state,
+      if (optionId != null) 'option_id': optionId,
+      if (answerValue != null) 'answer_value': answerValue,
+      if (notebookEntryId != null) 'notebook_entry_id': notebookEntryId,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PortraitAnswersCompanion copyWith({
+    Value<String>? ownerKey,
+    Value<String>? questionId,
+    Value<String>? state,
+    Value<String?>? optionId,
+    Value<String?>? answerValue,
+    Value<String?>? notebookEntryId,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return PortraitAnswersCompanion(
+      ownerKey: ownerKey ?? this.ownerKey,
+      questionId: questionId ?? this.questionId,
+      state: state ?? this.state,
+      optionId: optionId ?? this.optionId,
+      answerValue: answerValue ?? this.answerValue,
+      notebookEntryId: notebookEntryId ?? this.notebookEntryId,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (ownerKey.present) {
+      map['owner_key'] = Variable<String>(ownerKey.value);
+    }
+    if (questionId.present) {
+      map['question_id'] = Variable<String>(questionId.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (optionId.present) {
+      map['option_id'] = Variable<String>(optionId.value);
+    }
+    if (answerValue.present) {
+      map['answer_value'] = Variable<String>(answerValue.value);
+    }
+    if (notebookEntryId.present) {
+      map['notebook_entry_id'] = Variable<String>(notebookEntryId.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PortraitAnswersCompanion(')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('questionId: $questionId, ')
+          ..write('state: $state, ')
+          ..write('optionId: $optionId, ')
+          ..write('answerValue: $answerValue, ')
+          ..write('notebookEntryId: $notebookEntryId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $RelationshipLabelsTable extends RelationshipLabels
+    with TableInfo<$RelationshipLabelsTable, RelationshipLabelRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RelationshipLabelsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerKeyMeta = const VerificationMeta(
+    'ownerKey',
+  );
+  @override
+  late final GeneratedColumn<String> ownerKey = GeneratedColumn<String>(
+    'owner_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _subjectMeta = const VerificationMeta(
+    'subject',
+  );
+  @override
+  late final GeneratedColumn<String> subject = GeneratedColumn<String>(
+    'subject',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _systemMeta = const VerificationMeta('system');
+  @override
+  late final GeneratedColumn<String> system = GeneratedColumn<String>(
+    'system',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _certaintyMeta = const VerificationMeta(
+    'certainty',
+  );
+  @override
+  late final GeneratedColumn<String> certainty = GeneratedColumn<String>(
+    'certainty',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ownerKey,
+    subject,
+    system,
+    value,
+    certainty,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'relationship_labels';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RelationshipLabelRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('owner_key')) {
+      context.handle(
+        _ownerKeyMeta,
+        ownerKey.isAcceptableOrUnknown(data['owner_key']!, _ownerKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerKeyMeta);
+    }
+    if (data.containsKey('subject')) {
+      context.handle(
+        _subjectMeta,
+        subject.isAcceptableOrUnknown(data['subject']!, _subjectMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_subjectMeta);
+    }
+    if (data.containsKey('system')) {
+      context.handle(
+        _systemMeta,
+        system.isAcceptableOrUnknown(data['system']!, _systemMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_systemMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    if (data.containsKey('certainty')) {
+      context.handle(
+        _certaintyMeta,
+        certainty.isAcceptableOrUnknown(data['certainty']!, _certaintyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_certaintyMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {ownerKey, subject, system},
+  ];
+  @override
+  RelationshipLabelRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RelationshipLabelRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ownerKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_key'],
+      )!,
+      subject: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject'],
+      )!,
+      system: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}system'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
+      certainty: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}certainty'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $RelationshipLabelsTable createAlias(String alias) {
+    return $RelationshipLabelsTable(attachedDatabase, alias);
+  }
+}
+
+class RelationshipLabelRow extends DataClass
+    implements Insertable<RelationshipLabelRow> {
+  /// Client-generated UUID v4, permanently stable — never a rowid/autoincrement.
+  final String id;
+
+  /// Backend `User.id`; every query filters on this column, which is what keeps
+  /// two users sharing one device from reading each other's labels.
+  final String ownerKey;
+
+  /// `self` | `partner`. Stored as text with Dart constants rather than an enum
+  /// index, because an index silently changes meaning the day someone inserts a
+  /// value into the middle of the enum.
+  final String subject;
+
+  /// `zodiac` | `mbti`.
+  final String system;
+
+  /// An `axis_value.id` from the matching `req016.compat_*` pack.
+  final String value;
+
+  /// `known` | `guess`. A guess stays visibly the *user's* guess wherever it is
+  /// rendered; the app never promotes it to a fact it confirms (AC-8).
+  final String certainty;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const RelationshipLabelRow({
+    required this.id,
+    required this.ownerKey,
+    required this.subject,
+    required this.system,
+    required this.value,
+    required this.certainty,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['owner_key'] = Variable<String>(ownerKey);
+    map['subject'] = Variable<String>(subject);
+    map['system'] = Variable<String>(system);
+    map['value'] = Variable<String>(value);
+    map['certainty'] = Variable<String>(certainty);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  RelationshipLabelsCompanion toCompanion(bool nullToAbsent) {
+    return RelationshipLabelsCompanion(
+      id: Value(id),
+      ownerKey: Value(ownerKey),
+      subject: Value(subject),
+      system: Value(system),
+      value: Value(value),
+      certainty: Value(certainty),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory RelationshipLabelRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RelationshipLabelRow(
+      id: serializer.fromJson<String>(json['id']),
+      ownerKey: serializer.fromJson<String>(json['ownerKey']),
+      subject: serializer.fromJson<String>(json['subject']),
+      system: serializer.fromJson<String>(json['system']),
+      value: serializer.fromJson<String>(json['value']),
+      certainty: serializer.fromJson<String>(json['certainty']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ownerKey': serializer.toJson<String>(ownerKey),
+      'subject': serializer.toJson<String>(subject),
+      'system': serializer.toJson<String>(system),
+      'value': serializer.toJson<String>(value),
+      'certainty': serializer.toJson<String>(certainty),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  RelationshipLabelRow copyWith({
+    String? id,
+    String? ownerKey,
+    String? subject,
+    String? system,
+    String? value,
+    String? certainty,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => RelationshipLabelRow(
+    id: id ?? this.id,
+    ownerKey: ownerKey ?? this.ownerKey,
+    subject: subject ?? this.subject,
+    system: system ?? this.system,
+    value: value ?? this.value,
+    certainty: certainty ?? this.certainty,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  RelationshipLabelRow copyWithCompanion(RelationshipLabelsCompanion data) {
+    return RelationshipLabelRow(
+      id: data.id.present ? data.id.value : this.id,
+      ownerKey: data.ownerKey.present ? data.ownerKey.value : this.ownerKey,
+      subject: data.subject.present ? data.subject.value : this.subject,
+      system: data.system.present ? data.system.value : this.system,
+      value: data.value.present ? data.value.value : this.value,
+      certainty: data.certainty.present ? data.certainty.value : this.certainty,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RelationshipLabelRow(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('subject: $subject, ')
+          ..write('system: $system, ')
+          ..write('value: $value, ')
+          ..write('certainty: $certainty, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ownerKey,
+    subject,
+    system,
+    value,
+    certainty,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RelationshipLabelRow &&
+          other.id == this.id &&
+          other.ownerKey == this.ownerKey &&
+          other.subject == this.subject &&
+          other.system == this.system &&
+          other.value == this.value &&
+          other.certainty == this.certainty &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class RelationshipLabelsCompanion
+    extends UpdateCompanion<RelationshipLabelRow> {
+  final Value<String> id;
+  final Value<String> ownerKey;
+  final Value<String> subject;
+  final Value<String> system;
+  final Value<String> value;
+  final Value<String> certainty;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const RelationshipLabelsCompanion({
+    this.id = const Value.absent(),
+    this.ownerKey = const Value.absent(),
+    this.subject = const Value.absent(),
+    this.system = const Value.absent(),
+    this.value = const Value.absent(),
+    this.certainty = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RelationshipLabelsCompanion.insert({
+    required String id,
+    required String ownerKey,
+    required String subject,
+    required String system,
+    required String value,
+    required String certainty,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       ownerKey = Value(ownerKey),
+       subject = Value(subject),
+       system = Value(system),
+       value = Value(value),
+       certainty = Value(certainty),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<RelationshipLabelRow> custom({
+    Expression<String>? id,
+    Expression<String>? ownerKey,
+    Expression<String>? subject,
+    Expression<String>? system,
+    Expression<String>? value,
+    Expression<String>? certainty,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownerKey != null) 'owner_key': ownerKey,
+      if (subject != null) 'subject': subject,
+      if (system != null) 'system': system,
+      if (value != null) 'value': value,
+      if (certainty != null) 'certainty': certainty,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RelationshipLabelsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerKey,
+    Value<String>? subject,
+    Value<String>? system,
+    Value<String>? value,
+    Value<String>? certainty,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return RelationshipLabelsCompanion(
+      id: id ?? this.id,
+      ownerKey: ownerKey ?? this.ownerKey,
+      subject: subject ?? this.subject,
+      system: system ?? this.system,
+      value: value ?? this.value,
+      certainty: certainty ?? this.certainty,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ownerKey.present) {
+      map['owner_key'] = Variable<String>(ownerKey.value);
+    }
+    if (subject.present) {
+      map['subject'] = Variable<String>(subject.value);
+    }
+    if (system.present) {
+      map['system'] = Variable<String>(system.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<String>(value.value);
+    }
+    if (certainty.present) {
+      map['certainty'] = Variable<String>(certainty.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RelationshipLabelsCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('subject: $subject, ')
+          ..write('system: $system, ')
+          ..write('value: $value, ')
+          ..write('certainty: $certainty, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChapterClosuresTable extends ChapterClosures
+    with TableInfo<$ChapterClosuresTable, ChapterClosureRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChapterClosuresTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerKeyMeta = const VerificationMeta(
+    'ownerKey',
+  );
+  @override
+  late final GeneratedColumn<String> ownerKey = GeneratedColumn<String>(
+    'owner_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _closedAtMeta = const VerificationMeta(
+    'closedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> closedAt = GeneratedColumn<DateTime>(
+    'closed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, ownerKey, closedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'chapter_closures';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ChapterClosureRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('owner_key')) {
+      context.handle(
+        _ownerKeyMeta,
+        ownerKey.isAcceptableOrUnknown(data['owner_key']!, _ownerKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerKeyMeta);
+    }
+    if (data.containsKey('closed_at')) {
+      context.handle(
+        _closedAtMeta,
+        closedAt.isAcceptableOrUnknown(data['closed_at']!, _closedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_closedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChapterClosureRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChapterClosureRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ownerKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_key'],
+      )!,
+      closedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}closed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ChapterClosuresTable createAlias(String alias) {
+    return $ChapterClosuresTable(attachedDatabase, alias);
+  }
+}
+
+class ChapterClosureRow extends DataClass
+    implements Insertable<ChapterClosureRow> {
+  /// Client-generated UUID v4, permanently stable (R-15a).
+  final String id;
+
+  /// Backend `User.id` — chapter closure is a global event per owner because
+  /// stage 1 has exactly one relationship at a time (`ux/uiux-spec.md` §1).
+  final String ownerKey;
+
+  /// Internal ordering only. Never exposed as an elapsed-time measurement
+  /// (AC-19/AC-20).
+  final DateTime closedAt;
+  const ChapterClosureRow({
+    required this.id,
+    required this.ownerKey,
+    required this.closedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['owner_key'] = Variable<String>(ownerKey);
+    map['closed_at'] = Variable<DateTime>(closedAt);
+    return map;
+  }
+
+  ChapterClosuresCompanion toCompanion(bool nullToAbsent) {
+    return ChapterClosuresCompanion(
+      id: Value(id),
+      ownerKey: Value(ownerKey),
+      closedAt: Value(closedAt),
+    );
+  }
+
+  factory ChapterClosureRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChapterClosureRow(
+      id: serializer.fromJson<String>(json['id']),
+      ownerKey: serializer.fromJson<String>(json['ownerKey']),
+      closedAt: serializer.fromJson<DateTime>(json['closedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ownerKey': serializer.toJson<String>(ownerKey),
+      'closedAt': serializer.toJson<DateTime>(closedAt),
+    };
+  }
+
+  ChapterClosureRow copyWith({
+    String? id,
+    String? ownerKey,
+    DateTime? closedAt,
+  }) => ChapterClosureRow(
+    id: id ?? this.id,
+    ownerKey: ownerKey ?? this.ownerKey,
+    closedAt: closedAt ?? this.closedAt,
+  );
+  ChapterClosureRow copyWithCompanion(ChapterClosuresCompanion data) {
+    return ChapterClosureRow(
+      id: data.id.present ? data.id.value : this.id,
+      ownerKey: data.ownerKey.present ? data.ownerKey.value : this.ownerKey,
+      closedAt: data.closedAt.present ? data.closedAt.value : this.closedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChapterClosureRow(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('closedAt: $closedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, ownerKey, closedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChapterClosureRow &&
+          other.id == this.id &&
+          other.ownerKey == this.ownerKey &&
+          other.closedAt == this.closedAt);
+}
+
+class ChapterClosuresCompanion extends UpdateCompanion<ChapterClosureRow> {
+  final Value<String> id;
+  final Value<String> ownerKey;
+  final Value<DateTime> closedAt;
+  final Value<int> rowid;
+  const ChapterClosuresCompanion({
+    this.id = const Value.absent(),
+    this.ownerKey = const Value.absent(),
+    this.closedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ChapterClosuresCompanion.insert({
+    required String id,
+    required String ownerKey,
+    required DateTime closedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       ownerKey = Value(ownerKey),
+       closedAt = Value(closedAt);
+  static Insertable<ChapterClosureRow> custom({
+    Expression<String>? id,
+    Expression<String>? ownerKey,
+    Expression<DateTime>? closedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownerKey != null) 'owner_key': ownerKey,
+      if (closedAt != null) 'closed_at': closedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ChapterClosuresCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerKey,
+    Value<DateTime>? closedAt,
+    Value<int>? rowid,
+  }) {
+    return ChapterClosuresCompanion(
+      id: id ?? this.id,
+      ownerKey: ownerKey ?? this.ownerKey,
+      closedAt: closedAt ?? this.closedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ownerKey.present) {
+      map['owner_key'] = Variable<String>(ownerKey.value);
+    }
+    if (closedAt.present) {
+      map['closed_at'] = Variable<DateTime>(closedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChapterClosuresCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChapterClosureItemsTable extends ChapterClosureItems
+    with TableInfo<$ChapterClosureItemsTable, ChapterClosureItemRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChapterClosureItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _closureIdMeta = const VerificationMeta(
+    'closureId',
+  );
+  @override
+  late final GeneratedColumn<String> closureId = GeneratedColumn<String>(
+    'closure_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES chapter_closures (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _itemKindMeta = const VerificationMeta(
+    'itemKind',
+  );
+  @override
+  late final GeneratedColumn<String> itemKind = GeneratedColumn<String>(
+    'item_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _itemIdMeta = const VerificationMeta('itemId');
+  @override
+  late final GeneratedColumn<String> itemId = GeneratedColumn<String>(
+    'item_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [closureId, itemKind, itemId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'chapter_closure_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ChapterClosureItemRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('closure_id')) {
+      context.handle(
+        _closureIdMeta,
+        closureId.isAcceptableOrUnknown(data['closure_id']!, _closureIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_closureIdMeta);
+    }
+    if (data.containsKey('item_kind')) {
+      context.handle(
+        _itemKindMeta,
+        itemKind.isAcceptableOrUnknown(data['item_kind']!, _itemKindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemKindMeta);
+    }
+    if (data.containsKey('item_id')) {
+      context.handle(
+        _itemIdMeta,
+        itemId.isAcceptableOrUnknown(data['item_id']!, _itemIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {closureId, itemKind, itemId};
+  @override
+  ChapterClosureItemRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChapterClosureItemRow(
+      closureId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}closure_id'],
+      )!,
+      itemKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}item_kind'],
+      )!,
+      itemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}item_id'],
+      )!,
+    );
+  }
+
+  @override
+  $ChapterClosureItemsTable createAlias(String alias) {
+    return $ChapterClosureItemsTable(attachedDatabase, alias);
+  }
+}
+
+class ChapterClosureItemRow extends DataClass
+    implements Insertable<ChapterClosureItemRow> {
+  /// Cascades so that reopening a chapter is a single-row delete (AC-17). The
+  /// cascade only fires because `beforeOpen` switches `PRAGMA foreign_keys` on.
+  final String closureId;
+
+  /// `activity_card` | `notebook_entry` | `ask_prompt` (§2).
+  final String itemKind;
+  final String itemId;
+  const ChapterClosureItemRow({
+    required this.closureId,
+    required this.itemKind,
+    required this.itemId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['closure_id'] = Variable<String>(closureId);
+    map['item_kind'] = Variable<String>(itemKind);
+    map['item_id'] = Variable<String>(itemId);
+    return map;
+  }
+
+  ChapterClosureItemsCompanion toCompanion(bool nullToAbsent) {
+    return ChapterClosureItemsCompanion(
+      closureId: Value(closureId),
+      itemKind: Value(itemKind),
+      itemId: Value(itemId),
+    );
+  }
+
+  factory ChapterClosureItemRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChapterClosureItemRow(
+      closureId: serializer.fromJson<String>(json['closureId']),
+      itemKind: serializer.fromJson<String>(json['itemKind']),
+      itemId: serializer.fromJson<String>(json['itemId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'closureId': serializer.toJson<String>(closureId),
+      'itemKind': serializer.toJson<String>(itemKind),
+      'itemId': serializer.toJson<String>(itemId),
+    };
+  }
+
+  ChapterClosureItemRow copyWith({
+    String? closureId,
+    String? itemKind,
+    String? itemId,
+  }) => ChapterClosureItemRow(
+    closureId: closureId ?? this.closureId,
+    itemKind: itemKind ?? this.itemKind,
+    itemId: itemId ?? this.itemId,
+  );
+  ChapterClosureItemRow copyWithCompanion(ChapterClosureItemsCompanion data) {
+    return ChapterClosureItemRow(
+      closureId: data.closureId.present ? data.closureId.value : this.closureId,
+      itemKind: data.itemKind.present ? data.itemKind.value : this.itemKind,
+      itemId: data.itemId.present ? data.itemId.value : this.itemId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChapterClosureItemRow(')
+          ..write('closureId: $closureId, ')
+          ..write('itemKind: $itemKind, ')
+          ..write('itemId: $itemId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(closureId, itemKind, itemId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChapterClosureItemRow &&
+          other.closureId == this.closureId &&
+          other.itemKind == this.itemKind &&
+          other.itemId == this.itemId);
+}
+
+class ChapterClosureItemsCompanion
+    extends UpdateCompanion<ChapterClosureItemRow> {
+  final Value<String> closureId;
+  final Value<String> itemKind;
+  final Value<String> itemId;
+  final Value<int> rowid;
+  const ChapterClosureItemsCompanion({
+    this.closureId = const Value.absent(),
+    this.itemKind = const Value.absent(),
+    this.itemId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ChapterClosureItemsCompanion.insert({
+    required String closureId,
+    required String itemKind,
+    required String itemId,
+    this.rowid = const Value.absent(),
+  }) : closureId = Value(closureId),
+       itemKind = Value(itemKind),
+       itemId = Value(itemId);
+  static Insertable<ChapterClosureItemRow> custom({
+    Expression<String>? closureId,
+    Expression<String>? itemKind,
+    Expression<String>? itemId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (closureId != null) 'closure_id': closureId,
+      if (itemKind != null) 'item_kind': itemKind,
+      if (itemId != null) 'item_id': itemId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ChapterClosureItemsCompanion copyWith({
+    Value<String>? closureId,
+    Value<String>? itemKind,
+    Value<String>? itemId,
+    Value<int>? rowid,
+  }) {
+    return ChapterClosureItemsCompanion(
+      closureId: closureId ?? this.closureId,
+      itemKind: itemKind ?? this.itemKind,
+      itemId: itemId ?? this.itemId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (closureId.present) {
+      map['closure_id'] = Variable<String>(closureId.value);
+    }
+    if (itemKind.present) {
+      map['item_kind'] = Variable<String>(itemKind.value);
+    }
+    if (itemId.present) {
+      map['item_id'] = Variable<String>(itemId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChapterClosureItemsCompanion(')
+          ..write('closureId: $closureId, ')
+          ..write('itemKind: $itemKind, ')
+          ..write('itemId: $itemId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$CupidDatabase extends GeneratedDatabase {
   _$CupidDatabase(QueryExecutor e) : super(e);
   $CupidDatabaseManager get managers => $CupidDatabaseManager(this);
@@ -6715,9 +8294,23 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
   late final $AskPromptStateTable askPromptState = $AskPromptStateTable(this);
   late final $CalendarEventStateTable calendarEventState =
       $CalendarEventStateTable(this);
+  late final $PortraitAnswersTable portraitAnswers = $PortraitAnswersTable(
+    this,
+  );
+  late final $RelationshipLabelsTable relationshipLabels =
+      $RelationshipLabelsTable(this);
+  late final $ChapterClosuresTable chapterClosures = $ChapterClosuresTable(
+    this,
+  );
+  late final $ChapterClosureItemsTable chapterClosureItems =
+      $ChapterClosureItemsTable(this);
   late final Index activityCardsOwnerStatus = Index(
     'activity_cards_owner_status',
     'CREATE INDEX activity_cards_owner_status ON activity_cards (owner_key, status)',
+  );
+  late final Index chapterClosureItemsKindItem = Index(
+    'chapter_closure_items_kind_item',
+    'CREATE INDEX chapter_closure_items_kind_item ON chapter_closure_items (item_kind, item_id)',
   );
   late final MessageDao messageDao = MessageDao(this as CupidDatabase);
   late final TimelineDao timelineDao = TimelineDao(this as CupidDatabase);
@@ -6727,6 +8320,11 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
   );
   late final JournalDao journalDao = JournalDao(this as CupidDatabase);
   late final InviteMessageDao inviteMessageDao = InviteMessageDao(
+    this as CupidDatabase,
+  );
+  late final RelationshipLabelsDao relationshipLabelsDao =
+      RelationshipLabelsDao(this as CupidDatabase);
+  late final ChapterClosureDao chapterClosureDao = ChapterClosureDao(
     this as CupidDatabase,
   );
   @override
@@ -6748,7 +8346,12 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
     skillProfileEntries,
     askPromptState,
     calendarEventState,
+    portraitAnswers,
+    relationshipLabels,
+    chapterClosures,
+    chapterClosureItems,
     activityCardsOwnerStatus,
+    chapterClosureItemsKindItem,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -6772,6 +8375,13 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('invite_messages', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'chapter_closures',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('chapter_closure_items', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -10961,6 +12571,1112 @@ typedef $$CalendarEventStateTableProcessedTableManager =
       CalendarEventStateRow,
       PrefetchHooks Function()
     >;
+typedef $$PortraitAnswersTableCreateCompanionBuilder =
+    PortraitAnswersCompanion Function({
+      required String ownerKey,
+      required String questionId,
+      required String state,
+      Value<String?> optionId,
+      Value<String?> answerValue,
+      Value<String?> notebookEntryId,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$PortraitAnswersTableUpdateCompanionBuilder =
+    PortraitAnswersCompanion Function({
+      Value<String> ownerKey,
+      Value<String> questionId,
+      Value<String> state,
+      Value<String?> optionId,
+      Value<String?> answerValue,
+      Value<String?> notebookEntryId,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$PortraitAnswersTableFilterComposer
+    extends Composer<_$CupidDatabase, $PortraitAnswersTable> {
+  $$PortraitAnswersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get questionId => $composableBuilder(
+    column: $table.questionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get optionId => $composableBuilder(
+    column: $table.optionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get answerValue => $composableBuilder(
+    column: $table.answerValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notebookEntryId => $composableBuilder(
+    column: $table.notebookEntryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PortraitAnswersTableOrderingComposer
+    extends Composer<_$CupidDatabase, $PortraitAnswersTable> {
+  $$PortraitAnswersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get questionId => $composableBuilder(
+    column: $table.questionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get optionId => $composableBuilder(
+    column: $table.optionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get answerValue => $composableBuilder(
+    column: $table.answerValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notebookEntryId => $composableBuilder(
+    column: $table.notebookEntryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PortraitAnswersTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $PortraitAnswersTable> {
+  $$PortraitAnswersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get ownerKey =>
+      $composableBuilder(column: $table.ownerKey, builder: (column) => column);
+
+  GeneratedColumn<String> get questionId => $composableBuilder(
+    column: $table.questionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<String> get optionId =>
+      $composableBuilder(column: $table.optionId, builder: (column) => column);
+
+  GeneratedColumn<String> get answerValue => $composableBuilder(
+    column: $table.answerValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notebookEntryId => $composableBuilder(
+    column: $table.notebookEntryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$PortraitAnswersTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $PortraitAnswersTable,
+          PortraitAnswerRow,
+          $$PortraitAnswersTableFilterComposer,
+          $$PortraitAnswersTableOrderingComposer,
+          $$PortraitAnswersTableAnnotationComposer,
+          $$PortraitAnswersTableCreateCompanionBuilder,
+          $$PortraitAnswersTableUpdateCompanionBuilder,
+          (
+            PortraitAnswerRow,
+            BaseReferences<
+              _$CupidDatabase,
+              $PortraitAnswersTable,
+              PortraitAnswerRow
+            >,
+          ),
+          PortraitAnswerRow,
+          PrefetchHooks Function()
+        > {
+  $$PortraitAnswersTableTableManager(
+    _$CupidDatabase db,
+    $PortraitAnswersTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PortraitAnswersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PortraitAnswersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PortraitAnswersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> ownerKey = const Value.absent(),
+                Value<String> questionId = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<String?> optionId = const Value.absent(),
+                Value<String?> answerValue = const Value.absent(),
+                Value<String?> notebookEntryId = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PortraitAnswersCompanion(
+                ownerKey: ownerKey,
+                questionId: questionId,
+                state: state,
+                optionId: optionId,
+                answerValue: answerValue,
+                notebookEntryId: notebookEntryId,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String ownerKey,
+                required String questionId,
+                required String state,
+                Value<String?> optionId = const Value.absent(),
+                Value<String?> answerValue = const Value.absent(),
+                Value<String?> notebookEntryId = const Value.absent(),
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => PortraitAnswersCompanion.insert(
+                ownerKey: ownerKey,
+                questionId: questionId,
+                state: state,
+                optionId: optionId,
+                answerValue: answerValue,
+                notebookEntryId: notebookEntryId,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PortraitAnswersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $PortraitAnswersTable,
+      PortraitAnswerRow,
+      $$PortraitAnswersTableFilterComposer,
+      $$PortraitAnswersTableOrderingComposer,
+      $$PortraitAnswersTableAnnotationComposer,
+      $$PortraitAnswersTableCreateCompanionBuilder,
+      $$PortraitAnswersTableUpdateCompanionBuilder,
+      (
+        PortraitAnswerRow,
+        BaseReferences<
+          _$CupidDatabase,
+          $PortraitAnswersTable,
+          PortraitAnswerRow
+        >,
+      ),
+      PortraitAnswerRow,
+      PrefetchHooks Function()
+    >;
+typedef $$RelationshipLabelsTableCreateCompanionBuilder =
+    RelationshipLabelsCompanion Function({
+      required String id,
+      required String ownerKey,
+      required String subject,
+      required String system,
+      required String value,
+      required String certainty,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$RelationshipLabelsTableUpdateCompanionBuilder =
+    RelationshipLabelsCompanion Function({
+      Value<String> id,
+      Value<String> ownerKey,
+      Value<String> subject,
+      Value<String> system,
+      Value<String> value,
+      Value<String> certainty,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$RelationshipLabelsTableFilterComposer
+    extends Composer<_$CupidDatabase, $RelationshipLabelsTable> {
+  $$RelationshipLabelsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subject => $composableBuilder(
+    column: $table.subject,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get system => $composableBuilder(
+    column: $table.system,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get certainty => $composableBuilder(
+    column: $table.certainty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$RelationshipLabelsTableOrderingComposer
+    extends Composer<_$CupidDatabase, $RelationshipLabelsTable> {
+  $$RelationshipLabelsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subject => $composableBuilder(
+    column: $table.subject,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get system => $composableBuilder(
+    column: $table.system,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get certainty => $composableBuilder(
+    column: $table.certainty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$RelationshipLabelsTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $RelationshipLabelsTable> {
+  $$RelationshipLabelsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerKey =>
+      $composableBuilder(column: $table.ownerKey, builder: (column) => column);
+
+  GeneratedColumn<String> get subject =>
+      $composableBuilder(column: $table.subject, builder: (column) => column);
+
+  GeneratedColumn<String> get system =>
+      $composableBuilder(column: $table.system, builder: (column) => column);
+
+  GeneratedColumn<String> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+
+  GeneratedColumn<String> get certainty =>
+      $composableBuilder(column: $table.certainty, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$RelationshipLabelsTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $RelationshipLabelsTable,
+          RelationshipLabelRow,
+          $$RelationshipLabelsTableFilterComposer,
+          $$RelationshipLabelsTableOrderingComposer,
+          $$RelationshipLabelsTableAnnotationComposer,
+          $$RelationshipLabelsTableCreateCompanionBuilder,
+          $$RelationshipLabelsTableUpdateCompanionBuilder,
+          (
+            RelationshipLabelRow,
+            BaseReferences<
+              _$CupidDatabase,
+              $RelationshipLabelsTable,
+              RelationshipLabelRow
+            >,
+          ),
+          RelationshipLabelRow,
+          PrefetchHooks Function()
+        > {
+  $$RelationshipLabelsTableTableManager(
+    _$CupidDatabase db,
+    $RelationshipLabelsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RelationshipLabelsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RelationshipLabelsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RelationshipLabelsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ownerKey = const Value.absent(),
+                Value<String> subject = const Value.absent(),
+                Value<String> system = const Value.absent(),
+                Value<String> value = const Value.absent(),
+                Value<String> certainty = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RelationshipLabelsCompanion(
+                id: id,
+                ownerKey: ownerKey,
+                subject: subject,
+                system: system,
+                value: value,
+                certainty: certainty,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String ownerKey,
+                required String subject,
+                required String system,
+                required String value,
+                required String certainty,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => RelationshipLabelsCompanion.insert(
+                id: id,
+                ownerKey: ownerKey,
+                subject: subject,
+                system: system,
+                value: value,
+                certainty: certainty,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$RelationshipLabelsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $RelationshipLabelsTable,
+      RelationshipLabelRow,
+      $$RelationshipLabelsTableFilterComposer,
+      $$RelationshipLabelsTableOrderingComposer,
+      $$RelationshipLabelsTableAnnotationComposer,
+      $$RelationshipLabelsTableCreateCompanionBuilder,
+      $$RelationshipLabelsTableUpdateCompanionBuilder,
+      (
+        RelationshipLabelRow,
+        BaseReferences<
+          _$CupidDatabase,
+          $RelationshipLabelsTable,
+          RelationshipLabelRow
+        >,
+      ),
+      RelationshipLabelRow,
+      PrefetchHooks Function()
+    >;
+typedef $$ChapterClosuresTableCreateCompanionBuilder =
+    ChapterClosuresCompanion Function({
+      required String id,
+      required String ownerKey,
+      required DateTime closedAt,
+      Value<int> rowid,
+    });
+typedef $$ChapterClosuresTableUpdateCompanionBuilder =
+    ChapterClosuresCompanion Function({
+      Value<String> id,
+      Value<String> ownerKey,
+      Value<DateTime> closedAt,
+      Value<int> rowid,
+    });
+
+final class $$ChapterClosuresTableReferences
+    extends
+        BaseReferences<
+          _$CupidDatabase,
+          $ChapterClosuresTable,
+          ChapterClosureRow
+        > {
+  $$ChapterClosuresTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $ChapterClosureItemsTable,
+    List<ChapterClosureItemRow>
+  >
+  _chapterClosureItemsRefsTable(_$CupidDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.chapterClosureItems,
+        aliasName: 'chapter_closures__id__chapter_closure_items__closure_id',
+      );
+
+  $$ChapterClosureItemsTableProcessedTableManager get chapterClosureItemsRefs {
+    final manager = $$ChapterClosureItemsTableTableManager(
+      $_db,
+      $_db.chapterClosureItems,
+    ).filter((f) => f.closureId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _chapterClosureItemsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$ChapterClosuresTableFilterComposer
+    extends Composer<_$CupidDatabase, $ChapterClosuresTable> {
+  $$ChapterClosuresTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> chapterClosureItemsRefs(
+    Expression<bool> Function($$ChapterClosureItemsTableFilterComposer f) f,
+  ) {
+    final $$ChapterClosureItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.chapterClosureItems,
+      getReferencedColumn: (t) => t.closureId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ChapterClosureItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.chapterClosureItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ChapterClosuresTableOrderingComposer
+    extends Composer<_$CupidDatabase, $ChapterClosuresTable> {
+  $$ChapterClosuresTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ChapterClosuresTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $ChapterClosuresTable> {
+  $$ChapterClosuresTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerKey =>
+      $composableBuilder(column: $table.ownerKey, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get closedAt =>
+      $composableBuilder(column: $table.closedAt, builder: (column) => column);
+
+  Expression<T> chapterClosureItemsRefs<T extends Object>(
+    Expression<T> Function($$ChapterClosureItemsTableAnnotationComposer a) f,
+  ) {
+    final $$ChapterClosureItemsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.chapterClosureItems,
+          getReferencedColumn: (t) => t.closureId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ChapterClosureItemsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.chapterClosureItems,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$ChapterClosuresTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $ChapterClosuresTable,
+          ChapterClosureRow,
+          $$ChapterClosuresTableFilterComposer,
+          $$ChapterClosuresTableOrderingComposer,
+          $$ChapterClosuresTableAnnotationComposer,
+          $$ChapterClosuresTableCreateCompanionBuilder,
+          $$ChapterClosuresTableUpdateCompanionBuilder,
+          (ChapterClosureRow, $$ChapterClosuresTableReferences),
+          ChapterClosureRow,
+          PrefetchHooks Function({bool chapterClosureItemsRefs})
+        > {
+  $$ChapterClosuresTableTableManager(
+    _$CupidDatabase db,
+    $ChapterClosuresTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChapterClosuresTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChapterClosuresTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChapterClosuresTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ownerKey = const Value.absent(),
+                Value<DateTime> closedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChapterClosuresCompanion(
+                id: id,
+                ownerKey: ownerKey,
+                closedAt: closedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String ownerKey,
+                required DateTime closedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ChapterClosuresCompanion.insert(
+                id: id,
+                ownerKey: ownerKey,
+                closedAt: closedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ChapterClosuresTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({chapterClosureItemsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (chapterClosureItemsRefs) db.chapterClosureItems,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (chapterClosureItemsRefs)
+                    await $_getPrefetchedData<
+                      ChapterClosureRow,
+                      $ChapterClosuresTable,
+                      ChapterClosureItemRow
+                    >(
+                      currentTable: table,
+                      referencedTable: $$ChapterClosuresTableReferences
+                          ._chapterClosureItemsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$ChapterClosuresTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).chapterClosureItemsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.closureId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ChapterClosuresTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $ChapterClosuresTable,
+      ChapterClosureRow,
+      $$ChapterClosuresTableFilterComposer,
+      $$ChapterClosuresTableOrderingComposer,
+      $$ChapterClosuresTableAnnotationComposer,
+      $$ChapterClosuresTableCreateCompanionBuilder,
+      $$ChapterClosuresTableUpdateCompanionBuilder,
+      (ChapterClosureRow, $$ChapterClosuresTableReferences),
+      ChapterClosureRow,
+      PrefetchHooks Function({bool chapterClosureItemsRefs})
+    >;
+typedef $$ChapterClosureItemsTableCreateCompanionBuilder =
+    ChapterClosureItemsCompanion Function({
+      required String closureId,
+      required String itemKind,
+      required String itemId,
+      Value<int> rowid,
+    });
+typedef $$ChapterClosureItemsTableUpdateCompanionBuilder =
+    ChapterClosureItemsCompanion Function({
+      Value<String> closureId,
+      Value<String> itemKind,
+      Value<String> itemId,
+      Value<int> rowid,
+    });
+
+final class $$ChapterClosureItemsTableReferences
+    extends
+        BaseReferences<
+          _$CupidDatabase,
+          $ChapterClosureItemsTable,
+          ChapterClosureItemRow
+        > {
+  $$ChapterClosureItemsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ChapterClosuresTable _closureIdTable(_$CupidDatabase db) => db
+      .chapterClosures
+      .createAlias('chapter_closure_items__closure_id__chapter_closures__id');
+
+  $$ChapterClosuresTableProcessedTableManager get closureId {
+    final $_column = $_itemColumn<String>('closure_id')!;
+
+    final manager = $$ChapterClosuresTableTableManager(
+      $_db,
+      $_db.chapterClosures,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_closureIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ChapterClosureItemsTableFilterComposer
+    extends Composer<_$CupidDatabase, $ChapterClosureItemsTable> {
+  $$ChapterClosureItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get itemKind => $composableBuilder(
+    column: $table.itemKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get itemId => $composableBuilder(
+    column: $table.itemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ChapterClosuresTableFilterComposer get closureId {
+    final $$ChapterClosuresTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.closureId,
+      referencedTable: $db.chapterClosures,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ChapterClosuresTableFilterComposer(
+            $db: $db,
+            $table: $db.chapterClosures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChapterClosureItemsTableOrderingComposer
+    extends Composer<_$CupidDatabase, $ChapterClosureItemsTable> {
+  $$ChapterClosureItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get itemKind => $composableBuilder(
+    column: $table.itemKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get itemId => $composableBuilder(
+    column: $table.itemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ChapterClosuresTableOrderingComposer get closureId {
+    final $$ChapterClosuresTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.closureId,
+      referencedTable: $db.chapterClosures,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ChapterClosuresTableOrderingComposer(
+            $db: $db,
+            $table: $db.chapterClosures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChapterClosureItemsTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $ChapterClosureItemsTable> {
+  $$ChapterClosureItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get itemKind =>
+      $composableBuilder(column: $table.itemKind, builder: (column) => column);
+
+  GeneratedColumn<String> get itemId =>
+      $composableBuilder(column: $table.itemId, builder: (column) => column);
+
+  $$ChapterClosuresTableAnnotationComposer get closureId {
+    final $$ChapterClosuresTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.closureId,
+      referencedTable: $db.chapterClosures,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ChapterClosuresTableAnnotationComposer(
+            $db: $db,
+            $table: $db.chapterClosures,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChapterClosureItemsTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $ChapterClosureItemsTable,
+          ChapterClosureItemRow,
+          $$ChapterClosureItemsTableFilterComposer,
+          $$ChapterClosureItemsTableOrderingComposer,
+          $$ChapterClosureItemsTableAnnotationComposer,
+          $$ChapterClosureItemsTableCreateCompanionBuilder,
+          $$ChapterClosureItemsTableUpdateCompanionBuilder,
+          (ChapterClosureItemRow, $$ChapterClosureItemsTableReferences),
+          ChapterClosureItemRow,
+          PrefetchHooks Function({bool closureId})
+        > {
+  $$ChapterClosureItemsTableTableManager(
+    _$CupidDatabase db,
+    $ChapterClosureItemsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChapterClosureItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChapterClosureItemsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ChapterClosureItemsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> closureId = const Value.absent(),
+                Value<String> itemKind = const Value.absent(),
+                Value<String> itemId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChapterClosureItemsCompanion(
+                closureId: closureId,
+                itemKind: itemKind,
+                itemId: itemId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String closureId,
+                required String itemKind,
+                required String itemId,
+                Value<int> rowid = const Value.absent(),
+              }) => ChapterClosureItemsCompanion.insert(
+                closureId: closureId,
+                itemKind: itemKind,
+                itemId: itemId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ChapterClosureItemsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({closureId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (closureId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.closureId,
+                                referencedTable:
+                                    $$ChapterClosureItemsTableReferences
+                                        ._closureIdTable(db),
+                                referencedColumn:
+                                    $$ChapterClosureItemsTableReferences
+                                        ._closureIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ChapterClosureItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $ChapterClosureItemsTable,
+      ChapterClosureItemRow,
+      $$ChapterClosureItemsTableFilterComposer,
+      $$ChapterClosureItemsTableOrderingComposer,
+      $$ChapterClosureItemsTableAnnotationComposer,
+      $$ChapterClosureItemsTableCreateCompanionBuilder,
+      $$ChapterClosureItemsTableUpdateCompanionBuilder,
+      (ChapterClosureItemRow, $$ChapterClosureItemsTableReferences),
+      ChapterClosureItemRow,
+      PrefetchHooks Function({bool closureId})
+    >;
 
 class $CupidDatabaseManager {
   final _$CupidDatabase _db;
@@ -10993,4 +13709,12 @@ class $CupidDatabaseManager {
       $$AskPromptStateTableTableManager(_db, _db.askPromptState);
   $$CalendarEventStateTableTableManager get calendarEventState =>
       $$CalendarEventStateTableTableManager(_db, _db.calendarEventState);
+  $$PortraitAnswersTableTableManager get portraitAnswers =>
+      $$PortraitAnswersTableTableManager(_db, _db.portraitAnswers);
+  $$RelationshipLabelsTableTableManager get relationshipLabels =>
+      $$RelationshipLabelsTableTableManager(_db, _db.relationshipLabels);
+  $$ChapterClosuresTableTableManager get chapterClosures =>
+      $$ChapterClosuresTableTableManager(_db, _db.chapterClosures);
+  $$ChapterClosureItemsTableTableManager get chapterClosureItems =>
+      $$ChapterClosureItemsTableTableManager(_db, _db.chapterClosureItems);
 }

@@ -1,0 +1,104 @@
+{
+  "id": "req016.portrait_questions",
+  "version": "1.0.0",
+  "schema_id": "req016.portrait_questions.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "portrait.q.interest.food.v1",
+      "prompt": "Món nào người ấy hay chọn khi hai người đi ăn cùng nhau?",
+      "target": "notebook.interest",
+      "chips": ["Món Việt", "Lẩu nóng", "Đồ nướng", "Đồ ngọt", "Cà phê sáng"],
+      "allow_free_text": true,
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "portrait.q.interest.rest.v1",
+      "prompt": "Cuối tuần rảnh, người ấy thích dành thời gian cho điều gì?",
+      "target": "notebook.interest",
+      "chips": ["Ở nhà xem phim", "Đi cà phê", "Ra ngoại ô", "Gặp bạn bè", "Chơi thể thao"],
+      "allow_free_text": true,
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "portrait.q.interest.gift_style.v1",
+      "prompt": "Người ấy thích nhận món quà kiểu nào hơn?",
+      "target": "notebook.interest",
+      "chips": ["Đồ dùng được hằng ngày", "Đồ tự tay làm", "Đồ ăn ngon", "Món lưu niệm"],
+      "allow_free_text": true,
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "portrait.q.event.own_day.v1",
+      "prompt": "Có ngày nào trong năm mà người ấy coi là ngày riêng của mình không?",
+      "target": "notebook.event",
+      "chips": ["Sinh nhật người ấy", "Ngày quen nhau", "Ngày kỷ niệm", "Ngày riêng khác"],
+      "allow_free_text": true,
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "portrait.q.event.upcoming.v1",
+      "prompt": "Sắp tới người ấy có dịp nào bạn muốn chuẩn bị trước không?",
+      "target": "notebook.event",
+      "chips": ["Sinh nhật sắp tới", "Tết Nguyên đán", "Ngày kỷ niệm", "Chuyến đi chung"],
+      "allow_free_text": true,
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "portrait.q.guess.comfort.v1",
+      "prompt": "Theo bạn đoán, điều gì làm người ấy thấy nhẹ người sau một ngày dài?",
+      "target": "portrait.guess",
+      "chips": ["Được yên tĩnh", "Được kể chuyện", "Một bữa ngon", "Đi dạo"],
+      "allow_free_text": true,
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "portrait.q.guess.care_language.v1",
+      "prompt": "Bạn đoán người ấy nhận ra sự quan tâm qua điều gì nhiều nhất?",
+      "target": "portrait.guess",
+      "chips": ["Lời nói", "Việc làm giúp", "Món quà nhỏ", "Thời gian ở cạnh"],
+      "allow_free_text": true,
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "portrait.q.guess.crowd.v1",
+      "prompt": "Bạn đoán điều gì dễ làm người ấy ngại khi đi chơi cùng đám đông?",
+      "target": "portrait.guess",
+      "chips": ["Chỗ quá ồn", "Phải nói nhiều", "Đi quá xa", "Kế hoạch đổi phút chót"],
+      "allow_free_text": true,
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    }
+  ]
+}

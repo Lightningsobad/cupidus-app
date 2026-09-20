@@ -70,6 +70,11 @@ void main() {
             .customStatement('ALTER TABLE activity_cards DROP COLUMN $column');
       }
     }
+    // Items first: it holds the cascading foreign key onto chapter_closures.
+    // Unlike `createTable`, drift's `createIndex` is not `IF NOT EXISTS`, so a
+    // fixture that leaves the v7 tables behind makes the real v7 branch throw.
+    await seeded.customStatement('DROP TABLE chapter_closure_items');
+    await seeded.customStatement('DROP TABLE chapter_closures');
     await seeded.customStatement('PRAGMA user_version = $version');
     await seeded.close();
   }
@@ -96,7 +101,7 @@ void main() {
         final upgraded = CupidDatabase(NativeDatabase(databaseFile));
         addTearDown(upgraded.close);
 
-        expect(await readUserVersion(upgraded), 7);
+        expect(await readUserVersion(upgraded), 9);
         expect(await cardColumns(upgraded), contains('location'));
         expect(await tableNames(upgraded), contains('invite_messages'));
       });
@@ -159,8 +164,8 @@ void main() {
 
       await fresh.select(fresh.inviteMessages).get();
 
-      expect(await readUserVersion(fresh), 7);
-      expect(fresh.schemaVersion, 7);
+      expect(await readUserVersion(fresh), 9);
+      expect(fresh.schemaVersion, 9);
       expect(await cardColumns(fresh), contains('location'));
       expect(await tableNames(fresh), contains('invite_messages'));
     });

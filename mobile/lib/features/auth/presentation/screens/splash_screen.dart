@@ -4,6 +4,8 @@ import 'package:cupid_mobile/core/auth/cupid_auth.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/core/navigation/pair_gate_shell.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/chapter_closure/domain/return_gate_resolver.dart';
+import 'package:cupid_mobile/features/chapter_closure/presentation/screens/return_screen.dart';
 import 'package:cupid_mobile/features/pairing/presentation/pair_gate_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,12 +35,14 @@ class SplashScreen extends StatelessWidget {
   const SplashScreen({
     super.key,
     this.authRepository,
+    this.returnGateResolver,
     SessionGateCubit Function()? createSessionGateCubit,
     PairGateCubit Function()? createPairGateCubit,
   }) : _createSessionGateCubit = createSessionGateCubit,
        _createPairGateCubit = createPairGateCubit;
 
   final AuthRepository? authRepository;
+  final ReturnGateResolver? returnGateResolver;
   final SessionGateCubit Function()? _createSessionGateCubit;
   final PairGateCubit Function()? _createPairGateCubit;
 
@@ -57,6 +61,7 @@ class SplashScreen extends StatelessWidget {
       create: (_) => (_createSessionGateCubit ?? _defaultSessionGateCubit)(),
       child: _SplashView(
         authRepository: authRepository,
+        returnGateResolver: returnGateResolver,
         createPairGateCubit: _createPairGateCubit,
       ),
     );
@@ -64,9 +69,14 @@ class SplashScreen extends StatelessWidget {
 }
 
 class _SplashView extends StatefulWidget {
-  const _SplashView({this.authRepository, this.createPairGateCubit});
+  const _SplashView({
+    this.authRepository,
+    this.returnGateResolver,
+    this.createPairGateCubit,
+  });
 
   final AuthRepository? authRepository;
+  final ReturnGateResolver? returnGateResolver;
   final PairGateCubit Function()? createPairGateCubit;
 
   @override
@@ -108,20 +118,53 @@ class _SplashViewState extends State<_SplashView> {
       return;
     }
     _navigated = true;
+    if (state is SessionGateAuthenticated) {
+      unawaited(_navigateAuthenticated());
+      return;
+    }
     final Widget destination = switch (state) {
-      SessionGateChecking() => const SizedBox.shrink(),
       SessionGateUnauthenticated() => WelcomeScreen(
         authRepository: _authRepository,
-      ),
-      SessionGateAuthenticated() => PairGateShell(
-        createPairGateCubit: widget.createPairGateCubit,
       ),
       SessionGateSessionExpired(:final prefillEmail) => LoginScreen(
         authRepository: _authRepository,
         sessionExpired: true,
         prefillEmail: prefillEmail,
       ),
+      _ => const SizedBox.shrink(),
     };
+    _replaceWith(destination);
+  }
+
+  /// REQ-016 STORY-013 P6: the only branch that asks the return gate anything.
+  ///
+  /// The new open mark is written as soon as the decision is made, so J13 shows
+  /// at most once even if the user never taps anything on it (AC-18, AC-24). An
+  /// unregistered resolver means "no return gate" rather than a crash, matching
+  /// how this screen's other `getIt` seams degrade in harnesses that register
+  /// only what they exercise.
+  Future<void> _navigateAuthenticated() async {
+    final ReturnGateResolver? resolver =
+        widget.returnGateResolver ??
+        (getIt.isRegistered<ReturnGateResolver>()
+            ? getIt<ReturnGateResolver>()
+            : null);
+    bool showReturn = false;
+    if (resolver != null) {
+      showReturn = await resolver.shouldShow();
+      await resolver.markOpened();
+    }
+    if (!mounted) {
+      return;
+    }
+    _replaceWith(
+      showReturn
+          ? ReturnScreen(createPairGateCubit: widget.createPairGateCubit)
+          : PairGateShell(createPairGateCubit: widget.createPairGateCubit),
+    );
+  }
+
+  void _replaceWith(Widget destination) {
     // ADR-5 invariant 2: `pushReplacement` disposes this screen's
     // `BlocProvider<SessionGateCubit>`, so a later session emission cannot
     // re-route.

@@ -1189,8 +1189,133 @@
   "@gift_ideas_guess_row": {
     "description": "Bottom row of the gift screen, holding the place of the STORY-009/010 surfaces. Stays at the \"user guesses\" layer — it invites a guess, it never states a conclusion about the other person (AC-26)."
   },
-  "gift_ideas_guess_coming_soon": "Chân dung và bảng tra ăn khớp sẽ có ở bước sau.",
-  "@gift_ideas_guess_coming_soon": {
-    "description": "Answer when the bottom row is tapped before STORY-009/010 ship. Tapping says so rather than doing nothing, so the row is not a dead end (SC-5)."
+  "portrait_screen_title": "Chân dung tưởng tượng",
+  "@portrait_screen_title": {
+    "description": "App bar title of the your-view portrait screen. Names the screen as an act of imagination, never as a profile, an analysis, or an assessment of the other person (AC-9)."
+  },
+  "portrait_provenance_label": "Dựa trên những gì bạn đã nhập. App không biết người ấy — đọc để nghĩ ra câu hỏi, đừng đọc để kết luận.",
+  "@portrait_provenance_label": {
+    "description": "Provenance line pinned under the app bar in both the question state and the result state. Part of the layout, never a tooltip or a dismissible banner, and never smaller than the caption role (AC-6, AC-7, AC-8)."
+  },
+  "portrait_question_position": "Câu {position}/{total}",
+  "@portrait_question_position": {
+    "description": "Position of the open question inside the pack. Labels where the user is right now while the question sheet is open; it is not stored, not shown outside that sheet, and never rendered as a completion ratio or a progress bar (AC-26, AC-28).",
+    "placeholders": {
+      "position": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "portrait_skip_action": "Bỏ qua",
+  "@portrait_skip_action": {
+    "description": "Sits on the same row as the next action, at equal reach, because declining a question is an ordinary outcome and carries no consequence (AC-25, AC-27)."
+  },
+  "portrait_next_action": "Tiếp",
+  "@portrait_next_action": {
+    "description": "Commits the answer the user chose or typed and moves to the next question."
+  },
+  "portrait_free_text_hint": "Hoặc tự viết",
+  "@portrait_free_text_hint": {
+    "description": "Hint of the free-text field, shown only for a question whose pack entry allows free text. Chrome only — every word the user reads as content comes from the packs."
+  },
+  "portrait_ask_row_label": "Câu để hỏi",
+  "@portrait_ask_row_label": {
+    "description": "Label of the row that closes each result section. Marks the section as a starting point for a real conversation rather than a conclusion (AC-20)."
+  },
+  "compat_band_chip_semantics": "Dải ăn khớp: {label}",
+  "@compat_band_chip_semantics": {
+    "description": "Screen-reader label for the DẢI pill. Reads the band's own label verbatim; it must never add a position, a percentage or a comparison, because the band is a name from a closed vocabulary and not a point on a scale (AC-32).",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "compat_block_fit_title": "Chỗ dễ hợp",
+  "@compat_block_fit_title": {
+    "description": "Subheading of the `fit` facet block. Its friction twin uses the same weight and size; only the wording and the leading icon differ (AC-33)."
+  },
+  "compat_block_friction_title": "Chỗ dễ va",
+  "@compat_block_friction_title": {
+    "description": "Subheading of the `friction` facet block. Deliberately as short and as plain as the fit title — no hedging, no softening, no \"nhưng\", so neither block reads as the footnote of the other (AC-33)."
+  },
+  "compat_block_activity_title": "1 hoạt động nên thử",
+  "@compat_block_activity_title": {
+    "description": "Subheading of the activity block. States one activity, never a plan, a streak or a count (AC-33)."
+  },
+  "compat_add_to_my_store_action": "Thêm vào kho của tôi",
+  "@compat_add_to_my_store_action": {
+    "description": "Secondary action on the activity block. \"Kho của tôi\" is the reader's own activity store, so the wording stays first-person and never implies the other person will see it (AC-30)."
+  },
+  "compat_block_question_title": "1 câu để hỏi",
+  "@compat_block_question_title": {
+    "description": "Subheading of the closing block. The block shows a question to ask out loud; this story does not collect the answer (AC-31)."
+  },
+  "compat_screen_title": "Bảng tra ăn khớp",
+  "@compat_screen_title": {
+    "description": "Title of screen (10). A table you look something up in, not a verdict: the wording stays on the \"tra\" side and never promises a score or a match percentage."
+  },
+  "compat_empty_state": "Chọn nhãn cho cả hai bên ở một hệ bất kỳ để xem ô tương ứng.",
+  "@compat_empty_state": {
+    "description": "Shown while no label system has both sides declared. States what is missing and stops; an empty table is the ordinary opening state, not a failure to apologise for."
+  },
+  "compat_result_basis": "Dựa trên nhãn bạn đã nhập: {selfLabel} và {partnerLabel}",
+  "@compat_result_basis": {
+    "description": "Provenance line above each result, in STORY-009's style. It names the two labels the reader typed so the cell below is read as a table row keyed by those labels, never as an observation about the other person (AC-26).",
+    "placeholders": {
+      "selfLabel": {
+        "type": "String"
+      },
+      "partnerLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "compat_label_prompt_zodiac_self": "Cung hoàng đạo của bạn là gì?",
+  "@compat_label_prompt_zodiac_self": {
+    "description": "Ask-on-the-spot prompt for the reader's own zodiac label. One question, one card, in the shape STORY-004 established."
+  },
+  "compat_label_prompt_zodiac_partner": "Bạn biết cung hoàng đạo của người ấy chứ?",
+  "@compat_label_prompt_zodiac_partner": {
+    "description": "Ask-on-the-spot prompt for the other person's zodiac label. Phrased as a question about what the reader knows, because no value may be suggested or prefilled for this side (AC-6)."
+  },
+  "compat_label_prompt_mbti_self": "Nhóm tính cách (MBTI) của bạn là gì?",
+  "@compat_label_prompt_mbti_self": {
+    "description": "Ask-on-the-spot prompt for the reader's own MBTI label. Either system alone is enough, so this card never blocks on the zodiac one (AC-11)."
+  },
+  "compat_label_prompt_mbti_partner": "Còn nhóm tính cách của người ấy?",
+  "@compat_label_prompt_mbti_partner": {
+    "description": "Ask-on-the-spot prompt for the other person's MBTI label. Like its zodiac twin it offers no default value (AC-6)."
+  },
+  "compat_label_guess_toggle": "Mình chỉ đoán thôi",
+  "@compat_label_guess_toggle": {
+    "description": "Switch that marks the label about to be chosen as a guess. Off by default — the certainty is declared by the reader, never inferred from which side the label is for (AC-7)."
+  },
+  "compat_label_guess_marker": "bạn đang đoán",
+  "@compat_label_guess_marker": {
+    "description": "Provenance marker beside a label saved as a guess. Muted caption plus a small line icon, deliberately lighter than a confirmed field, so the table never quietly promotes a guess to a fact (AC-8)."
+  },
+  "compat_label_clear_action": "Bỏ nhãn này",
+  "@compat_label_clear_action": {
+    "description": "Removes one declared label in place. Withdrawing a label takes the result built on it with it, because nothing about a lookup is stored (AC-9)."
+  },
+  "compat_skip_back_action": "Bỏ qua, quay lại",
+  "@compat_skip_back_action": {
+    "description": "Neutral exit for a reader who does not want to answer. No reproach, no persuasion, and no second ask later in the same session (AC-10)."
+  },
+  "compat_card_created_snackbar": "Đã tạo thẻ mới trong kho hoạt động",
+  "@compat_card_created_snackbar": {
+    "description": "Undo snackbar shown after the activity block pushes a card. The card is created immediately and announced afterwards; there is no blocking confirmation dialog."
+  },
+  "compat_card_created_undo": "Hoàn tác",
+  "@compat_card_created_undo": {
+    "description": "Undo action on the card-created snackbar. It deletes the card outright, so an undone push leaves the activity store exactly as it was."
+  },
+  "compat_static_table_note": "Bảng tra soạn sẵn, cố định. Không có gì học từ bạn, nên nó không biết nịnh bạn.",
+  "@compat_static_table_note": {
+    "description": "Closing note of screen (10), taken from the design canvas. It states in words what AC-28/AC-31 state in code: the 400 cells ship with the app, nothing is computed about the reader, and nothing is stored back."
   }
 }

@@ -27,7 +27,8 @@ enum ActivityCardOrigin {
   pastedLink('pasted_link'),
   occasionSuggestion('occasion_suggestion'),
   giftSuggestion('gift_suggestion'),
-  conversationStarter('conversation_starter');
+  conversationStarter('conversation_starter'),
+  compatibilityLookup('compatibility_lookup');
 
   const ActivityCardOrigin(this.wireValue);
 

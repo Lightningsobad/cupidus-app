@@ -56,3 +56,20 @@ abstract interface class ActivityCardRepository {
   /// rows written, so a caller can tell "not mine" from "deleted".
   Future<int> deleteCard(String id);
 }
+
+/// The read side of the "Đã đóng" pane (AC-11, AC-14), deliberately kept off
+/// [ActivityCardRepository]: every ordinary consumer must keep seeing a store
+/// with the closed rows missing, so the one reader that can see them is handed
+/// only to the one pane allowed to show them.
+abstract interface class ClosedArchiveReader {
+  /// True once a chapter has been closed, whatever it contained — including a
+  /// closure holding no cards at all. Drives progressive disclosure: before the
+  /// first closure the app must not reveal that the archive exists (AC-16).
+  Future<bool> hasAnyClosure();
+
+  /// The closed cards, newest-updated first, paged in SQL like every other
+  /// pane so `hasMore` stays correct.
+  Future<List<ActivityCard>> closedCards({required int limit, int offset = 0});
+
+  Future<int> closedCardCount();
+}

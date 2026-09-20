@@ -3,18 +3,26 @@
 Status: TODO
 Complexity: standard
 Story-Class: standard
-Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
+Implementation Lane: mobile (Tech Lead chốt 2026-09-11 — không AC nào cần máy
+chủ, và một bản sao máy chủ vi phạm trực tiếp AC-27; xem
+`architecture/solution.md` §4 Lane Handoff)
 Requirement: REQ-016
 Screen: Trạng thái đặc biệt của màn (1) (J11 đóng ngăn, J13 quay lại). Không
 phải màn hình thứ 12.
+Design-Screen: `j11-dong-ngan-gon-gang`, `ngan-da-hen-ngay-dang-doi`,
+`j13-quay-lai-sau-3-thang` (surface `cupid-ch-ng-1`, platform `ios`; phân giải
+và khoá trong P4/P5/P6 — VISUAL_FIDELITY: PASS, xem
+`visual-fidelity/visual-fidelity-report.md`)
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục A (J11, J13),
 B (Lối ra, Lối quay lại), D (SC-5), F (SB-100)
 
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`,
+      `architecture/contract-summary.md`
+- [ ] Implementation (Development) — kế hoạch: `coding-plan/master-plan.md`
+      (P1..P6, một lane Mobile, tuần tự)
 - [ ] Review (Reviewer)
 
 ## Depends On
