@@ -15,7 +15,7 @@ PNG pairs already captured under `visual-fidelity/`.
 | --- | --- | --- | --- | --- |
 | `j11-dong-ngan-gon-gang` | P4 | `design-reference-j11-dong-ngan-gon-gang-ios.png` (415x900) | `implemented-j11-dong-ngan-gon-gang-ios.png` (415x900) | PASS — 1 lệch có chủ ý (test-results.md P4 §7) |
 | `ngan-da-hen-ngay-dang-doi` (neo cho "kho đã đóng", canvas không có khung riêng) | P5 | `design-reference-kho-da-dong-ios.png` (415x900) | `implemented-kho-da-dong-ios.png` (415x900) | PASS — 2 lệch có chủ ý (test-results.md P5 §9) |
-| `j13-quay-lai-sau-3-thang` | P6 | `design-reference-j13-quay-lai-sau-3-thang-ios.png` (415x900) | `implemented-j13-man-quay-lai-ios.png` (390x844) | PASS — 5 lệch có chủ ý (test-results.md P6 §10) |
+| `j13-quay-lai-sau-3-thang` | P6 | `design-reference-j13-quay-lai-sau-3-thang-ios.png` (415x900) | `implemented-j13-quay-lai-sau-3-thang-ios.png` (390x844, tên đã chuẩn hoá theo slug design-reference; nội dung giống hệt bản chụp gốc `implemented-j13-man-quay-lai-ios.png`) | PASS — 5 lệch có chủ ý (test-results.md P6 §10) |
 
 Surface `cupid-ch-ng-1`, platform `ios`. All three implemented captures were
 produced via `RepaintBoundary.toImage` inside the story's own widget tests
