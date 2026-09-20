@@ -11,6 +11,7 @@ import '../../data/calendar_event_state_repository.dart';
 import '../../domain/calendar_event_service.dart';
 import '../../domain/starter_selector.dart';
 import '../cubit/conversation_starters_cubit.dart';
+import '../widgets/starter_hero_card.dart';
 import '../widgets/starter_line.dart';
 
 /// This screen's entry point id for the inline ask mechanism
@@ -125,11 +126,21 @@ class _ConversationStartersBody extends StatelessWidget {
               key: const Key('conversation-starters-list'),
               padding: const EdgeInsets.all(CupidSpacing.md),
               children: <Widget>[
-                for (final RenderedStarter starter in state.starters)
-                  StarterLine(
-                    starter: starter,
+                if (state.starters.isNotEmpty)
+                  StarterHeroCard(
+                    starter: state.starters.first,
                     onCopied: () => _showCopied(context),
                   ),
+                if (state.starters.length > 1) ...<Widget>[
+                  const SizedBox(height: CupidSpacing.md),
+                  const _TopicCaption(),
+                  for (final RenderedStarter starter
+                      in state.starters.skip(1))
+                    _SecondaryStarterCard(
+                      starter: starter,
+                      onCopied: () => _showCopied(context),
+                    ),
+                ],
                 const SizedBox(height: CupidSpacing.xs),
                 _NextRoundButton(onPressed: cubit.nextPage),
                 const SizedBox(height: CupidSpacing.sm),
@@ -157,6 +168,65 @@ class _ConversationStartersBody extends StatelessWidget {
         key: const Key('starter_copied_toast'),
         duration: kStarterCopiedToastDuration,
         content: Text(starterText(context, 'Đã copy', 'Copied')),
+      ),
+    );
+  }
+}
+
+/// "CÙNG CHỦ ĐỀ": the eyebrow the round's remaining starters sit under.
+///
+/// Drawn only when there is at least one such starter — a one-item pack gets
+/// the hero card alone, with no empty box and no placeholder under it (AC-28).
+class _TopicCaption extends StatelessWidget {
+  const _TopicCaption();
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: CupidSpacing.sm),
+      child: Text(
+        starterText(context, 'CÙNG CHỦ ĐỀ', 'SAME TOPIC'),
+        key: const Key('starter_topic_caption'),
+        style: type.caption.copyWith(
+          color: colors.colorTextMuted,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+}
+
+/// One of the round's non-hero starters, in its own rounded box.
+class _SecondaryStarterCard extends StatelessWidget {
+  const _SecondaryStarterCard({required this.starter, required this.onCopied});
+
+  final RenderedStarter starter;
+
+  final VoidCallback onCopied;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platform = context.cupidPlatform;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: CupidSpacing.sm),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.colorSurfaceAlt,
+          borderRadius: BorderRadius.circular(platform.radiusCard),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: CupidSpacing.md,
+            vertical: CupidSpacing.sm,
+          ),
+          child: StarterLine(starter: starter, onCopied: onCopied),
+        ),
       ),
     );
   }

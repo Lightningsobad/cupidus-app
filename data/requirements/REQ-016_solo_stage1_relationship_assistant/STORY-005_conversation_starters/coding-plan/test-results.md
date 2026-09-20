@@ -410,3 +410,83 @@ story khác, **chưa** được liệt kê xác nhận bằng trình dựng.
 **P4 COMPLETE.** No blocker. Không đổi `pubspec.yaml`, không thêm phụ thuộc,
 không đổi schema Drift, không thêm route vào shell điều hướng (màn được push
 bằng `MaterialPageRoute` từ ô lối-vào-nhanh).
+
+## P5 — Phân cấp hero/phụ (ruling 2026-09-20 mục 2), 2026-09-20
+
+Worktree: `story-REQ-016_solo_stage1_relationship_assistant-STORY-005_conversation_starters`.
+BaseHead: `06dc96a489a6fcb734690cd26ad113c2ae725a0f`.
+
+### Lệnh đã chạy
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `flutter test test/features/conversation_starters/conversation_starters_screen_test.dart --reporter failures-only` | `+24 ~1: All other tests passed!` (1 skipped = test chụp ảnh, tắt khi không có `CAPTURE_VISUALS`) |
+| `flutter test <file trên> --plain-name "phân cấp hero/phụ" --reporter expanded` | `+6: All tests passed!` — liệt kê đủ 6 case mới |
+| `flutter test test/features/conversation_starters --reporter failures-only` | `+106 ~1 -3` — 3 đỏ **có sẵn từ trước**, xem mục dưới |
+| `flutter test <file trên> --dart-define=CAPTURE_VISUALS=true --reporter failures-only` | `+25: All tests passed!`, ảnh đã ghi |
+| `flutter analyze lib/features/conversation_starters/presentation test/.../conversation_starters_screen_test.dart` | 7 issues, **toàn bộ là `info` có sẵn trong `conversation_starters_cubit.dart`**; 0 issue ở file đã chạm |
+| `flutter analyze lib test` | 0 error, 35 warning, 230 info — đúng baseline repo, không có mục nào ở file đã chạm |
+
+### Ba test đỏ là baseline của nhánh, không do P5
+
+`starter_content_gate_test.dart` (2 case) và `calendar_event_service_test.dart`
+(1 case) so khớp danh sách thành viên enum và đang thiếu ba giá trị mà story
+khác đã thêm: `assertive_claim` (`InvariantRule`),
+`missing_question_ending` (`StarterGateRule`), `compatibility_lookup`
+(`ActivityCardOrigin`). `git log -S` cho thấy cả ba đã có mặt ở commit tổ tiên
+của BaseHead (`47c52888` STORY-009, `6d59a6d0`/`406c0bc6` STORY-010), tức là đỏ
+trước khi phase này bắt đầu. Diff của P5 gồm đúng 4 file (3 widget/screen + 1
+test) và **không** file nào trong hai test đỏ import chúng — kiểm bằng danh sách
+`import` của cả hai file. Việc sửa chúng thuộc lane sở hữu enum, không phải P5.
+
+### Bảng N → (thẻ hero, câu phụ, caption "CÙNG CHỦ ĐỀ")
+
+| N (số mục trong gói) | thẻ hero | câu phụ (`StarterLine`) | caption `CÙNG CHỦ ĐỀ` |
+| --- | --- | --- | --- |
+| 1 | 1 | 0 | không |
+| 2 | 1 | 1 | có |
+| 12 | 1 | 2 | có |
+
+Ở N = 1 còn khẳng định không có `starter_line_placeholder`, không có hộp rỗng,
+và `_starterIdsOnScreen` dài đúng 1 (AC-28).
+
+### Bao phủ acceptance criteria của phase
+
+| Tiêu chí §4 | Cách phủ |
+| --- | --- |
+| đúng một hero + tối đa hai câu phụ | `kho đủ dài: một thẻ hero + hai câu phụ dưới caption (N = 12)` |
+| N = 1 không caption, không hộp rỗng | `N = 1: chỉ thẻ hero, không caption "CÙNG CHỦ ĐỀ", không ô rỗng` |
+| N = 2 một hero + đúng một phụ | `N = 2: một hero + đúng một câu phụ` |
+| bấm quá số mục vẫn có hero, nút không tắt | `bấm quá số mục thì hero luôn còn chữ (N = 2)` + test AC-27 sẵn có (`button.onPressed` khác null ở cả 6 lần đo) |
+| cùng (ngày, sổ tay, page) ra cùng hero | `cùng (ngày, sổ tay, page) ra cùng một hero qua hai lần dựng (AC-17)`; và hero được khẳng định bằng `expectedRound(12, 0).first` |
+| không bộ đếm/phần trăm/"đã xem hết"/nút lưu | test quét chuỗi cấm sẵn có, chạy lại xanh với bố cục mới |
+| không khoá ARB mới | hai caption đi qua `starterText(context, vi, en)`; `starter_content_gate_test.dart` không đổi |
+
+Thứ tự không đổi: hero là phần tử `[0]` của danh sách `StarterSelector` trả về.
+Helper `_starterIdsOnScreen` đọc hero trước rồi tới các `StarterLine`, nên các
+bảng xoay vòng AC-27 giữ nguyên ý nghĩa và vẫn xanh.
+
+### Kiểm tra thị giác
+
+Đã chụp lại `visual-fidelity/implemented-6-moi-chuyen-a-a-material.png` và **mở
+ra nhìn bằng mắt**. Thẻ hero có caption `CÂU HÔM NAY` (mint, IN HOA, giãn chữ)
+trên câu hero cỡ `cardTitle` đậm hơn hẳn hai câu phụ; dưới đó caption
+`CÙNG CHỦ ĐỀ` muted rồi hai hộp bo góc nền `colorSurfaceAlt` — đúng tương quan
+canvas `design-reference-6-moi-chuyen-a-a-ios.png`. Dấu tiếng Việt lên đủ ở cả
+`Mồi chuyện`, `CÂU HÔM NAY`, `CÙNG CHỦ ĐỀ`, `Xem câu khác`; glyph `content_copy`
+rasterise đúng, không ô tofu.
+
+Khoảng cách còn lại so với canvas — nút đặc `Chép để nhắn`, icon `refresh`, dòng
+trấn an dưới thẻ hero, nhãn khối sự kiện, badge ngày — là mục 3/4/5/6b/7, thuộc
+P6/P7, cố ý **không** làm ở phase này. Nút copy trên hai câu phụ được **giữ**
+theo §3 của phase file (canvas không vẽ, nhưng gỡ affordance ngoài phạm vi
+ruling là tự phân xử).
+
+`git status` sau khi chụp: chỉ 4 file mã/test của phase và đúng một PNG của
+story này thay đổi; không đụng PNG visual-fidelity của story khác.
+
+### Result
+
+**P5 COMPLETE.** No blocker. Không đổi `pubspec.yaml`, không thêm phụ thuộc,
+không đổi schema Drift, không thêm khoá ARB, không đổi `RenderedStarter` hay
+`StarterSelector`.

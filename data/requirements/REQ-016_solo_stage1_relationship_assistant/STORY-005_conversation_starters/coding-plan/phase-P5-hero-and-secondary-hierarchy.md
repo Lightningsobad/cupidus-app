@@ -155,5 +155,7 @@ giữ nguyên ở phase này, P6 mới đổi chúng.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-20
+- Evidence: `coding-plan/test-results.md` §"P5 — Phân cấp hero/phụ",
+  `visual-fidelity/implemented-6-moi-chuyen-a-a-material.png`

@@ -82,7 +82,7 @@ bản vá chưa có.
 | P2 | Mobile Developer | Mobile | None | NO | DONE |
 | P3 | Mobile Developer | Mobile | P1, P2 | NO | DONE |
 | P4 | Mobile Developer | Mobile | P3 | NO | DONE |
-| P5 | Mobile Developer | Mobile | None | NO | NOT_STARTED |
+| P5 | Mobile Developer | Mobile | None | NO | DONE |
 | P6 | Mobile Developer | Mobile | P5 | NO | NOT_STARTED |
 | P7 | Mobile Developer | Mobile | P6 | NO | NOT_STARTED |
 

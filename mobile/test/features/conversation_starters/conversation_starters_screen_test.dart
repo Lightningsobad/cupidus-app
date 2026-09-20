@@ -24,6 +24,7 @@ import 'package:cupid_mobile/features/conversation_starters/presentation/cubit/c
 // The entry point exports only the screen and its id, so the internals this
 // file asserts on are reached through their own library.
 import 'package:cupid_mobile/features/conversation_starters/presentation/screens/conversation_starters_screen.dart';
+import 'package:cupid_mobile/features/conversation_starters/presentation/widgets/starter_hero_card.dart';
 import 'package:cupid_mobile/features/conversation_starters/presentation/widgets/starter_line.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:drift/native.dart';
@@ -153,7 +154,15 @@ Widget _host(Widget child) => MaterialApp(
 
 /// The ids currently on screen, top to bottom — the rotation evidence AC-27
 /// asks for, read off the widgets rather than off the cubit.
+///
+/// The hero card comes first because it renders element `[0]` of the round;
+/// the secondary lines follow in the selector's order, so this list stays the
+/// round itself and the ordering tables below keep their meaning.
 List<String> _starterIdsOnScreen(WidgetTester tester) => <String>[
+      for (final StarterHeroCard hero in tester.widgetList<StarterHeroCard>(
+        find.byType(StarterHeroCard),
+      ))
+        hero.starter.id,
       for (final StarterLine line in tester.widgetList<StarterLine>(
         find.byType(StarterLine),
       ))
@@ -445,6 +454,104 @@ void main() {
       await pumpStarters(tester, starterCount: 12);
 
       expect(_starterIdsOnScreen(tester), hasLength(kStartersPerRound));
+    });
+  });
+
+  group('phân cấp hero/phụ của khối Bản A (ruling 2026-09-20 mục 2)', () {
+    testWidgets('kho đủ dài: một thẻ hero + hai câu phụ dưới caption (N = 12)',
+        (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 12);
+
+      expect(find.byKey(const Key('starter_hero_card')), findsOneWidget);
+      expect(find.byKey(const Key('starter_hero_caption')), findsOneWidget);
+      expect(find.text('CÂU HÔM NAY'), findsOneWidget);
+      expect(find.byKey(const Key('starter_topic_caption')), findsOneWidget);
+      expect(find.text('CÙNG CHỦ ĐỀ'), findsOneWidget);
+      expect(find.byType(StarterLine), findsNWidgets(2));
+
+      // The hero is element [0] of the round the selector returned — this
+      // phase adds no second ordering rule on top of AC-17.
+      final StarterHeroCard hero =
+          tester.widget<StarterHeroCard>(find.byType(StarterHeroCard));
+      expect(hero.starter.id, (await expectedRound(12, 0)).first);
+    });
+
+    testWidgets('N = 2: một hero + đúng một câu phụ',
+        (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 2);
+
+      expect(find.byKey(const Key('starter_hero_card')), findsOneWidget);
+      expect(find.byKey(const Key('starter_topic_caption')), findsOneWidget);
+      expect(find.byType(StarterLine), findsOneWidget);
+    });
+
+    testWidgets('N = 1: chỉ thẻ hero, không caption "CÙNG CHỦ ĐỀ", không ô rỗng',
+        (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 1);
+
+      expect(find.byKey(const Key('starter_hero_card')), findsOneWidget);
+      expect(find.byKey(const Key('starter_topic_caption')), findsNothing);
+      expect(find.text('CÙNG CHỦ ĐỀ'), findsNothing);
+      expect(find.byType(StarterLine), findsNothing);
+      expect(find.byKey(const Key('starter_line_placeholder')), findsNothing);
+      expect(_starterIdsOnScreen(tester), hasLength(1));
+    });
+
+    testWidgets('hero nổi hơn câu phụ về cỡ chữ, không cùng một cỡ',
+        (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 12);
+
+      final List<String> ids = _starterIdsOnScreen(tester);
+      final TextStyle heroStyle = tester
+          .widget<Text>(find.byKey(Key('starter_line_text_${ids.first}')))
+          .style!;
+      final TextStyle secondaryStyle = tester
+          .widget<Text>(find.byKey(Key('starter_line_text_${ids[1]}')))
+          .style!;
+
+      expect(heroStyle.fontSize, greaterThan(secondaryStyle.fontSize!));
+      expect(
+        heroStyle.fontWeight!.value,
+        greaterThan(secondaryStyle.fontWeight!.value),
+      );
+    });
+
+    testWidgets('bấm quá số mục thì hero luôn còn chữ (N = 2)',
+        (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 2);
+
+      for (int taps = 0; taps <= 5; taps++) {
+        final StarterHeroCard hero =
+            tester.widget<StarterHeroCard>(find.byType(StarterHeroCard));
+        expect(hero.starter.text, isNotEmpty, reason: 'sau $taps lần bấm');
+        expect(
+          tester
+              .widget<Text>(
+                find.byKey(Key('starter_line_text_${hero.starter.id}')),
+              )
+              .data,
+          hero.starter.text,
+        );
+
+        await tester.tap(find.byKey(const Key('starter_next_round')));
+        await tester.pumpAndSettle();
+      }
+    });
+
+    testWidgets('cùng (ngày, sổ tay, page) ra cùng một hero qua hai lần dựng '
+        '(AC-17)', (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 12);
+      final String first =
+          tester.widget<StarterHeroCard>(find.byType(StarterHeroCard)).starter.id;
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+
+      await pumpStarters(tester, starterCount: 12);
+      final String second =
+          tester.widget<StarterHeroCard>(find.byType(StarterHeroCard)).starter.id;
+
+      expect(second, first);
     });
   });
 

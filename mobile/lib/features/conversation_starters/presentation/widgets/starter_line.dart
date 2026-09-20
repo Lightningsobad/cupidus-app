@@ -58,30 +58,52 @@ class StarterLine extends StatelessWidget {
             ),
           ),
           const SizedBox(width: CupidSpacing.sm),
-          Semantics(
-            button: true,
-            label: starterText(context, 'Sao chép', 'Copy'),
-            child: InkWell(
-              key: Key('starter_line_copy_${starter.id}'),
-              onTap: () async {
-                await Clipboard.setData(ClipboardData(text: starter.text));
-                onCopied();
-              },
-              customBorder: const CircleBorder(),
-              child: const SizedBox(
-                width: kStarterCopyTapTarget,
-                height: kStarterCopyTapTarget,
-                child: Center(
-                  child: CupidIcon(
-                    CupidIcons.contentCopy,
-                    variant: CupidIconVariant.line,
-                    size: CupidSpacing.lg,
-                  ),
-                ),
-              ),
+          StarterCopyButton(starter: starter, onCopied: onCopied),
+        ],
+      ),
+    );
+  }
+}
+
+/// The one copy control a starter gets, wherever it is drawn.
+///
+/// Shared by [StarterLine] and the hero card so both write the same clipboard
+/// payload and keep the same `starter_line_copy_<id>` key — the hero's raised
+/// card changes the starter's visual rank, not what copying it does (AC-2).
+class StarterCopyButton extends StatelessWidget {
+  const StarterCopyButton({
+    super.key,
+    required this.starter,
+    required this.onCopied,
+  });
+
+  final RenderedStarter starter;
+
+  final VoidCallback onCopied;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: starterText(context, 'Sao chép', 'Copy'),
+      child: InkWell(
+        key: Key('starter_line_copy_${starter.id}'),
+        onTap: () async {
+          await Clipboard.setData(ClipboardData(text: starter.text));
+          onCopied();
+        },
+        customBorder: const CircleBorder(),
+        child: const SizedBox(
+          width: kStarterCopyTapTarget,
+          height: kStarterCopyTapTarget,
+          child: Center(
+            child: CupidIcon(
+              CupidIcons.contentCopy,
+              variant: CupidIconVariant.line,
+              size: CupidSpacing.lg,
             ),
           ),
-        ],
+        ),
       ),
     );
   }
