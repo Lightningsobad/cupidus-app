@@ -3,12 +3,18 @@ import 'dart:io';
 
 import 'package:cupid_mobile/app/cupid_app.dart';
 import 'package:cupid_mobile/core/auth/cupid_auth.dart';
+import 'package:cupid_mobile/core/database/cupid_database.dart';
+import 'package:cupid_mobile/core/database/daos/activity_card_dao.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
+import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
+import 'package:cupid_mobile/features/activity_cards/data/activity_card_repository_impl.dart';
+import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
 import 'package:cupid_mobile/features/auth/presentation/session_gate_cubit.dart';
 import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
 import 'package:cupid_mobile/features/pairing/presentation/pair_gate_cubit.dart';
 import 'package:cupid_mobile/features/zodiac/presentation/zodiac_cubit.dart';
 import 'package:cupid_mobile/features/zodiac/presentation/zodiac_red_flag_screen.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -54,6 +60,32 @@ List<File> _zodiacSources() =>
         .toList();
 
 void main() {
+  // REQ-016 STORY-001 P9: this harness declares an unpaired session, which now
+  // lands on the solo card hub instead of the pairing stack. The hub resolves
+  // its repository through the composition root, so the launch path needs one
+  // registered even though this suite only asserts zodiac routing. An
+  // in-memory database keeps that off disk and off the network; mirrors
+  // `test/core/navigation/pair_gate_shell_test.dart`.
+  setUp(() {
+    final BackendUserIdStore backendUserIdStore = BackendUserIdStore()
+      ..updateFromLoginResponse(<String, Object?>{'id': 'u1'});
+    final CupidDatabase activityDatabase = CupidDatabase(
+      NativeDatabase.memory(),
+    );
+    getIt.registerSingleton<CupidDatabase>(
+      activityDatabase,
+      dispose: (CupidDatabase database) => database.close(),
+    );
+    getIt.registerSingleton<ActivityCardRepository>(
+      ActivityCardRepositoryImpl(
+        dao: ActivityCardDao(activityDatabase),
+        ownerKeyStore: backendUserIdStore,
+      ),
+    );
+  });
+
+  tearDown(() => getIt.reset());
+
   group('ZodiacRedFlagScreen.routeName (P3 §1B)', () {
     testWidgets('is registered on CupidApp and reachable with pushNamed', (
       WidgetTester tester,

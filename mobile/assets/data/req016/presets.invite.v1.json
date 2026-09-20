@@ -1,0 +1,189 @@
+{
+  "id": "presets.invite",
+  "version": "1.0.0",
+  "schema_id": "req016.presets.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "invite.rap_phim.v1",
+      "frame": "Rạp phim",
+      "clauses": [
+        { "text": "Có vụ {activity} nè.", "requires": ["activity"], "targets": "neutral" },
+        { "text": "Tớ tính rủ cậu đi cùng.", "requires": [], "targets": "neutral" },
+        { "text": "Ngày {date} nhé.", "requires": ["date"], "targets": "neutral" },
+        { "text": "Tầm {time} là hợp lý.", "requires": ["time"], "targets": "neutral" },
+        { "text": "Chỗ hẹn là {place}.", "requires": ["place"], "targets": "neutral" },
+        { "text": "Chắc mất khoảng {duration} thôi.", "requires": ["duration"], "targets": "neutral" },
+        { "text": "Tớ hứa lần này không ngủ gật ở hàng ghế sau.", "requires": [], "targets": "sender" },
+        { "text": "Bận thì cậu nhắn tớ một câu để hôm khác là được.", "requires": [], "targets": "neutral", "role": "decline_door" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "invite.quan_ca_phe.v1",
+      "frame": "Quán cà phê",
+      "clauses": [
+        { "text": "Tớ vừa nghĩ ra vụ {activity}.", "requires": ["activity"], "targets": "neutral" },
+        { "text": "Ngày {date} cậu rảnh không?", "requires": ["date"], "targets": "neutral" },
+        { "text": "Khoảng {time} nhé.", "requires": ["time"], "targets": "neutral" },
+        { "text": "Tớ ngồi sẵn ở {place}.", "requires": ["place"], "targets": "neutral" },
+        { "text": "Ngồi tầm {duration} rồi ai về nhà nấy.", "requires": ["duration"], "targets": "neutral" },
+        { "text": "Tớ sẽ cố gọi đồ uống mà không đọc sai tên món.", "requires": [], "targets": "sender" },
+        { "text": "Bận thì nhắn tớ để hôm khác nhé.", "requires": [], "targets": "neutral", "role": "decline_door" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "invite.di_bo.v1",
+      "frame": "Đi bộ lòng vòng",
+      "clauses": [
+        { "text": "Tớ định làm vụ {activity}.", "requires": ["activity"], "targets": "neutral" },
+        { "text": "Ngày {date} nha.", "requires": ["date"], "targets": "neutral" },
+        { "text": "Tầm {time} trời dễ chịu.", "requires": ["time"], "targets": "neutral" },
+        { "text": "Điểm hẹn {place}.", "requires": ["place"], "targets": "neutral" },
+        { "text": "Đi chừng {duration} thôi.", "requires": ["duration"], "targets": "neutral" },
+        { "text": "Tớ sẽ là người đi chậm nhất đoàn, báo trước rồi đó.", "requires": [], "targets": "sender" },
+        { "text": "Nếu bận thì cậu cứ nhắn để hôm khác nhé.", "requires": [], "targets": "neutral", "role": "decline_door" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "invite.an_vat.v1",
+      "frame": "Ăn vặt",
+      "clauses": [
+        { "text": "Có kèo {activity} nè.", "requires": ["activity"], "targets": "neutral" },
+        { "text": "Ngày {date}.", "requires": ["date"], "targets": "neutral" },
+        { "text": "Tầm {time}.", "requires": ["time"], "targets": "neutral" },
+        { "text": "Ở {place}.", "requires": ["place"], "targets": "neutral" },
+        { "text": "Tầm {duration} là xong.", "requires": ["duration"], "targets": "neutral" },
+        { "text": "Tớ đói trước khi tới nơi là chuyện bình thường.", "requires": [], "targets": "sender" },
+        { "text": "Bận thì nhắn tớ để hôm khác nhé.", "requires": [], "targets": "neutral", "role": "decline_door" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "invite.tham_hiem.v1",
+      "frame": "Nhà thám hiểm",
+      "clauses": [
+        { "text": "Nhật ký hành trình: chuẩn bị cho {activity}.", "requires": ["activity"], "targets": "neutral" },
+        { "text": "Khởi hành ngày {date}.", "requires": ["date"], "targets": "neutral" },
+        { "text": "Giờ tập kết: {time}.", "requires": ["time"], "targets": "neutral" },
+        { "text": "Toạ độ: {place}.", "requires": ["place"], "targets": "neutral" },
+        { "text": "Thời lượng dự kiến: {duration}.", "requires": ["duration"], "targets": "neutral" },
+        { "text": "Trưởng đoàn là tớ, và tớ vẫn hay quên đường về.", "requires": [], "targets": "sender" },
+        { "text": "Bận thì nhắn tớ để hôm khác nhé.", "requires": [], "targets": "neutral", "role": "decline_door" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "invite.bao_cao.v1",
+      "frame": "Báo cáo công việc",
+      "clauses": [
+        { "text": "Kính gửi cậu: đề xuất {activity}.", "requires": ["activity"], "targets": "neutral" },
+        { "text": "Thời gian: ngày {date}.", "requires": ["date"], "targets": "neutral" },
+        { "text": "Giờ: {time}.", "requires": ["time"], "targets": "neutral" },
+        { "text": "Địa điểm: {place}.", "requires": ["place"], "targets": "neutral" },
+        { "text": "Thời lượng: {duration}.", "requires": ["duration"], "targets": "neutral" },
+        { "text": "Người đề xuất là tớ, kèm cam kết không đi trễ như lần trước.", "requires": [], "targets": "sender" },
+        { "text": "Bận thì nhắn tớ để hôm khác nhé.", "requires": [], "targets": "neutral", "role": "decline_door" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "invite.thong_bao.v1",
+      "frame": "Thông báo dán tường",
+      "clauses": [
+        { "text": "Thông báo: sắp có {activity}.", "requires": ["activity"], "targets": "neutral" },
+        { "text": "Ngày {date}.", "requires": ["date"], "targets": "neutral" },
+        { "text": "Giờ {time}.", "requires": ["time"], "targets": "neutral" },
+        { "text": "Tại {place}.", "requires": ["place"], "targets": "neutral" },
+        { "text": "Kéo dài {duration}.", "requires": ["duration"], "targets": "neutral" },
+        { "text": "Người dán thông báo là tớ, chữ xấu cũng là tớ.", "requires": [], "targets": "sender" },
+        { "text": "Bận thì nhắn tớ để hôm khác nhé.", "requires": [], "targets": "neutral", "role": "decline_door" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "invite.vao_bep.v1",
+      "frame": "Vào bếp",
+      "clauses": [
+        { "text": "Tớ tính rủ cậu vụ {activity}.", "requires": ["activity"], "targets": "neutral" },
+        { "text": "Ngày {date} nhé.", "requires": ["date"], "targets": "neutral" },
+        { "text": "Bắt đầu tầm {time}.", "requires": ["time"], "targets": "neutral" },
+        { "text": "Ở {place}.", "requires": ["place"], "targets": "neutral" },
+        { "text": "Làm chừng {duration} thôi.", "requires": ["duration"], "targets": "neutral" },
+        { "text": "Tớ nhận phần rửa bát, coi như bù cho tay nghề nấu nướng.", "requires": [], "targets": "sender" },
+        { "text": "Bận thì nhắn tớ để hôm khác nhé.", "requires": [], "targets": "neutral", "role": "decline_door" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "invite.hieu_sach.v1",
+      "frame": "Hiệu sách",
+      "clauses": [
+        { "text": "Có vụ {activity}, tớ rủ cậu đi.", "requires": ["activity"], "targets": "neutral" },
+        { "text": "Ngày {date}.", "requires": ["date"], "targets": "neutral" },
+        { "text": "Tầm {time}.", "requires": ["time"], "targets": "neutral" },
+        { "text": "Ở {place}.", "requires": ["place"], "targets": "neutral" },
+        { "text": "Đi tầm {duration}.", "requires": ["duration"], "targets": "neutral" },
+        { "text": "Tớ hứa chỉ đứng đọc ké chứ không tha thêm chồng sách nào về nhà.", "requires": [], "targets": "sender" },
+        { "text": "Bận thì nhắn tớ để hôm khác nhé.", "requires": [], "targets": "neutral", "role": "decline_door" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-10"
+      }
+    },
+    {
+      "id": "invite.ke_hoach.v1",
+      "frame": "Kế hoạch chi tiết",
+      "clauses": [
+        { "text": "Mục tiêu: {activity}.", "requires": ["activity"], "targets": "neutral" },
+        { "text": "Ngày thực hiện: {date}.", "requires": ["date"], "targets": "neutral" },
+        { "text": "Giờ bắt đầu: {time}.", "requires": ["time"], "targets": "neutral" },
+        { "text": "Nơi gặp: {place}.", "requires": ["place"], "targets": "neutral" },
+        { "text": "Dự kiến {duration}.", "requires": ["duration"], "targets": "neutral" },
+        { "text": "Phần rủi ro lớn nhất của kế hoạch này vẫn là tớ.", "requires": [], "targets": "sender" },
+        { "text": "Bận thì nhắn tớ để hôm khác nhé.", "requires": [], "targets": "neutral", "role": "decline_door" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-10"
+      }
+    }
+  ]
+}

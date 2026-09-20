@@ -7,7 +7,11 @@ import 'realtime_failure.dart';
 /// populates this store after each successful backend profile sync
 /// (`AuthRepository._syncBackendProfile`).
 class BackendUserIdStore implements SessionScopedStore {
+  BackendUserIdStore({Future<String?> Function()? readPersistedUserId})
+      : _readPersistedUserId = readPersistedUserId;
+
   String? _backendUserId;
+  final Future<String?> Function()? _readPersistedUserId;
 
   /// The cached backend `User.id`, or `null` before the first successful
   /// sign-in of this session.
@@ -15,8 +19,26 @@ class BackendUserIdStore implements SessionScopedStore {
 
   /// The injected `Future<String?> Function()` resolver contract consumed by
   /// `SocketTransport` / `RealtimeCoordinator` (`architecture/solution.md`
-  /// §2 `backendUserId`).
-  Future<String?> resolve() async => _backendUserId;
+  /// §2 `backendUserId`). Lazily rehydrates from the id already persisted by
+  /// `JwtTokenProvider` on a cold app start after login, when a
+  /// `readPersistedUserId` reader was injected (`coding-plan/master-plan.md`
+  /// §9.3-§9.4) — the RAM cache always wins when already populated.
+  Future<String?> resolve() async {
+    final cached = _backendUserId;
+    if (cached != null && cached.isNotEmpty) {
+      return cached;
+    }
+    final read = _readPersistedUserId;
+    if (read == null) {
+      return cached;
+    }
+    final persisted = await read();
+    if (persisted == null || persisted.isEmpty) {
+      return cached;
+    }
+    _backendUserId = persisted;
+    return persisted;
+  }
 
   /// Extracts and caches the backend `User.id` from a `POST /auth/login` or
   /// `POST /auth/register` response body. Throws

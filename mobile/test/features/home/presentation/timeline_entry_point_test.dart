@@ -2,6 +2,8 @@ import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
 import 'package:cupid_mobile/core/database/cupid_database.dart' as db;
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
+import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart'
@@ -39,9 +41,55 @@ class _StubTimelineCubit extends TimelineCubit {
   Future<void> load() async {}
 }
 
+/// Since REQ-016 STORY-001 P4 an unpaired session renders the solo card hub,
+/// so that case needs a card repository. This one is empty and never writes:
+/// the assertion here is still only about the timeline entry point.
+class _EmptyActivityCardRepository implements ActivityCardRepository {
+  @override
+  Future<List<ActivityCard>> cardsByStatus({
+    required ActivityCardStatus status,
+    required int limit,
+    int offset = 0,
+  }) async => const <ActivityCard>[];
+
+  @override
+  Stream<List<ActivityCard>> watchCardsByStatus({
+    required ActivityCardStatus status,
+    required int limit,
+    int offset = 0,
+  }) => Stream<List<ActivityCard>>.value(const <ActivityCard>[]);
+
+  @override
+  Future<Map<ActivityCardStatus, int>> countsByStatus() async =>
+      const <ActivityCardStatus, int>{};
+
+  @override
+  Future<ActivityCard?> cardById(String id) async => null;
+
+  @override
+  Future<int> deleteCard(String id) async => 0;
+
+  @override
+  Future<ActivityCard> createCard(NewActivityCard draft) =>
+      throw StateError('not exercised in this test');
+
+  @override
+  Future<int> updateStatus(String cardId, ActivityCardStatus status) =>
+      throw StateError('not exercised in this test');
+
+  @override
+  Future<int> clearScheduledDate(String cardId) =>
+      throw StateError('not exercised in this test');
+
+  @override
+  Future<int> updateCardDetails(String cardId, ActivityCardEdit edit) =>
+      throw StateError('not exercised in this test');
+}
+
 Widget _harness({
   required Future<PairingStatus> Function() resolvePairingStatus,
   required TimelineCubit Function() createTimelineCubit,
+  ActivityCardRepository? activityCardRepository,
 }) {
   return MaterialApp(
     theme: buildCupidTheme(
@@ -53,6 +101,7 @@ Widget _harness({
     home: HomeScreen(
       resolvePairingStatus: resolvePairingStatus,
       createTimelineCubit: createTimelineCubit,
+      activityCardRepository: activityCardRepository,
     ),
   );
 }
@@ -98,6 +147,7 @@ void main() {
         resolvePairingStatus: () async => PairingStatus.unpaired,
         createTimelineCubit: () =>
             throw StateError('not exercised in this test'),
+        activityCardRepository: _EmptyActivityCardRepository(),
       ),
     );
     await tester.pumpAndSettle();

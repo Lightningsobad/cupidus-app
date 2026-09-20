@@ -1,0 +1,161 @@
+{
+  "id": "before_you_go",
+  "version": "1.0.0",
+  "schema_id": "req016.before_you_go.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "cash",
+      "order": 10,
+      "labelVi": "Mang đủ tiền mặt",
+      "icon": "payments",
+      "when": [
+        { "field": "priceVnd", "op": "gt", "value": 0 }
+      ]
+    },
+    {
+      "id": "fuel",
+      "order": 20,
+      "labelVi": "Đổ xăng hoặc sạc pin trước khi đi",
+      "icon": "local_gas_station",
+      "when": [
+        { "field": "distanceKm", "op": "gte", "value": 10 }
+      ]
+    },
+    {
+      "id": "rain",
+      "order": 30,
+      "labelVi": "Mang áo mưa/ô, có phương án B trong nhà",
+      "icon": "umbrella",
+      "when": [
+        { "field": "indoorOutdoor", "op": "eq", "value": "outdoor" },
+        { "field": "rainySeason", "op": "isTrue" }
+      ]
+    },
+    {
+      "id": "booking",
+      "order": 40,
+      "labelVi": "Gọi đặt chỗ trước",
+      "icon": "event_available",
+      "when": [
+        { "field": "needsBooking", "op": "isTrue" }
+      ]
+    },
+    {
+      "id": "share_location",
+      "order": 50,
+      "labelVi": "Chia sẻ vị trí",
+      "icon": "share_location",
+      "action": "share_location",
+      "when": [
+        { "field": "always", "op": "isTrue" }
+      ]
+    }
+  ],
+  "regions": [
+    {
+      "id": "bac",
+      "aliases": [
+        "ha noi",
+        "hanoi",
+        "hai phong",
+        "haiphong",
+        "quang ninh",
+        "ha long",
+        "halong",
+        "bac ninh",
+        "bac giang",
+        "hai duong",
+        "hung yen",
+        "thai binh",
+        "nam dinh",
+        "ha nam",
+        "ninh binh",
+        "vinh phuc",
+        "phu tho",
+        "thai nguyen",
+        "lao cai",
+        "sa pa",
+        "sapa",
+        "ha giang",
+        "tuyen quang",
+        "yen bai",
+        "lang son",
+        "cao bang"
+      ],
+      "rainyMonths": [5, 6, 7, 8, 9, 10]
+    },
+    {
+      "id": "trung",
+      "aliases": [
+        "thanh hoa",
+        "nghe an",
+        "vinh",
+        "ha tinh",
+        "quang binh",
+        "dong hoi",
+        "quang tri",
+        "dong ha",
+        "hue",
+        "thua thien hue",
+        "da nang",
+        "danang",
+        "hoi an",
+        "quang nam",
+        "tam ky",
+        "quang ngai",
+        "binh dinh",
+        "quy nhon",
+        "phu yen",
+        "tuy hoa",
+        "nha trang",
+        "khanh hoa",
+        "ninh thuan",
+        "phan rang",
+        "binh thuan",
+        "phan thiet",
+        "mui ne"
+      ],
+      "rainyMonths": [9, 10, 11, 12]
+    },
+    {
+      "id": "nam",
+      "aliases": [
+        "ho chi minh",
+        "hochiminh",
+        "hcm",
+        "tphcm",
+        "sai gon",
+        "saigon",
+        "thu duc",
+        "binh duong",
+        "thu dau mot",
+        "dong nai",
+        "bien hoa",
+        "vung tau",
+        "ba ria",
+        "tay ninh",
+        "long an",
+        "tien giang",
+        "my tho",
+        "ben tre",
+        "vinh long",
+        "tra vinh",
+        "dong thap",
+        "cao lanh",
+        "an giang",
+        "chau doc",
+        "long xuyen",
+        "can tho",
+        "hau giang",
+        "soc trang",
+        "bac lieu",
+        "ca mau",
+        "kien giang",
+        "rach gia",
+        "phu quoc"
+      ],
+      "rainyMonths": [5, 6, 7, 8, 9, 10, 11]
+    }
+  ]
+}

@@ -1,20 +1,39 @@
 # Story Master: STORY-005 Mồi chuyện — kho câu thường xanh và sự kiện có lịch
 
-Status: TODO
+Status: DONE
 Complexity: standard
 Story-Class: standard
-Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
+Implementation Lane: mobile-only (Tech Lead chốt: toàn bộ bề mặt nằm trong
+  tiến trình Dart + Drift cục bộ; AC-15/AC-16 cấm gọi mạng nên không có lane
+  backend — xem `architecture/solution.md` §1 Key Discovery 1)
 Requirement: REQ-016
 Screen: Mồi chuyện — màn (6), nhóm CỬA VÀO
+Design-Screen: `6-moi-chuyen-a-a` (surface `cupid-ch-ng-1`, biến thể ios; xem
+  `visual-fidelity/visual-fidelity-report.md`). Báo cáo đó mang
+  `DESIGN_ANCHOR_ADJUDICATION_REQUIRED: YES` — 6 chỗ canvas-vs-lời-văn-spec
+  chưa được phán quyết, xem §7 của báo cáo.
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục C.6, D (SC-2),
 F (3c, C1, C7)
 
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`,
+      `architecture/contract-summary.md`
+- [x] Implementation (Development) — mobile-dev P1-P4 complete, committed
+      3ff29be43d1e754548767a87246df3e0c1e181a2
+- [x] Review (Reviewer) — Outcome: DEFERRED_ONLY (2026-09-17,
+      `review/review-report.md`). Merged into
+      `codex/REQ-016_solo_stage1_relationship_assistant-integration`
+      (merge `2b5d841f`, re-merged `2406c82e` after the visual-confirm patch).
+      `design-reference-6-moi-chuyen-a-a-ios.png` was produced 2026-09-20 (see
+      `visual-fidelity/visual-fidelity-report.md` §3) and directly eyeballed
+      against `implemented-6-moi-chuyen-a-a-material.png`;
+      `VISUAL_FIDELITY: PASS` confirmed. The report also carries
+      `DESIGN_ANCHOR_ADJUDICATION_REQUIRED: YES` for 6 canvas-vs-spec-text
+      items with no AC backing (§7) — a scope judgment call, not an
+      implementation defect, so it does not block `Status: DONE` (see report
+      §8). Open for a separate Scrum-Master/user decision.
 
 ## Depends On
 - STORY-001 — bản A+ đổi thẳng thành thẻ trong kho chung.

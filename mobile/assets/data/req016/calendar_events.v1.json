@@ -1,0 +1,63 @@
+{
+  "id": "calendar_events",
+  "version": "1.0.0",
+  "schema_id": "req016.calendar_events.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "calendar_event.trung_thu.v1",
+      "name": "Tết Trung Thu",
+      "calendar": "lunar",
+      "dates": ["2026-09-25", "2027-09-15"],
+      "activity_type": "walk"
+    },
+    {
+      "id": "calendar_event.halloween.v1",
+      "name": "Halloween",
+      "calendar": "solar",
+      "dates": ["2026-10-31", "2027-10-31"],
+      "activity_type": "handmade"
+    },
+    {
+      "id": "calendar_event.nha_giao_viet_nam.v1",
+      "name": "Ngày Nhà giáo Việt Nam",
+      "calendar": "solar",
+      "dates": ["2026-11-20", "2027-11-20"],
+      "activity_type": "visit"
+    },
+    {
+      "id": "calendar_event.giang_sinh.v1",
+      "name": "Đêm Giáng Sinh",
+      "calendar": "solar",
+      "dates": ["2026-12-24", "2027-12-24"],
+      "activity_type": "outing"
+    },
+    {
+      "id": "calendar_event.tet_duong_lich.v1",
+      "name": "Tết Dương Lịch",
+      "calendar": "solar",
+      "dates": ["2027-01-01", "2028-01-01"],
+      "activity_type": "photo"
+    },
+    {
+      "id": "calendar_event.tet_nguyen_dan.v1",
+      "name": "Tết Nguyên Đán",
+      "calendar": "lunar",
+      "dates": ["2027-02-06", "2028-01-26"],
+      "activity_type": "home"
+    },
+    {
+      "id": "calendar_event.valentine.v1",
+      "name": "Valentine",
+      "calendar": "solar",
+      "dates": ["2027-02-14", "2028-02-14"],
+      "activity_type": "dining"
+    },
+    {
+      "id": "calendar_event.gio_to_hung_vuong.v1",
+      "name": "Giỗ Tổ Hùng Vương",
+      "calendar": "lunar",
+      "dates": ["2027-04-16", "2028-04-04"]
+    }
+  ]
+}

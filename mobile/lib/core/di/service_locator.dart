@@ -1,8 +1,35 @@
+import 'dart:io';
+
 import 'package:cupid_api/cupid_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
+import 'package:path_provider/path_provider.dart';
 
+import '../../features/activity_cards/data/activity_card_repository_impl.dart';
+import '../../features/activity_cards/data/closed_archive_reader_impl.dart';
+import '../../features/activity_cards/domain/activity_card_repository.dart';
+import '../../features/chapter_closure/data/chapter_closure_service.dart';
+import '../../features/chapter_closure/data/stage1_last_opened_store.dart';
+import '../../features/chapter_closure/data/stage1_wipe_registry.dart';
+import '../../features/chapter_closure/data/stage1_wipe_service.dart';
+import '../../features/chapter_closure/domain/chapter_closure_gate.dart';
+import '../../features/chapter_closure/domain/return_gate_resolver.dart';
+import '../../features/context_notebook/context_notebook_entry_point.dart';
+import '../../features/context_notebook/data/context_notebook_dao.dart';
+import '../../features/context_notebook/data/context_notebook_repository.dart';
+import '../../features/compatibility_lookup/data/relationship_label_repository.dart';
+import '../../features/compatibility_lookup/presentation/cubit/compatibility_lookup_cubit.dart';
+import '../content/content_package.dart';
+import '../database/daos/relationship_labels_dao.dart';
+import '../../features/gift_ideas/data/gift_repository.dart';
+import '../../features/gift_ideas/domain/gift_selector.dart';
+import '../../features/invite_composer/data/invite_payload_repository_impl.dart';
+import '../../features/invite_composer/domain/invite_payload_repository.dart';
+import '../../features/invite_composer/domain/preset_catalogue.dart';
+import '../database/daos/chapter_closure_dao.dart';
+import '../database/daos/invite_message_dao.dart';
 import '../../features/vibes/data/vibes_repository.dart';
 import '../../features/vibes/presentation/vibe_cubit.dart';
 import '../../features/zodiac/data/zodiac_repository.dart';
@@ -27,6 +54,8 @@ import '../../features/account/data/notification_preferences_store.dart';
 import '../../features/gallery/data/gallery_api.dart';
 import '../../features/gallery/data/gallery_local_cache.dart';
 import '../../features/gallery/data/gallery_repository.dart';
+import '../../features/journal/data/journal_repository.dart';
+import '../journal/journal_media_store.dart';
 import '../../features/love_contracts/data/love_contract_gate_repository.dart';
 import '../../features/love_contracts/data/love_contract_repository.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_remote_data_source.dart';
@@ -57,6 +86,7 @@ import '../navigation/onboarding_router.dart';
 import '../config/cupid_api_config.dart';
 import '../couple/couple_pairing_store.dart';
 import '../database/cupid_database.dart';
+import '../database/daos/activity_card_dao.dart';
 import '../database/daos/message_dao.dart';
 import '../database/daos/timeline_dao.dart';
 import '../network/cupid_api_client.dart';
@@ -168,7 +198,11 @@ void setupServiceLocator() {
     ),
   );
 
-  getIt.registerLazySingleton<BackendUserIdStore>(BackendUserIdStore.new);
+  getIt.registerLazySingleton<BackendUserIdStore>(
+    () => BackendUserIdStore(
+      readPersistedUserId: getIt<JwtTokenProvider>().getSavedUserId,
+    ),
+  );
 
   getIt.registerLazySingleton<PendingEventStore>(PendingEventStore.new);
 
@@ -297,7 +331,169 @@ void setupServiceLocator() {
     () => GhostConfigRepository(api: getIt<CupidApi>()),
   );
 
-  getIt.registerLazySingleton<CupidDatabase>(CupidDatabase.new);
+  // REQ-016 STORY-003 F-B3 (`architecture/solution.md` §7.4): the journal's
+  // text half lives in this DB, and on iOS `Documents/` is backed up by
+  // default, so the DB file is tagged over the same channel the media root
+  // already uses.
+  getIt.registerLazySingleton<CupidDatabase>(
+    () => CupidDatabase(null, _excludeFromOsBackup),
+  );
+
+  // REQ-016 STORY-001 P2 (`architecture/contract-summary.md` §1): NOT a
+  // `SessionScopedStore` registration -- multi-user isolation on one device
+  // comes from `owner_key` filtering inside the repository, never from
+  // wiping this client-owned store on sign-out (AC-22, `solution.md` §1 Key
+  // Discovery).
+  getIt.registerLazySingleton<ActivityCardDao>(
+    () => getIt<CupidDatabase>().activityCardDao,
+  );
+
+  getIt.registerLazySingleton<ActivityCardRepository>(
+    () => ActivityCardRepositoryImpl(
+      dao: getIt<ActivityCardDao>(),
+      ownerKeyStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  // REQ-016 STORY-002 P5 (`architecture/contract-summary.md` §4): the invite
+  // composer's three collaborators. Like `ActivityCardDao` above, these are
+  // deliberately NOT session-scoped stores -- an exported invite is
+  // client-owned data hanging off a card that survives sign-out, so wiping it
+  // on session teardown would delete the user's own drafts.
+  getIt.registerLazySingleton<PresetCatalogue>(() => PresetCatalogue());
+
+  getIt.registerLazySingleton<InviteMessageDao>(
+    () => getIt<CupidDatabase>().inviteMessageDao,
+  );
+
+  getIt.registerLazySingleton<InvitePayloadRepository>(
+    () => InvitePayloadRepositoryImpl(getIt<InviteMessageDao>()),
+  );
+
+  // REQ-016 STORY-004 P1 (`architecture/contract-summary.md` §4): same rule as
+  // the two blocks above -- the notebook is client-owned data that must survive
+  // sign-out, so neither of these is registered as a `SessionScopedStore`.
+  // Isolation comes from `owner_key` inside the repository.
+  getIt.registerLazySingleton<ContextNotebookDao>(
+    () => ContextNotebookDao(getIt<CupidDatabase>()),
+  );
+
+  getIt.registerLazySingleton<ContextNotebookRepository>(
+    () => ContextNotebookRepository(
+      dao: getIt<ContextNotebookDao>(),
+      ownerKeyStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  // REQ-016 STORY-010 P2 (`architecture/contract-summary.md` §4): the labels
+  // the user declares for themselves and for the other person. Same rule as the
+  // notebook above -- client-owned data that must survive sign-out, so it is not
+  // a `SessionScopedStore` and isolation comes from `owner_key`.
+  getIt.registerLazySingleton<RelationshipLabelsDao>(
+    () => getIt<CupidDatabase>().relationshipLabelsDao,
+  );
+
+  getIt.registerLazySingleton<RelationshipLabelRepository>(
+    () => RelationshipLabelRepository(
+      dao: getIt<RelationshipLabelsDao>(),
+      ownerKeyStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  // REQ-016 STORY-013 P2 (`architecture/contract-summary.md` §3): the closure
+  // ledger's writer and its read gate. Also not session-scoped -- a sign-out
+  // that deleted the ledger would silently un-close a chapter the user closed
+  // on purpose (AC-17).
+  //
+  // Nothing is injected into `ActivityCardDao` or `ContextNotebookRepository`
+  // here: both already exclude closed rows inside their own SQL, so their
+  // constructors and public signatures are unchanged.
+  getIt.registerLazySingleton<ChapterClosureDao>(
+    () => getIt<CupidDatabase>().chapterClosureDao,
+  );
+
+  getIt.registerLazySingleton<ChapterClosureGate>(
+    () => ChapterClosureGate(getIt<ChapterClosureDao>()),
+  );
+
+  // REQ-016 STORY-013 P5: the one reader allowed to see closed cards. It is a
+  // separate registration rather than extra methods on
+  // `ActivityCardRepository` so that every existing consumer keeps a store with
+  // the closed rows missing (AC-11).
+  getIt.registerLazySingleton<ClosedArchiveReader>(
+    () => ClosedArchiveReaderImpl(
+      dao: getIt<ActivityCardDao>(),
+      closureDao: getIt<ChapterClosureDao>(),
+      ownerKeyStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  // REQ-016 STORY-010 P4: screen (10). The loader is a singleton because it is
+  // stateless and every feature that ships a content pack wants the same one;
+  // the cubit is a factory because it is per-screen and holds the packs it read
+  // until the screen it belongs to is gone.
+  getIt.registerLazySingleton<ContentPackageLoader>(
+    () => const ContentPackageLoader(),
+  );
+
+  getIt.registerFactory<CompatibilityLookupCubit>(
+    () => CompatibilityLookupCubit(
+      labels: getIt<RelationshipLabelRepository>(),
+      cards: getIt<ActivityCardRepository>(),
+      loader: getIt<ContentPackageLoader>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<ChapterClosureService>(
+    () => ChapterClosureService(
+      db: getIt<CupidDatabase>(),
+      dao: getIt<ChapterClosureDao>(),
+      ownerKeyStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  // REQ-016 STORY-013 P3 (`architecture/contract-summary.md` §4): the stage-1
+  // wipe registry and the service that executes it. Both resolve
+  // `JournalMediaStore` lazily, so this block stays independent of where that
+  // registration sits in this file.
+  getIt.registerLazySingleton<Stage1WipeRegistry>(
+    () => Stage1WipeRegistry(
+      db: getIt<CupidDatabase>(),
+      journalMediaStore: getIt<JournalMediaStore>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<Stage1WipeService>(
+    () => Stage1WipeService(
+      db: getIt<CupidDatabase>(),
+      dao: getIt<ChapterClosureDao>(),
+      gate: getIt<ChapterClosureGate>(),
+      ownerKeyStore: getIt<BackendUserIdStore>(),
+      registry: getIt<Stage1WipeRegistry>(),
+    ),
+  );
+
+  // REQ-016 STORY-013 P6 (`architecture/contract-summary.md` §2): the return
+  // gate. Not session-scoped -- the open mark describes this install's usage,
+  // not the signed-in session, and signing out must not make the next launch
+  // look like a fresh install.
+  getIt.registerLazySingleton<Stage1LastOpenedStore>(
+    () => Stage1LastOpenedStore(),
+  );
+
+  getIt.registerLazySingleton<ReturnGateResolver>(
+    () => ReturnGateResolver(store: getIt<Stage1LastOpenedStore>()),
+  );
+
+  // REQ-016 STORY-004 P6: the read/rank pair behind the gift flow. Neither one
+  // owns storage -- the repository reads bundled packs plus the notebook, and
+  // the selector is a pure function of what it is handed
+  // (`architecture/contract-summary.md` §6).
+  getIt.registerLazySingleton<GiftRepository>(
+    () => GiftRepository(notebook: contextNotebookReader()),
+  );
+
+  getIt.registerLazySingleton<GiftSelector>(() => const GiftSelector());
 
   getIt.registerLazySingleton<MessageDao>(() {
     final dao = getIt<CupidDatabase>().messageDao;
@@ -429,6 +625,36 @@ void setupServiceLocator() {
     ),
   );
 
+  // REQ-016 STORY-003 P2 (`architecture/solution.md` §4 Boundaries And
+  // Ownership): additive registrations for the private journal's device-side
+  // data layer. Deliberately NOT `CupidSession.registerScopedStore` — journal
+  // content is device-authoritative, so clearing it on sign-out would be
+  // permanent data loss; multi-account isolation comes from the mandatory
+  // `ownerUserId` filter instead.
+  //
+  // AC-9 media base. `getApplicationSupportDirectory` is getFilesDir() on
+  // Android and NSApplicationSupportDirectory on iOS, which is what both
+  // exclusion mechanisms below are written against.
+  //
+  // F-B1: the media root carries the owner segment for the same reason the DB
+  // queries carry the `ownerUserId` filter — without it, account B opening the
+  // journal sweeps account A's photo files off the shared device.
+  getIt.registerLazySingleton<JournalMediaStore>(
+    () => JournalMediaStore(
+      baseDirectory: getApplicationSupportDirectory,
+      ownerUserId: () => getIt<BackendUserIdStore>().backendUserId,
+      excludeFromBackup: _excludeFromOsBackup,
+    ),
+  );
+
+  getIt.registerLazySingleton<JournalRepository>(
+    () => JournalRepository(
+      database: getIt<CupidDatabase>(),
+      mediaStore: getIt<JournalMediaStore>(),
+      backendUserIdStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
   getIt.registerLazySingleton<OnboardingRouter>(
     () => OnboardingRouter(builders: onboardingRouteBuilders()),
   );
@@ -534,6 +760,19 @@ Map<OnboardingNode, WidgetBuilder> onboardingRouteBuilders() {
     // discard along with the original shell root.
     OnboardingNode.home: (_) => const PairGateShell(),
   };
+}
+
+/// REQ-016 STORY-003 P2 (AC-9). Android excludes the journal from Auto Backup
+/// through `res/xml/backup_rules.xml` + `res/xml/data_extraction_rules.xml`, so
+/// nothing is asked of the app at runtime there. iOS has no declarative
+/// equivalent: the path must be tagged with `isExcludedFromBackup`, which
+/// `AppDelegate.swift` exposes over this channel.
+Future<void> _excludeFromOsBackup(String absolutePath) async {
+  if (!Platform.isIOS) {
+    return;
+  }
+  await const MethodChannel('com.snapsofts.cupid/backup_exclusion')
+      .invokeMethod<void>('excludeFromBackup', absolutePath);
 }
 
 /// Adapts [MessageDao] to [SessionScopedStore] so the Drift message cache is
