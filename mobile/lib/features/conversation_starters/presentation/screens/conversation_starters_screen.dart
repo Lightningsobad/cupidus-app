@@ -9,6 +9,7 @@ import '../../../activity_cards/domain/activity_card_repository.dart';
 import '../../../context_notebook/context_notebook_entry_point.dart';
 import '../../data/calendar_event_state_repository.dart';
 import '../../domain/calendar_event_service.dart';
+import '../../domain/event_date_label.dart';
 import '../../domain/starter_selector.dart';
 import '../cubit/conversation_starters_cubit.dart';
 import '../widgets/starter_hero_card.dart';
@@ -130,6 +131,7 @@ class _ConversationStartersBody extends StatelessWidget {
                   StarterHeroCard(
                     starter: state.starters.first,
                     onCopied: () => _showCopied(context),
+                    onNextRound: cubit.nextPage,
                   ),
                 if (state.starters.length > 1) ...<Widget>[
                   const SizedBox(height: CupidSpacing.md),
@@ -141,8 +143,6 @@ class _ConversationStartersBody extends StatelessWidget {
                       onCopied: () => _showCopied(context),
                     ),
                 ],
-                const SizedBox(height: CupidSpacing.xs),
-                _NextRoundButton(onPressed: cubit.nextPage),
                 const SizedBox(height: CupidSpacing.sm),
                 (askSlotBuilder ?? _defaultAskSlot)(
                   entryPointId: conversationStartersEntryPointId,
@@ -232,38 +232,6 @@ class _SecondaryStarterCard extends StatelessWidget {
   }
 }
 
-/// "Xem câu khác": a text button, never disabled.
-///
-/// There is no exhausted state to disable it into — the selector wraps — so
-/// this widget has no `enabled` flag to get wrong, and the screen ships no
-/// "x/N", no progress bar and no "đã xem hết" line beside it (AC-4/AC-27).
-class _NextRoundButton extends StatelessWidget {
-  const _NextRoundButton({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final CupidColorTokens colors = context.cupidColors;
-    final CupidTypographyTokens type = context.cupidType;
-
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: TextButton(
-        key: const Key('starter_next_round'),
-        onPressed: onPressed,
-        child: Text(
-          starterText(context, 'Xem câu khác', 'Show other lines'),
-          style: type.body.copyWith(
-            color: colors.colorAccentPink,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _ThinDivider extends StatelessWidget {
   const _ThinDivider();
 
@@ -278,7 +246,7 @@ class _ThinDivider extends StatelessWidget {
   }
 }
 
-/// "Sự kiện có lịch": the upcoming-events strip.
+/// "CÓ LỊCH SẴN · RỦ ĐI ĐƯỢC": the upcoming-events strip.
 ///
 /// Empty is a defined state with a neutral line, not an invitation and not a
 /// repeat of the Minute-1 voice — only the absolutely empty hub of screen (1)
@@ -297,13 +265,31 @@ class _EventStrip extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(
-          starterText(context, 'Sự kiện có lịch', 'Dated events'),
-          key: const Key('starter_events_heading'),
-          style: type.body.copyWith(
-            color: colors.colorText,
-            fontWeight: FontWeight.w600,
-          ),
+        Row(
+          children: <Widget>[
+            CupidIcon(
+              CupidIcons.event,
+              variant: CupidIconVariant.line,
+              size: CupidSpacing.md,
+              color: colors.colorAccentLilac,
+            ),
+            const SizedBox(width: CupidSpacing.xs),
+            Flexible(
+              child: Text(
+                starterText(
+                  context,
+                  'CÓ LỊCH SẴN · RỦ ĐI ĐƯỢC',
+                  'ALREADY DATED · EASY TO ASK',
+                ),
+                key: const Key('starter_events_heading'),
+                style: type.caption.copyWith(
+                  color: colors.colorAccentLilac,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: CupidSpacing.sm),
         if (events.isEmpty)
@@ -329,45 +315,21 @@ class _EventRow extends StatelessWidget {
 
   final VisibleCalendarEvent event;
 
-  /// `YYYY-MM-DD` read as `dd/mm`. A substring of the pinned civil date the
-  /// pack ships, so the badge cannot drift from the date the card is given.
-  String get _dayMonthBadge =>
-      '${event.date.substring(8, 10)}/${event.date.substring(5, 7)}';
-
   @override
   Widget build(BuildContext context) {
     final ConversationStartersCubit cubit =
         context.read<ConversationStartersCubit>();
     final CupidColorTokens colors = context.cupidColors;
     final CupidTypographyTokens type = context.cupidType;
-    final CupidPlatformTokens platform = context.cupidPlatform;
 
     return Padding(
       key: Key('starter_event_${event.id}'),
       padding: const EdgeInsets.symmetric(vertical: CupidSpacing.xs),
       child: Row(
         children: <Widget>[
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: colors.colorSurfaceAlt,
-              borderRadius: BorderRadius.circular(platform.radiusButton),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: CupidSpacing.sm,
-                vertical: CupidSpacing.xs,
-              ),
-              child: Text(
-                _dayMonthBadge,
-                key: Key('starter_event_date_${event.id}'),
-                style: type.caption.copyWith(color: colors.colorAccentLilac),
-              ),
-            ),
-          ),
-          const SizedBox(width: CupidSpacing.sm),
           Expanded(
             child: Text(
-              event.event.name,
+              '${event.event.name} — ${eventDateLabel(event.date)}',
               key: Key('starter_event_name_${event.id}'),
               style: type.body.copyWith(color: colors.colorText),
             ),
@@ -401,7 +363,8 @@ class _AddToStorePill extends StatelessWidget {
     final CupidColorTokens colors = context.cupidColors;
     final CupidTypographyTokens type = context.cupidType;
     final CupidPlatformTokens platform = context.cupidPlatform;
-    final String label = starterText(context, 'Thêm vào kho', 'Add to store');
+    final String label =
+        starterText(context, 'Thêm vào Muốn làm', 'Add to Muốn làm');
 
     return Semantics(
       button: true,
@@ -417,9 +380,23 @@ class _AddToStorePill extends StatelessWidget {
             color: colors.colorAccentPink,
             borderRadius: BorderRadius.circular(platform.radiusButton),
           ),
-          child: Text(
-            label,
-            style: type.caption.copyWith(color: colors.colorOnAccent),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              CupidIcon(
+                CupidIcons.add,
+                variant: CupidIconVariant.line,
+                size: CupidSpacing.md,
+                color: colors.colorOnAccent,
+              ),
+              const SizedBox(width: CupidSpacing.xs),
+              Flexible(
+                child: Text(
+                  label,
+                  style: type.caption.copyWith(color: colors.colorOnAccent),
+                ),
+              ),
+            ],
           ),
         ),
       ),

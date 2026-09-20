@@ -490,3 +490,112 @@ story này thay đổi; không đụng PNG visual-fidelity của story khác.
 **P5 COMPLETE.** No blocker. Không đổi `pubspec.yaml`, không thêm phụ thuộc,
 không đổi schema Drift, không thêm khoá ARB, không đổi `RenderedStarter` hay
 `StarterSelector`.
+
+## P6 — Nhãn, affordance và ngày inline (ruling 2026-09-20 mục 3, 4, 5, 6b), 2026-09-20
+
+Worktree: `story-REQ-016_solo_stage1_relationship_assistant-STORY-005_conversation_starters`.
+BaseHead: `ae908e93b87e399f0e9da55deb45bc791dd16c39`.
+
+### Lệnh đã chạy
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `flutter test test/features/conversation_starters/event_date_label_test.dart` | `+5: All tests passed!` |
+| `flutter test test/features/conversation_starters/conversation_starters_screen_test.dart -r github` | `29 tests passed, 1 skipped` (skip = test chụp ảnh, tắt khi không có `CAPTURE_VISUALS`) |
+| `flutter test test/features/conversation_starters/conversation_starters_screen_test.dart --dart-define=CAPTURE_VISUALS=true -r github` | `30 tests passed` — ảnh đã ghi |
+| `flutter test <5 file còn lại của thư mục> test/design_system -r github` | xanh, trừ đúng 3 đỏ baseline mô tả dưới |
+| `flutter analyze lib test` | 265 issues: **0 error**, 35 warning, 230 info — trùng khít baseline ghi ở P5; **0 chẩn đoán ở cả 7 file đã chạm** |
+
+Exit code của `flutter analyze` là 1 theo đúng baseline nhánh (info/warning có sẵn);
+gate của phase là zero **error** và không warning mới ở file đã chạm — cả hai đạt.
+
+### Ba test đỏ vẫn là baseline của nhánh, không do P6
+
+Y hệt danh sách P5 đã lập: `starter_content_gate_test.dart` (2 case, dòng 471 và
+498) và `calendar_event_service_test.dart` (1 case, dòng 390) so khớp danh sách
+thành viên enum và thiếu `assertive_claim` (`InvariantRule`),
+`missing_question_ending` (`StarterGateRule`), `compatibility_lookup`
+(`ActivityCardOrigin`). `git diff --name-only ae908e93` của P6 trả đúng 5 file
+sửa + 2 file mới, **không** file nào trong đó, và cũng không file nào trong đồ
+thị import của hai test đỏ. Sửa chúng thuộc lane sở hữu enum.
+
+### Bảng nhãn cũ → nhãn mới (4 chuỗi của ruling)
+
+| Mục ruling | Nhãn cũ | Nhãn mới |
+| --- | --- | --- |
+| 3 | text button `Xem câu khác` (chữ, trên thân màn) | nút đặc `Chép để nhắn` + nút tròn icon `refresh` (nhãn `Xem câu khác` chuyển vào `Semantics`) |
+| 4 | *(không có)* | `Câu này nhắn liền, không cần lưu. Quay lại là có câu khác.` |
+| 5 | tiêu đề `Sự kiện có lịch` | `CÓ LỊCH SẴN · RỦ ĐI ĐƯỢC` |
+| 5 | pill `Thêm vào kho của tôi` | `Thêm vào Muốn làm` |
+| 6b | badge `dd/mm` riêng (`starter_event_date_<id>`) | ngày gộp vào dòng tên: `<tên> — thứ Bảy 16/08` |
+
+Mục 6b dùng dạng **tuyệt đối** (`thứ Bảy 16/08`), không phải dạng tương đối
+(`thứ Bảy này`): `eventDateLabel` là hàm thuần của chuỗi `YYYY-MM-DD` mà gói
+ship, không đọc đồng hồ, nên nhãn không thể lệch khỏi ngày thẻ đang mang.
+
+### Codepoint của `CupidIcons.refresh` và nguồn tra
+
+`0xe5d5`. Tra bằng `fontTools` `getBestCmap()` chạy thẳng trên font đang bundle
+`mobile/assets/fonts/MaterialSymbolsRounded-Variable.ttf` — không lấy từ trí nhớ
+(tiền lệ D-20/R8-F-2). Cmap xác nhận đây là codepoint đơn, không alias;
+`autorenew`/`0xe028`, `sync`/`0xe627`, `cached`/`0xe86a`, `restart_alt`/`0xf053`
+là glyph khác, đã ghi trong doc comment của token để không ai thay bừa.
+
+### Bao phủ acceptance criteria của phase
+
+| Tiêu chí §4 | Cách phủ |
+| --- | --- |
+| hero có đúng một nút đặc + một nút tròn, hết text button | `thẻ hero có nút đặc "Chép để nhắn" kèm icon copy`, `nút tròn refresh thay text button "Xem câu khác"` (`find.text('Xem câu khác')` findsNothing) |
+| nút đặc ghi clipboard, toast, không tạo thẻ | `copy một câu (AC-2, AC-3)` chạy lại xanh trên affordance mới |
+| bấm nút tròn quá số mục vẫn ra câu, không bao giờ tắt | `bấm nhiều lần hơn số câu vẫn luôn ra câu, nút không bao giờ tắt (N = 2)` — đọc `InkWell.onTap` của `starter_next_round` |
+| `Semantics` nhãn `Xem câu khác`, vùng chạm ≥44pt | cùng test; khẳng định `properties.button == true`, `properties.label` và kích thước ≥ `kStarterCopyTapTarget` |
+| dòng trấn an dưới hàng CTA | `dòng trấn an nằm dưới hàng CTA của thẻ hero` — so `getBottomLeft` của CTA với `getTopLeft` của dòng |
+| nhãn khối sự kiện + pill mới, hành vi không đổi | `khối sự kiện đọc nhãn mới, nhãn cũ biến mất`; `"Thêm vào Muốn làm" tạo thẻ conversationStarter rồi bỏ dòng đi`; `"Bỏ qua" ...` |
+| hết badge riêng, ngày nằm trong dòng tên | `ngày nằm trong dòng tên, không còn badge riêng (ruling 6b)` — `starter_event_date_<id>` findsNothing |
+| ngày khớp `VisibleCalendarEvent.date` | `ngày hiển thị khớp VisibleCalendarEvent.date` — `endsWith(eventDateLabel('2026-10-20'))` |
+| `refresh` render glyph thật, không tofu | mục "Kiểm tra thị giác" dưới |
+| không khoá ARB mới, không chuỗi nội dung vào Dart, không gọi mạng | mọi nhãn đi qua `starterText(context, vi, en)`; `app_vi.arb` không đổi; test cổng nội dung và test "không lời gọi mạng" chạy lại xanh |
+
+Unit `eventDateLabel` phủ bảy thứ trong tuần (2026-08-17 … 2026-08-23), số 0 dẫn
+đầu (`2026-01-05` → `thứ Hai 05/01`), năm nhuận/cuối năm, tính thuần, và từ chối
+chuỗi không phải `YYYY-MM-DD` (`throwsFormatException`).
+
+Hai neo key được **giữ nguyên** để regression P4/P5 không mất điểm bám:
+`starter_line_copy_<id>` chuyển sang nút đặc của hero, `starter_next_round`
+chuyển sang nút tròn. Nút tròn dựng bằng `InkWell` chứ không `IconButton`, nên
+khẳng định sẵn có `expect(find.byType(IconButton), findsNothing)` vẫn đúng.
+Bộ lọc quét chuỗi cấm dạng `x/N` đổi từ "trừ các key badge ngày" sang "trừ các
+key `starter_event_name_`", vì ngày inline giờ nằm trong chính dòng tên.
+
+### Kiểm tra thị giác
+
+Đã chụp lại `visual-fidelity/implemented-6-moi-chuyen-a-a-material.png` và **mở
+ra nhìn bằng mắt**. Glyph `refresh` mới thêm rasterise đúng thành vòng tròn có
+mũi tên trong đĩa viền `colorLine` — **không ô tofu**, đây là rủi ro lớn nhất của
+phase và đã loại trừ bằng mắt chứ không bằng một lần chạy xanh. Nút đặc
+`Chép để nhắn` là dải gradient hồng-tím full-width kèm icon copy, đĩa refresh nằm
+sát phải cùng hàng, dòng trấn an muted nằm ngay dưới — khớp canvas
+`design-reference-6-moi-chuyen-a-a-ios.png`. Dấu tiếng Việt đủ ở `Mồi chuyện`,
+`CÂU HÔM NAY`, `Chép để nhắn`, `Câu này nhắn liền, không cần lưu. Quay lại là có
+câu khác.`, `CÙNG CHỦ ĐỀ`.
+
+Giới hạn đã biết của ảnh này: trong khung reference `415x900`, ô hỏi sổ tay
+(`ContextAskCard`) chiếm nửa dưới màn và đẩy khối sự kiện xuống dưới fold, nên
+mục 5 và 6b **không đối chiếu được bằng mắt** trong ảnh — canvas vẽ khối sự kiện
+ngay dưới hai câu phụ vì canvas không vẽ ô hỏi. Đây là chênh lệch bố cục có sẵn
+từ trước P6 (giống như canvas có tab bar mà màn chưa có), không do phase này gây
+ra; P6 cố ý **không** đụng vào điều kiện hiện của ô hỏi vì nó nằm ngoài ruling và
+ngoài Write Scope. Bằng chứng mục 5/6b vì vậy đến từ bốn test widget liệt kê ở
+bảng trên. Đã thử nạp thêm entry `NotebookKind.event` vào fixture chụp để ô hỏi
+rút lui — không có tác dụng — và đã hoàn tác để fixture chụp không lệch khỏi
+bản gốc.
+
+`git status` sau khi chụp: 5 file mã/test sửa + 2 file mới + đúng một PNG của
+story này; không đụng PNG visual-fidelity của story khác.
+
+### Result
+
+**P6 DONE.** No blocker. Không đổi `pubspec.yaml`, không thêm phụ thuộc, không
+đổi schema Drift, không thêm khoá ARB, không đổi `RenderedStarter`,
+`StarterSelector` hay `VisibleCalendarEvent`. Không đụng
+`phase-P7-event-reason-field.md`.

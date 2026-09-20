@@ -65,11 +65,20 @@ class StarterLine extends StatelessWidget {
   }
 }
 
-/// The one copy control a starter gets, wherever it is drawn.
+/// Writes [starter] to the clipboard, then fires [onCopied].
 ///
-/// Shared by [StarterLine] and the hero card so both write the same clipboard
-/// payload and keep the same `starter_line_copy_<id>` key — the hero's raised
-/// card changes the starter's visual rank, not what copying it does (AC-2).
+/// The one copy behaviour on this screen, shared by the secondary lines' icon
+/// control and the hero card's solid CTA: both write the same payload, create
+/// no card and keep no list (AC-2/AC-3). Only the affordance differs.
+Future<void> copyStarter(RenderedStarter starter, VoidCallback onCopied) async {
+  await Clipboard.setData(ClipboardData(text: starter.text));
+  onCopied();
+}
+
+/// The copy control a secondary starter line gets.
+///
+/// Keeps the `starter_line_copy_<id>` key the hero's CTA also carries, so a
+/// caller asking for "the copy control of this starter" finds one either way.
 class StarterCopyButton extends StatelessWidget {
   const StarterCopyButton({
     super.key,
@@ -88,10 +97,7 @@ class StarterCopyButton extends StatelessWidget {
       label: starterText(context, 'Sao chép', 'Copy'),
       child: InkWell(
         key: Key('starter_line_copy_${starter.id}'),
-        onTap: () async {
-          await Clipboard.setData(ClipboardData(text: starter.text));
-          onCopied();
-        },
+        onTap: () => copyStarter(starter, onCopied),
         customBorder: const CircleBorder(),
         child: const SizedBox(
           width: kStarterCopyTapTarget,

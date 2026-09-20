@@ -238,5 +238,5 @@ Ba mục còn lại (3, 4, 5) không phụ thuộc bản vá này.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-20
