@@ -144,5 +144,18 @@ tạo thẻ đã có**, kèm snackbar hoàn tác 5 giây. Bỏ qua phải không
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-20
+- Status: DONE
+- Last updated: 2026-09-23
+- Evidence: `coding-plan/test-results.md` mục `## P5`,
+  `visual-fidelity/visual-fidelity-report.md`
+- Nguồn gợi ý đã chọn: gói dịp `calendar_events.v1.json` (không phải kho câu
+  mồi) — lý do ghi ở `## P5` của test-results.
+- Cần Scrum Master ghi nhận: P5 thêm một dòng vào
+  `mobile/lib/features/activity_cards/domain/activity_card.dart`
+  (`nextPlanAfterDate('next_plan_after_date')`), ngoài WriteScope đã khai báo.
+- `BLOCKER: PREEXISTING_TEST_FAILURE` — `flutter test
+  test/features/conversation_starters` thoát 1 với 3 test đỏ
+  (`calendar_event_service_test.dart:390`,
+  `starter_content_gate_test.dart:471` và `:498`). Cả ba đã đỏ tại BaseHead
+  `d684c7e5` và nằm ngoài WriteScope của P5; chi tiết ở `## P5` của
+  `test-results.md`. Phase chờ Scrum Master mở bug rồi re-dispatch.

@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:cupid_mobile/core/content/content_package.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
@@ -12,6 +14,7 @@ import 'package:cupid_mobile/features/activity_cards/thank_you/domain/thank_you_
 import 'package:cupid_mobile/features/activity_cards/thank_you/domain/thank_you_activation_service.dart';
 import 'package:cupid_mobile/features/activity_cards/thank_you/presentation/thank_you_block_cubit.dart';
 import 'package:cupid_mobile/features/activity_cards/thank_you/presentation/widgets/thank_you_block.dart';
+import 'package:cupid_mobile/features/conversation_starters/domain/starter_content.dart';
 import 'package:cupid_mobile/core/database/cupid_database.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:drift/drift.dart' hide isNull;
@@ -106,6 +109,41 @@ ActivityCard _card({
     updatedAt: now,
   );
 }
+
+ContentPackage<CalendarEvent> _occasions(List<Map<String, Object?>> items) =>
+    ContentPackage.parse<CalendarEvent>(
+      jsonEncode(<String, Object?>{
+        'id': 'calendar_events',
+        'version': '1.0.0',
+        'schema_id': calendarEventsSchemaId,
+        'items': items,
+      }),
+      expectedSchemaId: calendarEventsSchemaId,
+      itemParser: calendarEventFromJson,
+    );
+
+/// Phần 3 resolved against a pack with nothing upcoming, which is what keeps
+/// these P2 frame assertions about the frame: the slot stays empty unless a
+/// test asks for occasions. Behaviour of the section itself lives in
+/// `next_plan_test.dart`.
+NextPlanOptions _emptyNextPlan() => NextPlanOptions(
+      today: _nextDay,
+      package: _occasions(const <Map<String, Object?>>[]),
+      repository: _StubRepository(),
+    );
+
+/// The shipped pack read off disk rather than through `rootBundle`, so the
+/// capture shows the wording and the dates the app actually ships, pinned to
+/// [_nextDay] so the same three chips render on any run day.
+NextPlanOptions _shippedNextPlan() => NextPlanOptions(
+      today: _nextDay,
+      package: ContentPackage.parse<CalendarEvent>(
+        File('assets/data/req016/calendar_events.v1.json').readAsStringSync(),
+        expectedSchemaId: calendarEventsSchemaId,
+        itemParser: calendarEventFromJson,
+      ),
+      repository: _StubRepository(),
+    );
 
 Widget _host(
   Widget child, {
@@ -204,6 +242,7 @@ void main() {
     WidgetTester tester, {
     ActivityCard? card,
     ThankYouSlots slots = const ThankYouSlots(),
+    NextPlanOptions? nextPlan,
   }) async {
     await tester.pumpWidget(
       _host(
@@ -211,7 +250,11 @@ void main() {
           key: UniqueKey(),
           card: card ?? _card(),
           repository: _StubRepository(),
-          thankYou: ThankYouOptions(service: service, slots: slots),
+          thankYou: ThankYouOptions(
+            service: service,
+            slots: slots,
+            nextPlan: nextPlan ?? _emptyNextPlan(),
+          ),
         ),
       ),
     );
@@ -506,7 +549,10 @@ void main() {
                 key: UniqueKey(),
                 card: _card(),
                 repository: _StubRepository(),
-                thankYou: ThankYouOptions(service: service),
+                thankYou: ThankYouOptions(
+                  service: service,
+                  nextPlan: _shippedNextPlan(),
+                ),
               ),
             ),
           ),

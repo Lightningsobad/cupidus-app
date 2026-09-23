@@ -331,3 +331,156 @@ vốn khác 0 nên gate là "không thêm error mới".
 
 `git status --porcelain` trong worktree: đúng 3 file (service_locator sửa, lớp
 bọc mới, test mới) — không PNG visual-fidelity của story khác bị ghi đè.
+
+## P5 — Phần 3 "chốt việc kế tiếp" (2026-09-23)
+
+### Nguồn gợi ý đã chọn, và vì sao
+
+AC-19 cho hai nguồn: "kho mồi của STORY-005 **hoặc** dịp lịch âm gần nhất".
+P5 lấy **gói dịp** (`assets/data/req016/calendar_events.v1.json`), không lấy
+kho câu mồi, vì `conversation_starters_entry_point.dart` ghi rõ một ranh giới
+đã chốt: không có API headless nào cho phép đọc một câu mồi ngoài màn (6).
+Một câu mồi cũng là câu để nhắn, không phải một kế hoạch có ngày — mà ngày là
+thứ AC-21 bắt thẻ phải mang sẵn.
+
+Ngày của dịp lấy từ chính hàm trên thiết bị của STORY-005
+(`nearestUpcomingDate` trong `calendar_event_service.dart`), không tính lại
+lịch âm ở đây (AC-21, STORY-005 AC-18).
+
+### Ràng buộc module
+
+- `NextPlanSuggestionService.suggest` là `static` và **đồng bộ**, thuần theo
+  (gói, today, slots). Đó là bằng chứng cấu trúc cho AC-35: không có bước
+  `await` nào để treo spinner vào khi gói lớn.
+- Ghi thẻ đi qua đúng một cửa: `ActivityCardRepository.createCard`. Không có
+  lời gọi DAO/bảng nào trong `thank_you/`.
+- Hoàn tác đi ngược qua `deleteCard` của cùng hợp đồng, nên cascade của thẻ
+  ra theo, không để lại hàng mồ côi.
+- `NextPlanState` cố tình không có cờ `loading` và không có cờ "gói rỗng":
+  danh sách rỗng vẽ ra đúng con số không, nên không nơi nào cắm được skeleton.
+
+### Lệnh đã chạy và kết quả thật
+
+`flutter test test/features/activity_cards/thank_you/next_plan_test.dart`
+
+```
+00:00 +12: phần 3 trong khối — tạo thẻ qua đúng một cửa (AC-20, AC-21) nhiều dịp thì các chip cùng cỡ, không chip nào được nhấn mạnh
+00:00 +13: All tests passed!
+```
+
+Cả thư mục sub-feature —
+`flutter test test/features/activity_cards/thank_you`
+
+```
+00:01 +54 ~1: All tests passed!
+```
+
+Hồi quy — `flutter test test/features/activity_cards --reporter failures-only`
+
+```
++290 ~4: 4 skipped tests.
++290 ~4: All other tests passed!
+```
+
+`flutter analyze lib test`
+
+```
+268 issues found. (ran in 1.7s)
+```
+
+Phân rã: **0 error**, 35 warning, 233 info — không có dòng nào thuộc file P5
+trừ đúng một `info • prefer_initializing_formals` trên
+`next_plan_suggestion_service.dart:56`, cùng loại info mà lớp bọc của P1 và
+`ActivityCardRepositoryImpl` đang mang (Dart không cho `required this._x`).
+Baseline repo vốn khác 0, nên gate là "không thêm error mới" — và 0 error.
+
+### Assertion theo yêu cầu của `## 6. Test Scope`
+
+| Yêu cầu | Test |
+| --- | --- |
+| Tất định: hai lần gọi cùng đầu vào → cùng tập, cùng thứ tự | `cùng gói và cùng ngày thì trả về đúng một tập, đúng một thứ tự` + `hai dịp trùng ngày vẫn có thứ tự cố định` |
+| N = 1 → 1 chip, không ô giữ chỗ, không lỗi (AC-35) | `gói chỉ còn một dịp thì trả về đúng một` + `gói không còn dịp nào thì khe phần 3 vắng hẳn khỏi cây widget` |
+| N rất lớn → không thêm bước tải, chọn không đổi (AC-35) | `gói rất lớn không đổi kết quả và không thêm bước chờ nào` (500 dịp) |
+| Bấm chip → thẻ ở *Mới nghĩ ra*, nguồn sinh đúng, có sẵn ngày | `chạm một chip tạo ngay thẻ *Mới nghĩ ra* trong kho chung` |
+| Ngày điền sẵn sửa được | `ngày điền sẵn của thẻ vẫn sửa được như mọi thẻ khác (AC-21)` |
+| Hoàn tác trong 5 giây → thẻ biến mất, không hàng mồ côi | `chạm chip xong có snackbar hoàn tác, và hoàn tác xoá sạch thẻ` |
+| Đóng khối không chọn gì → số thẻ không đổi | `đóng khối mà không chọn chip nào thì không tạo gì (AC-22)` |
+| Thẻ mới tìm thấy ở **kho chung của màn (1)** | Mọi assertion trên đọc qua `repository.cardsByStatus(status: idea)` — kho chung, không phải danh sách riêng của khối |
+
+### Sai lệch so với handoff, cần Scrum Master ghi nhận
+
+1. **Sửa một file ngoài WriteScope:**
+   `mobile/lib/features/activity_cards/domain/activity_card.dart`, đúng một
+   dòng thêm vào cuối enum:
+   `nextPlanAfterDate('next_plan_after_date')`.
+   Bắt buộc, không có đường vòng: `architecture/contract-summary.md` mục 2 ghim
+   đúng chuỗi này làm nguồn sinh của thẻ tạo từ phần 3, `NewActivityCard.origin`
+   có kiểu `ActivityCardOrigin` nên không có lối thoát bằng chuỗi, và enum tự
+   ghi là append-only ("later stories add new values here").
+   Không cần nâng `schemaVersion`: cột `origin` là `text()` thuần, không có
+   CHECK constraint, nên không có migration nào đi kèm.
+2. **Sửa `thank_you_block_test.dart` (P2, trong WriteScope):** `pumpDetail`
+   giờ truyền `NextPlanOptions` với gói rỗng, vì phần 3 đã được cắm thật nên
+   mặc định cũ sẽ đi tìm `getIt<ActivityCardRepository>()`. Test khung P2 giữ
+   nguyên ý nghĩa: gói rỗng ⇒ cả ba khe vẫn rỗng.
+
+### Đỏ có sẵn ngoài phạm vi — không do P5 gây ra
+
+`flutter test test/features/conversation_starters --reporter failures-only` đỏ
+3 test, cả 3 đều là kiểu "khoá cứng danh sách enum" đã lỗi thời trên nhánh
+tích hợp:
+
+- `calendar_event_service_test.dart:390` `giá trị mới nằm cuối, không chen vào
+  giữa` — khoá `ActivityCardOrigin.values` đúng 5 phần tử. Tại `BaseHead`
+  (`d684c7e5`) enum **đã có 6** (`compatibility_lookup` từ story khác), nên
+  test này đã đỏ trước P5; P5 làm danh sách dài thành 7. Giá trị mới nằm đúng
+  cuối, tức là bất biến mà test định bảo vệ vẫn giữ — chỉ con số ghim là cũ.
+- `starter_content_gate_test.dart:471` và `:498` — khoá `InvariantRule` ở 6 quy
+  tắc trong khi nhánh đã có `assertive_claim`. Không dính gì tới P5.
+
+Cả ba file đều ngoài WriteScope của phase này nên P5 không sửa. Đề nghị Scrum
+Master xếp chúng vào một việc dọn hợp đồng enum riêng.
+
+Kết quả thật của lệnh, chạy lại nguyên văn để làm bằng chứng cho cổng build:
+
+```
+PATH="$HOME/flutter/bin:$PATH" FLUTTER_ROOT="$HOME/flutter" \
+  flutter test test/features/conversation_starters --reporter failures-only
++100 ~1 -3: Some tests failed.
+EXIT=1
+```
+
+Bằng chứng BaseHead cho lỗi (1):
+
+```
+git show d684c7e5:mobile/lib/features/activity_cards/domain/activity_card.dart
+  manual('manual'), pastedLink('pasted_link'), occasionSuggestion('occasion_suggestion'),
+  giftSuggestion('gift_suggestion'), conversationStarter('conversation_starter'),
+  compatibilityLookup('compatibility_lookup');
+```
+
+6 phần tử tại BaseHead so với 5 phần tử test ghim ⇒ đã đỏ trước P5.
+`git status --porcelain -- mobile/test/features/conversation_starters
+mobile/lib/features/conversation_starters` rỗng ⇒ P5 không chạm file nào ở đó.
+
+`BLOCKER: PREEXISTING_TEST_FAILURE` — phase dừng ở đây theo cổng build
+evidence; cần Scrum Master mở bug rồi re-dispatch.
+
+### Visual fidelity
+
+`flutter test test/features/activity_cards/thank_you/thank_you_block_test.dart
+--dart-define=CAPTURE_VISUALS=true --plain-name="visual fidelity capture"` →
+`00:00 +1: All tests passed!`
+
+Ảnh chụp được pin vào 2026-09-21 và đọc **gói dịp thật đang ship**, nên ba chip
+trong ảnh đúng là chữ và ngày app sẽ hiện: `Tết Trung Thu · còn 4 ngày`,
+`Halloween · còn 40 ngày`, `Ngày Nhà giáo Việt Nam · còn 60 ngày`. Đã soi ảnh
+bằng mắt: đủ dấu tiếng Việt, không ô tofu, ba icon dẫn đầu là
+`walk`/`handmade`/`visit` thật chứ không phải ô vuông thay thế.
+`visual-fidelity-report.md` đã cập nhật: VISUAL_FIDELITY vẫn `PASS`, thêm mục
+so khớp phần 3 và ba delta đã chấp nhận (ba hàng thay vì hai theo AC-35; dấu
+`+` đặc thay vì `⊕` viền; mọi hàng đều có dòng ngày).
+
+`git status --porcelain` trong worktree sau khi chạy: 5 file sửa + 4 file mới,
+tất cả thuộc phase này — **không** PNG visual-fidelity của story khác bị ghi
+đè.

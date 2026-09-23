@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/content/content_package.dart';
 import '../../../../../core/database/cupid_database.dart';
 import '../../../../../core/di/service_locator.dart';
 import '../../../../../design_system/icons/cupid_icons.dart';
@@ -11,11 +12,17 @@ import '../../../../../design_system/tokens/cupid_color_tokens.dart';
 import '../../../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../../../design_system/tokens/cupid_spacing.dart';
 import '../../../../../design_system/tokens/cupid_typography_tokens.dart';
+import '../../../../conversation_starters/domain/starter_content.dart';
 import '../../../domain/activity_card.dart';
+import '../../../domain/activity_card_repository.dart';
+import '../../../domain/occasion_suggestion_service.dart' show civilDate;
 import '../../data/thank_you_activation_dao.dart';
 import '../../data/thank_you_activation_repository_impl.dart';
+import '../../domain/next_plan_suggestion_service.dart';
 import '../../domain/thank_you_activation_service.dart';
+import '../next_plan_cubit.dart';
 import '../thank_you_block_cubit.dart';
+import 'next_plan_section.dart';
 
 /// `mobile/lib/l10n/` is outside this story's write scope, so the block follows
 /// the same file-local bilingual helper the other activity-card surfaces use
@@ -49,10 +56,38 @@ class ThankYouSlots {
 /// section resolves the registered database.
 @immutable
 class ThankYouOptions {
-  const ThankYouOptions({this.service, this.slots = const ThankYouSlots()});
+  const ThankYouOptions({
+    this.service,
+    this.nextPlan,
+    this.slots = const ThankYouSlots(),
+  });
 
   final ThankYouActivationService? service;
+
+  /// Seams for phần 3. Null in production, so the section reads the device
+  /// clock, the shipped occasion pack and the registered card store.
+  final NextPlanOptions? nextPlan;
+
   final ThankYouSlots slots;
+}
+
+/// Test/preview seams for phần 3 (`ux/uiux-spec.md` mục 3).
+@immutable
+class NextPlanOptions {
+  const NextPlanOptions({
+    this.today,
+    this.package,
+    this.loader,
+    this.repository,
+  });
+
+  /// Pins the civil day the occasions are resolved against, so a test renders
+  /// the same chips on any run day (AC-19).
+  final DateTime? today;
+
+  final ContentPackage<CalendarEvent>? package;
+  final ContentPackageLoader? loader;
+  final ActivityCardRepository? repository;
 }
 
 /// The mount point the card-detail screen keeps at the foot of its
@@ -74,6 +109,10 @@ class ThankYouSection extends StatefulWidget {
 class _ThankYouSectionState extends State<ThankYouSection> {
   late final ThankYouBlockCubit _cubit;
 
+  /// Built here but loaded only once the block is actually visible, so opening
+  /// any other card never reaches the occasion pack at all.
+  NextPlanCubit? _nextPlan;
+
   @override
   void initState() {
     super.initState();
@@ -82,7 +121,31 @@ class _ThankYouSectionState extends State<ThankYouSection> {
       isRecording: widget.card.status == ActivityCardStatus.done,
       service: () => widget.options?.service ?? _registeredService(),
     );
-    unawaited(_cubit.resolve());
+    unawaited(_resolve());
+  }
+
+  Future<void> _resolve() async {
+    await _cubit.resolve();
+    if (!mounted || !_cubit.state.isVisible) {
+      return;
+    }
+    if (widget.options?.slots.nextPlan != null) {
+      // A caller that already put its own widget in the slot gets exactly
+      // that; phần 3 does not resolve a pack behind it.
+      return;
+    }
+    final NextPlanOptions options =
+        widget.options?.nextPlan ?? const NextPlanOptions();
+    final NextPlanCubit next = NextPlanCubit(
+      today: civilDate(options.today ?? DateTime.now()),
+      service: NextPlanSuggestionService(
+        repository: options.repository ?? getIt<ActivityCardRepository>(),
+      ),
+      package: options.package,
+      loader: options.loader ?? const ContentPackageLoader(),
+    );
+    setState(() => _nextPlan = next);
+    await next.load();
   }
 
   /// The ledger has no composition-root registration of its own: it is one
@@ -96,6 +159,7 @@ class _ThankYouSectionState extends State<ThankYouSection> {
 
   @override
   void dispose() {
+    _nextPlan?.close();
     _cubit.close();
     super.dispose();
   }
@@ -106,12 +170,35 @@ class _ThankYouSectionState extends State<ThankYouSection> {
       value: _cubit,
       child: BlocBuilder<ThankYouBlockCubit, ThankYouBlockState>(
         builder: (BuildContext context, ThankYouBlockState state) =>
-            state.isVisible
-                ? ThankYouBlock(
-                    cubit: _cubit,
-                    slots: widget.options?.slots ?? const ThankYouSlots(),
-                  )
-                : const SizedBox.shrink(),
+            state.isVisible ? _block() : const SizedBox.shrink(),
+      ),
+    );
+  }
+
+  Widget _block() {
+    final ThankYouSlots declared =
+        widget.options?.slots ?? const ThankYouSlots();
+    final NextPlanCubit? next = _nextPlan;
+    if (next == null || declared.nextPlan != null) {
+      return ThankYouBlock(cubit: _cubit, slots: declared);
+    }
+
+    return BlocProvider<NextPlanCubit>.value(
+      value: next,
+      child: BlocBuilder<NextPlanCubit, NextPlanState>(
+        // An occasion pack with nothing upcoming leaves `nextPlan` null, which
+        // keeps the slot itself out of the tree: no header over an empty row,
+        // no placeholder chip (AC-35).
+        builder: (BuildContext context, NextPlanState state) => ThankYouBlock(
+          cubit: _cubit,
+          slots: ThankYouSlots(
+            thanks: declared.thanks,
+            photo: declared.photo,
+            nextPlan: state.suggestions.isEmpty
+                ? null
+                : NextPlanSection(suggestions: state.suggestions),
+          ),
+        ),
       ),
     );
   }

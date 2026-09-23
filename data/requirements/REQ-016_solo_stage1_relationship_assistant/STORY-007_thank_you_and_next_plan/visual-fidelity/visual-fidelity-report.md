@@ -1,10 +1,11 @@
 VISUAL_FIDELITY: PASS
 Design-Screen: sb-212-cam-on-chot-viec-ke-tiep
 
-# STORY-007 — "Cảm ơn + chốt việc kế tiếp", visual fidelity (P2 khung khối + điểm gắn)
+# STORY-007 — "Cảm ơn + chốt việc kế tiếp", visual fidelity (P2 khung khối + P5 phần 3)
 
-- Story: REQ-016 / STORY-007, phase P2
-  (`coding-plan/phase-P2-block-shell-and-entry-point.md` §6)
+- Story: REQ-016 / STORY-007, phases P2 and P5
+  (`coding-plan/phase-P2-block-shell-and-entry-point.md` §6,
+  `coding-plan/phase-P5-next-plan-suggestions.md` §6)
 - Requirement: REQ-016_solo_stage1_relationship_assistant
 - Lane: Mobile
 - Date: 2026-09-23
@@ -84,12 +85,49 @@ it are all correct.
   (`Ghi lại buổi đó đi`, gradient pill) sits above the block and the block adds
   no card-level CTA of its own — AC-6 and AC-7, visible directly in the capture.
 
-## P2 scope note — the three slots are empty on purpose
+## Phần 3 (P5) — matches the design
 
-P2 ships the frame and its slot contract only. The canvas draws the block with
-its sections filled; those sections are P3 (`soạn lời cảm ơn`), P4 (`đính ảnh`)
-and P5 (`chốt việc kế tiếp`), each explicitly out of this phase's write scope.
-An unfilled slot renders nothing at all — no placeholder row — which is also the
+The capture is pinned to 2026-09-21 and resolves the shipped occasion pack
+(`assets/data/req016/calendar_events.v1.json`), so the three chips it shows are
+the wording and the dates the app actually ships.
+
+- Section header `HẸN NHAU LẦN TỚI · KHÔNG BẮT BUỘC` in muted caption caps with
+  the canvas's letter-spacing, sitting below the block title with no divider.
+- Each suggestion is one full-width row of identical height and identical
+  decoration: leading activity icon, title at `body` semibold, a date readout
+  beneath it, and a `+` affordance at the trailing edge in `colorAccentPink`.
+  No row is emphasised over its peers (`ux/uiux-spec.md` mục 3).
+- The rows stay at the secondary-action tier: `Ghi lại buổi đó đi` above the
+  block keeps the only gradient fill on the screen (AC-6, BR-1).
+- Vietnamese diacritics render fully across all three titles and the countdown
+  line (`Tết Trung Thu`, `Ngày Nhà giáo Việt Nam`, `còn 60 ngày`) — checked
+  glyph by glyph against the capture, no tofu boxes, and the three leading
+  glyphs are the real `walk`/`handmade`/`visit` icons rather than fallback
+  squares.
+
+### Deltas inside phần 3 — accepted, with the binding source
+
+- **Three rows vs the canvas's two.** AC-35 fixes "2-3" as a layout parameter,
+  not a content claim: the section renders what the pack has, capped at
+  `maxNextPlanSuggestions`. On the captured day the pack has three upcoming
+  occasions, so three render. A pack with one renders one, with no placeholder
+  filling the third slot, and an empty pack leaves the whole section out of the
+  tree (`next_plan_test.dart`).
+- **Plain `+` glyph vs the canvas's ringed `⊕`.** `CupidIcons.add` is the
+  design system's own token for this affordance and is what every other
+  "thêm vào kho" surface in the app already draws; a second, ringed variant
+  would be a new icon rather than a reused one.
+- **Every row carries a date line.** The canvas leaves its second row without
+  one. Every suggestion here is an occasion, and AC-21 requires the occasion's
+  date to travel with the card, so the date is never absent for a chip that
+  exists.
+
+## P2 scope note — the remaining two slots are empty on purpose
+
+P2 shipped the frame and its slot contract; P5 fills the third slot. The canvas
+draws the block with all its sections filled, and the two still unfilled are P3
+(`soạn lời cảm ơn`) and P4 (`đính ảnh`), both out of P5's write scope. An
+unfilled slot renders nothing at all — no placeholder row — which is also the
 shape AC-15/BR-9 need for "card with no photo". The canvas has no equivalent
 empty-frame state to compare against, so the following are recorded as
 **not-yet-built, not deltas**:
@@ -98,8 +136,6 @@ empty-frame state to compare against, so the following are recorded as
   the shuffle button (P3, blocked on `CONTENT_GATE_CATEGORY_COUPLING`).
 - Section 2: the `Kèm một ảnh tối qua` row with thumbnail, sub-caption and
   chevron (P4, blocked on `JOURNAL_SOURCE_CONTRACT_CLOSED`).
-- Section 3: the `HẸN NHAU LẦN TỚI · KHÔNG BẮT BUỘC` header and its two
-  suggestion rows with `+` affordances (P5).
 
 ## Authority note
 
@@ -144,4 +180,5 @@ gaps and must not be "fixed" toward the canvas without a user ruling.
 - The monospace receipt block inside section 1 is STORY-002's renderer output
   (AC-8); its framing is P3's call, not P2's.
 - The `+` affordances on the section-3 rows write activity cards through
-  STORY-001's creation path (AC-19..AC-24) and belong to P5.
+  STORY-001's creation path (AC-19..AC-24). Shipped by P5: the tap calls
+  `ActivityCardRepository.createCard` and nothing else writes a card.
