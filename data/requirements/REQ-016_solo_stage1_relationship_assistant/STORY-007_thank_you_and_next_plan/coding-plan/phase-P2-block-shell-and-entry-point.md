@@ -138,5 +138,5 @@ tự hiện đúng một lần. Đây là phase điểm-vào của story.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-20
+- Status: DONE
+- Last updated: 2026-09-23

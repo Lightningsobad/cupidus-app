@@ -165,3 +165,101 @@ phiên bản.
    dữ liệu của ba tính năng đó **sống sót** sau khi người dùng rời giai đoạn 1.
    Phase này không tự quyết định ngữ nghĩa xoá cho bảng của story khác, nên chỉ
    đăng ký bảng của mình và báo lại. Cần một quyết định PO / Tech Lead.
+
+## P2 — Khung khối + điểm gắn
+
+- Date: 2026-09-23
+- Worktree: `story-REQ-016_solo_stage1_relationship_assistant-STORY-007_thank_you_and_next_plan`
+- BaseHead: `4a241d2f0de7e6cbee251a8f17f3d1d6e7165a9f`
+- Result: **PASS**
+
+### Lệnh và kết quả
+
+```
+$ flutter test test/features/activity_cards test/features/before_you_go \
+    --reporter failures-only
++358 ~6: 6 skipped tests.
++358 ~6: All other tests passed!
+```
+
+```
+$ flutter test test/features/activity_cards/thank_you/thank_you_block_test.dart \
+    --dart-define=CAPTURE_VISUALS=true --reporter expanded
+00:01 +16: All tests passed!
+```
+
+```
+$ flutter analyze lib test
+265 issues found. (ran in 2.4s)      # exit 1
+$ grep -c "error •"  →  0
+```
+
+`flutter analyze` không bao giờ thoát 0 trong repo này: nền có hàng trăm
+`info`/`warning` có từ trước BaseHead. Cổng là **không có lỗi mới**, và kết quả
+là **0 `error`** trên toàn `lib` + `test`, **0 issue nào nằm trong file mà phase
+này chạm vào**. Lần chạy đầu có đúng một `prefer_initializing_formals` ở
+`thank_you_block_cubit.dart:34`; đã sửa bằng initializing formal, 266 → 265.
+
+### Phạm vi test mới
+
+`mobile/test/features/activity_cards/thank_you/thank_you_block_test.dart` —
+15 test + 1 test capture (skip trừ khi có dart-define), chạy trên
+`CupidDatabase` in-memory thật, không mock sổ lượt:
+
+- **cubit (AC-1, AC-3, AC-7)** — thẻ đủ điều kiện thì khối hiện và lượt bị tiêu
+  thụ ngay tại lần trình bày đầu; thẻ chưa đủ điều kiện thì lượt còn nguyên; thẻ
+  ngoài luồng "ghi lại" không chạm vào sổ lượt; `resolve` lần hai sau khi đóng
+  không gọi khối trở lại.
+- **màn chi tiết thẻ** — mở lần đầu sang ngày mới thì khối tự hiện, không cần
+  thao tác; mở hai lần liên tiếp thì lần sau không còn khối (AC-3); bấm close
+  rồi mở lại cũng không còn; thẻ vào *Đã đi rồi* **hôm nay** thì không có khối
+  (AC-2); thẻ chưa từng vào *Đã đi rồi* thì không có khối; khối không thêm hành
+  động chính cấp thẻ thứ hai (AC-6, BR-1).
+- **khung khối** — khe rỗng không để lại ô giữ chỗ nào trong cây widget
+  (AC-15/BR-9); ba khe đã cắm hiện đúng thứ tự P3 → P4 → P5; cắm một khe không
+  kéo theo hai khe kia.
+- **không phạt im lặng (AC-25, AC-28)** — sau khi đóng, sổ lượt còn đúng một
+  hàng `CONSUMED` và không gì khác; màn chi tiết không hiện dấu
+  chưa-hoàn-thành nào.
+
+### Hồi quy phải sửa — test cũ thiếu composition root
+
+Gắn khối vào `ActivityCardDetailScreen` làm 3 file test có sẵn đỏ với
+`Bad state: GetIt: Object/factory with type CupidDatabase is not registered`.
+Nguyên nhân: màn chi tiết giờ chạm tới sổ lượt qua composition root — đúng cách
+nó vẫn lấy `ActivityCardRepository` — nhưng các test đó chưa bao giờ chạy
+`configureDependencies()`.
+
+Sửa theo hai hướng, **không đổi bố cục sản phẩm**:
+
+1. Dependency thành lazy: `ThankYouBlockCubit` nhận
+   `ThankYouActivationService Function()` và chỉ gọi nó sau khi đã biết thẻ ở
+   *Đã đi rồi*. Thẻ ở mọi trạng thái khác không còn dựng service, nên phần lớn
+   test cũ hết đỏ mà không phải đụng vào.
+2. Ba file còn mount thẻ *Đã đi rồi* được thêm `setUp`/`tearDown` đăng ký một
+   `CupidDatabase(NativeDatabase.memory())` rỗng vào `getIt`. Sổ lượt rỗng ⇒
+   không thẻ nào `armed` ⇒ khối không vẽ ⇒ bố cục mà các test đó khẳng định giữ
+   nguyên: `test/features/activity_cards/activity_card_detail_screen_test.dart`,
+   `test/features/activity_cards/card_lifecycle_ui_test.dart`,
+   `test/features/before_you_go/before_you_go_block_test.dart`.
+
+Bẫy khung 800x600 mà phase §6 cảnh báo **không** xảy ra: khối không hiện trong
+các test đó, nên không `tap()` nào bị trượt. `git status` trong worktree sạch —
+không PNG visual-fidelity của story khác bị ghi đè.
+
+### Visual fidelity
+
+`VISUAL_FIDELITY: PASS`, `Design-Screen: sb-212-cam-on-chot-viec-ke-tiep`
+(surface `cupid-ch-ng-1`, ios, 415x900). Chi tiết, bốn mục
+`DESIGN_SPEC_CONFLICT` và danh sách phần chưa dựng vì thuộc P3/P4/P5 nằm trong
+`visual-fidelity/visual-fidelity-report.md`.
+
+### Việc P1 còn sót — báo lại, không sửa ở đây
+
+Không chỗ nào trong `mobile/lib` gọi
+`ThankYouActivationCardStatusListener.onCardStatusChanged`, và
+`mobile/lib/core/di/service_locator.dart` không đăng ký gì cho sổ lượt. Phase P1
+§3 liệt kê phần đấu nối đó là việc của P1, và P1 đang `DONE`. Hệ quả: trong bản
+build thật **không thẻ nào được `arm`**, nên khối không bao giờ nổi lên — các
+test ở trên chạy được là vì chúng tự `arm` qua service. Cả hai file đều ngoài
+write scope của P2.
