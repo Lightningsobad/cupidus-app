@@ -11,7 +11,7 @@ Ground truth = integration-worktree `story_master.md` copies +
 | STORY-002 | STORY-001 | DONE, merged |
 | STORY-003 | NONE | DONE, merged |
 | STORY-004 | STORY-001 | DONE, merged |
-| STORY-005 | STORY-001, STORY-004 | DONE, merged, but REWORK IN FLIGHT (Design Ruling Log 2026-09-20 "Neo thiết kế"). Phase breakdown P5/P6/P7 in `coding-plan/master-plan.md` §5/§7 (Tech Lead). P5 DONE, P6 DONE (master-plan.md §5 table confirms both rows DONE on re-read). **P7 (event reason field) DISPATCHED round 10** — fresh `Alex-Mobile-Dev` (prior P7 run was a 3-day-old stale/unstarted session per `ListAgents` + unchanged worktree HEAD; re-dispatched with `Session-Recovery: YES`, same RunId reused `...-STORY-005_conversation_starters-mobile-dev`), BaseHead `9ab00f48`. Scope: `phase-P7-event-reason-field.md` only — content-pack schema field, Drift/schemaVersion explicitly forbidden (§1C). On completion: 3-part verify, commit, refresh-base, then final canvas-diff visual-fidelity gate + full Reviewer story review (not Tier-0) before re-sealing STORY-005. |
+| STORY-005 | STORY-001, STORY-004 | DONE, merged, but REWORK IN FLIGHT (Design Ruling Log 2026-09-20 "Neo thiết kế"). P5 DONE, P6 DONE. **P7 code implemented + committed by Scrum Master** (commit `fa9c0ad5`, own scope green: conversation_starters + content-gate suites, `flutter analyze` 0 error, visual fidelity PASS eyeballed) but worker left phase/master-plan status `BLOCKED` because a broad `flutter test test/core/database/` (OUTSIDE P7 WriteScope) hit 11 pre-existing reds from Drift `schemaVersion` drifting to 9 via 3 sibling merges (STORY-009/010/013) — filed as **`BUG-20260923-001`** (non-blocking, pre-existing, out of scope). Worker's own build-evidence gate got session-locked by that one red run (known pattern), so a **fresh** `Alex-Mobile-Dev` was re-dispatched round 10 (`Mode: completion/resume`, `Session-Recovery: YES`, BaseHead `fa9c0ad5`, doc-only WriteScope) just to flip phase-P7 §7 + master-plan §5 row `BLOCKED`→`DONE` citing the bug — no code change. **Open Reviewer question for STORY-005's eventual story review**: P7's WriteScope also carried two scope-adjacent edits outside its own §3 (`StarterGateRule.assertiveClaim` addition, with a `firstWhere`-no-`orElse` `StateError` risk flagged by the worker; `ActivityCardOrigin` append-only assertion changed to a frozen-prefix `take(5)` comparison) — Reviewer must rule in/out-of-scope, Scrum Master does not resolve this itself. After completion/resume returns DONE: run the final canvas-diff visual-fidelity gate + full Reviewer story review (not Tier-0) before re-sealing STORY-005. |
 | STORY-006 | STORY-001 | DONE, merged |
 | STORY-007 | STORY-001, STORY-002, STORY-003, STORY-005 | Tech Lead COMPLETED (architecture + master-plan sealed by Scrum Master, commit `d36e7a4a`, boundary refreshed). Phases P1-P5 all NOT_STARTED; single mobile lane, strictly sequential (P1→P2→P3/P4/P5, P3/P4 gated on decisions below). **P1 (activation ledger) DISPATCHED round 10** — fresh `Alex-Mobile-Dev-2`, RunId `...-STORY-007_thank_you_and_next_plan-mobile-dev`, BaseHead `d36e7a4a`. schemaVersion 9→10 bump owned by this phase; worker told to abort with `DRIFT_SCHEMA_COLLISION` if base version has already moved. P2 and P5 are next-ready only after P1 ships (single-lane cap, do not dispatch in parallel). P3/P4 remain blocked on the two decisions below. |
 | STORY-008 | STORY-001, STORY-002, STORY-003, STORY-004 | COMPLETED but unsealed: `runtime_smoke: BLOCKED` (disk recovered to 28Gi free, not re-attempted) + review F-3 open |
@@ -38,10 +38,13 @@ Ground truth = integration-worktree `story_master.md` copies +
 
 - STORY-008: retry `runtime_smoke` now that host disk has 28Gi free; re-review
   F-3 in `STORY-008/review/review-report.md` before sealing.
-- Open, non-blocking bugs (cite, do not re-run repo-wide commands):
+- Open, non-blocking bugs (cite, do not re-run repo-wide/broad commands):
   `BUG-20260907-001` (repo-wide `flutter test` pre-existing failures),
   `BUG-20260908-001` (repo-wide `flutter analyze` pre-existing chat/dream_jar
-  warnings). Closed: `BUG-20260907-002`, `BUG-20260910-001`.
+  warnings), `BUG-20260923-001` (Drift `schemaVersion` migration test lag —
+  11 reds in `test/core/database/`, cite instead of re-running that combined
+  suite from any REQ-016 story worktree). Closed: `BUG-20260907-002`,
+  `BUG-20260910-001`.
 - Integration branch re-verification owed: `sync-integration` (Round 9) pulled
   `main`'s STORY-005 Design Ruling Log commit + checkpoint compaction into
   `codex/REQ-016_solo_stage1_relationship_assistant-integration`
@@ -71,15 +74,16 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 - Round 1-8 narrative in git history of this file — superseded by the table
   and open-decisions sections above.
 
-## Next action (Round 10, both dispatches in flight)
+## Next action (Round 10b, both dispatches in flight)
 
-- STORY-005 P7: `Alex-Mobile-Dev` running (agent_id `Alex-Mobile-Dev@session-e7df910a`,
-  RunId `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-005_conversation_starters-mobile-dev`).
-  On completion: 3-part verify (agent idle, git diff matches WriteScope,
-  `phase-P7-event-reason-field.md` §7 Status DONE AND master-plan.md §5 P7 row
-  DONE — check BOTH), commit, refresh-base, then dispatch the final canvas-diff
-  visual-fidelity gate + full Reviewer story review (not Tier-0) before
-  re-sealing STORY-005 DONE.
+- STORY-005 P7: code already committed (`fa9c0ad5`). A second, fresh
+  `Alex-Mobile-Dev` is running a doc-only `completion/resume` pass (agent_id
+  `Alex-Mobile-Dev@session-e7df910a`, same RunId) to flip phase/master-plan
+  status BLOCKED->DONE citing `BUG-20260923-001`. On `MOBILE_COMPLETE: YES`:
+  3-part verify (git diff limited to the 3 doc files, both status fields read
+  DONE), commit, refresh-base, then dispatch the final canvas-diff
+  visual-fidelity gate + full Reviewer story review (not Tier-0 — also carries
+  the open Reviewer scope question above) before re-sealing STORY-005 DONE.
 - STORY-007 P1: `Alex-Mobile-Dev-2` running (agent_id `Alex-Mobile-Dev-2@session-e7df910a`,
   RunId `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-007_thank_you_and_next_plan-mobile-dev`).
   On completion: 3-part verify (schemaVersion is 10, activation-ledger table +
