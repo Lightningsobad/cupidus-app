@@ -130,6 +130,8 @@ Map<String, Object?> _event(
   String name,
   List<String> dates, {
   String? activityType,
+  String? reasonTemplate,
+  String? reasonContextSlot,
 }) =>
     <String, Object?>{
       'id': id,
@@ -137,7 +139,18 @@ Map<String, Object?> _event(
       'calendar': 'solar',
       'dates': dates,
       'activity_type': ?activityType,
+      'reason_template': ?reasonTemplate,
+      'reason_context_slot': ?reasonContextSlot,
     };
+
+/// The reason line an event draws under its name, or `null` when the row is
+/// silent — read off the widget tree rather than off the cubit.
+String? _reasonOnScreen(WidgetTester tester, String eventId) {
+  final Finder finder = find.byKey(Key('starter_event_reason_$eventId'));
+  return finder.evaluate().isEmpty
+      ? null
+      : tester.widget<Text>(finder).data;
+}
 
 Widget _host(Widget child) => MaterialApp(
       theme: buildCupidTheme(
@@ -232,6 +245,7 @@ Future<void> _captureAtReferenceViewport(
   String fileName, {
   CupidPlatform platform = CupidPlatform.material,
   Size viewport = _referenceViewport,
+  Future<void> Function(WidgetTester)? beforeCapture,
 }) async {
   tester.view.physicalSize = viewport;
   tester.view.devicePixelRatio = 1;
@@ -259,6 +273,11 @@ Future<void> _captureAtReferenceViewport(
     ),
   );
   await tester.pumpAndSettle();
+
+  if (beforeCapture != null) {
+    await beforeCapture(tester);
+    await tester.pumpAndSettle();
+  }
 
   final RenderRepaintBoundary boundary =
       tester.renderObject(find.byKey(_captureBoundaryKey))
@@ -309,17 +328,24 @@ void main() {
         ),
       );
 
-  Widget startersScreen(ContentPackageLoader loader) =>
+  Widget startersScreen(
+    ContentPackageLoader loader, {
+    void Function(ConversationStartersCubit)? onCubitCreated,
+  }) =>
       ConversationStartersScreen(
         today: _today,
-        cubitBuilder: () => ConversationStartersCubit(
-          notebook: _RepositoryReader(notebook),
-          cardRepository: cards,
-          eventStateRepository: CalendarEventStateRepository(database),
-          ownerKeyStore: owner,
-          today: _today,
-          loader: loader,
-        ),
+        cubitBuilder: () {
+          final ConversationStartersCubit cubit = ConversationStartersCubit(
+            notebook: _RepositoryReader(notebook),
+            cardRepository: cards,
+            eventStateRepository: CalendarEventStateRepository(database),
+            ownerKeyStore: owner,
+            today: _today,
+            loader: loader,
+          );
+          onCubitCreated?.call(cubit);
+          return cubit;
+        },
         // The screen still hands its own entry point and target list to the
         // builder, so injecting the notebook seams here does not take the
         // production ask identity out of the assertions.
@@ -1003,12 +1029,110 @@ void main() {
     });
   });
 
+  group('dòng lý do dưới tên sự kiện (ruling 2026-09-20 mục 7)', () {
+    const String template = 'Đúng dòng "{value}" trong sổ tay';
+
+    List<Map<String, Object?>> eventsWithAndWithoutReason() =>
+        <Map<String, Object?>>[
+          _event(
+            'ev-upcoming',
+            'Fixture dated event',
+            <String>['2026-10-20'],
+            reasonTemplate: template,
+            reasonContextSlot: 'interest',
+          ),
+          _event('ev-later', 'Fixture later event', <String>['2026-11-02']),
+        ];
+
+    testWidgets('sổ tay có mục khớp: chỉ sự kiện khai template mới có lý do',
+        (WidgetTester tester) async {
+      await notebook.addEntry(
+        kind: NotebookKind.interest,
+        value: 'Cà phê sáng',
+        source: ContextEntrySource.manual,
+      );
+
+      await pumpStarters(
+        tester,
+        starterCount: 12,
+        events: eventsWithAndWithoutReason(),
+      );
+
+      expect(
+        _reasonOnScreen(tester, 'ev-upcoming'),
+        'Đúng dòng "Cà phê sáng" trong sổ tay',
+      );
+      expect(_reasonOnScreen(tester, 'ev-later'), isNull);
+    });
+
+    testWidgets('sổ tay rỗng: không dòng lý do nào, và không ô nào lộ {value}',
+        (WidgetTester tester) async {
+      expect(await notebook.entries(), isEmpty);
+
+      await pumpStarters(
+        tester,
+        starterCount: 12,
+        events: eventsWithAndWithoutReason(),
+      );
+
+      expect(_reasonOnScreen(tester, 'ev-upcoming'), isNull);
+      expect(_reasonOnScreen(tester, 'ev-later'), isNull);
+      expect(
+        _renderedText(tester).where((String text) => text.contains('{value}')),
+        isEmpty,
+      );
+    });
+
+    testWidgets(
+        'trả lời xong câu hỏi: dòng lý do hiện ra, nhưng dòng đã bỏ qua '
+        'không sống lại (AC-12, AC-14)', (WidgetTester tester) async {
+      late ConversationStartersCubit cubit;
+      tester.view.physicalSize = _tallViewport;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        _host(
+          startersScreen(
+            fixtureLoader(
+              starterCount: 12,
+              events: eventsWithAndWithoutReason(),
+            ),
+            onCubitCreated: (ConversationStartersCubit created) =>
+                cubit = created,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(_reasonOnScreen(tester, 'ev-upcoming'), isNull);
+
+      await tester.tap(find.byKey(const Key('starter_event_dismiss_ev-later')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('starter_event_ev-later')), findsNothing);
+
+      await notebook.addEntry(
+        kind: NotebookKind.interest,
+        value: 'Cà phê sáng',
+        source: ContextEntrySource.askOnTheSpot,
+      );
+      await cubit.refreshContext();
+      await tester.pumpAndSettle();
+
+      expect(
+        _reasonOnScreen(tester, 'ev-upcoming'),
+        'Đúng dòng "Cà phê sáng" trong sổ tay',
+      );
+      expect(find.byKey(const Key('starter_event_ev-later')), findsNothing);
+    });
+  });
+
   testWidgets(
     'captures 6-moi-chuyen-a-a',
     (WidgetTester tester) async {
       await notebook.addEntry(
         kind: NotebookKind.interest,
-        value: 'Cà phê sáng',
+        value: 'thích đọc sách cũ',
         source: ContextEntrySource.manual,
       );
 
@@ -1018,12 +1142,23 @@ void main() {
           fixtureLoader(
             starterCount: 12,
             events: <Map<String, Object?>>[
-              _event('ev-a', 'Sinh nhật bạn ấy', <String>['2026-10-20']),
+              _event(
+                'ev-a',
+                'Sinh nhật bạn ấy',
+                <String>['2026-10-20'],
+                reasonTemplate: 'Đúng dòng "{value}" trong sổ tay',
+                reasonContextSlot: 'interest',
+              ),
               _event('ev-b', 'Kỷ niệm quen nhau', <String>['2026-11-02']),
             ],
           ),
         ),
         'implemented-6-moi-chuyen-a-a-material.png',
+        // The canvas frames the event strip with no ask card above it. Left up,
+        // the card fills the lower half and pushes the reason line — the one
+        // thing this phase adds — below the reference fold.
+        beforeCapture: (WidgetTester tester) =>
+            tester.tap(find.byKey(const Key('ask-skip'))),
       );
 
       expect(

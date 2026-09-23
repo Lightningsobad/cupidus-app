@@ -328,10 +328,24 @@ class _EventRow extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Expanded(
-            child: Text(
-              '${event.event.name} — ${eventDateLabel(event.date)}',
-              key: Key('starter_event_name_${event.id}'),
-              style: type.body.copyWith(color: colors.colorText),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  '${event.event.name} — ${eventDateLabel(event.date)}',
+                  key: Key('starter_event_name_${event.id}'),
+                  style: type.body.copyWith(color: colors.colorText),
+                ),
+                if (event.reason case final String reason) ...<Widget>[
+                  const SizedBox(height: CupidSpacing.xs),
+                  Text(
+                    reason,
+                    key: Key('starter_event_reason_${event.id}'),
+                    style: type.caption.copyWith(color: colors.colorTextMuted),
+                  ),
+                ],
+              ],
             ),
           ),
           const SizedBox(width: CupidSpacing.sm),

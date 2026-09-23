@@ -102,6 +102,7 @@ class ConversationStartersCubit extends Cubit<ConversationStartersState> {
     final List<VisibleCalendarEvent> events = await service.visibleEvents(
       ownerKey: ownerKey,
       today: _today,
+      notebook: entries,
     );
     if (isClosed) {
       return;
@@ -132,13 +133,34 @@ class ConversationStartersCubit extends Cubit<ConversationStartersState> {
 
   /// Re-ranks in place after the inline ask card records an answer. Same page,
   /// same screen: answering a question never moves the reader (AC-8).
+  ///
+  /// The event reasons are recomputed over `state.events` rather than by asking
+  /// the service again: a second `visibleEvents` call would rebuild the strip
+  /// from the pack and bring back the rows just added to "Muốn làm" or skipped
+  /// (AC-12/AC-14).
   Future<void> refreshContext() async {
     final List<NotebookEntry> entries = await _notebook.entries();
     if (isClosed) {
       return;
     }
     _notebookEntries = entries;
-    emit(state._copyWith(starters: _renderPage(state.page)));
+    emit(
+      state._copyWith(
+        starters: _renderPage(state.page),
+        events: <VisibleCalendarEvent>[
+          for (final VisibleCalendarEvent visible in state.events)
+            VisibleCalendarEvent(
+              event: visible.event,
+              date: visible.date,
+              reason: resolveEventReason(
+                event: visible.event,
+                notebook: entries,
+                today: _today,
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   /// Hands one event to the shared hub of screen (1) and drops it from the

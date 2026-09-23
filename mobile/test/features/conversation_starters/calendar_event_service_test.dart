@@ -8,6 +8,7 @@ import 'package:cupid_mobile/features/activity_cards/data/activity_card_reposito
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_type.dart';
+import 'package:cupid_mobile/features/context_notebook/domain/context_notebook_models.dart';
 import 'package:cupid_mobile/features/conversation_starters/data/calendar_event_state_repository.dart';
 import 'package:cupid_mobile/features/conversation_starters/domain/calendar_event_service.dart';
 import 'package:cupid_mobile/features/conversation_starters/domain/starter_content.dart';
@@ -34,14 +35,59 @@ Map<String, Object?> _event({
   required List<String> dates,
   String calendar = 'solar',
   String? activityType = 'outing',
+  String? reasonTemplate,
+  String? reasonContextSlot,
 }) =>
     <String, Object?>{
       'id': id,
       'name': 'synthetic event $id',
       'calendar': calendar,
       'dates': dates,
-      if (activityType != null) 'activity_type': activityType,
+      'activity_type': ?activityType,
+      'reason_template': ?reasonTemplate,
+      'reason_context_slot': ?reasonContextSlot,
     };
+
+NotebookEntry _entry({
+  required String id,
+  required NotebookKind kind,
+  required String value,
+}) =>
+    NotebookEntry(
+      id: id,
+      ownerKey: _ownerKey,
+      kind: kind,
+      value: value,
+      source: ContextEntrySource.manual,
+      createdAt: DateTime(2026, 9, 1),
+      updatedAt: DateTime(2026, 9, 1),
+    );
+
+CalendarEvent _parsedEvent({
+  required String id,
+  String? reasonTemplate,
+  String? reasonContextSlot,
+}) =>
+    _package(<Map<String, Object?>>[
+      _event(
+        id: id,
+        dates: <String>['2026-12-24'],
+        reasonTemplate: reasonTemplate,
+        reasonContextSlot: reasonContextSlot,
+      ),
+    ]).items.single;
+
+/// The notebook is a required input of the strip now that an event can carry a
+/// reason line; the tests that are not about the reason pass an empty one.
+Future<List<VisibleCalendarEvent>> _visible(
+  CalendarEventService service, {
+  List<NotebookEntry> notebook = const <NotebookEntry>[],
+}) =>
+    service.visibleEvents(
+      ownerKey: _ownerKey,
+      today: _today,
+      notebook: notebook,
+    );
 
 Never _explodingHttpClient(SecurityContext? context) => throw StateError(
       'R-7/AC-16 violated: the calendar event path opened an HttpClient',
@@ -84,10 +130,7 @@ void main() {
         ]),
       );
 
-      final List<VisibleCalendarEvent> visible = await service.visibleEvents(
-        ownerKey: _ownerKey,
-        today: _today,
-      );
+      final List<VisibleCalendarEvent> visible = await _visible(service);
 
       expect(
         visible.map((VisibleCalendarEvent e) => e.id),
@@ -102,10 +145,7 @@ void main() {
         ]),
       );
 
-      final List<VisibleCalendarEvent> visible = await service.visibleEvents(
-        ownerKey: _ownerKey,
-        today: _today,
-      );
+      final List<VisibleCalendarEvent> visible = await _visible(service);
 
       expect(visible.single.date, _today);
     });
@@ -120,10 +160,7 @@ void main() {
         ]),
       );
 
-      final List<VisibleCalendarEvent> visible = await service.visibleEvents(
-        ownerKey: _ownerKey,
-        today: _today,
-      );
+      final List<VisibleCalendarEvent> visible = await _visible(service);
 
       expect(visible.single.date, '2026-10-05');
     });
@@ -140,12 +177,12 @@ void main() {
 
       final List<String> first = <String>[
         for (final VisibleCalendarEvent e
-            in await service.visibleEvents(ownerKey: _ownerKey, today: _today))
+            in await _visible(service))
           e.id,
       ];
       final List<String> second = <String>[
         for (final VisibleCalendarEvent e
-            in await service.visibleEvents(ownerKey: _ownerKey, today: _today))
+            in await _visible(service))
           e.id,
       ];
 
@@ -159,7 +196,7 @@ void main() {
       );
 
       expect(
-        await service.visibleEvents(ownerKey: _ownerKey, today: _today),
+        await _visible(service),
         isEmpty,
       );
     });
@@ -173,10 +210,7 @@ void main() {
           _event(id: 'ev_future', dates: <String>['2026-12-24']),
         ]),
       );
-      final List<VisibleCalendarEvent> visible = await service.visibleEvents(
-        ownerKey: _ownerKey,
-        today: _today,
-      );
+      final List<VisibleCalendarEvent> visible = await _visible(service);
 
       final ActivityCard? card = await service.addToStore(
         ownerKey: _ownerKey,
@@ -197,10 +231,7 @@ void main() {
           _event(id: 'ev_future', dates: <String>['2026-12-24']),
         ]),
       );
-      final List<VisibleCalendarEvent> visible = await service.visibleEvents(
-        ownerKey: _ownerKey,
-        today: _today,
-      );
+      final List<VisibleCalendarEvent> visible = await _visible(service);
 
       await service.addToStore(ownerKey: _ownerKey, event: visible.single);
 
@@ -227,10 +258,7 @@ void main() {
           ),
         ]),
       );
-      final List<VisibleCalendarEvent> visible = await service.visibleEvents(
-        ownerKey: _ownerKey,
-        today: _today,
-      );
+      final List<VisibleCalendarEvent> visible = await _visible(service);
 
       final ActivityCard? card = await service.addToStore(
         ownerKey: _ownerKey,
@@ -246,10 +274,7 @@ void main() {
           _event(id: 'ev_future', dates: <String>['2026-12-24']),
         ]),
       );
-      final List<VisibleCalendarEvent> visible = await service.visibleEvents(
-        ownerKey: _ownerKey,
-        today: _today,
-      );
+      final List<VisibleCalendarEvent> visible = await _visible(service);
 
       final ActivityCard? first = await service.addToStore(
         ownerKey: _ownerKey,
@@ -279,17 +304,11 @@ void main() {
           _event(id: 'ev_two', dates: <String>['2026-12-25']),
         ]),
       );
-      final List<VisibleCalendarEvent> before = await service.visibleEvents(
-        ownerKey: _ownerKey,
-        today: _today,
-      );
+      final List<VisibleCalendarEvent> before = await _visible(service);
 
       await service.addToStore(ownerKey: _ownerKey, event: before.first);
 
-      final List<VisibleCalendarEvent> after = await service.visibleEvents(
-        ownerKey: _ownerKey,
-        today: _today,
-      );
+      final List<VisibleCalendarEvent> after = await _visible(service);
       expect(after.map((VisibleCalendarEvent e) => e.id), <String>['ev_two']);
 
       final List<ActivityCard> ideas = await cardRepository.cardsByStatus(
@@ -311,7 +330,7 @@ void main() {
       await service.dismiss(ownerKey: _ownerKey, eventId: 'ev_future');
 
       expect(
-        await service.visibleEvents(ownerKey: _ownerKey, today: _today),
+        await _visible(service),
         isEmpty,
       );
       expect(
@@ -329,10 +348,7 @@ void main() {
           _event(id: 'ev_future', dates: <String>['2026-12-24']),
         ]),
       );
-      final VisibleCalendarEvent event = (await service.visibleEvents(
-        ownerKey: _ownerKey,
-        today: _today,
-      ))
+      final VisibleCalendarEvent event = (await _visible(service))
           .single;
 
       await service.dismiss(ownerKey: _ownerKey, eventId: event.id);
@@ -355,7 +371,7 @@ void main() {
       await service.dismiss(ownerKey: 'user-2', eventId: 'ev_future');
 
       expect(
-        await service.visibleEvents(ownerKey: _ownerKey, today: _today),
+        await _visible(service),
         hasLength(1),
       );
     });
@@ -387,15 +403,22 @@ void main() {
     });
 
     test('giá trị mới nằm cuối, không chen vào giữa', () {
+      // Đoạn đầu bị đóng băng chính là hợp đồng append-only: một câu chuyện sau
+      // được phép nối thêm giá trị vào cuối, nhưng không được chen vào giữa
+      // hay đổi chỗ `conversation_starter` (ghi vào Drift bằng wire value).
+      const List<String> frozenPrefix = <String>[
+        'manual',
+        'pasted_link',
+        'occasion_suggestion',
+        'gift_suggestion',
+        'conversation_starter',
+      ];
+
       expect(
-        ActivityCardOrigin.values.map((ActivityCardOrigin o) => o.wireValue),
-        <String>[
-          'manual',
-          'pasted_link',
-          'occasion_suggestion',
-          'gift_suggestion',
-          'conversation_starter',
-        ],
+        ActivityCardOrigin.values
+            .take(frozenPrefix.length)
+            .map((ActivityCardOrigin o) => o.wireValue),
+        frozenPrefix,
       );
     });
   });
@@ -411,10 +434,7 @@ void main() {
           ]),
         );
 
-        final List<VisibleCalendarEvent> visible = await service.visibleEvents(
-          ownerKey: _ownerKey,
-          today: _today,
-        );
+        final List<VisibleCalendarEvent> visible = await _visible(service);
         final ActivityCard? card = await service.addToStore(
           ownerKey: _ownerKey,
           event: visible.first,
@@ -423,10 +443,197 @@ void main() {
 
         expect(card!.origin, ActivityCardOrigin.conversationStarter);
         expect(
-          await service.visibleEvents(ownerKey: _ownerKey, today: _today),
+          await _visible(service),
           isEmpty,
         );
       }, createHttpClient: _explodingHttpClient);
+    });
+  });
+
+  group('dòng lý do của sự kiện (ruling 2026-09-20 mục 7, AC-17)', () {
+    test('sự kiện không khai template thì không có dòng lý do', () {
+      expect(
+        resolveEventReason(
+          event: _parsedEvent(id: 'ev_no_reason'),
+          notebook: <NotebookEntry>[
+            _entry(
+              id: 'nb_1',
+              kind: NotebookKind.interest,
+              value: 'Cà phê sáng',
+            ),
+          ],
+          today: _today,
+        ),
+        isNull,
+      );
+    });
+
+    test('có template nhưng sổ tay rỗng thì im lặng, không dựng câu rỗng', () {
+      expect(
+        resolveEventReason(
+          event: _parsedEvent(
+            id: 'ev_reason',
+            reasonTemplate: 'Đúng dòng "{value}" trong sổ tay',
+            reasonContextSlot: 'interest',
+          ),
+          notebook: const <NotebookEntry>[],
+          today: _today,
+        ),
+        isNull,
+      );
+    });
+
+    test('một mục khớp thì giá trị của mục đó thay vào chỗ {value}', () {
+      expect(
+        resolveEventReason(
+          event: _parsedEvent(
+            id: 'ev_reason',
+            reasonTemplate: 'Đúng dòng "{value}" trong sổ tay',
+            reasonContextSlot: 'interest',
+          ),
+          notebook: <NotebookEntry>[
+            _entry(
+              id: 'nb_1',
+              kind: NotebookKind.interest,
+              value: 'Cà phê sáng',
+            ),
+            _entry(
+              id: 'nb_2',
+              kind: NotebookKind.event,
+              value: 'Sinh nhật mẹ',
+            ),
+          ],
+          today: _today,
+        ),
+        'Đúng dòng "Cà phê sáng" trong sổ tay',
+      );
+    });
+
+    test(
+        'sổ tay nhiều mục: cùng ngày + cùng sự kiện luôn ra một mục, '
+        'và thứ tự nhập vào không đổi kết quả', () {
+      final CalendarEvent event = _parsedEvent(
+        id: 'ev_reason',
+        reasonTemplate: 'Đúng dòng "{value}" trong sổ tay',
+        reasonContextSlot: 'interest',
+      );
+      final List<NotebookEntry> notebook = <NotebookEntry>[
+        _entry(id: 'nb_1', kind: NotebookKind.interest, value: 'Cà phê sáng'),
+        _entry(id: 'nb_2', kind: NotebookKind.interest, value: 'Leo núi'),
+        _entry(id: 'nb_3', kind: NotebookKind.interest, value: 'Nấu ăn'),
+        _entry(id: 'nb_4', kind: NotebookKind.interest, value: 'Xem phim'),
+      ];
+
+      final String? first = resolveEventReason(
+        event: event,
+        notebook: notebook,
+        today: _today,
+      );
+      final String? shuffled = resolveEventReason(
+        event: event,
+        notebook: notebook.reversed.toList(growable: false),
+        today: _today,
+      );
+
+      expect(first, isNotNull);
+      expect(first, shuffled);
+      expect(
+        resolveEventReason(event: event, notebook: notebook, today: _today),
+        first,
+      );
+    });
+
+    test('sổ tay nhiều mục: hai sự kiện khác nhau không bị khoá vào một mục',
+        () {
+      final List<NotebookEntry> notebook = <NotebookEntry>[
+        for (int index = 0; index < 8; index++)
+          _entry(
+            id: 'nb_$index',
+            kind: NotebookKind.interest,
+            value: 'Sở thích $index',
+          ),
+      ];
+      final Set<String?> lines = <String?>{
+        for (final String id in <String>['ev_a', 'ev_b', 'ev_c', 'ev_d'])
+          resolveEventReason(
+            event: _parsedEvent(
+              id: id,
+              reasonTemplate: 'Đúng dòng "{value}" trong sổ tay',
+              reasonContextSlot: 'interest',
+            ),
+            notebook: notebook,
+            today: _today,
+          ),
+      };
+
+      expect(lines.length, greaterThan(1));
+    });
+
+    test('mục khớp có giá trị rỗng bị bỏ qua, không dựng dấu ngoặc trống', () {
+      expect(
+        resolveEventReason(
+          event: _parsedEvent(
+            id: 'ev_reason',
+            reasonTemplate: 'Đúng dòng "{value}" trong sổ tay',
+            reasonContextSlot: 'interest',
+          ),
+          notebook: <NotebookEntry>[
+            _entry(id: 'nb_1', kind: NotebookKind.interest, value: ''),
+          ],
+          today: _today,
+        ),
+        isNull,
+      );
+    });
+
+    test('dải sự kiện mang theo dòng lý do đã dựng sẵn', () async {
+      final CalendarEventService service = serviceFor(
+        _package(<Map<String, Object?>>[
+          _event(
+            id: 'ev_with_reason',
+            dates: <String>['2026-12-24'],
+            reasonTemplate: 'Đúng dòng "{value}" trong sổ tay',
+            reasonContextSlot: 'interest',
+          ),
+          _event(id: 'ev_plain', dates: <String>['2026-12-25']),
+        ]),
+      );
+
+      final List<VisibleCalendarEvent> visible = await _visible(
+        service,
+        notebook: <NotebookEntry>[
+          _entry(
+            id: 'nb_1',
+            kind: NotebookKind.interest,
+            value: 'Cà phê sáng',
+          ),
+        ],
+      );
+
+      expect(
+        visible
+            .map((VisibleCalendarEvent event) => event.reason)
+            .toList(growable: false),
+        <String?>['Đúng dòng "Cà phê sáng" trong sổ tay', null],
+      );
+    });
+
+    test('không ô nào của dải còn sót chỗ giữ {value} khi sổ tay rỗng',
+        () async {
+      final CalendarEventService service = serviceFor(
+        _package(<Map<String, Object?>>[
+          _event(
+            id: 'ev_with_reason',
+            dates: <String>['2026-12-24'],
+            reasonTemplate: 'Đúng dòng "{value}" trong sổ tay',
+            reasonContextSlot: 'interest',
+          ),
+        ]),
+      );
+
+      final List<VisibleCalendarEvent> visible = await _visible(service);
+
+      expect(visible.single.reason, isNull);
     });
   });
 }

@@ -251,5 +251,14 @@ nhắc lại nó ở vòng này.
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-20
+- Status: BLOCKED
+- Last updated: 2026-09-23
+- Lý do: toàn bộ công việc mã của P7 đã xong và xanh (gói, cổng nhập,
+  `resolveEventReason`, cubit, màn hình, test, visual fidelity PASS, `core/database`
+  diff rỗng). Chặn ở một cổng §6 bắt buộc: `flutter test test/core/database/`
+  thoát khác 0 với 11 case đỏ **đã đỏ sẵn tại BaseHead**
+  `9ab00f489dfff89137cbf6d695a72718e9144c96` (`+93 -11` trùng khít trên cây sạch),
+  do `schemaVersion` = 9 sau merge STORY-009/010/013 trong khi test migration còn
+  khẳng định v7/v8. Ngoài Write Scope và §1C cấm P7 mở Drift.
+  `BLOCKER: PREEXISTING_TEST_FAILURE` — xem `coding-plan/test-results.md` §P7.
+  Scrum Master mở bug cho lane Drift; chuyển sang DONE sau khi cổng đó xanh.

@@ -62,6 +62,8 @@ String _eventsPack({
   String calendar = 'lunar',
   List<String> dates = const <String>['2027-09-15'],
   Object? activityType = 'walk',
+  Object? reasonTemplate,
+  Object? reasonContextSlot,
 }) =>
     jsonEncode(<String, Object?>{
       'id': 'calendar_events.fixture',
@@ -75,6 +77,8 @@ String _eventsPack({
           'calendar': calendar,
           'dates': dates,
           'activity_type': ?activityType,
+          'reason_template': ?reasonTemplate,
+          'reason_context_slot': ?reasonContextSlot,
         },
       ],
     });
@@ -87,6 +91,8 @@ List<StarterViolation> _violations({
   String eventName = 'Tết Trung Thu',
   List<String> dates = const <String>['2027-09-15'],
   Object? activityType = 'walk',
+  Object? reasonTemplate,
+  Object? reasonContextSlot,
 }) =>
     validateStarterPacks(
       starters: _parseStarters(
@@ -102,6 +108,8 @@ List<StarterViolation> _violations({
           name: eventName,
           dates: dates,
           activityType: activityType,
+          reasonTemplate: reasonTemplate,
+          reasonContextSlot: reasonContextSlot,
         ),
       ),
     );
@@ -169,11 +177,33 @@ void main() {
       );
     });
 
+    test('the shipped events carry reason content, and both slots are used',
+        () {
+      final List<CalendarEvent> withReason = calendarEvents.items
+          .where((CalendarEvent e) => e.reasonTemplate != null)
+          .toList(growable: false);
+
+      expect(withReason, isNotEmpty);
+      expect(
+        withReason.map((CalendarEvent e) => e.reasonContextSlot).toSet(),
+        StarterContextSlot.values.toSet(),
+      );
+      // An event with no natural reason ships neither key, so the optional
+      // pair stays optional rather than becoming a required one by habit.
+      expect(
+        calendarEvents.items.any((CalendarEvent e) => e.reasonTemplate == null),
+        isTrue,
+      );
+    });
+
     test('no starter or event wording is written into Dart or l10n (BR-15)',
         () {
       final List<String> authored = <String>[
         for (final StarterItem item in starters.items) item.text,
-        for (final CalendarEvent event in calendarEvents.items) event.name,
+        for (final CalendarEvent event in calendarEvents.items) ...<String>[
+          event.name,
+          ?event.reasonTemplate,
+        ],
       ];
       final List<String> offenders = <String>[];
 
@@ -223,6 +253,24 @@ void main() {
             (ContentPackageFormatException e) => e.message,
             'message',
             contains('unsupported context_slot "partner_behaviour"'),
+          ),
+        ),
+      );
+    });
+
+    test('an unknown reason_context_slot is a parse error', () {
+      expect(
+        () => _parseEvents(
+          _eventsPack(
+            reasonTemplate: 'Đúng dòng "{value}" trong sổ tay',
+            reasonContextSlot: 'weather',
+          ),
+        ),
+        throwsA(
+          isA<ContentPackageFormatException>().having(
+            (ContentPackageFormatException e) => e.message,
+            'message',
+            contains('unsupported reason_context_slot "weather"'),
           ),
         ),
       );
@@ -466,8 +514,88 @@ void main() {
     });
   });
 
+  group('dòng lý do của gói sự kiện (ruling 2026-09-20 mục 7)', () {
+    const String reason = 'Đúng dòng "{value}" trong sổ tay';
+
+    test('a declared reason with both keys is clean', () {
+      expect(
+        _violations(
+          reasonTemplate: reason,
+          reasonContextSlot: 'interest',
+        ),
+        isEmpty,
+      );
+    });
+
+    test('an event declaring neither key is clean — the line is optional', () {
+      expect(_violations(), isEmpty);
+    });
+
+    test('a reason_template with no reason_context_slot', () {
+      expect(
+        _rulesFrom(_violations(reasonTemplate: reason)),
+        contains(StarterGateRule.eventReasonSlotMismatch),
+      );
+    });
+
+    test('a reason_context_slot with no reason_template', () {
+      expect(
+        _rulesFrom(_violations(reasonContextSlot: 'interest')),
+        contains(StarterGateRule.eventReasonSlotMismatch),
+      );
+    });
+
+    test('a reason_template carrying no token', () {
+      expect(
+        _rulesFrom(
+          _violations(
+            reasonTemplate: 'Đúng dòng bạn đã ghi trong sổ tay',
+            reasonContextSlot: 'interest',
+          ),
+        ),
+        contains(StarterGateRule.eventReasonTokenMismatch),
+      );
+    });
+
+    test('a reason_template carrying the token twice', () {
+      expect(
+        _rulesFrom(
+          _violations(
+            reasonTemplate: 'Đúng dòng "{value}" và "{value}" trong sổ tay',
+            reasonContextSlot: 'interest',
+          ),
+        ),
+        contains(StarterGateRule.eventReasonTokenMismatch),
+      );
+    });
+
+    test('a reason_template that ends by asking', () {
+      expect(
+        _rulesFrom(
+          _violations(
+            reasonTemplate: 'Bạn còn thích "{value}" chứ?',
+            reasonContextSlot: 'interest',
+          ),
+        ),
+        contains(StarterGateRule.eventReasonAsksQuestion),
+      );
+    });
+
+    test('a reason_template is scanned by the shared display rules too', () {
+      expect(
+        _rulesFrom(
+          _violations(
+            reasonTemplate: 'Đúng dòng tuyệt vời "{value}" trong sổ tay',
+            reasonContextSlot: 'interest',
+          ),
+        ),
+        contains(StarterGateRule.flattery),
+      );
+    });
+  });
+
   group('the R-1g rule is added beside InvariantRule, not inside it (§6)', () {
-    test('InvariantRule still carries exactly its six display rules', () {
+    test('InvariantRule still carries exactly its seven display rules', () {
       expect(
         InvariantRule.values.map((InvariantRule r) => r.wireValue),
         <String>[
@@ -477,6 +605,7 @@ void main() {
           'score_or_ratio',
           'recipient_behaviour',
           'manipulative_tone',
+          'assertive_claim',
         ],
       );
     });
@@ -494,7 +623,8 @@ void main() {
       }
     });
 
-    test('the first six gate rules pair by wire value with InvariantRule', () {
+    test('the first seven gate rules pair by wire value with InvariantRule',
+        () {
       expect(
         StarterGateRule.values
             .take(InvariantRule.values.length)

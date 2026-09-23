@@ -9,28 +9,36 @@
       "name": "Tết Trung Thu",
       "calendar": "lunar",
       "dates": ["2026-09-25", "2027-09-15"],
-      "activity_type": "walk"
+      "activity_type": "walk",
+      "reason_template": "Đúng dòng \"{value}\" trong sổ tay",
+      "reason_context_slot": "interest"
     },
     {
       "id": "calendar_event.halloween.v1",
       "name": "Halloween",
       "calendar": "solar",
       "dates": ["2026-10-31", "2027-10-31"],
-      "activity_type": "handmade"
+      "activity_type": "handmade",
+      "reason_template": "Đúng dòng \"{value}\" trong sổ tay",
+      "reason_context_slot": "interest"
     },
     {
       "id": "calendar_event.nha_giao_viet_nam.v1",
       "name": "Ngày Nhà giáo Việt Nam",
       "calendar": "solar",
       "dates": ["2026-11-20", "2027-11-20"],
-      "activity_type": "visit"
+      "activity_type": "visit",
+      "reason_template": "Gần dịp \"{value}\" bạn đã ghi trong sổ tay",
+      "reason_context_slot": "event"
     },
     {
       "id": "calendar_event.giang_sinh.v1",
       "name": "Đêm Giáng Sinh",
       "calendar": "solar",
       "dates": ["2026-12-24", "2027-12-24"],
-      "activity_type": "outing"
+      "activity_type": "outing",
+      "reason_template": "Đúng dòng \"{value}\" trong sổ tay",
+      "reason_context_slot": "interest"
     },
     {
       "id": "calendar_event.tet_duong_lich.v1",
@@ -44,14 +52,18 @@
       "name": "Tết Nguyên Đán",
       "calendar": "lunar",
       "dates": ["2027-02-06", "2028-01-26"],
-      "activity_type": "home"
+      "activity_type": "home",
+      "reason_template": "Gần dịp \"{value}\" bạn đã ghi trong sổ tay",
+      "reason_context_slot": "event"
     },
     {
       "id": "calendar_event.valentine.v1",
       "name": "Valentine",
       "calendar": "solar",
       "dates": ["2027-02-14", "2028-02-14"],
-      "activity_type": "dining"
+      "activity_type": "dining",
+      "reason_template": "Đúng dòng \"{value}\" trong sổ tay",
+      "reason_context_slot": "interest"
     },
     {
       "id": "calendar_event.gio_to_hung_vuong.v1",
