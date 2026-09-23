@@ -10,6 +10,12 @@ import 'package:path_provider/path_provider.dart';
 import '../../features/activity_cards/data/activity_card_repository_impl.dart';
 import '../../features/activity_cards/data/closed_archive_reader_impl.dart';
 import '../../features/activity_cards/domain/activity_card_repository.dart';
+import '../../features/activity_cards/thank_you/data/thank_you_activation_dao.dart';
+import '../../features/activity_cards/thank_you/data/thank_you_activation_repository_impl.dart';
+import '../../features/activity_cards/thank_you/domain/thank_you_activation_card_status_listener.dart';
+import '../../features/activity_cards/thank_you/domain/thank_you_activation_card_status_repository.dart';
+import '../../features/activity_cards/thank_you/domain/thank_you_activation_repository.dart';
+import '../../features/activity_cards/thank_you/domain/thank_you_activation_service.dart';
 import '../../features/chapter_closure/data/chapter_closure_service.dart';
 import '../../features/chapter_closure/data/stage1_last_opened_store.dart';
 import '../../features/chapter_closure/data/stage1_wipe_registry.dart';
@@ -348,10 +354,35 @@ void setupServiceLocator() {
     () => getIt<CupidDatabase>().activityCardDao,
   );
 
+  // REQ-016 STORY-007 P1 (`architecture/solution.md` §4): the card store every
+  // consumer resolves is the ledger-aware wrapper, so a card entering *Đã đi
+  // rồi* arms its one lifetime turn in a real build (AC-1/AC-14) and leaving
+  // the status cancels a pending one (AC-5). `ActivityCardRepositoryImpl` and
+  // the card schema stay untouched: the dependency runs STORY-007 -> STORY-001
+  // and never back.
+  getIt.registerLazySingleton<ThankYouActivationRepository>(
+    () => ThankYouActivationRepositoryImpl(
+      ThankYouActivationDao(getIt<CupidDatabase>()),
+    ),
+  );
+
+  getIt.registerLazySingleton<ThankYouActivationService>(
+    () => ThankYouActivationService(getIt<ThankYouActivationRepository>()),
+  );
+
+  getIt.registerLazySingleton<ThankYouActivationCardStatusListener>(
+    () => ThankYouActivationCardStatusListener(
+      getIt<ThankYouActivationService>(),
+    ),
+  );
+
   getIt.registerLazySingleton<ActivityCardRepository>(
-    () => ActivityCardRepositoryImpl(
-      dao: getIt<ActivityCardDao>(),
-      ownerKeyStore: getIt<BackendUserIdStore>(),
+    () => ThankYouActivationAwareCardRepository(
+      inner: ActivityCardRepositoryImpl(
+        dao: getIt<ActivityCardDao>(),
+        ownerKeyStore: getIt<BackendUserIdStore>(),
+      ),
+      listener: getIt<ThankYouActivationCardStatusListener>(),
     ),
   );
 

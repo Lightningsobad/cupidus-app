@@ -263,3 +263,71 @@ Không chỗ nào trong `mobile/lib` gọi
 build thật **không thẻ nào được `arm`**, nên khối không bao giờ nổi lên — các
 test ở trên chạy được là vì chúng tự `arm` qua service. Cả hai file đều ngoài
 write scope của P2.
+
+## P1 — lượt hoàn tất đấu nối (2026-09-23)
+
+Mục này chỉ đóng đúng phần P2 báo sót ở trên; không sửa lại `## P1` hay `## P2`.
+
+### Xác nhận lại gap
+
+- `ThankYouActivationCardStatusListener` có mặt từ P1 nhưng
+  `onCardStatusChanged` không có lời gọi nào trong `mobile/lib` — chỉ ba test
+  trong `thank_you_activation_service_test.dart` gọi tay.
+- `service_locator.dart` không đăng ký `ThankYouActivationDao` /
+  `ThankYouActivationRepository` / `ThankYouActivationService`; widget dựng
+  service tại chỗ trong `thank_you_block.dart` (`_registeredService()`), nên chỉ
+  có nhánh **đọc** của sổ lượt được đấu nối, nhánh **ghi** thì không.
+- Phase P1 §3 dòng "Nối `arm` / `cancel` vào tín hiệu đổi trạng thái thẻ của
+  STORY-001 mà **không** sửa lược đồ bảng thẻ" — đúng là việc của P1.
+
+### Cách đóng
+
+Tín hiệu đổi trạng thái duy nhất của STORY-001 là lời gọi
+`ActivityCardRepository.updateStatus` (không có stream trạng thái nào).
+`activity_card_detail_cubit.dart` — nơi gọi nó — nằm ngoài write scope, và phần
+chú thích của chính listener cấm đặt lời gọi vào trong card repository (sẽ làm
+STORY-001 phụ thuộc ngược vào STORY-007).
+
+Nên đấu nối ở composition root bằng một lớp bọc:
+
+- `thank_you/domain/thank_you_activation_card_status_repository.dart` —
+  `ThankYouActivationAwareCardRepository implements ActivityCardRepository`,
+  uỷ quyền 8 phương thức còn lại nguyên vẹn, riêng `updateStatus` gọi listener
+  **sau khi** ghi thành công (`rows > 0`, nên thẻ của chủ khác không arm).
+- `service_locator.dart` — đăng ký `ThankYouActivationRepository`,
+  `ThankYouActivationService`, `ThankYouActivationCardStatusListener`, và trả
+  `ActivityCardRepository` bằng lớp bọc quanh `ActivityCardRepositoryImpl`.
+  File STORY-001 và lược đồ bảng thẻ không đổi một dòng.
+
+### Bằng chứng chạy thật
+
+`flutter test test/features/activity_cards/thank_you/thank_you_activation_card_status_repository_test.dart --reporter expanded`
+
+```
+00:00 +0: thẻ sang *Đã đi rồi* qua chính card store của app thì có hàng ARMED — không cần nối tay (AC-1, AC-14)
+00:00 +1: rời *Đã đi rồi* qua card store thì lượt đang chờ bị huỷ lặng lẽ (AC-5)
+00:00 +2: thẻ của chủ khác không ghi được trạng thái nên cũng không arm (AC-22)
+00:00 +3: các thao tác còn lại của card store đi thẳng qua lớp bọc
+00:00 +4: All tests passed!
+```
+
+Hồi quy — `flutter test test/features/activity_cards --reporter failures-only`
+
+```
++277 ~4: 4 skipped tests.
++277 ~4: All other tests passed!
+```
+
+`flutter analyze --no-fatal-infos --no-fatal-warnings lib/core/di/service_locator.dart lib/features/activity_cards/thank_you/domain test/features/activity_cards/thank_you/thank_you_activation_card_status_repository_test.dart`
+
+```
+2 issues found. (ran in 1.5s)
+```
+
+Cả 2 là `info • prefer_initializing_formals` trên hai tham số private có tên của
+lớp bọc — Dart không cho `required this._inner`, nên đây là cùng loại info mà
+`ActivityCardRepositoryImpl` đang mang. **0 error, 0 warning**; baseline repo
+vốn khác 0 nên gate là "không thêm error mới".
+
+`git status --porcelain` trong worktree: đúng 3 file (service_locator sửa, lớp
+bọc mới, test mới) — không PNG visual-fidelity của story khác bị ghi đè.

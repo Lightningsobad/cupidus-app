@@ -136,3 +136,7 @@ tiêu thụ vĩnh viễn ở lần trình bày đầu, huỷ lặng lẽ khi th�
 - Status: DONE
 - Last updated: 2026-09-23
 - Evidence: `coding-plan/test-results.md` §`## P1`
+- 2026-09-23 (lượt hoàn tất): đóng nốt phần đấu nối `arm`/`cancel` vào tín hiệu
+  đổi trạng thái của STORY-001 — trước đó listener có mặt nhưng không lời gọi
+  nào trong `mobile/lib` và sổ lượt không có đăng ký DI; xem
+  `coding-plan/test-results.md` §`## P1 — lượt hoàn tất đấu nối (2026-09-23)`.
