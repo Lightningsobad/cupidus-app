@@ -116,7 +116,7 @@ void main() {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
-      expect(await readUserVersion(upgraded), 9);
+      expect(await readUserVersion(upgraded), 10);
       expect(
         await tableNames(upgraded),
         containsAll(<String>[
@@ -176,8 +176,8 @@ void main() {
       await fresh.select(fresh.skillProfileEntries).get();
       await fresh.select(fresh.askPromptState).get();
 
-      expect(await readUserVersion(fresh), 9);
-      expect(fresh.schemaVersion, 9);
+      expect(await readUserVersion(fresh), 10);
+      expect(fresh.schemaVersion, 10);
     });
 
     test('ask_prompt_state is keyed by (owner_key, question_id)', () async {

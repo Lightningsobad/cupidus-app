@@ -23,6 +23,7 @@ import 'tables/journal_photos.dart';
 import 'tables/messages_table.dart';
 import 'tables/portrait_answers_table.dart';
 import 'tables/relationship_labels_table.dart';
+import 'tables/thank_you_activations_table.dart';
 import 'tables/timeline_tables.dart';
 
 part 'cupid_database.g.dart';
@@ -64,6 +65,7 @@ typedef BackupExclusion = Future<void> Function(String absolutePath);
     RelationshipLabels,
     ChapterClosures,
     ChapterClosureItems,
+    ThankYouActivations,
   ],
   daos: [
     MessageDao,
@@ -81,7 +83,7 @@ class CupidDatabase extends _$CupidDatabase {
       : super(executor ?? _openConnection(excludeFromBackup));
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   /// From v3 onward this database is NO LONGER a disposable cache, and a
   /// destructive-recreate migration is forbidden.
@@ -101,7 +103,8 @@ class CupidDatabase extends _$CupidDatabase {
   /// tables. v8 adds the device-authoritative `relationship_labels` table.
   /// v9 adds the two chapter-closure ledger tables (STORY-013, authored
   /// assuming it would land at v7; renumbered to v9 when merged after
-  /// STORY-009's v7 and STORY-010's v8). Every migration step here and
+  /// STORY-009's v7 and STORY-010's v8). v10 adds the device-authoritative
+  /// `thank_you_activations` ledger (STORY-007). Every migration step here and
   /// onward must therefore be additive, or migrate the data explicitly.
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -157,6 +160,9 @@ class CupidDatabase extends _$CupidDatabase {
             await m.createTable(chapterClosures);
             await m.createTable(chapterClosureItems);
             await m.createIndex(chapterClosureItemsKindItem);
+          }
+          if (from < 10) {
+            await m.createTable(thankYouActivations);
           }
         },
         // `ON DELETE CASCADE` on activity_card_photos.card_id,

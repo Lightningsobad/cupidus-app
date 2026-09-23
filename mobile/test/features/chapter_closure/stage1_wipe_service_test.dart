@@ -200,6 +200,16 @@ void main() {
         );
   }
 
+  Future<void> insertThankYouActivation({required String cardId}) {
+    return database.into(database.thankYouActivations).insert(
+          ThankYouActivationsCompanion.insert(
+            cardId: cardId,
+            status: 'armed',
+            armedOn: '2026-09-16',
+          ),
+        );
+  }
+
   Future<void> closeChapter({
     String ownerKey = owner,
     String closureId = 'closure-1',
@@ -238,6 +248,7 @@ void main() {
     await insertCard('card-$suffix', ownerKey: ownerKey, invited: true);
     await insertCardPhoto('cardphoto-$suffix', cardId: 'card-$suffix');
     await insertInvite('invite-$suffix', cardId: 'card-$suffix');
+    await insertThankYouActivation(cardId: 'card-$suffix');
     await insertJournalEntry('journal-$suffix', ownerKey: ownerKey);
     await insertJournalPhoto(
       'journalphoto-$suffix',
@@ -287,7 +298,7 @@ void main() {
         after,
         before.map((String table, _) => MapEntry<String, int>(table, 0)),
       );
-      expect(after.keys.length, 10);
+      expect(after.keys.length, 11);
     });
 
     test('dữ liệu của người dùng khác trên cùng máy không suy suyển', () async {

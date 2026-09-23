@@ -5,14 +5,14 @@ import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Schema v7 adds `chapter_closures` and `chapter_closure_items`
+/// Schema v9 adds `chapter_closures` and `chapter_closure_items`
 /// (`architecture/contract-summary.md` §1). Both are device-authoritative, so
 /// the migration is `CREATE TABLE` only and every pre-existing client-owned row
 /// must come through untouched.
 ///
 /// The fixture is built by opening the current schema on a file and then
-/// removing exactly the v7 additions, so the v6 shape tracks the real table
-/// definitions instead of being retyped by hand.
+/// removing exactly the closure-ledger additions, so the pre-ledger shape
+/// tracks the real table definitions instead of being retyped by hand.
 void main() {
   Future<int> readUserVersion(CupidDatabase database) async {
     final row = await database.customSelect('PRAGMA user_version').getSingle();
@@ -107,16 +107,17 @@ void main() {
     await tempDir.delete(recursive: true);
   });
 
-  group('v6 -> v7', () {
+  group('pre-ledger -> current', () {
     setUp(() async {
       await seedV6(databaseFile);
     });
 
-    test('lands on v7 with both closure-ledger tables present', () async {
+    test('lands on the current schema with both closure-ledger tables present',
+        () async {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
-      expect(await readUserVersion(upgraded), 7);
+      expect(await readUserVersion(upgraded), 10);
       expect(
         await tableNames(upgraded),
         containsAll(<String>['chapter_closures', 'chapter_closure_items']),
@@ -189,7 +190,7 @@ void main() {
     });
   });
 
-  group('v7 on a fresh install', () {
+  group('a fresh install', () {
     test('onCreate emits both tables without a migration', () async {
       final fresh = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(fresh.close);
@@ -197,8 +198,8 @@ void main() {
       await fresh.select(fresh.chapterClosures).get();
       await fresh.select(fresh.chapterClosureItems).get();
 
-      expect(await readUserVersion(fresh), 7);
-      expect(fresh.schemaVersion, 7);
+      expect(await readUserVersion(fresh), 10);
+      expect(fresh.schemaVersion, 10);
     });
 
     test('chapter_closure_items is keyed by (closure_id, item_kind, item_id)',

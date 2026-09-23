@@ -61,7 +61,7 @@ void main() {
       reason: 'bảng REQ-016 mới phải được đăng ký trong Stage1WipeRegistry '
           'hoặc được loại trừ có chủ ý trong nonReq016Tables()',
     );
-    expect(expected, hasLength(10));
+    expect(expected, hasLength(14));
   });
 
   test('danh sách loại trừ chỉ gồm các bảng đệm của máy chủ', () {

@@ -11,14 +11,17 @@ import 'package:flutter_test/flutter_test.dart';
 /// `onCreate` path exercised by the repository tests proves nothing about it.
 ///
 /// The v6 fixture is built by opening the current schema on a file and then
-/// dropping exactly the v8 addition, so the v6 shape tracks the real table
+/// dropping the later additions, so the v6 shape tracks the real table
 /// definitions instead of being retyped by hand. Dropping matters: drift emits
 /// `CREATE TABLE IF NOT EXISTS`, so a fixture that leaves the table in place
 /// passes whether or not `onUpgrade` ever runs the step.
 ///
-/// Landing at v8, not v7: a sibling story (STORY-009) also added a schema step
-/// (`calendar_event_state`/`portrait_answers`) at v7, so this story's own
-/// addition renumbered to v8 when both merged into the integration branch.
+/// The closure-ledger tables are dropped for the opposite reason: their upgrade
+/// step also builds an index, and `Migrator.createIndex` emits a plain
+/// `CREATE INDEX` that fails outright on one the fixture left behind.
+///
+/// The upgrade lands on the current schema version rather than on the version
+/// this story shipped: every later additive step replays on the same fixture.
 void main() {
   Future<int> readUserVersion(CupidDatabase database) async {
     final row = await database.customSelect('PRAGMA user_version').getSingle();
@@ -86,6 +89,9 @@ void main() {
           ),
         );
     await seeded.customStatement('DROP TABLE relationship_labels');
+    // Items first: it holds the cascading foreign key onto chapter_closures.
+    await seeded.customStatement('DROP TABLE chapter_closure_items');
+    await seeded.customStatement('DROP TABLE chapter_closures');
     await seeded.customStatement('PRAGMA user_version = 6');
 
     // Asserted on the seeding connection, before it closes: reopening the file
@@ -109,16 +115,17 @@ void main() {
     await tempDir.delete(recursive: true);
   });
 
-  group('v6 -> v8', () {
+  group('v6 -> current', () {
     setUp(() async {
       await seedV6(databaseFile);
     });
 
-    test('lands on v8 with relationship_labels present', () async {
+    test('lands on the current schema with relationship_labels present',
+        () async {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
-      expect(await readUserVersion(upgraded), 8);
+      expect(await readUserVersion(upgraded), 10);
       expect(
         await tableNames(upgraded),
         containsAll(<String>[
@@ -133,7 +140,7 @@ void main() {
       );
     });
 
-    test('the migrated table carries the full v8 column set', () async {
+    test('the migrated table carries its full column set', () async {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 

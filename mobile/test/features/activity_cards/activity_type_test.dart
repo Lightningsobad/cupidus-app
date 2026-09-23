@@ -174,10 +174,10 @@ void main() {
       // The version moved 3 -> 4 for ruling B-1's five new columns, 4 -> 5 for
       // `location` + `invite_messages`, 5 -> 6 for the context-notebook tables,
       // 6 -> 7 for `calendar_event_state` + `portrait_answers`, 7 -> 8 for
-      // `relationship_labels`, and 8 -> 9 for the chapter-closure ledger,
-      // never for this converter: attaching it to an existing TEXT column
-      // emits no DDL.
-      expect(database.schemaVersion, 9);
+      // `relationship_labels`, 8 -> 9 for the chapter-closure ledger, and
+      // 9 -> 10 for `thank_you_activations`, never for this converter:
+      // attaching it to an existing TEXT column emits no DDL.
+      expect(database.schemaVersion, 10);
       final GeneratedColumn<Object> column = database.activityCards.$columns
           .firstWhere((GeneratedColumn<Object> c) => c.name == 'activity_type');
       expect(column.type, DriftSqlType.string);

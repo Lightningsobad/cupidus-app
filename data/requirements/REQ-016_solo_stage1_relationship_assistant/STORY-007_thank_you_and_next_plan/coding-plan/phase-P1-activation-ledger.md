@@ -133,5 +133,6 @@ tiêu thụ vĩnh viễn ở lần trình bày đầu, huỷ lặng lẽ khi th�
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-20
+- Status: DONE
+- Last updated: 2026-09-23
+- Evidence: `coding-plan/test-results.md` §`## P1`
