@@ -11,7 +11,7 @@ Ground truth = integration-worktree `story_master.md` copies +
 | STORY-002 | STORY-001 | DONE, merged |
 | STORY-003 | NONE | DONE, merged |
 | STORY-004 | STORY-001 | DONE, merged |
-| STORY-005 | STORY-001, STORY-004 | DONE, merged, but REWORK IN FLIGHT (Design Ruling Log 2026-09-20 "Neo thiết kế"): Alan-Techlead-2 dispatched (RunId `...-STORY-005_conversation_starters-tech-lead`) to add coding-plan phases for §7 items 2/7 (separate phases) and 3/4/5/6b (combined). DONE status unaffected until rework phases ship. |
+| STORY-005 | STORY-001, STORY-004 | DONE, merged, but REWORK IN FLIGHT (Design Ruling Log 2026-09-20 "Neo thiết kế"). Phase breakdown P5/P6/P7 in `coding-plan/master-plan.md` §5/§7 (Tech Lead). `ux/uiux-spec.md` §2 patched by Scrum Master (items 2/3/4 hero+phụ+button+caption, items 5/6b block relabel+drop dd/mm badge) — commit `06dc96a4`. **P5 DONE**: Alex-Mobile-Dev built hero/phụ hierarchy (`starter_hero_card.dart` + screen/widget/test edits), verified (3-part protocol incl. fixed stale master-plan.md table row), committed `ae908e93`, boundary refreshed to BaseHead `ae908e93`. **P6 DISPATCHED** (agent `Alex-Mobile-Dev-2`, same RunId reused, BaseHead `ae908e93`): labels/affordances (mục 3 nút+icon refresh, mục 4 caption, mục 5 relabel, mục 6b date-inline via `eventDateLabel`). P7 (event reason field) dispatches only after P6 verified+committed, strict order per master-plan.md §7 (all three touch `conversation_starters_screen.dart`). DONE status unaffected until rework phases ship+review; final canvas-comparison screenshot gate is P7's, not P5/P6's. |
 | STORY-006 | STORY-001 | DONE, merged |
 | STORY-007 | STORY-001, STORY-002, STORY-003, STORY-005 | DISPATCHED — Alan-Techlead (RunId `...-STORY-007_thank_you_and_next_plan-tech-lead`), Mode: compact-story-plan (first touch, no architecture/coding-plan existed yet) |
 | STORY-008 | STORY-001, STORY-002, STORY-003, STORY-004 | COMPLETED but unsealed: `runtime_smoke: BLOCKED` (disk recovered to 28Gi free, not re-attempted) + review F-3 open |
@@ -73,9 +73,24 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 
 ## Next action
 
-Two Tech Lead runs in flight (STORY-005 rework phases, STORY-007
-compact-story-plan) — wait for SubagentStop/mailbox completion, verify
-outputs against OutputPath, then continue each story's pipeline
-(UI/UX-affected patch for STORY-005 item 6b is Scrum-Master-owned per the
-Design Ruling Log, not Tech Lead's). Report the STORY-013 guard-failure
-decision request to the user this round.
+- STORY-005: Alex-Mobile-Dev-2 running P6 (labels/affordances/date-inline).
+  On completion: 3-part verify (agent idle, `git status`/`git diff` matches
+  WriteScope, `phase-P6-labels-affordances-and-date-inline.md` `## 7. Status:
+  DONE` AND master-plan.md §5 phase-table P6 row `DONE` — check BOTH, P5's
+  specialist missed the table row), commit, refresh-base
+  (`git-story-boundary.sh refresh-base --req REQ-016_solo_stage1_relationship_assistant
+  --story STORY-005_conversation_starters`), then dispatch P7
+  (`phase-P7-event-reason-field.md`) — must be strictly after P6, never
+  parallel (master-plan.md §7: all three phases touch
+  `conversation_starters_screen.dart`). After P7: expect final canvas-diff
+  visual-fidelity gate + full story review (Reviewer, not Tier-0 — UI lane +
+  visual fidelity required) before re-sealing STORY-005.
+- STORY-007: awaiting Alan-Techlead's reply to the SendMessage continuation
+  (re-verify `JOURNAL_SOURCE_CONTRACT_CLOSED` blocker against synced base
+  `bfe231aa`, restate `CONTENT_GATE_CATEGORY_COUPLING`). Both are PO/Scrum
+  Master decision blockers per Tech Lead's own `next_step`, not further Tech
+  Lead work — once it replies, this needs a user decision gate, not another
+  specialist dispatch.
+- Still owed to user this round: STORY-013 `DONE_WITHOUT_VISUAL_EVIDENCE`
+  guard-failure decision request (see Open user decisions above) — report
+  after current dispatches are recorded.
