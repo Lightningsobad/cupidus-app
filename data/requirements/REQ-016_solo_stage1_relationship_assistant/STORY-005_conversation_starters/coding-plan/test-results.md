@@ -769,3 +769,17 @@ khác 0, và một test đỏ thì không bao giờ được miễn.
 Không đổi `pubspec.yaml`, không thêm phụ thuộc, không đổi schema Drift, không đổi
 `schema_id` của gói, không thêm khoá ARB. Hai sửa trôi enum nêu trên nằm ngoài §3
 và cần Reviewer xác nhận.
+
+### Định đoạt (2026-09-23, vòng sau khi mở bug)
+
+`BLOCKED` → `DONE`. Lý do: 11 case đỏ của `test/core/database/` là trôi
+`schemaVersion` có sẵn từ trước, đã mở bug riêng
+`BUG-20260923-001_drift_schema_version_migration_test_lag`, nằm ngoài Write Scope
+của P7 (§1C cấm P7 mở Drift) và không chặn REQ-016. Không đổi một dòng mã nào ở
+vòng này; chạy lại đúng các lệnh scoped ghi ở bảng trên tại HEAD
+`fa9c0ad5e2d196b1415f4773c3478a85c39c61c0` và tất cả vẫn xanh:
+`flutter test test/features/conversation_starters/` → `+140 ~1: All other tests
+passed!`; `flutter test test/core/content/` + bảy cổng nội dung anh em →
+`+266: All tests passed!`;
+`flutter analyze lib/features/conversation_starters test/features/conversation_starters`
+→ 10 issues, **0 error**, 0 warning (đúng 10 `prefer_initializing_formals` có sẵn).

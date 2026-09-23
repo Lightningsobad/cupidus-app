@@ -251,14 +251,21 @@ nhắc lại nó ở vòng này.
 
 ## 7. Status
 
-- Status: BLOCKED
+- Status: DONE
 - Last updated: 2026-09-23
 - Lý do: toàn bộ công việc mã của P7 đã xong và xanh (gói, cổng nhập,
   `resolveEventReason`, cubit, màn hình, test, visual fidelity PASS, `core/database`
-  diff rỗng). Chặn ở một cổng §6 bắt buộc: `flutter test test/core/database/`
-  thoát khác 0 với 11 case đỏ **đã đỏ sẵn tại BaseHead**
+  diff rỗng). Trạng thái `BLOCKED` trước đó đến từ một cổng §6 duy nhất,
+  `flutter test test/core/database/`, với 11 case đỏ **đã đỏ sẵn tại BaseHead**
   `9ab00f489dfff89137cbf6d695a72718e9144c96` (`+93 -11` trùng khít trên cây sạch),
   do `schemaVersion` = 9 sau merge STORY-009/010/013 trong khi test migration còn
-  khẳng định v7/v8. Ngoài Write Scope và §1C cấm P7 mở Drift.
-  `BLOCKER: PREEXISTING_TEST_FAILURE` — xem `coding-plan/test-results.md` §P7.
-  Scrum Master mở bug cho lane Drift; chuyển sang DONE sau khi cổng đó xanh.
+  khẳng định v7/v8.
+- Xử lý: lớp đỏ đó đã được mở bug riêng
+  `BUG-20260923-001_drift_schema_version_migration_test_lag`
+  (`data/bugs/BUG-20260923-001_drift_schema_version_migration_test_lag/bug_master.md`) —
+  xác nhận có sẵn từ trước, nằm ngoài Write Scope của P7, thuộc lane sở hữu Drift
+  (§1C cấm P7 mở Drift), và không chặn REQ-016. Vì vậy đây không phải khuyết tật
+  của chính P7 và phase chuyển `BLOCKED` → `DONE`.
+- Bằng chứng scoped chạy lại ngày 2026-09-23 tại HEAD
+  `fa9c0ad5e2d196b1415f4773c3478a85c39c61c0` vẫn xanh: xem
+  `coding-plan/test-results.md` §P7.
