@@ -16,7 +16,7 @@ F (Tầng 4); `req_master.md` SB-174, R-10
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
-- [ ] Implementation (Development)
+- [x] Implementation (Development) — P1-P4 DONE, commit `5c757d685417b1d54ee6255512911705e95028b0`
 - [ ] Review (Reviewer)
 
 ## Depends On
