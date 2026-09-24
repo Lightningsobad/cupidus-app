@@ -226,16 +226,59 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
   extend it to the whole story. Committed `becaf80d`, merged `878fada2`
   (re-merge, branch had advanced past the prior recorded merge — normal).
   `Iris-QC` released via `TaskStop`.
-- **About to dispatch now: Slice P3** (preset category) to `Iris-QC` (fresh
-  spawn, `Mode: scoped-slice`, file list: `preset_content_gate.dart`,
-  `mobile/assets/data/req016/presets.thank_you_after_date.v1.json`,
-  `preset_content_gate_test.dart`). Handoff must instruct: cite
-  `BUG-20260924-001` instead of re-running full-repo/design_system tests;
-  append a `P3` row to `review/review-report.md`'s `## Slice Index` table
-  (check first whether a placeholder `P3` row already exists to fill in
-  place, same pattern as P2, before appending a new one); do not touch
-  `scope-gate.md` unless the guard actually re-fires for this run; use only
-  `Outcome: PARTIAL_SLICE_ONLY` as the slice-level literal (never "PASS").
+- **Slice P3 DONE (Round 20).** `Iris-QC` returned `REVIEW_SLICE_COMPLETE: YES`,
+  `review/slice-p3-preset-category.md` `Outcome: PARTIAL_SLICE_ONLY` (slice
+  literal; content = clean PASS, no blocking finding). **Handoff file-path
+  guess was wrong, reviewer self-corrected via the diff**: the real content
+  gate is `mobile/lib/features/invite_composer/domain/preset_content_gate.dart`
+  (STORY-002's own file, not under `activity_cards/thank_you/`), test
+  `mobile/test/features/invite_composer/preset_content_gate_test.dart`, new
+  asset `mobile/assets/data/req016/presets.thank_you_after_date.v1.json`. Key
+  results: 10 new preset ids all prefixed `thank_you_after_date.*`, no
+  collision with `invite.*` (that pack untouched in this diff); `decline_door`
+  scoping is genuinely per-category via an allowlist
+  `_declineDoorCategories = {inviteCategoryId}`, invite branch strictness
+  unchanged (`doors.length != 1`), new category only relaxes the *missing*
+  case, still blocks *extra* doors; all other gate rules
+  (`declineDoorConditional`, `editorial_review`, vocabulary denylist) remain
+  global, no bypass path; no second engine — `thanks_section.dart` reuses
+  `showInviteComposerSheet`/`InviteComposerCubit` unchanged; same
+  `req016.presets.v1` schema, no fork. Independent re-run of just this
+  slice's test file: `+22` all pass. 5 advisory notes, most notable **A3
+  (Scrum-Master action, not a code defect) — RESOLVED same round**: the
+  `preset_content_gate.dart` code comment cites the `CONTENT_GATE_CATEGORY_COUPLING`
+  Design Ruling Log row in `req_master.md`, but that row (plus the sibling
+  `JOURNAL_SOURCE_CONTRACT_CLOSED` row and 2 pending bug-registry entries,
+  `BUG-20260923-002`/`BUG-20260924-001`) turned out to be sitting as
+  **uncommitted local edits on `main`** since an earlier, pre-compaction round
+  — confirmed via `git status`/`git diff` on the control checkout, absent
+  entirely from the story worktree. This was the sole authorization for P3
+  touching a STORY-002 file outside its own write-scope, so committed it
+  immediately: `dc05d105` on `main`. No further action needed. Other
+  advisories (A1 allowlist-is-fail-open for future invite-semantics
+  categories, A2 test-oracle independence, A4 `.v1.json`-suffix assumption,
+  A5 BaseHead bookkeeping mismatch) are non-blocking, deferred to
+  final-synthesis. Committed `26ca73ce`, merged `12460988` (re-merge, normal).
+  `Iris-QC` released via `TaskStop`.
+- **About to dispatch now: Slice P4** (photo attach) to `Iris-QC` (fresh
+  spawn, `Mode: scoped-slice`, file list: `attachable_photos.dart`,
+  `photo_attach_section.dart`, `photo_attach_test.dart`, `thank_you_block.dart`
+  photo part, `thanks_section.dart`, `journal_repository.dart`,
+  `journal_entry_point.dart`, `thank_you_block_test.dart`,
+  `thanks_section_test.dart` — confirm exact paths via
+  `git diff --name-only bfe231aa`, the P3 handoff's guessed paths for the
+  gate file were wrong so do not trust guessed paths blindly here either).
+  Handoff must instruct: surface the 2 already-flagged `DESIGN_SPEC_CONFLICT`
+  items (canvas leaks journal metadata vs AC-17/BR-8; canvas implies a 2nd
+  nav destination vs AC-7) for final-synthesis, not re-litigate; also
+  resolve advisory **A4 from Slice P2** by claiming
+  `thank_you_block_test.dart` (16 tests) for this slice's own file list if the
+  diff confirms it belongs to P4/photo-attach evidence rather than P2's shell
+  — check before assuming; append a `P4` row to `review/review-report.md`'s
+  `## Slice Index` (fill an existing placeholder row in place if present,
+  same pattern as P2/P3); do not touch `scope-gate.md` unless the guard
+  actually re-fires; use only `Outcome: PARTIAL_SLICE_ONLY` as the slice-level
+  literal (never "PASS").
 - After each slice returns: 3-part-verify, then dispatch the next slice
   immediately (dispatch discipline — same story, so sequential is correct
   here, not a capacity-fill violation).
