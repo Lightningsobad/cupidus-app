@@ -492,4 +492,60 @@ thiết bị — hai việc khác nhau, và mục này chỉ thiếu việc th�
 **Việc cần làm để đóng mục này** (owner: devops hoặc user, không phải mobile):
 giải phóng đĩa máy chủ về ≥10 GiB và khôi phục/khởi động lại `emulator-5554`;
 sau đó lặp lại đúng chuỗi lệnh của STORY-006 §Story Runtime Startup Smoke.
+
+---
+
+**Cập nhật 2026-09-24 (devops — lần chạy thật, thay thế BLOCKED ở trên):**
+cả hai trở ngại hạ tầng ngày 2026-09-17 đã hết. Đĩa máy chủ hiện còn ~23-27 GiB
+trống (≥10 GiB); `emulator-5554` mới được khởi động lại từ đầu trong lượt này
+và shell của nó phản hồi bình thường (không treo ở `getprop`/`exec-out` như
+lần trước).
+
+- **Runtime Id:** `mobile-app`
+- **Registry:** `data/devops/system/runtime-command-registry.json` → `runtimes.mobile-app`
+- **Device:** AVD `cupid-story001-avd`, khởi động headless bằng
+  `emulator -avd cupid-story001-avd -no-snapshot -no-boot-anim`, đạt
+  `adb get-state` = `device` sau ~4s và `getprop sys.boot_completed` = `1`
+  sau lần poll đầu tiên (bounded, không treo).
+- **Build:** `flutter build apk --debug` (`buildCommand` trong registry) —
+  PASS, `Running Gradle task 'assembleLocalDebug'... 59.8s`,
+  `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk`. Cài đặt bằng
+  `adb install -r` sau khi gỡ bản cài cũ trên AVD gây
+  `INSTALL_FAILED_VERSION_DOWNGRADE` (versionCode cũ 2001 > versionCode build
+  này 1 — dữ liệu AVD còn từ một lần cài trước, không liên quan story này);
+  `adb uninstall com.snapsofts.cupid` rồi `install -r` lại → `Success`.
+- **Command (readiness, đúng nguyên văn `readiness.command` trong registry):**
+  ```
+  adb -s "$MOBILE_DEVICE_SERIAL" shell am start -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity
+  # poll: adb -s "$MOBILE_DEVICE_SERIAL" shell dumpsys activity activities | grep "ResumedActivity.*com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity"
+  ```
+- **Ready Check:** lần gọi đầu tiên, `am start` trả `Status: ok` /
+  `LaunchState: COLD` nhưng `ResumedActivity` lại là
+  `com.google.android.permissioncontroller/…GrantPermissionsActivity` —
+  app tự xin quyền `POST_NOTIFICATIONS` ở lần chạy đầu (hành vi Android bình
+  thường ở API 33+, không phải lỗi app), nên activity của app không phải là
+  resumed activity trong 60s đầu → readiness thất bại ở lần thử #1. Cấp quyền
+  trước bằng `adb shell pm grant com.snapsofts.cupid
+  android.permission.POST_NOTIFICATIONS` (thiết lập trạng thái thiết bị, không
+  phải sửa hành vi app), `am force-stop` rồi lặp lại đúng lệnh readiness ở
+  trên → `ResumedActivity` là `com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`
+  ngay ở lần poll đầu tiên.
+- **Result: PASS.** Ảnh chụp màn hình đầu tiên sau khi resumed (màn chào/đăng
+  nhập Cupid — đúng vì chưa đăng nhập, và đúng luồng app thật đã ship, không
+  phải preview) lưu tạm tại `/tmp/story008-smoke/runtime-smoke-main-first-screen-emulator-5554.png`
+  (1080x2400 PNG, chụp bằng `adb exec-out screencap -p`); không commit vào repo
+  vì nằm ngoài WriteScope của lượt devops này.
+- **Shutdown: PASS.** `adb shell am force-stop com.snapsofts.cupid`
+  (`shutdownCommand` trong registry) → `pidof com.snapsofts.cupid` sau đó trả
+  exit 1 (không còn process). Emulator instance được tự tắt bằng
+  `adb emu kill` để dọn tài nguyên máy chủ dùng chung cho các worktree song
+  song khác (`adb devices -l` sau đó trống, đĩa còn ~23 GiB).
+
+Không cần khởi động `backend-api`: story này không ghi DB, không gọi mạng, và
+`architecture/solution.md` §4 xác nhận `schemaVersion` không đổi; readiness
+probe của `mobile-app` chỉ kiểm tra tiến trình app lên foreground, không phụ
+thuộc backend.
+
+Gate 12g coi như đã đóng bằng bằng chứng thật ở trên, thay thế hoàn toàn kết
+luận BLOCKED ngày 2026-09-17.
 Hoặc Scrum Master ghi `Runtime-Smoke: WAIVED — <lý do>` vào `story_master.md`.
