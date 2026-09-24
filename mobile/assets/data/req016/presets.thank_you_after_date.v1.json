@@ -1,0 +1,159 @@
+{
+  "id": "presets.thank_you_after_date",
+  "version": "1.0.0",
+  "schema_id": "req016.presets.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "thank_you_after_date.gon_gang.v1",
+      "frame": "Gọn gàng",
+      "clauses": [
+        { "text": "Cảm ơn cậu vì buổi {activity} hôm nay nhé.", "requires": ["activity"], "targets": "neutral" },
+        { "text": "Ngày {date} với tớ nhẹ hơn hẳn mọi ngày.", "requires": ["date"], "targets": "sender" },
+        { "text": "Tớ về tới nhà rồi đây.", "requires": [], "targets": "sender" },
+        { "text": "Cậu về tới nơi chưa?", "requires": [], "targets": "neutral" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-23"
+      }
+    },
+    {
+      "id": "thank_you_after_date.tu_cuoi_minh.v1",
+      "frame": "Tự cười mình",
+      "clauses": [
+        { "text": "Cảm ơn cậu đã đi {activity} cùng tớ.", "requires": ["activity"], "targets": "neutral" },
+        { "text": "Tớ vẫn còn ngượng vụ gọi nhầm tên món lúc nãy.", "requires": [], "targets": "sender" },
+        { "text": "Lần sau tớ hứa đọc kỹ thực đơn trước khi mở miệng.", "requires": [], "targets": "sender" },
+        { "text": "Hôm nay cậu thấy ổn chứ?", "requires": [], "targets": "neutral" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-23"
+      }
+    },
+    {
+      "id": "thank_you_after_date.nhe_nhang.v1",
+      "frame": "Nhẹ nhàng",
+      "clauses": [
+        { "text": "Cảm ơn cậu vì buổi đi chơi hôm nay.", "requires": [], "targets": "neutral" },
+        { "text": "Tớ thích kiểu đi chơi không vội thế này.", "requires": [], "targets": "sender" },
+        { "text": "Ngồi {duration} mà tớ tưởng mới có một lúc.", "requires": ["duration"], "targets": "sender" },
+        { "text": "Cậu nghỉ ngơi được chưa?", "requires": [], "targets": "neutral" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-23"
+      }
+    },
+    {
+      "id": "thank_you_after_date.tin_nhan_muon.v1",
+      "frame": "Tin nhắn muộn",
+      "clauses": [
+        { "text": "Muộn rồi mà tớ vẫn muốn nhắn một câu cảm ơn.", "requires": [], "targets": "sender" },
+        { "text": "Buổi {activity} hôm nay vui thật.", "requires": ["activity"], "targets": "neutral" },
+        { "text": "Tớ nằm mãi chưa ngủ được, chắc tại còn vui.", "requires": [], "targets": "sender" },
+        { "text": "Cậu ngủ ngon nhé, mai còn dậy sớm đúng không?", "requires": [], "targets": "neutral" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-23"
+      }
+    },
+    {
+      "id": "thank_you_after_date.nhac_chi_tiet.v1",
+      "frame": "Nhắc một chi tiết",
+      "clauses": [
+        { "text": "Cảm ơn cậu vì hôm nay nha.", "requires": [], "targets": "neutral" },
+        { "text": "Tớ vẫn nhớ đoạn {time} trời dịu hẳn đi.", "requires": ["time"], "targets": "sender" },
+        { "text": "Tự dưng tớ nhớ mãi đoạn đó.", "requires": [], "targets": "sender" },
+        { "text": "Cậu còn nhớ đoạn nào nữa không?", "requires": [], "targets": "neutral" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-23"
+      }
+    },
+    {
+      "id": "thank_you_after_date.cho_hen.v1",
+      "frame": "Chỗ hẹn hôm nay",
+      "clauses": [
+        { "text": "Cảm ơn cậu vì buổi hôm nay.", "requires": [], "targets": "neutral" },
+        { "text": "Chỗ {place} yên, ngồi nói chuyện dễ ghê.", "requires": ["place"], "targets": "neutral" },
+        { "text": "Tớ mà chọn chỗ thì chắc lại lạc đường thêm lần nữa.", "requires": [], "targets": "sender" },
+        { "text": "Cậu thấy chỗ đó thế nào?", "requires": [], "targets": "neutral" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-23"
+      }
+    },
+    {
+      "id": "thank_you_after_date.thoi_gian.v1",
+      "frame": "Cảm ơn thời gian",
+      "clauses": [
+        { "text": "Cảm ơn cậu đã dành cả buổi cho hôm nay.", "requires": [], "targets": "neutral" },
+        { "text": "{duration} trôi nhanh thật.", "requires": ["duration"], "targets": "neutral" },
+        { "text": "Tớ biết sắp xếp được một buổi không dễ.", "requires": [], "targets": "neutral" },
+        { "text": "Giờ cậu đỡ mệt chưa?", "requires": [], "targets": "neutral" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-23"
+      }
+    },
+    {
+      "id": "thank_you_after_date.ke_lai.v1",
+      "frame": "Kể lại một câu",
+      "clauses": [
+        { "text": "Cảm ơn cậu vì hôm nay nhé.", "requires": [], "targets": "neutral" },
+        { "text": "Về tới nhà tớ vẫn kể lại buổi {activity} cho đứa bạn nghe.", "requires": ["activity"], "targets": "sender" },
+        { "text": "Tớ cười hơi nhiều, giờ nghĩ lại vẫn thấy buồn cười.", "requires": [], "targets": "sender" },
+        { "text": "Cậu kể cho ai chưa?", "requires": [], "targets": "neutral" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-23"
+      }
+    },
+    {
+      "id": "thank_you_after_date.ru_tiep_nhe.v1",
+      "frame": "Rủ tiếp nhẹ",
+      "clauses": [
+        { "text": "Cảm ơn cậu vì buổi hôm nay nhé.", "requires": [], "targets": "neutral" },
+        { "text": "Tớ đang định rủ cậu đi thêm một buổi nữa.", "requires": [], "targets": "sender" },
+        { "text": "Lần này tớ tự tìm đường, không hỏi vòng vo như hôm nay.", "requires": [], "targets": "sender" },
+        { "text": "Cậu thấy sao?", "requires": [], "targets": "neutral" },
+        { "text": "Bận thì cậu nói thẳng nhé, tớ không phiền đâu.", "requires": [], "targets": "neutral", "role": "decline_door" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-23"
+      }
+    },
+    {
+      "id": "thank_you_after_date.hen_lan_sau.v1",
+      "frame": "Hẹn lần sau",
+      "clauses": [
+        { "text": "Cảm ơn cậu, hôm nay tớ vui lắm.", "requires": [], "targets": "sender" },
+        { "text": "Ngày {date} chắc tớ nhớ lâu.", "requires": ["date"], "targets": "sender" },
+        { "text": "Hôm nào đó tớ rủ cậu đi một vòng nữa nhé?", "requires": [], "targets": "neutral" },
+        { "text": "Không tiện thì cậu cứ nhắn một câu, mình để hôm khác.", "requires": [], "targets": "neutral", "role": "decline_door" }
+      ],
+      "editorial_review": {
+        "layer1": "content.editor.vi.a",
+        "layer2": "content.editor.vi.b",
+        "approved_at": "2026-09-23"
+      }
+    }
+  ]
+}

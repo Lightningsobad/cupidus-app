@@ -8268,6 +8268,335 @@ class ChapterClosureItemsCompanion
   }
 }
 
+class $ThankYouActivationsTable extends ThankYouActivations
+    with TableInfo<$ThankYouActivationsTable, ThankYouActivationRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ThankYouActivationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _cardIdMeta = const VerificationMeta('cardId');
+  @override
+  late final GeneratedColumn<String> cardId = GeneratedColumn<String>(
+    'card_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES activity_cards (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _armedOnMeta = const VerificationMeta(
+    'armedOn',
+  );
+  @override
+  late final GeneratedColumn<String> armedOn = GeneratedColumn<String>(
+    'armed_on',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _consumedAtMeta = const VerificationMeta(
+    'consumedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> consumedAt = GeneratedColumn<DateTime>(
+    'consumed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [cardId, status, armedOn, consumedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'thank_you_activations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ThankYouActivationRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('card_id')) {
+      context.handle(
+        _cardIdMeta,
+        cardId.isAcceptableOrUnknown(data['card_id']!, _cardIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_cardIdMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('armed_on')) {
+      context.handle(
+        _armedOnMeta,
+        armedOn.isAcceptableOrUnknown(data['armed_on']!, _armedOnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_armedOnMeta);
+    }
+    if (data.containsKey('consumed_at')) {
+      context.handle(
+        _consumedAtMeta,
+        consumedAt.isAcceptableOrUnknown(data['consumed_at']!, _consumedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {cardId};
+  @override
+  ThankYouActivationRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ThankYouActivationRow(
+      cardId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}card_id'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      armedOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}armed_on'],
+      )!,
+      consumedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}consumed_at'],
+      ),
+    );
+  }
+
+  @override
+  $ThankYouActivationsTable createAlias(String alias) {
+    return $ThankYouActivationsTable(attachedDatabase, alias);
+  }
+}
+
+class ThankYouActivationRow extends DataClass
+    implements Insertable<ThankYouActivationRow> {
+  final String cardId;
+
+  /// `armed` | `consumed` | `cancelled`.
+  final String status;
+
+  /// Civil date `YYYY-MM-DD` in the device calendar on the day the card entered
+  /// *Đã đi rồi*. Deliberately not a DateTime/instant: AC-1 and AC-2 compare
+  /// calendar days, so storing an instant would make the answer depend on the
+  /// host's UTC offset rather than on the user's own date.
+  final String armedOn;
+
+  /// Internal ordering only, never rendered and never compared against a
+  /// deadline (BR-3).
+  final DateTime? consumedAt;
+  const ThankYouActivationRow({
+    required this.cardId,
+    required this.status,
+    required this.armedOn,
+    this.consumedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['card_id'] = Variable<String>(cardId);
+    map['status'] = Variable<String>(status);
+    map['armed_on'] = Variable<String>(armedOn);
+    if (!nullToAbsent || consumedAt != null) {
+      map['consumed_at'] = Variable<DateTime>(consumedAt);
+    }
+    return map;
+  }
+
+  ThankYouActivationsCompanion toCompanion(bool nullToAbsent) {
+    return ThankYouActivationsCompanion(
+      cardId: Value(cardId),
+      status: Value(status),
+      armedOn: Value(armedOn),
+      consumedAt: consumedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(consumedAt),
+    );
+  }
+
+  factory ThankYouActivationRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ThankYouActivationRow(
+      cardId: serializer.fromJson<String>(json['cardId']),
+      status: serializer.fromJson<String>(json['status']),
+      armedOn: serializer.fromJson<String>(json['armedOn']),
+      consumedAt: serializer.fromJson<DateTime?>(json['consumedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'cardId': serializer.toJson<String>(cardId),
+      'status': serializer.toJson<String>(status),
+      'armedOn': serializer.toJson<String>(armedOn),
+      'consumedAt': serializer.toJson<DateTime?>(consumedAt),
+    };
+  }
+
+  ThankYouActivationRow copyWith({
+    String? cardId,
+    String? status,
+    String? armedOn,
+    Value<DateTime?> consumedAt = const Value.absent(),
+  }) => ThankYouActivationRow(
+    cardId: cardId ?? this.cardId,
+    status: status ?? this.status,
+    armedOn: armedOn ?? this.armedOn,
+    consumedAt: consumedAt.present ? consumedAt.value : this.consumedAt,
+  );
+  ThankYouActivationRow copyWithCompanion(ThankYouActivationsCompanion data) {
+    return ThankYouActivationRow(
+      cardId: data.cardId.present ? data.cardId.value : this.cardId,
+      status: data.status.present ? data.status.value : this.status,
+      armedOn: data.armedOn.present ? data.armedOn.value : this.armedOn,
+      consumedAt: data.consumedAt.present
+          ? data.consumedAt.value
+          : this.consumedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ThankYouActivationRow(')
+          ..write('cardId: $cardId, ')
+          ..write('status: $status, ')
+          ..write('armedOn: $armedOn, ')
+          ..write('consumedAt: $consumedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(cardId, status, armedOn, consumedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ThankYouActivationRow &&
+          other.cardId == this.cardId &&
+          other.status == this.status &&
+          other.armedOn == this.armedOn &&
+          other.consumedAt == this.consumedAt);
+}
+
+class ThankYouActivationsCompanion
+    extends UpdateCompanion<ThankYouActivationRow> {
+  final Value<String> cardId;
+  final Value<String> status;
+  final Value<String> armedOn;
+  final Value<DateTime?> consumedAt;
+  final Value<int> rowid;
+  const ThankYouActivationsCompanion({
+    this.cardId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.armedOn = const Value.absent(),
+    this.consumedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ThankYouActivationsCompanion.insert({
+    required String cardId,
+    required String status,
+    required String armedOn,
+    this.consumedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : cardId = Value(cardId),
+       status = Value(status),
+       armedOn = Value(armedOn);
+  static Insertable<ThankYouActivationRow> custom({
+    Expression<String>? cardId,
+    Expression<String>? status,
+    Expression<String>? armedOn,
+    Expression<DateTime>? consumedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (cardId != null) 'card_id': cardId,
+      if (status != null) 'status': status,
+      if (armedOn != null) 'armed_on': armedOn,
+      if (consumedAt != null) 'consumed_at': consumedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ThankYouActivationsCompanion copyWith({
+    Value<String>? cardId,
+    Value<String>? status,
+    Value<String>? armedOn,
+    Value<DateTime?>? consumedAt,
+    Value<int>? rowid,
+  }) {
+    return ThankYouActivationsCompanion(
+      cardId: cardId ?? this.cardId,
+      status: status ?? this.status,
+      armedOn: armedOn ?? this.armedOn,
+      consumedAt: consumedAt ?? this.consumedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (cardId.present) {
+      map['card_id'] = Variable<String>(cardId.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (armedOn.present) {
+      map['armed_on'] = Variable<String>(armedOn.value);
+    }
+    if (consumedAt.present) {
+      map['consumed_at'] = Variable<DateTime>(consumedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ThankYouActivationsCompanion(')
+          ..write('cardId: $cardId, ')
+          ..write('status: $status, ')
+          ..write('armedOn: $armedOn, ')
+          ..write('consumedAt: $consumedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$CupidDatabase extends GeneratedDatabase {
   _$CupidDatabase(QueryExecutor e) : super(e);
   $CupidDatabaseManager get managers => $CupidDatabaseManager(this);
@@ -8304,6 +8633,8 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
   );
   late final $ChapterClosureItemsTable chapterClosureItems =
       $ChapterClosureItemsTable(this);
+  late final $ThankYouActivationsTable thankYouActivations =
+      $ThankYouActivationsTable(this);
   late final Index activityCardsOwnerStatus = Index(
     'activity_cards_owner_status',
     'CREATE INDEX activity_cards_owner_status ON activity_cards (owner_key, status)',
@@ -8350,6 +8681,7 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
     relationshipLabels,
     chapterClosures,
     chapterClosureItems,
+    thankYouActivations,
     activityCardsOwnerStatus,
     chapterClosureItemsKindItem,
   ];
@@ -8382,6 +8714,13 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('chapter_closure_items', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'activity_cards',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('thank_you_activations', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -9556,6 +9895,30 @@ final class $$ActivityCardsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $ThankYouActivationsTable,
+    List<ThankYouActivationRow>
+  >
+  _thankYouActivationsRefsTable(_$CupidDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.thankYouActivations,
+        aliasName: 'activity_cards__id__thank_you_activations__card_id',
+      );
+
+  $$ThankYouActivationsTableProcessedTableManager get thankYouActivationsRefs {
+    final manager = $$ThankYouActivationsTableTableManager(
+      $_db,
+      $_db.thankYouActivations,
+    ).filter((f) => f.cardId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _thankYouActivationsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ActivityCardsTableFilterComposer
@@ -9725,6 +10088,31 @@ class $$ActivityCardsTableFilterComposer
           }) => $$InviteMessagesTableFilterComposer(
             $db: $db,
             $table: $db.inviteMessages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> thankYouActivationsRefs(
+    Expression<bool> Function($$ThankYouActivationsTableFilterComposer f) f,
+  ) {
+    final $$ThankYouActivationsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.thankYouActivations,
+      getReferencedColumn: (t) => t.cardId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ThankYouActivationsTableFilterComposer(
+            $db: $db,
+            $table: $db.thankYouActivations,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -10014,6 +10402,32 @@ class $$ActivityCardsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> thankYouActivationsRefs<T extends Object>(
+    Expression<T> Function($$ThankYouActivationsTableAnnotationComposer a) f,
+  ) {
+    final $$ThankYouActivationsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.thankYouActivations,
+          getReferencedColumn: (t) => t.cardId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ThankYouActivationsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.thankYouActivations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$ActivityCardsTableTableManager
@@ -10032,6 +10446,7 @@ class $$ActivityCardsTableTableManager
           PrefetchHooks Function({
             bool activityCardPhotosRefs,
             bool inviteMessagesRefs,
+            bool thankYouActivationsRefs,
           })
         > {
   $$ActivityCardsTableTableManager(
@@ -10160,12 +10575,17 @@ class $$ActivityCardsTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({activityCardPhotosRefs = false, inviteMessagesRefs = false}) {
+              ({
+                activityCardPhotosRefs = false,
+                inviteMessagesRefs = false,
+                thankYouActivationsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (activityCardPhotosRefs) db.activityCardPhotos,
                     if (inviteMessagesRefs) db.inviteMessages,
+                    if (thankYouActivationsRefs) db.thankYouActivations,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -10212,6 +10632,27 @@ class $$ActivityCardsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (thankYouActivationsRefs)
+                        await $_getPrefetchedData<
+                          ActivityCardRow,
+                          $ActivityCardsTable,
+                          ThankYouActivationRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ActivityCardsTableReferences
+                              ._thankYouActivationsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ActivityCardsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).thankYouActivationsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.cardId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -10235,6 +10676,7 @@ typedef $$ActivityCardsTableProcessedTableManager =
       PrefetchHooks Function({
         bool activityCardPhotosRefs,
         bool inviteMessagesRefs,
+        bool thankYouActivationsRefs,
       })
     >;
 typedef $$ActivityCardPhotosTableCreateCompanionBuilder =
@@ -13677,6 +14119,326 @@ typedef $$ChapterClosureItemsTableProcessedTableManager =
       ChapterClosureItemRow,
       PrefetchHooks Function({bool closureId})
     >;
+typedef $$ThankYouActivationsTableCreateCompanionBuilder =
+    ThankYouActivationsCompanion Function({
+      required String cardId,
+      required String status,
+      required String armedOn,
+      Value<DateTime?> consumedAt,
+      Value<int> rowid,
+    });
+typedef $$ThankYouActivationsTableUpdateCompanionBuilder =
+    ThankYouActivationsCompanion Function({
+      Value<String> cardId,
+      Value<String> status,
+      Value<String> armedOn,
+      Value<DateTime?> consumedAt,
+      Value<int> rowid,
+    });
+
+final class $$ThankYouActivationsTableReferences
+    extends
+        BaseReferences<
+          _$CupidDatabase,
+          $ThankYouActivationsTable,
+          ThankYouActivationRow
+        > {
+  $$ThankYouActivationsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ActivityCardsTable _cardIdTable(_$CupidDatabase db) => db
+      .activityCards
+      .createAlias('thank_you_activations__card_id__activity_cards__id');
+
+  $$ActivityCardsTableProcessedTableManager get cardId {
+    final $_column = $_itemColumn<String>('card_id')!;
+
+    final manager = $$ActivityCardsTableTableManager(
+      $_db,
+      $_db.activityCards,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_cardIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ThankYouActivationsTableFilterComposer
+    extends Composer<_$CupidDatabase, $ThankYouActivationsTable> {
+  $$ThankYouActivationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get armedOn => $composableBuilder(
+    column: $table.armedOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get consumedAt => $composableBuilder(
+    column: $table.consumedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ActivityCardsTableFilterComposer get cardId {
+    final $$ActivityCardsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cardId,
+      referencedTable: $db.activityCards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityCardsTableFilterComposer(
+            $db: $db,
+            $table: $db.activityCards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ThankYouActivationsTableOrderingComposer
+    extends Composer<_$CupidDatabase, $ThankYouActivationsTable> {
+  $$ThankYouActivationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get armedOn => $composableBuilder(
+    column: $table.armedOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get consumedAt => $composableBuilder(
+    column: $table.consumedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ActivityCardsTableOrderingComposer get cardId {
+    final $$ActivityCardsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cardId,
+      referencedTable: $db.activityCards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityCardsTableOrderingComposer(
+            $db: $db,
+            $table: $db.activityCards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ThankYouActivationsTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $ThankYouActivationsTable> {
+  $$ThankYouActivationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get armedOn =>
+      $composableBuilder(column: $table.armedOn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get consumedAt => $composableBuilder(
+    column: $table.consumedAt,
+    builder: (column) => column,
+  );
+
+  $$ActivityCardsTableAnnotationComposer get cardId {
+    final $$ActivityCardsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cardId,
+      referencedTable: $db.activityCards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityCardsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.activityCards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ThankYouActivationsTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $ThankYouActivationsTable,
+          ThankYouActivationRow,
+          $$ThankYouActivationsTableFilterComposer,
+          $$ThankYouActivationsTableOrderingComposer,
+          $$ThankYouActivationsTableAnnotationComposer,
+          $$ThankYouActivationsTableCreateCompanionBuilder,
+          $$ThankYouActivationsTableUpdateCompanionBuilder,
+          (ThankYouActivationRow, $$ThankYouActivationsTableReferences),
+          ThankYouActivationRow,
+          PrefetchHooks Function({bool cardId})
+        > {
+  $$ThankYouActivationsTableTableManager(
+    _$CupidDatabase db,
+    $ThankYouActivationsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ThankYouActivationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ThankYouActivationsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ThankYouActivationsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> cardId = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> armedOn = const Value.absent(),
+                Value<DateTime?> consumedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ThankYouActivationsCompanion(
+                cardId: cardId,
+                status: status,
+                armedOn: armedOn,
+                consumedAt: consumedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String cardId,
+                required String status,
+                required String armedOn,
+                Value<DateTime?> consumedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ThankYouActivationsCompanion.insert(
+                cardId: cardId,
+                status: status,
+                armedOn: armedOn,
+                consumedAt: consumedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ThankYouActivationsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({cardId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (cardId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.cardId,
+                                referencedTable:
+                                    $$ThankYouActivationsTableReferences
+                                        ._cardIdTable(db),
+                                referencedColumn:
+                                    $$ThankYouActivationsTableReferences
+                                        ._cardIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ThankYouActivationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $ThankYouActivationsTable,
+      ThankYouActivationRow,
+      $$ThankYouActivationsTableFilterComposer,
+      $$ThankYouActivationsTableOrderingComposer,
+      $$ThankYouActivationsTableAnnotationComposer,
+      $$ThankYouActivationsTableCreateCompanionBuilder,
+      $$ThankYouActivationsTableUpdateCompanionBuilder,
+      (ThankYouActivationRow, $$ThankYouActivationsTableReferences),
+      ThankYouActivationRow,
+      PrefetchHooks Function({bool cardId})
+    >;
 
 class $CupidDatabaseManager {
   final _$CupidDatabase _db;
@@ -13717,4 +14479,6 @@ class $CupidDatabaseManager {
       $$ChapterClosuresTableTableManager(_db, _db.chapterClosures);
   $$ChapterClosureItemsTableTableManager get chapterClosureItems =>
       $$ChapterClosureItemsTableTableManager(_db, _db.chapterClosureItems);
+  $$ThankYouActivationsTableTableManager get thankYouActivations =>
+      $$ThankYouActivationsTableTableManager(_db, _db.thankYouActivations);
 }

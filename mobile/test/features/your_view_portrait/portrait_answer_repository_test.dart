@@ -39,7 +39,7 @@ void main() {
 
     test('opens at the current schema version with the table present',
         () async {
-      expect(database.schemaVersion, 7);
+      expect(database.schemaVersion, 10);
       await database.select(database.portraitAnswers).get();
     });
 
@@ -108,7 +108,7 @@ void main() {
     });
   });
 
-  group('v6 -> v7 migration', () {
+  group('v6 -> current migration', () {
     Future<int> readUserVersion(CupidDatabase database) async {
       final row = await database.customSelect('PRAGMA user_version').getSingle();
       return row.read<int>('user_version');
@@ -143,6 +143,11 @@ void main() {
             ),
           );
       await seeded.customStatement('DROP TABLE portrait_answers');
+      // Also the closure ledger: its upgrade step builds an index, and
+      // `Migrator.createIndex` emits a plain `CREATE INDEX` that fails on one
+      // the fixture left behind. Items first — it holds the cascading key.
+      await seeded.customStatement('DROP TABLE chapter_closure_items');
+      await seeded.customStatement('DROP TABLE chapter_closures');
       await seeded.customStatement('PRAGMA user_version = 6');
       await seeded.close();
     }
@@ -161,7 +166,7 @@ void main() {
       await tempDir.delete(recursive: true);
     });
 
-    test('lands on v7 with portrait_answers created', () async {
+    test('lands on the current schema with portrait_answers created', () async {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
@@ -169,7 +174,7 @@ void main() {
           .customSelect("SELECT name FROM sqlite_master WHERE type = 'table'")
           .get();
 
-      expect(await readUserVersion(upgraded), 7);
+      expect(await readUserVersion(upgraded), 10);
       expect(
         tables.map((row) => row.read<String>('name')).toSet(),
         contains('portrait_answers'),

@@ -14,12 +14,12 @@ import 'package:flutter_test/flutter_test.dart';
 /// removing exactly the v7 addition, so the v6 shape tracks the real table
 /// definitions instead of being retyped by hand.
 ///
-/// Landing at v8, not v7: a sibling story (STORY-010) also added a schema step
-/// (`relationship_labels`) at what it assumed would be v7, so it renumbered to
-/// v8 when both merged into the integration branch. `relationship_labels`
-/// already exists in this fixture (it comes from the current schema the
-/// fixture is built on), so the v8 upgrade step is a no-op `CREATE TABLE IF
-/// NOT EXISTS` here — it does not affect what this file is testing.
+/// Landing on the current version, not v7: sibling stories kept adding schema
+/// steps after this one, and their tables already exist in this fixture (it is
+/// built on the current schema), so each later `CREATE TABLE` step is a no-op
+/// `CREATE TABLE IF NOT EXISTS` here. `createIndex` has no such `IF NOT
+/// EXISTS`, which is why the closure-ledger tables are dropped below rather
+/// than left in place like the others.
 void main() {
   Future<int> readUserVersion(CupidDatabase database) async {
     final row = await database.customSelect('PRAGMA user_version').getSingle();
@@ -96,6 +96,11 @@ void main() {
           ),
         );
     await seeded.customStatement('DROP TABLE calendar_event_state');
+    // Items first: it holds the cascading foreign key onto chapter_closures.
+    // Dropping the tables also drops the v9 index, which the upgrade recreates
+    // with a plain `CREATE INDEX` that would fail on an index already there.
+    await seeded.customStatement('DROP TABLE chapter_closure_items');
+    await seeded.customStatement('DROP TABLE chapter_closures');
     await seeded.customStatement('PRAGMA user_version = 6');
     await seeded.close();
   }
@@ -112,16 +117,17 @@ void main() {
     await tempDir.delete(recursive: true);
   });
 
-  group('v6 -> v8', () {
+  group('v6 -> current', () {
     setUp(() async {
       await seedV6(databaseFile);
     });
 
-    test('lands on v8 with calendar_event_state present', () async {
+    test('lands on the current schema with calendar_event_state present',
+        () async {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
-      expect(await readUserVersion(upgraded), 8);
+      expect(await readUserVersion(upgraded), 10);
       expect(await tableNames(upgraded), contains('calendar_event_state'));
     });
 
@@ -168,15 +174,15 @@ void main() {
     });
   });
 
-  group('v8 on a fresh install', () {
+  group('a fresh install', () {
     test('onCreate emits calendar_event_state without a migration', () async {
       final fresh = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(fresh.close);
 
       await fresh.select(fresh.calendarEventState).get();
 
-      expect(await readUserVersion(fresh), 8);
-      expect(fresh.schemaVersion, 8);
+      expect(await readUserVersion(fresh), 10);
+      expect(fresh.schemaVersion, 10);
     });
 
     test('calendar_event_state is keyed by (owner_key, event_id)', () async {

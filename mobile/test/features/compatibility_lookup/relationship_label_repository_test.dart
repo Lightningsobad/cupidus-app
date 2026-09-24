@@ -67,7 +67,7 @@ void main() {
     );
   }
 
-  group('migration v6 -> v8', () {
+  group('migration v6 -> current', () {
     /// Seeds one row in each pre-existing client-owned table, then strips the
     /// v8 addition and rewinds `user_version`, leaving a database that looks
     /// exactly like one that stopped at v6.
@@ -96,15 +96,21 @@ void main() {
             ),
           );
       await seeded.customStatement('DROP TABLE relationship_labels');
+      // Also the closure ledger: its upgrade step builds an index, and
+      // `Migrator.createIndex` emits a plain `CREATE INDEX` that fails on one
+      // the fixture left behind. Items first — it holds the cascading key.
+      await seeded.customStatement('DROP TABLE chapter_closure_items');
+      await seeded.customStatement('DROP TABLE chapter_closures');
       await seeded.customStatement('PRAGMA user_version = 6');
       await seeded.close();
     });
 
-    test('lands on v8 with relationship_labels present', () async {
+    test('lands on the current schema with relationship_labels present',
+        () async {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
-      expect(await readUserVersion(upgraded), 8);
+      expect(await readUserVersion(upgraded), 10);
       expect(await tableNames(upgraded), contains('relationship_labels'));
     });
 
@@ -138,15 +144,15 @@ void main() {
     });
   });
 
-  group('v8 on a fresh install', () {
+  group('a fresh install', () {
     test('onCreate emits relationship_labels without a migration', () async {
       final fresh = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(fresh.close);
 
       await fresh.select(fresh.relationshipLabels).get();
 
-      expect(await readUserVersion(fresh), 8);
-      expect(fresh.schemaVersion, 8);
+      expect(await readUserVersion(fresh), 10);
+      expect(fresh.schemaVersion, 10);
     });
 
     test('the natural key (owner_key, subject, system) is UNIQUE in the DDL',

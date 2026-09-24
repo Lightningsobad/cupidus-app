@@ -88,6 +88,15 @@ class Stage1WipeRegistry {
           ownerColumn: cards.ownerKey,
         ),
       ),
+      Stage1WipeTable(
+        table: _db.thankYouActivations,
+        ownerWhere: _viaParent(
+          child: _db.thankYouActivations.cardId,
+          parent: cards,
+          parentKey: cards.id,
+          ownerColumn: cards.ownerKey,
+        ),
+      ),
       Stage1WipeTable(table: cards, ownerWhere: _ownedBy(cards.ownerKey)),
       Stage1WipeTable(
         table: _db.journalPhotos,
