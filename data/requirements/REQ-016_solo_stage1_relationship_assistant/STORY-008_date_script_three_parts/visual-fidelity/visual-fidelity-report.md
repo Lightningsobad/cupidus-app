@@ -53,10 +53,10 @@ trên surface và chặn lane. Giữ nguyên tên mặc định `design-referenc
 
 | Trạng thái | Nền tảng | Bản thiết kế | Bản cài đặt |
 | --- | --- | --- | --- |
-| Đoạn "Trước" | ios | `design-reference-9-kich-ban-buoi-hen-ios.png` (415x900) | `implemented-screen-9-kich-ban-buoi-hen-truoc-ios.png` (415x900) |
-| Đoạn "Trong" | ios | cùng bản tham chiếu (canvas chỉ có một khung tĩnh, `toggles: []`) | `implemented-screen-9-kich-ban-buoi-hen-trong-ios.png` (415x900) |
-| Hỏi tại chỗ, sổ tay trống | ios | cùng bản tham chiếu | `implemented-screen-9-kich-ban-buoi-hen-so-tay-trong-ios.png` (415x900) |
-| Ba cửa ra hiện đủ | ios | cùng bản tham chiếu | `implemented-screen-9-ba-cua-ra-ios.png` (415x900) |
+| Đoạn "Trước" | ios | `design-reference-9-kich-ban-buoi-hen-ios.png` (415x900) | `implemented-9-kich-ban-buoi-hen-truoc-ios.png` (415x900) |
+| Đoạn "Trong" | ios | cùng bản tham chiếu (canvas chỉ có một khung tĩnh, `toggles: []`) | `implemented-9-kich-ban-buoi-hen-trong-ios.png` (415x900) |
+| Hỏi tại chỗ, sổ tay trống | ios | cùng bản tham chiếu | `implemented-9-kich-ban-buoi-hen-so-tay-trong-ios.png` (415x900) |
+| Ba cửa ra hiện đủ | ios | cùng bản tham chiếu | `implemented-9-ba-cua-ra-ios.png` (415x900) |
 
 Canvas không có toggle/biến thể trạng thái cho khung này, nên một bản tham chiếu
 phục vụ cả bốn trạng thái cài đặt.
@@ -65,6 +65,12 @@ Bốn ảnh `implemented-*` là **chính những ảnh review đã tự mở và
 lệ**, chỉ được `git mv` từ `mobile/test/features/date_script/visual-fidelity/`
 sang đây và thêm hậu tố `-ios` cho khớp quy ước STORY-003/STORY-006. Không chụp
 lại, không sửa nội dung ảnh.
+
+Lượt khắc phục F-4 (2026-09-24) `git mv` thêm một lần nữa để bỏ token `screen-`
+thừa còn sót từ tên cũ: `implemented-screen-9-…` → `implemented-9-…`. Gate lấy
+id màn là token đứng ngay sau tiền tố `implemented-`/`design-reference-`, nên
+tên cũ cho id `screen` còn bản tham chiếu cho id `9` và hai phía không ghép cặp
+được. Nội dung ảnh không đổi ở lần này.
 
 ## Cách bốn ảnh cài đặt được tạo ra
 
@@ -119,7 +125,7 @@ Review hoãn D-1: pill "Ghi vào nhật ký" *có vẻ* dính sát mép phải �
 và không có assert `rect.right <= view.width`.
 
 **D-1 không tái lập được.** Quét pixel trên chính
-`implemented-screen-9-ba-cua-ra-ios.png`:
+`implemented-9-ba-cua-ra-ios.png`:
 
 | Phần tử | Bản cài đặt | Bản thiết kế |
 | --- | --- | --- |
@@ -216,7 +222,7 @@ dung (mỗi đoạn thành N mục có dòng phụ), không phải một patch g
 | Hỏi tại chỗ (sổ tay trống) | PASS | Canvas không vẽ trạng thái này; ô hỏi một câu + "Bỏ qua" cùng khối đúng AC-23/AC-24/AC-25 và cơ chế STORY-004 |
 | Ba cửa ra | PASS | Đủ ba, đúng thứ tự, pill viền sticky; nhãn/kiểu = conflict #2, #3; lề trái/phải đối xứng 16dp, **D-1 không tái lập** |
 
-## Lệnh đã chạy trong lần kiểm này
+## Lệnh đã chạy trong lượt khắc phục thị giác (2026-09-17)
 
 ```
 node .ai-team-bundle/runtime/tools/render-design-canvas.js --location=cupid-app-design-system --surface=cupid-ch-ng-1 --list-screens            → exit 0
@@ -229,3 +235,30 @@ ghi đè `STORY-002_invite_message_composer/visual-fidelity/implemented-11-chuan
 dù không bật `--dart-define=CAPTURE_VISUALS`. File ngoài WriteScope của story
 này nên đã `git checkout --` trả lại bản đã commit. Việc cần sửa vẫn thuộc
 STORY-002.
+
+## Gate re-run sau đổi tên (khắc phục F-4, 2026-09-24)
+
+`verify-story-visual-fidelity-gate.sh` chạy im lặng khi thiếu ngữ cảnh phiên,
+nên lượt này gọi thẳng bộ kiểm nó dùng — `.claude/hooks/lib/visual_fidelity.py`:
+
+```
+python3 .claude/hooks/lib/visual_fidelity.py --dir <story-dir> --project <worktree> \
+  --stage review --stack mobile --lane mobile   → không output, exit 0  (PASS)
+python3 .claude/hooks/lib/visual_fidelity.py --dir <story-dir> --project <worktree> \
+  --stage done   --stack mobile --lane mobile   → không output, exit 0  (PASS)
+```
+
+Đối chứng trên một bản sao tạm ở `/tmp` giữ nguyên tên cũ
+`implemented-screen-9-*` (ảnh và báo cáo y hệt, chỉ khác tên file) cho đúng lỗi
+đã chặn ở lượt 2, exit 1:
+
+```
+no screen has BOTH renders, so nothing was actually compared:
+running-app renders exist for ['screen'] and design renders for ['9']
+```
+
+Tức là cổng thực sự có chạy và chính việc bỏ token `screen-` là thứ gỡ chặn:
+cả hai phía giờ cùng cho id màn `9`. Không ảnh nào bị chụp lại, không mã sản
+phẩm hay mã test nào bị đổi trong lượt này.
+
+**Gate re-run sau đổi tên: PASS — 2026-09-24.**
