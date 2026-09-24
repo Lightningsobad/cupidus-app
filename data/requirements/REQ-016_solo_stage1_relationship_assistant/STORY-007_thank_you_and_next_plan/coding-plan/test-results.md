@@ -609,3 +609,126 @@ chip viền `Soạn lời cảm ơn` với icon `edit_note`, nằm trên phần 
 mắt: đủ dấu tiếng Việt, không ô tofu, icon vẽ đúng chứ không phải ô vuông thay
 thế. `git status --porcelain` sau khi chạy: 5 file sửa + 3 file mới, tất cả
 thuộc phase này — **không** PNG của story khác bị ghi đè.
+
+## P4 — Phần 2, đính ảnh
+
+- Date: 2026-09-24
+- Worktree: `story-REQ-016_solo_stage1_relationship_assistant-STORY-007_thank_you_and_next_plan`
+- BaseHead: `3a824d4a08f82a0ced5827395a8ad57e9ddfd043`
+- Result: **PASS**
+
+### Chữ ký hàm chiếu mới ở cổng nhật ký
+
+Đúng **một** khai báo được thêm vào
+`mobile/lib/features/journal/journal_entry_point.dart` (3 → 4 khai báo):
+
+```dart
+Future<List<String>> journalPhotoPathsForOrigin(String originRef)
+```
+
+Truy vấn nền đặt cạnh `JournalRepository`, không lộ ra ngoài feature:
+
+```dart
+Future<List<String>> JournalRepository.photoFilePathsForOrigin(String originRef)
+```
+
+Kiểu chiếu của STORY-007
+(`mobile/lib/features/activity_cards/thank_you/data/attachable_photos.dart`)
+mang đúng một trường, `final String filePath;` — không văn bản, không mốc thời
+gian, không nhãn mục nhật ký, nên AC-17/BR-8 được trình biên dịch cưỡng chế chứ
+không phải kỷ luật ở widget. Hợp nhất hai nguồn:
+
+```dart
+List<AttachablePhoto> mergeAttachablePhotos({
+  required Iterable<String> cardPaths,
+  required Iterable<String> journalPaths,
+})
+```
+
+Không thêm hàm liệt kê/đếm/tìm/xem trước nào; `photo_attach_test.dart` fail nếu
+một trong số đó xuất hiện trong file entry point.
+
+### Nhánh nhật ký được kiểm bằng hàng gieo sẵn, không qua UI
+
+Theo Bước 1c của phase file: trong `mobile/lib` **chưa có caller nào** truyền
+`originRef`, nên nhánh nhật ký trả rỗng trên app thật cho tới STORY-008. Vì vậy
+test gieo hàng thẳng qua đường ghi có sẵn của chính entry point —
+`JournalRepository.saveEntry(id: ..., bodyText: ..., photoSourcePaths: [...],
+originRef: 'card-1')` — rồi đọc lại bằng `journalPhotoPathsForOrigin('card-1')`.
+Không màn hình nào tham gia, và không có API ghi mới nào được thêm.
+
+Ba ca đã chạy thật trên `CupidDatabase(NativeDatabase.memory())` với
+`JournalMediaStore` trỏ vào thư mục tạm: mục mang đúng `originRef` mới trả về;
+mục không gắn thẻ nào không lọt ra; xoá mục thì file ảnh biến mất khỏi đĩa và
+truy vấn trả rỗng (AC-18).
+
+### Lệnh đã chạy và kết quả thật
+
+1. Suite mới của P4:
+
+   ```
+   flutter test test/features/activity_cards/thank_you/photo_attach_test.dart
+   00:00 +15: All tests passed!
+   ```
+
+2. Toàn bộ thư mục `thank_you/`, gồm cả 4 closure `openComposer` phải sửa theo
+   chữ ký `ThankYouComposerOpener` mới (thêm tham số `List<String>
+   attachmentPaths`):
+
+   ```
+   flutter test test/features/activity_cards/thank_you/
+   00:02 +102 ~1: All tests passed!
+   ```
+
+3. Hai nhánh bị hàm chiếu mới chạm tới:
+
+   ```
+   flutter test test/features/journal/ --reporter=failures-only
+   +67 ~4: All other tests passed!
+   ```
+
+   ```
+   flutter test test/features/activity_cards/ test/features/invite_composer/ --reporter=failures-only
+   +460 ~4: All other tests passed!
+   ```
+
+4. Phân tích tĩnh. `flutter analyze lib test` không bao giờ xanh ở repo này
+   (nền có sẵn hàng trăm info `prefer_initializing_formals`, 0 error), nên cổng
+   là "không thêm vấn đề mới". Chạy hẹp vào đúng 4 thư mục của phase:
+
+   ```
+   flutter analyze lib/features/activity_cards/thank_you lib/features/journal \
+     test/features/activity_cards/thank_you test/features/journal
+   13 issues found.
+   ```
+
+   0 error. 12/13 có sẵn từ trước; issue duy nhất do P4 sinh ra
+   (`unnecessary_import` cho `dart:typed_data` trong `photo_attach_test.dart`)
+   đã sửa ngay trong lần chạy này.
+
+### Visual fidelity
+
+```
+flutter test test/features/activity_cards/thank_you/ \
+  --dart-define=CAPTURE_VISUALS=true --reporter=failures-only
++104: All tests passed!
+```
+
+Hai bản chụp, cả hai đã soi bằng mắt:
+
+- `implemented-sb-212-cam-on-chot-viec-ke-tiep-ios.png` — chụp lại với phần 2
+  có ảnh: hàng ba thumbnail vuông cuộn ngang dưới header
+  `KÈM ẢNH · KHÔNG BẮT BUỘC`, không tấm nào được chọn sẵn, không chữ/ngày giờ
+  đè lên ảnh. Đủ dấu tiếng Việt, không ô tofu.
+- `state-khong-anh-sb-212-cam-on-chot-viec-ke-tiep-ios.png` — cùng màn hình khi
+  không có ảnh nào: phần 2 **vắng hẳn**, không hàng xám, không placeholder
+  (AC-15/BR-9), phần 1 nằm liền trên header của phần 3.
+
+Bẫy đã gặp và cách xử lý, ghi lại vì nó im lặng: `Image.file` đọc đĩa, và một
+lượt đọc khởi động dưới đồng hồ giả của widget test **không bao giờ xong** — chờ
+nó trong `runAsync` sau đó làm treo cả lần chạy chứ không fail. Harness nạp
+trước file vào image cache **trước khi** pump widget; nếu không, hàng ảnh chụp ra
+là ba ô trống mà test vẫn xanh.
+
+`git status --porcelain` sau khi chạy: 7 file sửa + 4 file mới, tất cả thuộc
+write scope của P4 — **không** PNG của story khác bị ghi đè.

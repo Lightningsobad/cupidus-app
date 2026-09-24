@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../../core/content/content_package.dart';
 import '../../../../../core/di/service_locator.dart';
@@ -10,10 +12,13 @@ import '../../../../../design_system/tokens/cupid_color_tokens.dart';
 import '../../../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../../../design_system/tokens/cupid_spacing.dart';
 import '../../../../../design_system/tokens/cupid_typography_tokens.dart';
+import '../../../../invite_composer/domain/invite_payload_repository.dart';
 import '../../../../invite_composer/domain/invite_preset.dart';
 import '../../../../invite_composer/domain/preset_catalogue.dart';
+import '../../../../invite_composer/presentation/invite_composer_cubit.dart';
 import '../../../../invite_composer/presentation/widgets/invite_composer_sheet.dart';
 import '../../../domain/activity_card.dart';
+import '../../../domain/activity_card_repository.dart';
 
 /// Same file-local bilingual helper the rest of the block uses: `mobile/lib/l10n/`
 /// is outside this story's write scope. Only chrome goes through here — every
@@ -32,11 +37,16 @@ const String thankYouAfterDateCategoryId = 'thank_you_after_date';
 /// How the composer is opened, as a seam rather than a direct call so a test
 /// can drive the row without the composer's own DI. Mirrors
 /// `InviteComposerOpener` in STORY-002's prepare-actions sheet.
+///
+/// [attachmentPaths] are the files phần 2 has selected at the moment the sheet
+/// opens. A snapshot is enough: the sheet is modal, so the row of thumbnails
+/// cannot be touched again before the share.
 typedef ThankYouComposerOpener =
     Future<bool> Function(
       BuildContext context,
       ActivityCard card,
       String categoryId,
+      List<String> attachmentPaths,
     );
 
 /// Test/preview seams for [ThanksSection]. Both null in production.
@@ -46,6 +56,53 @@ class ThanksOptions {
 
   final PresetCatalogue? catalogue;
   final ThankYouComposerOpener? openComposer;
+}
+
+/// The share item: phần 1's text plus the original files picked in phần 2.
+///
+/// Every file goes out by reference to the path its own store already holds.
+/// Nothing is copied into a share staging area, so deleting the journal entry
+/// or the card still removes every copy of the photo the app ever made
+/// (AC-18), and an empty selection produces an item with no file at all —
+/// which is what the user gets until they tap a thumbnail (AC-16).
+ShareParams thankYouShareParams({
+  required String text,
+  required List<String> filePaths,
+}) =>
+    ShareParams(
+      text: text,
+      files: <XFile>[for (final String path in filePaths) XFile(path)],
+    );
+
+/// Opens STORY-002's composer with the thank-you category and hands the OS the
+/// text together with [attachmentPaths].
+///
+/// The composer is reached through its own public entry point; only the share
+/// step is supplied here, because attaching a file is this block's behaviour
+/// and not something STORY-002's invite flow does.
+Future<bool> openThankYouComposer(
+  BuildContext context,
+  ActivityCard card,
+  String categoryId,
+  List<String> attachmentPaths,
+) {
+  return showInviteComposerSheet(
+    context,
+    card,
+    categoryId,
+    createCubit: () => InviteComposerCubit(
+      card: card,
+      categoryId: categoryId,
+      catalogue: getIt<PresetCatalogue>(),
+      payloads: getIt<InvitePayloadRepository>(),
+      cards: getIt<ActivityCardRepository>(),
+      share: (String text) async {
+        await SharePlus.instance.share(
+          thankYouShareParams(text: text, filePaths: attachmentPaths),
+        );
+      },
+    ),
+  );
 }
 
 /// Whether the thank-you category resolves to a pack with at least one preset.
@@ -79,10 +136,15 @@ class ThanksSection extends StatelessWidget {
     super.key,
     required this.card,
     this.options = const ThanksOptions(),
+    this.attachments,
   });
 
   final ActivityCard card;
   final ThanksOptions options;
+
+  /// Photos phần 2 has selected, or null when there is no phần 2 to select in.
+  /// Read at the moment the composer opens; this section never writes to it.
+  final ValueListenable<List<String>>? attachments;
 
   @override
   Widget build(BuildContext context) {
@@ -133,7 +195,12 @@ class ThanksSection extends StatelessWidget {
 
   Future<void> _openComposer(BuildContext context) async {
     final ThankYouComposerOpener open =
-        options.openComposer ?? showInviteComposerSheet;
-    await open(context, card, thankYouAfterDateCategoryId);
+        options.openComposer ?? openThankYouComposer;
+    await open(
+      context,
+      card,
+      thankYouAfterDateCategoryId,
+      attachments?.value ?? const <String>[],
+    );
   }
 }

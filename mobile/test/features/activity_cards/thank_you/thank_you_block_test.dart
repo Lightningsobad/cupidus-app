@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -8,6 +9,7 @@ import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_type.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/screens/activity_card_detail_screen.dart';
+import 'package:cupid_mobile/features/activity_cards/thank_you/data/attachable_photos.dart';
 import 'package:cupid_mobile/features/activity_cards/thank_you/data/thank_you_activation_dao.dart';
 import 'package:cupid_mobile/features/activity_cards/thank_you/data/thank_you_activation_repository_impl.dart';
 import 'package:cupid_mobile/features/activity_cards/thank_you/domain/thank_you_activation.dart';
@@ -134,6 +136,20 @@ NextPlanOptions _emptyNextPlan() => NextPlanOptions(
       repository: _StubRepository(),
     );
 
+/// Phần 2 against a card with nothing to attach, which is the default here for
+/// the same reason [_emptyNextPlan] is: these are frame assertions, and the
+/// real loader would need both photo stores in the locator. Behaviour of the
+/// section itself lives in `photo_attach_test.dart`.
+PhotoAttachOptions _noPhotos() => PhotoAttachOptions(
+      loader: (String cardId) async => const <AttachablePhoto>[],
+    );
+
+PhotoAttachOptions _photosFrom(List<String> paths) => PhotoAttachOptions(
+      loader: (String cardId) async => <AttachablePhoto>[
+        for (final String path in paths) AttachablePhoto(path),
+      ],
+    );
+
 /// The shipped pack read off disk rather than through `rootBundle`, so the
 /// capture shows the wording and the dates the app actually ships, pinned to
 /// [_nextDay] so the same three chips render on any run day.
@@ -176,6 +192,7 @@ ThanksOptions _shippedThanks() => ThanksOptions(
         BuildContext context,
         ActivityCard card,
         String categoryId,
+        List<String> attachmentPaths,
       ) async =>
           true,
     );
@@ -279,6 +296,7 @@ void main() {
     ThankYouSlots slots = const ThankYouSlots(),
     NextPlanOptions? nextPlan,
     ThanksOptions? thanks,
+    PhotoAttachOptions? photos,
   }) async {
     await tester.pumpWidget(
       _host(
@@ -290,6 +308,7 @@ void main() {
             service: service,
             slots: slots,
             thanks: thanks,
+            photos: photos ?? _noPhotos(),
             nextPlan: nextPlan ?? _emptyNextPlan(),
           ),
         ),
@@ -566,6 +585,142 @@ void main() {
     });
   });
 
+  group('phần 2 nối vào khung (P4)', () {
+    late Directory photoDir;
+
+    setUp(() {
+      photoDir = Directory.systemTemp.createTempSync('thank_you_block_photos');
+      addTearDown(() {
+        if (photoDir.existsSync()) {
+          photoDir.deleteSync(recursive: true);
+        }
+      });
+    });
+
+    List<String> photoPaths(int count) => <String>[
+          for (int i = 0; i < count; i++)
+            (File('${photoDir.path}/photo-$i.png')
+                  ..writeAsBytesSync(
+                    base64Decode(
+                      'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91Jpz'
+                      'AAAAF0lEQVR42mN4UblyWsI+hoqAVS+m7QMAM5sHbVdD'
+                      'd/4AAAAASUVORK5CYII=',
+                    ),
+                  ))
+                .path,
+        ];
+
+    testWidgets('thẻ không có ảnh nào thì khe phần 2 vắng hẳn (AC-15, BR-9)',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await armYesterday();
+
+      await pumpDetail(tester);
+
+      expect(find.byKey(const Key('thank_you_slot_photo')), findsNothing);
+      expect(find.byKey(const Key('photo_attach_section')), findsNothing);
+      expect(find.byKey(const Key('photo_attach_row')), findsNothing);
+    });
+
+    testWidgets('có ảnh thì khe phần 2 hiện đủ số ô, chưa ô nào được chọn',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await armYesterday();
+
+      await pumpDetail(tester, photos: _photosFrom(photoPaths(2)));
+
+      expect(find.byKey(const Key('thank_you_slot_photo')), findsOneWidget);
+      expect(find.byKey(const Key('photo_attach_thumb_0')), findsOneWidget);
+      expect(find.byKey(const Key('photo_attach_thumb_1')), findsOneWidget);
+      expect(find.byKey(const Key('photo_attach_tick_0')), findsNothing);
+      expect(find.byKey(const Key('photo_attach_tick_1')), findsNothing);
+    });
+
+    testWidgets('chưa chạm ô nào thì lời cảm ơn đi một mình (AC-16)',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await armYesterday();
+      List<String>? handed;
+
+      await pumpDetail(
+        tester,
+        photos: _photosFrom(photoPaths(2)),
+        thanks: ThanksOptions(
+          catalogue: PresetCatalogue(
+            loader: ContentPackageLoader(bundle: _DiskBundle()),
+          ),
+          openComposer: (
+            BuildContext context,
+            ActivityCard card,
+            String categoryId,
+            List<String> attachmentPaths,
+          ) async {
+            handed = attachmentPaths;
+            return true;
+          },
+        ),
+      );
+
+      await tester.tap(find.byKey(const Key('thanks_compose_chip')));
+      await tester.pumpAndSettle();
+
+      expect(handed, isEmpty);
+    });
+
+    testWidgets('ô đã chạm đi cùng lời cảm ơn trong một vật phẩm (AC-14)',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await armYesterday();
+      final List<String> paths = photoPaths(2);
+      List<String>? handed;
+
+      await pumpDetail(
+        tester,
+        photos: _photosFrom(paths),
+        thanks: ThanksOptions(
+          catalogue: PresetCatalogue(
+            loader: ContentPackageLoader(bundle: _DiskBundle()),
+          ),
+          openComposer: (
+            BuildContext context,
+            ActivityCard card,
+            String categoryId,
+            List<String> attachmentPaths,
+          ) async {
+            handed = attachmentPaths;
+            return true;
+          },
+        ),
+      );
+
+      await tester.tap(find.byKey(const Key('photo_attach_thumb_1')));
+      await tester.pump();
+      expect(find.byKey(const Key('photo_attach_tick_1')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('thanks_compose_chip')));
+      await tester.pumpAndSettle();
+
+      expect(handed, <String>[paths[1]]);
+    });
+
+    testWidgets('kho ảnh hỏng thì mất khe phần 2, không mất cả khối (AC-25)',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await armYesterday();
+
+      await pumpDetail(
+        tester,
+        photos: PhotoAttachOptions(
+          loader: (String cardId) async => throw StateError('kho ảnh hỏng'),
+        ),
+      );
+
+      expect(find.byKey(const Key('thank_you_block')), findsOneWidget);
+      expect(find.byKey(const Key('thank_you_slot_photo')), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('không phạt im lặng (AC-25, AC-28)', () {
     testWidgets('đóng khối chỉ để lại đúng một hàng CONSUMED, không gì khác',
         (WidgetTester tester) async {
@@ -611,7 +766,12 @@ void main() {
   });
 
   group('visual fidelity capture', () {
-    testWidgets('sb-212-cam-on-chot-viec-ke-tiep', (WidgetTester tester) async {
+    Future<void> capture(
+      WidgetTester tester, {
+      required PhotoAttachOptions photos,
+      required List<File> preload,
+      required String fileName,
+    }) async {
       await armYesterday();
 
       tester.view.physicalSize = _iosReferenceViewport;
@@ -619,6 +779,7 @@ void main() {
       addTearDown(tester.view.reset);
 
       await _loadDesignFonts(tester);
+      await _warmImageCache(tester, preload);
       await tester.pumpWidget(
         RepaintBoundary(
           key: _captureBoundaryKey,
@@ -635,6 +796,7 @@ void main() {
                 thankYou: ThankYouOptions(
                   service: service,
                   thanks: _shippedThanks(),
+                  photos: photos,
                   nextPlan: _shippedNextPlan(),
                 ),
               ),
@@ -656,13 +818,94 @@ void main() {
         final ByteData? png =
             await image.toByteData(format: ui.ImageByteFormat.png);
         image.dispose();
-        final File out = File(
-          '$_visualEvidenceDir/'
-          'implemented-sb-212-cam-on-chot-viec-ke-tiep-ios.png',
-        );
+        final File out = File('$_visualEvidenceDir/$fileName');
         out.parent.createSync(recursive: true);
         out.writeAsBytesSync(png!.buffer.asUint8List());
       });
+    }
+
+    testWidgets('sb-212-cam-on-chot-viec-ke-tiep', (WidgetTester tester) async {
+      final Directory dir =
+          Directory.systemTemp.createTempSync('thank_you_capture');
+      addTearDown(() => dir.deleteSync(recursive: true));
+
+      final List<File> shots = <File>[];
+      await tester.runAsync(() async {
+        shots.addAll(<File>[
+          await _solidPng(dir, 'shot-0.png', const Color(0xFF6E5A8C)),
+          await _solidPng(dir, 'shot-1.png', const Color(0xFF3F6C7A)),
+          await _solidPng(dir, 'shot-2.png', const Color(0xFF8C5A62)),
+        ]);
+      });
+
+      await capture(
+        tester,
+        photos: _photosFrom(<String>[for (final File shot in shots) shot.path]),
+        preload: shots,
+        fileName: 'implemented-sb-212-cam-on-chot-viec-ke-tiep-ios.png',
+      );
+    });
+
+    testWidgets('sb-212 — thẻ không có ảnh nào', (WidgetTester tester) async {
+      await capture(
+        tester,
+        photos: _noPhotos(),
+        preload: const <File>[],
+        fileName: 'state-khong-anh-sb-212-cam-on-chot-viec-ke-tiep-ios.png',
+      );
     });
   }, skip: !kCaptureVisuals);
+}
+
+/// Decodes [files] into the image cache before anything asks for them.
+///
+/// `Image.file` reads from disk, and a read started inside the fake clock never
+/// finishes — not even once a later `runAsync` opens the real one, so waiting on
+/// it afterwards hangs the run rather than filling the thumbnails. Decoding
+/// first leaves `FileImage` a cache hit, which resolves on the first frame.
+Future<void> _warmImageCache(WidgetTester tester, List<File> files) async {
+  if (files.isEmpty) {
+    return;
+  }
+  await tester.runAsync(() async {
+    for (final File file in files) {
+      final ImageStream stream =
+          FileImage(file).resolve(ImageConfiguration.empty);
+      final Completer<void> decoded = Completer<void>();
+      late final ImageStreamListener listener;
+      listener = ImageStreamListener(
+        (ImageInfo info, bool synchronousCall) {
+          if (!decoded.isCompleted) {
+            decoded.complete();
+          }
+        },
+        onError: (Object error, StackTrace? stack) {
+          if (!decoded.isCompleted) {
+            decoded.completeError(error);
+          }
+        },
+      );
+      stream.addListener(listener);
+      await decoded.future;
+      stream.removeListener(listener);
+    }
+  });
+}
+
+/// A flat colour square standing in for a user photo.
+///
+/// The row's job in the capture is its geometry — 72pt squares, `xs` gutters,
+/// no caption — so a real photograph would only add noise the design canvas
+/// cannot be compared against.
+Future<File> _solidPng(Directory dir, String name, Color color) async {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  Canvas(recorder).drawRect(
+    const Rect.fromLTWH(0, 0, 144, 144),
+    Paint()..color = color,
+  );
+  final ui.Image image = await recorder.endRecording().toImage(144, 144);
+  final ByteData? png = await image.toByteData(format: ui.ImageByteFormat.png);
+  image.dispose();
+  return File('${dir.path}/$name')
+    ..writeAsBytesSync(png!.buffer.asUint8List());
 }

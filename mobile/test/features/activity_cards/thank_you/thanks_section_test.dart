@@ -486,6 +486,7 @@ void main() {
                 BuildContext context,
                 ActivityCard card,
                 String categoryId,
+                List<String> attachmentPaths,
               ) async {
                 cards.add(card.id);
                 categories.add(categoryId);
@@ -515,6 +516,7 @@ void main() {
                 BuildContext context,
                 ActivityCard card,
                 String categoryId,
+                List<String> attachmentPaths,
               ) async =>
                   true,
             ),
@@ -542,6 +544,7 @@ void main() {
                 BuildContext context,
                 ActivityCard card,
                 String categoryId,
+                List<String> attachmentPaths,
               ) async {
                 opened++;
                 return true;

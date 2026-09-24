@@ -1,7 +1,7 @@
 /// The private journal's whole contact surface with the rest of the app
 /// (`architecture/contract-summary.md`).
 ///
-/// Two of the three declarations below are the cross-story contract STORY-007
+/// Two of the four declarations below are the cross-story contract STORY-007
 /// and STORY-008 call — [openJournalComposer] and [JournalComposerSeed], with
 /// the signatures §1 of that document locks. The third,
 /// [openJournalScreen], exists because
@@ -14,8 +14,14 @@
 /// What is deliberately absent is the point of the file: no `JournalDao`,
 /// `JournalRepository`, `JournalMediaStore`, cubit or internal widget is
 /// re-exported, and there is no function to list, count, search or preview an
-/// entry. The contract is one-way — a caller can hand content in and can never
-/// read anything back out (AC-7, `contract-summary.md` §5).
+/// entry (AC-7, `contract-summary.md` §5).
+///
+/// The one thing that can be read back out is [journalPhotoPathsForOrigin],
+/// added by STORY-007 P4 under the 2026-09-23 `JOURNAL_SOURCE_CONTRACT_CLOSED`
+/// ruling (`req_master.md` `## Design Ruling Log`). It hands back photo files
+/// and nothing else, so text and metadata still never leave the journal
+/// (AC-17/BR-8) and the surface stays "hand content in" plus one photo-only
+/// read, rather than a readable journal.
 library;
 
 import 'package:flutter/material.dart';
@@ -69,6 +75,19 @@ Future<String?> openJournalComposer(
       ),
     ),
   );
+}
+
+/// Absolute paths of the photos held by the entries tagged with [originRef].
+///
+/// The only read the journal allows out, and only in this shape: file
+/// references, never body text, timestamps, entry ids or how many entries
+/// matched. A caller that already knows the provenance tag it wrote can pick up
+/// its own photos again; it still cannot list, count, search or preview
+/// anything (AC-17/BR-8).
+///
+/// An entry whose photo file has since gone is simply absent from the result.
+Future<List<String>> journalPhotoPathsForOrigin(String originRef) {
+  return getIt<JournalRepository>().photoFilePathsForOrigin(originRef);
 }
 
 /// Pushes the journal itself, full-screen, with its "Viết điều gì đó" CTA wired
