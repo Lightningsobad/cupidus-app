@@ -1,6 +1,6 @@
 # Story Master: STORY-007 "Cảm ơn + chốt việc kế tiếp" (SB-212)
 
-Status: IN_PROGRESS
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: mobile-only (Tech Lead chốt: một lane Mobile Developer
@@ -8,6 +8,7 @@ Implementation Lane: mobile-only (Tech Lead chốt: một lane Mobile Developer
   `coding-plan/master-plan.md` mục 2)
 Requirement: REQ-016
 Screen: Khối mở rộng trên chi tiết thẻ ở màn (1). **Không phải màn hình thứ 12.**
+Design-Screen: sb-212-cam-on-chot-viec-ke-tiep
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục E (SB-212),
 A (J9), C.11
 
@@ -27,7 +28,11 @@ A (J9), C.11
       hai vi phạm AC-7) — cả 6 mục đều làm theo AC/spec, không theo canvas.
       Nhánh nhật ký của AC-14/AC-4 kiểm bằng hàng gieo sẵn (chưa có caller
       trong phạm vi story này; STORY-008 sẽ cung cấp màn tạo-mục-từ-thẻ).
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — `review/review-report.md` (final-synthesis),
+      `Outcome: DEFERRED_ONLY`. 0 phát hiện chặn trên cả 5 slice. Mục cần
+      chuyển tiếp lên PO (không chặn DONE): lượt kích hoạt trọn-đời bị
+      `consume()` lúc màn dựng, không phải lúc khối lọt vào tầm mắt — xem
+      `review/review-report.md` mục 4.
 
 ## Depends On
 - STORY-001 — khối gắn trên chi tiết thẻ trạng thái *Đã đi rồi*.
@@ -99,7 +104,7 @@ nguội đi.
   (R-15a); **N là thuộc tính dữ liệu**, hành vi hết-vòng đúng với mọi N, không
   chỉ báo tiến độ (R-15b); R-1b, R-1g, chống tâng bốc, cấm %, cấm streak cưỡng
   chế ở **cùng cổng nhập của STORY-002** — story này **không** dựng nhánh cổng
-  riêng (R-15c, STORY-002 AC-29). Kiểm duyệt hai lớp (SB-123) giữ cho chất lượng
+  riêng (R-15b, STORY-002 AC-29). Kiểm duyệt hai lớp (SB-123) giữ cho chất lượng
   biên tập, không còn là cổng chặn ship. Chi tiết: AC-33..AC-36, BR-16..BR-18
   trong `requirements/requirements.md`.
 - Engine, UI, luồng kích hoạt, đính ảnh, và tạo thẻ chưa bao giờ bị chặn.
