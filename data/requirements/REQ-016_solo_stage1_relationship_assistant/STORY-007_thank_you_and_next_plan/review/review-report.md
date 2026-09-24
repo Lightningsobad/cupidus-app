@@ -20,7 +20,7 @@ Outcome: PARTIAL_SLICE_ONLY
 | Slice | Phạm vi | Báo cáo | Kết luận slice |
 |---|---|---|---|
 | P1 | Activation ledger: persistence, bump `schemaVersion` 9→10, đăng ký `stage1_wipe_registry` | `review/slice-p1-activation-ledger.md` | Không có phát hiện chặn |
-| P2 | Block shell + entry point | chưa trả | — |
+| P2 | Khung khối + điểm gắn: `ThankYouSection` lồng trên `activity_card_detail_screen.dart`, `ThankYouBlockCubit`, phần khung của `thank_you_block.dart` | `review/slice-p2-block-shell-entry-point.md` | Không có phát hiện chặn (7 mục advisory, A3 cần PO xác nhận) |
 | P3 | Preset category | chưa trả | — |
 | P4 | Photo attach | chưa trả | — |
 | P5 | Next-plan suggestions | chưa trả | — |
