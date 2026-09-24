@@ -1,21 +1,42 @@
 VISUAL_FIDELITY: PASS
-DESIGN_ANCHOR_ADJUDICATION_REQUIRED: YES (xem §7 — 5 mục, không phải lỗi cài đặt)
+DESIGN_ANCHOR_ADJUDICATION_REQUIRED: NO (đã phân xử — xem §7)
 Design-Screen: 6-moi-chuyen-a-a (đã xác nhận bằng ảnh dựng, xem §2 và §4b)
 
-# STORY-005 — "Mồi chuyện", visual fidelity (P4 màn hình + lối vào)
+# STORY-005 — "Mồi chuyện", visual fidelity (P4 màn hình + lối vào, cập nhật sau rework P5-P7)
 
-- Story: REQ-016 / STORY-005, phase P4
+- Story: REQ-016 / STORY-005, phases P4 → P7
   (`coding-plan/phase-P4-screen-and-entry-point.md` §6, mục
-  "Per-story visual fidelity: REQUIRED")
+  "Per-story visual fidelity: REQUIRED"; giữ hiệu lực cho cả ba phase rework)
 - Requirement: REQ-016_solo_stage1_relationship_assistant
 - Lane: Mobile
-- Date: 2026-09-17
+- Date: 2026-09-24 (bản gốc 2026-09-17, so sánh ảnh 2026-09-20, rework P5-P7 tới
+  2026-09-23)
+
+> **Phán quyết neo-thiết-kế đã đóng.** Người dùng chọn **đường 1 ("Neo thiết
+> kế")** trong ba đường §7 đề xuất ngày 2026-09-20. Sáu chỗ mở khi đó (mục 2, 3,
+> 4, 5, 6b, 7) đã được bóc thành ba phase rework và **đã ship**: P5 (`ae908e93`)
+> phân cấp hero/phụ, P6 (`9ab00f48`) nhãn + affordance + ngày inline, P7
+> (`fa9c0ad5`) dòng lý do của sự kiện. `ux/uiux-spec.md` §2/§5 đã được vá cho
+> khớp canvas ở `06dc96a4`. Vì vậy cờ đầu tệp chuyển
+> `DESIGN_ANCHOR_ADJUDICATION_REQUIRED: YES → NO`, §6 và §7 được viết lại theo
+> đúng thứ đang chạy, và §1/§4b neo lại trên ảnh chụp của P7. Không có tranh
+> chấp canvas-vs-spec nào còn treo ở màn này.
 
 ## 1. Ảnh đã chụp
 
 | Design screen id | Design source | Design reference | Implemented |
 | --- | --- | --- | --- |
-| `6-moi-chuyen-a-a` | `cupid-ch-ng-1` (`Cupid Chặng 1.dc.html`, `screens_from: "frames"`, `platforms: ["ios"]`) | `design-reference-6-moi-chuyen-a-a-ios.png` (415x900) — dựng được ngày 2026-09-20, xem §3 | `implemented-6-moi-chuyen-a-a-material.png` (415x900) |
+| `6-moi-chuyen-a-a` | `cupid-ch-ng-1` (`Cupid Chặng 1.dc.html`, `screens_from: "frames"`, `platforms: ["ios"]`) | `design-reference-6-moi-chuyen-a-a-ios.png` (415x900) — dựng được ngày 2026-09-20, xem §3 | `implemented-6-moi-chuyen-a-a-material.png` (415x900) — **ảnh hiện tại là bản chụp của P7** (`fa9c0ad5`, 2026-09-23), tức là bản dựng **sau** cả ba phase rework |
+
+Ảnh implemented được chụp lại ở **cả ba** phase rework, mỗi lần đè lên cùng một
+tên tệp; tệp đang nằm trên đĩa là lần chụp cuối (P7). Vòng vá tài liệu này
+**không** chụp lại và không cần chụp lại: bản P7 đã mang đủ sáu mục đã phân xử.
+
+| Lần chụp | Commit | Thứ mà ảnh lần đó chứng minh |
+| --- | --- | --- |
+| P5 | `ae908e93` | thẻ hero `CÂU HÔM NAY` + caption `CÙNG CHỦ ĐỀ` + hai câu phụ |
+| P6 | `9ab00f48` | nút đặc `Chép để nhắn`, đĩa `refresh`, dòng trấn an, nhãn khối sự kiện, ngày inline |
+| P7 (đang trên đĩa) | `fa9c0ad5` | tất cả các mục trên **cộng** dòng lý do, và lần đầu thấy được khối sự kiện trong khung 415x900 |
 
 ## 2. Cách phân giải `Design-Screen:` khi không có trình dựng
 
@@ -110,14 +131,28 @@ FLUTTER_ROOT="$HOME/flutter" flutter test \
 - Nội dung câu mồi trong ảnh là gói fixture (`Fixture starter 1..12`) chứ không
   phải gói ship kèm — bố cục là thứ đang audit, còn nội dung gói đã có test
   riêng ở P1/P2.
+- **Từ P7 trở đi**, `_captureAtReferenceViewport` nhận thêm tham số tuỳ chọn
+  `beforeCapture`, và lần chụp này chạm `ask-skip` trước khi chụp. Lý do nằm ở
+  §4b: ô hỏi sổ tay (`ContextAskCard`) chiếm nửa dưới khung `415x900` và đẩy
+  khối sự kiện xuống dưới fold, nên P6 không đối chiếu được mục 5 và 6b bằng
+  mắt. Khung reference, nền, font và nền tảng Material giữ y nguyên — chỉ trạng
+  thái của ô hỏi đổi, và đó là trạng thái người dùng thật cũng đạt được bằng một
+  chạm "Bỏ qua".
 
-**Ảnh đã được mở ra nhìn bằng mắt.** Mọi chữ tiếng Việt lên đúng dấu
-(`Mồi chuyện`, `Xem câu khác`, `Người ấy hợp gu ăn uống kiểu nào?`,
-`Trà sữa ít đường`, `Bỏ qua`, `Sự kiện có lịch`, `Kỷ niệm quen nhau`,
-`Thêm vào kho`), không có ô tofu. Glyph `content_copy` và `close` rasterise
-đúng, không phải ô vuông.
+**Ảnh đã được mở ra nhìn bằng mắt** (bản P7 đang trên đĩa). Mọi chữ tiếng Việt
+lên đúng dấu — `Mồi chuyện`, `CÂU HÔM NAY`, `Chép để nhắn`, `Câu này nhắn liền,
+không cần lưu. Quay lại là có câu khác.`, `CÙNG CHỦ ĐỀ`, `CÓ LỊCH SẴN · RỦ ĐI
+ĐƯỢC`, `Sinh nhật bạn ấy — thứ Ba 20/10`, `Đúng dòng "thích đọc sách cũ" trong
+sổ tay`, `Kỷ niệm quen nhau — thứ Hai 02/11`, `Thêm vào Muốn làm` — **không có ô
+tofu nào**. Glyph `content_copy`, `refresh`, `calendar` và `close` rasterise
+đúng hình, không phải ô vuông. Cặp dấu nháy kép thẳng trong dòng lý do lên
+nguyên vẹn.
 
-## 4b. So sánh ảnh trực tiếp (2026-09-20)
+## 4b. So sánh ảnh trực tiếp (2026-09-20, neo lại trên ảnh P7 ngày 2026-09-24)
+
+Phần đầu mục này ghi vòng so sánh 2026-09-20 — lúc đó ảnh implemented còn là bản
+**trước** rework. Phần "Sau rework" ở cuối mục là vòng so sánh hiện hành, chạy
+trên đúng tệp đang nằm trên đĩa (bản chụp P7).
 
 Hai tệp đã được **mở ra nhìn bằng mắt** cạnh nhau:
 `design-reference-6-moi-chuyen-a-a-ios.png` ↔
@@ -145,10 +180,56 @@ implemented dựng gói `Fixture starter 1..12`, ảnh design dùng câu mẫu b
 ngoài các mục đã liệt kê — không lệch lưới, không tràn chữ, không tofu, không
 sai thang màu. Nó **xác nhận bằng mắt** cả 8 delta mà vòng 2026-09-17 mới chỉ
 suy ra được từ DOM. Nhưng nó cũng cho thấy **cơ sở phân xử của 5 trong 8 mục
-đó là lời văn spec chứ không phải AC** — xem §7, phần này là thứ duy nhất còn
-mở sau khi có ảnh.
+đó là lời văn spec chứ không phải AC** — sáu chỗ đó đi vào §7 và đã được người
+dùng phân xử theo đường 1, xem dưới.
+
+### 4b-2. Sau rework — so sánh trên ảnh P7 (2026-09-24)
+
+Cùng hai tệp, **mở lại bằng mắt** sau khi P5/P6/P7 đã ship, lần này ảnh
+implemented là bản chụp của P7 (`fa9c0ad5`). Ba mục dưới đây chép nguyên ý các
+mục "Kiểm tra thị giác" đã viết trong `coding-plan/test-results.md` của từng
+phase, cộng một lần đối chiếu hợp nhất của chính vòng này.
+
+| Phase | Đã nhìn thấy gì trên ảnh | Nguồn |
+| --- | --- | --- |
+| P5 `ae908e93` | Thẻ hero mang caption `CÂU HÔM NAY` (mint, IN HOA, giãn chữ) trên câu hero cỡ `cardTitle` **đậm hơn hẳn** hai câu phụ; dưới đó caption `CÙNG CHỦ ĐỀ` muted rồi hai hộp bo góc nền `colorSurfaceAlt` — đúng tương quan canvas. Glyph `content_copy` rasterise đúng, không tofu. | `test-results.md` P5 §"Kiểm tra thị giác" |
+| P6 `9ab00f48` | Glyph `refresh` mới thêm rasterise thành vòng tròn có mũi tên trong đĩa viền `colorLine` — **không ô tofu**, đây là rủi ro lớn nhất của phase và đã loại trừ bằng mắt chứ không bằng một lần chạy xanh. Nút đặc `Chép để nhắn` là dải gradient hồng-tím full-width kèm icon copy, đĩa refresh sát phải cùng hàng, dòng trấn an muted ngay dưới. | `test-results.md` P6 §"Kiểm tra thị giác" |
+| P7 `fa9c0ad5` | Dòng lý do hiện đúng dưới dòng tên, cỡ `caption`, màu `colorTextMuted`: `Đúng dòng "thích đọc sách cũ" trong sổ tay` dưới `Sinh nhật bạn ấy — thứ Ba 20/10`. Chỗ dễ ra tofu nhất của phase (có cả ngoặc kép lẫn dấu tiếng Việt): **không ô tofu nào**. `Kỷ niệm quen nhau — thứ Hai 02/11` không có dòng lý do, đúng như gói fixture khai. Badge `CÓ LỊCH SẴN · RỦ ĐI ĐƯỢC` và icon lịch/`×` nguyên vẹn. | `test-results.md` P7 §"Kiểm tra thị giác" |
+
+**Giới hạn fold của P6 đã được P7 gỡ.** P6 ghi lại rằng ô hỏi sổ tay chiếm nửa
+dưới khung `415x900` và đẩy khối sự kiện xuống dưới fold, nên mục 5 và 6b lúc đó
+**không đối chiếu được bằng mắt** và phải dựa vào bốn test widget. P6 đã thử nạp
+thêm entry `NotebookKind.event` vào fixture chụp để ô hỏi rút lui — không tác
+dụng; P7 thử lại, vẫn không. Cách hiệu quả là **chạm `ask-skip` trước khi chụp**
+(§4, tham số `beforeCapture`): ô hỏi rút lui và khối sự kiện lên đúng vị trí
+canvas vẽ. Từ P7, ảnh đối chiếu được trực tiếp với ảnh design **gồm cả mục 5 và
+6b**, và mục này không còn khoảng trống bằng chứng nào phải trả cho test widget.
+
+**Đối chiếu hợp nhất của vòng 2026-09-24.** Mở hai ảnh cạnh nhau lần nữa và soi
+đúng sáu mục đã phân xử: caption hero mint IN HOA, câu hero đậm, nút đặc gradient
+`Chép để nhắn` + đĩa `refresh` cùng hàng, dòng trấn an nguyên văn canvas, caption
+`CÙNG CHỦ ĐỀ` + hai hộp phụ, tiêu đề khối `CÓ LỊCH SẴN · RỦ ĐI ĐƯỢC` kèm glyph
+lịch, ngày gộp trong dòng tên (`— thứ Ba 20/10`, `— thứ Hai 02/11`, **không** còn
+badge `dd/mm` leading), dòng lý do muted, pill `+ Thêm vào Muốn làm`. **Sáu trên
+sáu khớp canvas.** Hai khác biệt còn lại **không** thuộc sáu mục đã phân xử và
+được ghi thành D-1, D-2 ở §7b để vòng sau không mở lại như một lỗ fidelity.
 
 ## 5. Khớp với `ux/uiux-spec.md` §2 (nguồn ràng buộc)
+
+> **Bảng dưới là ảnh chụp của vòng 2026-09-17**, đối chiếu với lời văn
+> `uiux-spec.md` §2 **trước khi** nó được vá. Phán quyết neo-thiết-kế đã đổi
+> chính nguồn ràng buộc: `uiux-spec.md` §2/§5 được vá theo canvas ở `06dc96a4`
+> (quyền của Tech Lead/Scrum Master, không phải của lane Mobile), và bản dựng
+> được sửa theo canvas ở P5/P6/P7. Bốn hàng dưới đây vì vậy **đã bị thay thế**
+> và phải đọc ở §7, không đọc ở đây: "đúng 3 câu, mỗi câu một dòng độc lập"
+> (nay là một hero + hai câu phụ), "text button nhãn Xem câu khác" (nay là nút
+> đặc `Chép để nhắn` + đĩa `refresh`), "tiêu đề phụ Sự kiện có lịch" + pill
+> "Thêm vào kho" (nay là `CÓ LỊCH SẴN · RỦ ĐI ĐƯỢC` + `Thêm vào Muốn làm`), và
+> "badge ngày dd/mm leading" (nay ngày gộp trong dòng tên). Các hàng còn lại —
+> header, vùng chạm ≥44, không danh sách "đã copy/đã lưu", ô hỏi tại chỗ + "Bỏ
+> qua", divider mảnh, icon-button `close` ≥44, không spinner/skeleton/banner
+> mạng/nhãn "AI gợi ý" — **vẫn đúng nguyên trên bản dựng P7**, đã soi lại bằng
+> mắt ở §4b-2.
 
 Đối chiếu từng mục, từ trên xuống:
 
@@ -191,6 +272,12 @@ Khung `(6) Mồi chuyện A / A+` có trước các AC của story. Các điểm
 >
 > Không mục nào trong (b) được "sửa về phía canvas" trước khi có phán quyết.
 
+> **Cập nhật 2026-09-24 — phán quyết đã có, sáu mục (b) đã ship.** Mỗi mục dưới
+> đây mang thêm một dòng `**Đang cài (2026-09-24):**` mô tả đúng thứ đang chạy
+> trên bản dựng P7. Câu "Cài đặt:" ngay trên nó là trạng thái **lịch sử** của
+> vòng 2026-09-17, giữ lại để đọc được mạch phân xử, **không** phải mô tả bản
+> hiện tại. Ba mục (a) — 1, 6 (nửa nút bỏ qua), 8 — không đổi.
+
 1. **Ba tab đầu màn.** Canvas vẽ `Câu để nhắn` / `Tuần này có gì` / `Đoán thử`.
    Ghi chú của chính canvas (dòng 1449) nói tab thứ ba là trò "đoán" và
    `Bản B feed tin thật đã cắt sang REQ-014`. `uiux-spec.md` §1 mô tả màn (6)
@@ -210,6 +297,10 @@ Khung `(6) Mồi chuyện A / A+` có trước các AC của story. Các điểm
    "3 câu"/"ba câu". Vậy "đúng 3 câu, mỗi câu một dòng" thuần là lời văn
    `uiux-spec.md` §2.2, đúng loại tranh chấp mà phán quyết neo-thiết-kế xử cho
    canvas. Đây là mục nặng nhất trong §7.
+   → **Đang cài (2026-09-24):** đã dựng theo canvas ở **P5 `ae908e93`** — một
+   thẻ hero mang caption `CÂU HÔM NAY` cộng caption `CÙNG CHỦ ĐỀ` với tối đa hai
+   câu phụ. N = 1 không caption và không hộp rỗng; N = 2 đúng một câu phụ
+   (AC-28 giữ nguyên, N vẫn là tham số bố cục).
 3. **Nhãn chữ cạnh nút copy và nút `refresh`.** Canvas dùng `Chép để nhắn` +
    icon `refresh`. `uiux-spec.md` §2.2 đòi nút icon copy trần và **một text
    button nhãn "Xem câu khác"**. Cài đặt theo spec. (Phase P4 §3 có chỗ gọi nút
@@ -219,6 +310,12 @@ Khung `(6) Mồi chuyện A / A+` có trước các AC của story. Các điểm
    nhắn"; **AC-4** chỉ đòi có đường ra bộ câu tiếp theo. Cả hai đều được thoả
    bởi bố cục canvas (`Chép để nhắn` + `refresh`) y như bởi bố cục đang cài.
    Nhãn và hình thức nút là lời văn spec.
+   → **Đang cài (2026-09-24):** đã đổi theo canvas ở **P6 `9ab00f48`** — nút đặc
+   gradient `Chép để nhắn` kèm icon copy, cộng nút tròn icon `refresh`
+   (`0xe5d5`, tra bằng `fontTools getBestCmap()` thẳng trên font đang bundle).
+   Text button `Xem câu khác` **biến mất khỏi thân màn** và chuyển thành nhãn
+   `Semantics`; hai neo key `starter_line_copy_<id>` và `starter_next_round`
+   giữ nguyên nên regression P4/P5 không mất điểm bám.
 4. **Dòng trấn an "Câu này nhắn liền, không cần lưu. Quay lại là có câu khác."**
    Canvas có, spec không yêu cầu, và AC-27 cấm mọi thứ gợi ý "đã hết/còn lại".
    Không ship.
@@ -228,11 +325,21 @@ Khung `(6) Mồi chuyện A / A+` có trước các AC của story. Các điểm
    *hợp* với AC-4 (không ngõ cụt) và "không cần lưu" hợp với **AC-3** (không
    có kho "đã lưu"/"yêu thích"). Vậy AC-27 **không** chặn dòng này; giữ hay bỏ
    là quyết định lời văn, đưa vào §7.
+   → **Đang cài (2026-09-24):** đã thêm theo canvas ở **P6 `9ab00f48`** — dòng
+   trấn an muted nằm ngay dưới hàng CTA của thẻ hero, nguyên văn canvas. Có test
+   khẳng định thứ tự dọc (`getBottomLeft` của CTA so với `getTopLeft` của dòng).
 5. **Nhãn khối sự kiện.** Canvas: `CÓ LỊCH SẴN · RỦ ĐI ĐƯỢC` + nút
    `Thêm vào Muốn làm`. Spec §2.5: tiêu đề phụ `Sự kiện có lịch` + nút
    `Thêm vào kho`. Cài đặt theo spec.
    → **(b) KHÔNG có AC chống lưng.** Đã grep `requirements.md`: không AC nào
    chứa chuỗi `Thêm vào kho` hay quy định tiêu đề khối sự kiện. Thuần lời văn.
+   → **Đang cài (2026-09-24):** đã đổi theo canvas ở **P6 `9ab00f48`** — tiêu đề
+   khối là `CÓ LỊCH SẴN · RỦ ĐI ĐƯỢC` (kèm glyph lịch) và pill là
+   `Thêm vào Muốn làm`. Hai nhãn cũ `Sự kiện có lịch` / `Thêm vào kho của tôi`
+   **không còn tồn tại** trên màn, có test khẳng định chúng biến mất. Hành vi
+   không đổi: pill vẫn tạo thẻ `conversationStarter` rồi bỏ dòng đi. Mục này đã
+   được **nhìn thấy trực tiếp trên ảnh từ P7** (xem §4b-2), không còn phải dựa
+   vào test widget như ở P6.
 6. **Badge ngày dd/mm và nút bỏ qua.** Canvas viết ngày lẫn trong tên sự kiện
    (`Hội sách cũ phố Đinh Lễ — thứ Bảy này`) và **không** có nút bỏ qua. Spec
    §2.5 đòi badge `dd/mm` leading, và AC-14 đòi nút bỏ qua xoá ngay không hộp
@@ -241,6 +348,14 @@ Khung `(6) Mồi chuyện A / A+` có trước các AC của story. Các điểm
    sạch, một chạm, không hỏi lý do" — canvas thiếu nó, AC thắng, giữ nguyên.
    Badge `dd/mm` leading: **(b)**, chỉ `uiux-spec.md` §2.5 đòi, không AC nào
    quy định chỗ đặt ngày; canvas viết ngày lẫn trong tên sự kiện.
+   → **Đang cài (2026-09-24), nửa badge:** đã đổi theo canvas ở
+   **P6 `9ab00f48`** — **không còn** badge `dd/mm` leading; key
+   `starter_event_date_<id>` đã biến mất và ngày nằm trong chính dòng tên:
+   `Sinh nhật bạn ấy — thứ Ba 20/10`, `Kỷ niệm quen nhau — thứ Hai 02/11`. Dùng
+   dạng **tuyệt đối** (`thứ Ba 20/10`) chứ không tương đối (`thứ Bảy này` như
+   canvas viết): `eventDateLabel` là hàm thuần của chuỗi `YYYY-MM-DD` mà gói
+   ship, không đọc đồng hồ, nên nhãn không thể lệch khỏi ngày thẻ đang mang.
+   → **Nửa nút bỏ qua không đổi:** `×` vẫn còn, AC-14 vẫn thắng canvas.
 7. **Dòng lý do dưới tên sự kiện** (`Đúng dòng "thích đọc sách cũ" trong sổ
    tay`). Canvas có; spec §2.5 không mô tả trường này và schema gói sự kiện
    không mang nó. Không ship — đây là thay đổi content package, không phải
@@ -249,51 +364,91 @@ Khung `(6) Mồi chuyện A / A+` có trước các AC của story. Các điểm
    luận "không ship vì schema gói không mang trường này" là lập luận **chi
    phí**, không phải lập luận AC — và STORY-001 B-1 là tiền lệ cho thấy người
    dùng có thể chọn "mở rộng phạm vi" đúng loại chi phí đó.
+   → **Đang cài (2026-09-24):** **đã ship** theo canvas ở **P7 `fa9c0ad5`** —
+   người dùng đúng là đã chọn mở rộng phạm vi, y như tiền lệ STORY-001 B-1. Gói
+   sự kiện nhận thêm **hai khoá tuỳ chọn** `reason_template` /
+   `reason_context_slot` (giữ nguyên `schema_id`, **không** đụng Drift, không
+   đụng `schemaVersion`). `resolveEventReason` là hàm thuần khoá trên
+   `stableContentKey('$today|$eventId')` — cùng phép FNV-1a `StarterSelector`
+   dùng, nên AC-17 vẫn chỉ có một quy tắc. Trên ảnh:
+   `Đúng dòng "thích đọc sách cũ" trong sổ tay` dưới `Sinh nhật bạn ấy — thứ Ba
+   20/10`; sổ tay rỗng, giá trị rỗng, hoặc sự kiện không khai template thì
+   **không** dựng dòng và **không** dựng ngoặc trống. Cổng nội dung nhận ba luật
+   mới, trong đó `event_reason_asks_question` bắt đúng chiều ngược: dòng lý do là
+   chuỗi hiển thị **duy nhất** không được kết thúc bằng dấu hỏi.
 8. **Không có ô hỏi tại chỗ trong canvas.** Spec §2.3 + AC-6 đòi có. Cài đặt
    có, dùng nguyên `AskOnTheSpotSlot` của STORY-004.
    → **(a) có AC chống lưng.** Nguyên văn **AC-6**: "hỏi tại chỗ **đúng một
    câu** theo cơ chế của STORY-004"; **AC-7** quy định đường bỏ qua của ô này.
    AC thắng canvas, giữ nguyên.
 
-## 7. DESIGN_ANCHOR_ADJUDICATION_REQUIRED — 5 mục cần người dùng phán quyết
+## 7. Phán quyết neo-thiết-kế — ĐÃ ĐÓNG, sáu mục đã ship
 
-Mở ra sau khi có ảnh design reference, **không** phải lỗi cài đặt và **không**
-phải việc mà lane Mobile được tự quyết. Căn cứ: `req_master.md` ghi người dùng
-đã chọn **"anchor on design"** cho REQ-016 (A-1..A-4, D-1/D-2/D-3), nghĩa là
-canvas neo trên lời văn `uiux-spec.md`; chỉ AC mới đè được canvas. Sáu chỗ dưới
-đây (5 mục + nửa mục 6) **không có AC chống lưng**, nên bản 2026-09-17 xử cho
-spec là tự phân xử sai thẩm quyền.
+Mục này mở ra ngày 2026-09-20 sau khi có ảnh design reference, với sáu chỗ
+(5 mục + nửa mục 6) **không có AC chống lưng** và ba đường đi đề xuất cho Scrum
+Master. **Người dùng chọn đường 1 — "Neo thiết kế"** — nhất quán với A-1..A-4
+trong `req_master.md` ("anchor on design" cho REQ-016). Tech Lead bóc thành ba
+phase rework, cả ba đã ship, và `ux/uiux-spec.md` §2/§5 đã được vá cho khớp
+canvas ở `06dc96a4`. Không còn mục nào chờ phán quyết, nên cờ đầu tệp là
+`DESIGN_ANCHOR_ADJUDICATION_REQUIRED: NO`.
 
-| # | Canvas vẽ | Đang cài | Nếu neo-thiết-kế thắng thì phải làm gì |
-| --- | --- | --- | --- |
-| 2 | `CÂU HÔM NAY` một câu hero + `CÙNG CHỦ ĐỀ` hai câu phụ | ba dòng ngang hàng | dựng lại phân cấp hero/phụ — **phạm vi implementation mới**, cần phase riêng |
-| 3 | nút đặc `Chép để nhắn` + icon `refresh` tròn | icon copy trần + text button `Xem câu khác` | đổi affordance + nhãn; kéo theo test nhãn ở P1/P4 |
-| 4 | dòng "Câu này nhắn liền, không cần lưu. Quay lại là có câu khác." | không có | thêm một dòng caption |
-| 5 | `CÓ LỊCH SẴN · RỦ ĐI ĐƯỢC` + `Thêm vào Muốn làm` | `Sự kiện có lịch` + `Thêm vào kho` | đổi hai nhãn; kéo theo test nhãn |
-| 6b | ngày viết lẫn trong tên sự kiện | badge `dd/mm` leading | bỏ badge, gộp ngày vào tên — **va với** yêu cầu badge ở `uiux-spec.md` §2.5 |
-| 7 | dòng lý do dưới tên sự kiện ("Đúng dòng ... trong sổ tay") | không có | **thêm trường vào schema gói sự kiện** — phạm vi mới, cỡ như STORY-001 B-1 |
+| # | Canvas vẽ | Đã cài (bản dựng P7) | Phase / commit | Trạng thái |
+| --- | --- | --- | --- | --- |
+| 2 | `CÂU HÔM NAY` một câu hero + `CÙNG CHỦ ĐỀ` hai câu phụ | thẻ hero + caption `CÙNG CHỦ ĐỀ` + tối đa hai câu phụ; N = 1 không caption, không hộp rỗng | P5 `ae908e93` | **RESOLVED** |
+| 3 | nút đặc `Chép để nhắn` + icon `refresh` tròn | nút đặc gradient `Chép để nhắn` + đĩa `refresh` (`0xe5d5`); `Xem câu khác` chuyển vào `Semantics` | P6 `9ab00f48` | **RESOLVED** |
+| 4 | dòng "Câu này nhắn liền, không cần lưu. Quay lại là có câu khác." | đúng dòng đó, muted, ngay dưới hàng CTA của hero | P6 `9ab00f48` | **RESOLVED** |
+| 5 | `CÓ LỊCH SẴN · RỦ ĐI ĐƯỢC` + `Thêm vào Muốn làm` | đúng hai nhãn đó; nhãn cũ biến mất khỏi màn | P6 `9ab00f48` | **RESOLVED** |
+| 6b | ngày viết lẫn trong tên sự kiện | ngày gộp vào dòng tên (`— thứ Ba 20/10`); hết badge `dd/mm` leading, hết key `starter_event_date_<id>` | P6 `9ab00f48` | **RESOLVED** |
+| 7 | dòng lý do dưới tên sự kiện ("Đúng dòng ... trong sổ tay") | dòng lý do caption muted dưới dòng tên, dựng từ hai khoá **tuỳ chọn** mới của gói sự kiện | P7 `fa9c0ad5` | **RESOLVED** |
 
-Ba đường đi cho Scrum Master, không tự chọn hộ:
+Ba mục **(a)** của §6 — 1 (không tab, AC-19), 6 nửa nút bỏ qua (AC-14), 8 (ô hỏi
+tại chỗ, AC-6/AC-7) — giữ nguyên: ở đó AC đè canvas, và rework **không** đụng
+vào chúng.
 
-1. **Neo thiết kế** (nhất quán với A-1..A-4): nhận 6 mục trên thành phạm vi
-   rework, giao Tech Lead bóc phase, rồi vá `uiux-spec.md` §2 cho khớp canvas.
-   Mục 2 và 7 là phạm vi implementation mới, không phải sửa câu chữ.
-2. **Giữ nguyên** và ghi 6 mục thành **ngoại lệ đóng** của phán quyết
-   neo-thiết-kế cho màn này, có lý do sản phẩm — khi đó phải vá `req_master.md`
-   để vòng sau không mở lại, giống cách A-3 được đóng.
-3. **Tách**: nhận mục nhãn rẻ (3, 4, 5) và đóng mục đắt (2, 6b, 7).
+Cả sáu mục đã được **nhìn thấy trực tiếp trên ảnh** ở §4b-2, không mục nào chỉ
+có bằng chứng gián tiếp qua test widget.
 
-Trước khi rework bất kỳ mục nào, đọc lại nguyên văn AC — §6 vừa phải đính chính
-một trích dẫn AC-27 sai của chính bản trước.
+## 7b. Hai delta canvas còn lại — có theo dõi, không phải khuyết tật
 
-## 8. Vì sao verdict vẫn là PASS
+Hai điểm dưới đây khác canvas nhưng **không** nằm trong sáu mục đã phân xử và
+**không** được mở lại như một lỗ fidelity ở vòng sau. Ghi ở đây theo đúng
+Reviewer `review-report.md` §6 (D-1, D-2), cùng số hiệu để tra chéo được.
+
+- **D-1 — vỏ của khối sự kiện.** Canvas vẽ khối sự kiện thành một thẻ **viền
+  đứt** với nút `+ Thêm vào Muốn làm` **full-width** bên dưới. Bản dựng dùng một
+  divider mảnh rồi một hàng có pill ở cuối dòng cộng nút `×`. Đây **không** phải
+  một trong sáu mục được phân xử (mục 5 chỉ nói về *nhãn*), và bản thân nút `×`
+  do AC-14 chống lưng, nên hình dạng hàng một phần là do AC quy định chứ không
+  phải do bỏ sót canvas. Có sẵn từ P4, rework không làm nó tệ hơn.
+- **D-2 — chrome của canvas không có trong bản dựng.** Chevron quay lại, thanh
+  trạng thái iOS (`9:41`, sóng/wifi/pin, home indicator) và dải tab
+  `Câu để nhắn / Tuần này có gì / Đoán thử` đều chỉ có ở ảnh design. Chevron và
+  device chrome đã giải thích ở §4/§4b là **tính chất của harness chụp**, không
+  phải của sản phẩm. Dải tab đã xử ở §6 mục 1: `Tuần này có gì` bị **AC-19** loại
+  ("bản B nằm ngoài phạm vi và không có phiên bản rút gọn ở đây"), còn `Đoán thử`
+  là SB-144/145/146, ghi rõ **ngoài phạm vi** trong `story_master.md`.
+
+Cả hai **chỉ ghi nhận, không hành động** trong story này.
+
+## 8. Vì sao verdict là PASS
 
 `VISUAL_FIDELITY: PASS` ở đây đo **tính đúng của cài đặt**, và so sánh ảnh trực
-tiếp không tìm ra lỗi cài đặt nào: màn dựng đúng, không lệch lưới, không tràn
-chữ, không tofu, đúng thang màu, và khớp **toàn bộ** ràng buộc có hiệu lực
-(`ux/uiux-spec.md` §2 ở §5, cộng AC-6/AC-7/AC-14/AC-19 ở §6). Thứ còn mở ở §7
-là **câu hỏi phán quyết** giữa canvas và lời văn spec, không phải khuyết tật
-của bản dựng — nên nó được gắn cờ
-`DESIGN_ANCHOR_ADJUDICATION_REQUIRED: YES` ở đầu tệp thay vì bị nhét vào một
-FAIL khiến story trông như có lỗi kỹ thuật. Nếu người dùng chọn đường 1 ở §7,
-mục này phải được mở lại cùng phase rework.
+tiếp — cả vòng 2026-09-20 lẫn vòng trên ảnh P7 ở §4b-2 — không tìm ra lỗi cài
+đặt nào: màn dựng đúng, không lệch lưới, không tràn chữ, không tofu, đúng thang
+màu, và khớp **toàn bộ** ràng buộc có hiệu lực (`ux/uiux-spec.md` §2/§5 sau khi
+vá ở `06dc96a4`, cộng AC-6/AC-7/AC-14/AC-19 ở §6).
+
+Bản 2026-09-17 giữ PASS **kèm** cờ `DESIGN_ANCHOR_ADJUDICATION_REQUIRED: YES`,
+vì thứ còn mở khi đó là **câu hỏi phán quyết** giữa canvas và lời văn spec, chứ
+không phải khuyết tật của bản dựng. Câu cuối của bản đó tự đặt điều kiện: *"Nếu
+người dùng chọn đường 1 ở §7, mục này phải được mở lại cùng phase rework."*
+
+Điều kiện đó đã xảy ra và **đã được thực hiện**: đường 1 được chọn, P5/P6/P7 ship
+cả sáu mục, ảnh được chụp lại ở từng phase, và vòng 2026-09-24 này mở lại chính
+báo cáo để neo §1/§4b trên ảnh P7, sửa §6 theo thứ đang chạy, viết lại §7 thành
+bảng đã phân xử, và ghi D-1/D-2 vào §7b. Verdict không đổi — **PASS** — nhưng
+bây giờ nó đứng trên bản dựng hiện tại chứ không phải bản trước rework, và cờ
+phân xử chuyển về `NO`.
+
+Vòng vá này **không đụng một dòng mã nào**, không chụp lại ảnh, không dùng thiết
+bị: chỉ sửa chính tệp báo cáo này.
