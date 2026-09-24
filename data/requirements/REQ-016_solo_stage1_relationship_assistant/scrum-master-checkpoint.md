@@ -300,24 +300,92 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
   real (canvas shows a journal-metadata caption line + a trailing chevron
   implying a second destination). Committed `8dbf2806`, merged `deab88bb`
   (re-merge, normal). `Iris-QC` released via `TaskStop`.
-- **About to dispatch now: Slice P5** (next-plan suggestions) — LAST scoped
-  slice before final-synthesis. Target `Iris-QC` (fresh spawn,
-  `Mode: scoped-slice`). Confirm exact file paths via
-  `git -C <Worktree> diff --name-only bfe231aa -- mobile/lib mobile/test |
-  grep -i "next_plan"` before building the handoff (two prior slices had
-  handoff path/AC guesses corrected by the reviewer — verify first this
-  time). Expected files per master-plan: `next_plan_suggestion_service.dart`,
-  `next_plan_cubit.dart`, `next_plan_section.dart`, `next_plan_test.dart` (or
-  equivalents). Handoff must instruct: cite `BUG-20260923-002` (now committed
-  to `master_bugs_list.md` as of this round) if the conversation_starters
-  suite surfaces those same 3 pre-existing reds — do not re-run that suite
-  broadly, and re-verify root-cause note that it's already green on
-  STORY-005's own branch (fixed by P7) so it may have already resolved on
-  integration; fill the existing `P5` placeholder row in
-  `review/review-report.md`'s `## Slice Index` in place; do not touch
-  `scope-gate.md` unless the guard re-fires (it has not fired since P1); use
-  only `Outcome: PARTIAL_SLICE_ONLY` as the slice-level literal (never
-  "PASS").
+- **Slice P5 DONE (Round 21) — LAST scoped slice, all 5 complete.**
+  `Iris-QC` returned `REVIEW_SLICE_COMPLETE: YES`,
+  `review/slice-p5-next-plan-suggestions.md` `Outcome: PARTIAL_SLICE_ONLY`
+  (slice literal; content = clean PASS, 0 blocking findings). File list
+  verified via true diff before handoff (no guess-correction needed this
+  time): `next_plan_suggestion_service.dart` (+132, suggestion source,
+  accept/undo), `next_plan_cubit.dart` (+81, phase-3 state, no loading flag),
+  `next_plan_section.dart` (+176, header+chip+undo snackbar),
+  `next_plan_test.dart` (+422, 13 tests). AC text was read directly from
+  `req_master.md` (not reused from memory) — full table for
+  AC-19/AC-20/AC-21/AC-22/AC-23/AC-24/AC-25/AC-28/AC-29/AC-30/AC-35/AC-36 +
+  BR-11/BR-16/BR-17 all PASS: deterministic suggestion source (static+sync,
+  no AI/network), card creation goes through STORY-001's single
+  `ActivityCardRepository.createCard` contract (no second card-creation
+  path), tap-to-confirm with a 5s undo snackbar satisfies "select and
+  confirm" without a blocking dialog (AC-23 forbids a second confirmation),
+  origin enum is internal-only/never rendered as a metric, N=0 removes the
+  phase-3 slot entirely from the widget tree (not an empty header), N=500
+  still yields exactly 3 chips with no async/loading step. Both of my
+  handoff's 2 open items were resolved correctly by the reviewer: (1)
+  `before_you_go_block_test.dart` and `service_locator.dart` → **both belong
+  to P1**, not P5 (P1's `ActivityCardRepository` wrapper via composition
+  root required STORY-006's test to register a database; zero next-plan
+  content in either diff); (2) `activity_card.dart`
+  (+3/-1, the `nextPlanAfterDate` enum value) → **P5 correctly claims this as
+  its own evidence** (direct AC-24 implementation, appended per the enum's
+  own append-only rule, no migration needed since `origin` is a plain
+  `text()` column with no CHECK constraint) — flagged as advisory A3 that
+  this is a real, justified out-of-declared-WriteScope file touch for Scrum
+  Master's record, not a defect. Pre-existing red
+  `calendar_event_service_test.dart:390` (enum-count pinned assertion, now
+  6→7 elements) independently re-verified against BaseHead itself (not
+  reusing the implementer's count) and correctly matched to the existing
+  `BUG-20260923-002` row rather than filing a new bug. 5 advisories, all
+  DEFERRED/non-blocking or forwarding notes: (A1) `NextPlanCubit.load()`
+  lacks the `try/catch` P4 used for its own asset-loading path — an
+  asymmetry, not a defect, no test covers the failure case; (A2)
+  `unawaited(_accept(...))` has no error surface if `createCard` throws —
+  low probability, local SQLite write; (A3) the out-of-scope
+  `activity_card.dart` touch, noted above; (A4) BR-14 (a phase-3 copy rule)
+  isn't independently retested here since the chip text is a pass-through
+  from STORY-005's own gated content, correctly treated as out of P5's
+  re-verification scope; (A5) forwards P4's `VISUAL_FIDELITY: PASS` +
+  `DESIGN_SPEC_CONFLICT` pairing question to final-synthesis without
+  re-litigating it, and additionally flags that the "3 rows instead of 2"
+  visual delta is itself a direct AC-35 consequence (layout is a parameter,
+  not a fixed count) that final-synthesis should read together with P4's
+  conflict rather than as a separate item. `review/review-report.md`'s
+  `## Slice Index` P5 row filled in place, P1-P4 rows and the standing
+  `Outcome:` header untouched. Verified independently: `git status
+  --porcelain` matched WriteScope exactly; both artifacts read in full;
+  `RUN-...-reviewer-p5slice.json` read directly to confirm the reviewer's
+  self-reported `OutputPath` declaration fix (my handoff wrongly gave a
+  short worktree-root-relative form; the reviewer corrected the run-state
+  declaration to the same full repo-relative form P1-P4 used, documented via
+  `output_path_correction_note`/`output_paths_as_handed_off`, with the
+  artifact itself written exactly once at the canonical path — no other
+  run-state fields touched). **Lesson for any future `handoff-build.sh spawn`
+  reviewer calls in this story: `--output-path`/`--write-scope` must use the
+  full form `data/requirements/<REQ>/<STORY>/review/<file>`, not a short
+  form relative to the story's own `review/` dir.** Committed `32f20f0a`,
+  merged `4c9c1ccd` (re-merge, normal). `Iris-QC` released via `TaskStop`.
+- **About to dispatch now: fresh final-synthesis reviewer** (new `Iris-QC`
+  spawn, NOT a continuation of any slice reviewer's context). This is the
+  real story-level review pass — reads only the 5 slice reports
+  (`slice-p1-activation-ledger.md` .. `slice-p5-next-plan-suggestions.md`)
+  plus `story_master.md`, not raw source. Must explicitly resolve: (a) the
+  `VISUAL_FIDELITY: PASS` + `DESIGN_SPEC_CONFLICT` pairing tension (P4,
+  echoed by P5-A5) with one deliberate story-level decision, following this
+  story's own "AC/spec over canvas" precedent rather than reopening it; (b)
+  record the accumulated `DESIGN_SPEC_CONFLICT` items across P2 (4) and P4
+  (2) for the story record; (c) surface P2's advisory A3 (one-time
+  activation consumed at screen-build time vs. scroll-into-view) as an
+  explicit open question for PO, not a reviewer-resolved item; (d) extend
+  `scope-gate.md` from P1-only to the whole story; (e) confirm P4's AC
+  citation self-correction (A1: AC-14..AC-18/BR-8/BR-9, not AC-4/AC-5) is
+  reflected accurately; (f) note P5's advisory A3 (the justified
+  out-of-WriteScope `activity_card.dart` touch) in the story record. Must
+  write ONE true `Outcome:` line — `CLEAN`, `DEFERRED_ONLY`, or
+  `PATCH_REQUIRED` (never `PARTIAL_SLICE_ONLY`, which does not satisfy the
+  DONE gate) — overwriting the placeholder file per its own standing
+  instructions at the top. Use `Mode: retro-audit`-adjacent but this is an
+  ordinary story final review, not retro — use whatever mode
+  `handoff-build.sh spawn` resolves for a full story-level Reviewer pass
+  given the existing scope-gate/slice-index state; check the builder's
+  guidance if it rejects `scoped-slice` for a synthesis call.
 - After each slice returns: 3-part-verify, then dispatch the next slice
   immediately (dispatch discipline — same story, so sequential is correct
   here, not a capacity-fill violation).
