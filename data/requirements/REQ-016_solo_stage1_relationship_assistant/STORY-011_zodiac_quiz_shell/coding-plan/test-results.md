@@ -105,3 +105,93 @@ All commands run from the story worktree's `mobile/` directory on
   deliberately wrote no `VISUAL_FIDELITY:` verdict: there is nothing rendered to
   compare yet, and a typed token without a capture is exactly what the gate
   exists to refuse.
+
+## Phase P2 — Deterministic Session (Mobile)
+
+Run at: 2026-09-24 · Worktree:
+`.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-011_zodiac_quiz_shell`
+
+### Commands and results
+
+| Command | Result |
+| --- | --- |
+| `flutter test test/features/zodiac_shell/` | 45/45 PASS |
+| `flutter analyze lib/features/zodiac_shell lib/features/activity_cards/domain/activity_card.dart test/features/zodiac_shell` | `No issues found!` (3 items) |
+| `flutter test test/features/zodiac_shell/ test/features/activity_cards/` | `+457 ~5: All other tests passed!` (0 failures, 5 pre-existing skips) |
+
+Breakdown of the 45: `zodiac_shell_resolver_test.dart` 16,
+`zodiac_rotation_store_test.dart` 15, `zodiac_shell_cubit_test.dart` 14.
+
+`flutter analyze` is scoped to this phase's write scope on purpose: the
+repository baseline is non-zero (222 pre-existing warnings, 0 errors), so a
+whole-tree run can never read as a pass/fail signal. The delta this phase adds
+is zero.
+
+A fresh worktree needs `flutter gen-l10n` before any test that transitively
+imports a screen; `zodiac_shell_cubit_test.dart` does, through
+`context_notebook_entry_point.dart`. The generated `lib/l10n/generated/` stays
+untracked.
+
+### Required assertion evidence
+
+- **Deterministic repeat (AC-21)** —
+  `zodiac_shell_resolver_test.dart` "the same set, answers and notebook resolve
+  identically every time" resolves the same round five times and asserts one
+  distinct outcome id and one distinct suggestion-id sequence.
+  `zodiac_shell_cubit_test.dart` "the same answers land on the same outcome on a
+  later round" repeats that against the shipped assets *after* the rotation
+  cursor has advanced, which is the assumption `solution.md` §3 records: the
+  cursor picks questions and never reaches the mapping.
+  A second test scans every `.dart` under `lib/features/zodiac_shell/` for
+  `DateTime.now`, `Random(`, `Random.secure` and `Stopwatch` and requires none —
+  the determinism claim holds for files added later, not just today's.
+- **Wrap-around (AC-32)** — `zodiac_rotation_store_test.dart` runs a 7-question
+  set for 16 rounds and asserts rounds 8-14 repeat rounds 1-7 in the same order;
+  a 5-question set with a 2-question round is asserted to return `[4, 0]` across
+  the seam; N=1 returns `[0]` forever rather than running out. The shipped
+  `zodiac_quiz.v1.json` cannot exercise any of this — every set ships exactly
+  `questions_per_round` questions today — so these run on fixtures, and a
+  separate case pins the shipped shape (round == set length repeats).
+- **Append-only enum** — the P2 change to `ActivityCardOrigin` is an append;
+  `activity_card_test.dart`'s own "the four earlier values keep their positions"
+  assertion still passes, and `cubit` test "the card carries the zodiac origin,
+  the idea status and the suggestion title" pins `zodiac_shell` end to end
+  through `createCard`.
+
+### A tail-freeze the append had to retire
+
+Appending `zodiacShell` broke exactly one assertion elsewhere,
+`mobile/test/features/activity_cards/activity_card_test.dart:53`:
+
+`expect(ActivityCardOrigin.values.last, ActivityCardOrigin.dateScript);`
+
+That line pinned the *tail* of an enum whose own contract is append-only, so it
+was guaranteed to break on the next append — the very thing the two lines above
+it exist to allow ("append-only: the four earlier values keep their positions",
+still passing). It now asserts `date_script`'s own index instead, which is what
+append-only actually promises and what survives STORY-012's append too. A new
+case pins `zodiac_shell`'s wire value and its position behind `date_script`.
+
+Verified as the only breaking assertion before touching anything:
+`activity_card_status_test.dart:29` iterates all values without pinning the
+tail, and `conversation_starters/calendar_event_service_test.dart:418` pins only
+the first five. The file is inside this run's registered `write_scope`.
+
+### Design notes worth carrying into P3
+
+- `ZodiacShellState` has no question index and no round length. A progress bar,
+  a "câu 2/5", or a "đã hết" line is not merely unrendered — it cannot be built
+  from this state (AC-18/AC-19/AC-31). P3 should not add one.
+- The rotation cursor is stored already reduced modulo the set length, so the
+  number on disk is a position, never a tally. "How many have I played" is
+  unanswerable from storage, not just unexposed.
+- `ZodiacShellCubit.undoAddToCards` lives here, not in P3, because P3's write
+  scope holds only screens/widgets/arb/tests and its 5-second undo snackbar
+  needs a door to delete the card it just created.
+- Notebook enrichment folds free text to the packs' ASCII tag vocabulary
+  (lowercase, Vietnamese diacritics folded, contiguous runs of up to three
+  words joined by `_`). No such helper existed in the repository. Punctuation
+  ends a phrase so `cà phê, sách` cannot invent `phe_sach`; spaces do not. A
+  notebook that throws — the signed-out case, since the notebook door needs a
+  resolved backend user id — is treated exactly like an empty one, and never
+  reaches a state P3 could render as an error (AC-25/BR-4).

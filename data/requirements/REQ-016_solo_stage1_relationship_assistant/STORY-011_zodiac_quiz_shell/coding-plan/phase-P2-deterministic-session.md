@@ -145,5 +145,7 @@ lộ số đếm, một cubit phiên chơi tạo thẻ hoạt động với ngu�
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-24
+- Evidence: `coding-plan/test-results.md` → "Phase P2 — Deterministic Session
+  (Mobile)"

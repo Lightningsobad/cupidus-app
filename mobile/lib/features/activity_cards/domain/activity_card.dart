@@ -30,7 +30,8 @@ enum ActivityCardOrigin {
   conversationStarter('conversation_starter'),
   compatibilityLookup('compatibility_lookup'),
   nextPlanAfterDate('next_plan_after_date'),
-  dateScript('date_script');
+  dateScript('date_script'),
+  zodiacShell('zodiac_shell');
 
   const ActivityCardOrigin(this.wireValue);
 
