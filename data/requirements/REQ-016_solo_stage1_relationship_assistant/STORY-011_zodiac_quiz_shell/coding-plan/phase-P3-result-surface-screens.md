@@ -151,5 +151,22 @@ trên cùng một lượt cuộn, cộng màn chọn lát/bộ dẫn vào nó.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-24
+- Lane: Mobile
+- Delivered:
+  - `mobile/lib/features/zodiac_shell/presentation/screens/zodiac_shell_screen.dart`
+    (màn chọn lát, màn một câu một lần, màn kết quả — ba stage của một route)
+  - `mobile/lib/features/zodiac_shell/presentation/widgets/zodiac_result_surface.dart`
+    (một `ListView`: nhận định → khối "câu để hỏi" → tiêu đề phụ → đúng 3 thẻ →
+    dòng định vị)
+  - `mobile/lib/l10n/arb/app_vi.arb`, `mobile/lib/l10n/arb/app_en.arb` — 11
+    chuỗi chrome (`zodiac_shell_*`), không chuỗi nội dung nào
+  - `mobile/test/features/zodiac_shell/zodiac_shell_screen_test.dart` (12 test
+    + 2 test chụp ảnh gated)
+  - `mobile/test/features/zodiac_shell/zodiac_result_surface_test.dart` (10
+    test, quét cả 27 outcome đã ship)
+  - `visual-fidelity/` — reference canvas, 2 ảnh dựng, báo cáo
+- Evidence: `coding-plan/test-results.md` mục P3,
+  `visual-fidelity/visual-fidelity-report.md` (`VISUAL_FIDELITY: PASS`,
+  `Design-Screen: 7-vo-hoang-dao-3-viec`)

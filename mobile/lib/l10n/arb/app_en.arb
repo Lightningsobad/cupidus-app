@@ -283,5 +283,16 @@
   "compat_skip_back_action": "Skip, go back",
   "compat_card_created_snackbar": "New card created in your activity store",
   "compat_card_created_undo": "Undo",
-  "compat_static_table_note": "A fixed, pre-written table. It learns nothing from you, so it cannot flatter you."
+  "compat_static_table_note": "A fixed, pre-written table. It learns nothing from you, so it cannot flatter you.",
+  "zodiac_shell_screen_title": "Signs & quizzes",
+  "zodiac_shell_guess_label": "This one is your guess",
+  "zodiac_shell_result_guess_basis": "Based on your guess",
+  "zodiac_shell_ask_block_title": "Something to ask",
+  "zodiac_shell_suggestions_subheading": "3 things you can do from here",
+  "zodiac_shell_add_to_my_store_action": "Add to my store",
+  "zodiac_shell_card_created_snackbar": "New card created in your activity store",
+  "zodiac_shell_card_created_undo": "Undo",
+  "zodiac_shell_leave_round_action": "Another time",
+  "zodiac_shell_back_to_picker_action": "Pick another one",
+  "zodiac_shell_positioning_note": "A sign is a light excuse, not a verdict. Reading it should only leave you wanting to ask them more."
 }

@@ -195,3 +195,118 @@ the first five. The file is inside this run's registered `write_scope`.
   notebook that throws — the signed-out case, since the notebook door needs a
   resolved backend user id — is treated exactly like an empty one, and never
   reaches a state P3 could render as an error (AC-25/BR-4).
+
+## Phase P3 — Result Surface And Screens (Mobile)
+
+Run at: 2026-09-24 · Worktree:
+`.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-011_zodiac_quiz_shell`
+
+`flutter gen-l10n` was run first, as required after the two `.arb` edits.
+
+### Commands and results
+
+| Command | Result |
+| --- | --- |
+| `flutter test test/features/zodiac_shell/zodiac_result_surface_test.dart` | 10/10 PASS |
+| `flutter test test/features/zodiac_shell/zodiac_shell_screen_test.dart` | 12/12 PASS (+2 capture tests skipped without the flag) |
+| `flutter test test/features/zodiac_shell/ --concurrency=1` | `+134 ~2: All other tests passed!` (0 failures) |
+| `flutter test test/features/activity_cards/ --concurrency=1` | `+345 ~5: All other tests passed!` (0 failures, 5 pre-existing skips) |
+| `flutter analyze lib/features/zodiac_shell lib/l10n test/features/zodiac_shell` | `No issues found!` (3 items) |
+| `flutter test test/features/zodiac_shell/zodiac_shell_screen_test.dart --dart-define=CAPTURE_VISUALS=true` | 14/14 PASS, 2 PNGs written |
+
+`flutter analyze` stays scoped to this phase's write scope on purpose: the
+repository baseline is non-zero (222 pre-existing warnings, 0 errors), so a
+whole-tree run can never read as a pass/fail signal. The delta this phase adds
+is zero. One `unnecessary_import` raised on the first run was fixed before the
+result above.
+
+The zodiac suite is run with `--concurrency=1` because the default parallel
+reporter interleaves output from seven files and a single failure scrolls out
+of reach.
+
+### Required assertion evidence
+
+- **Every shipped outcome, not a sample** — `zodiac_result_surface_test.dart`
+  loads `zodiac_outcomes.v1.json` off disk and loops all 27 shipped outcomes
+  for: exactly `minimumSuggestionsPerOutcome` cards, the insight present, one
+  and only one `Scrollable` in the tree, cards as descendants of the result
+  surface, and no `ExpansionTile`/`ExpansionPanelList`. A verdict can therefore
+  not ship alone (SC-2/BR-2) for any outcome an author writes, not just the
+  ones a fixture happens to name.
+- **Block order proved by geometry** — the same file asserts
+  `insight.dy < askBlock.dy < subheading.dy < firstCard.dy` with
+  `tester.getTopLeft`, rather than asserting that four widgets merely exist.
+- **The ask block is conditional, both ways** — present with its exact
+  `ask_line` text and the guess-provenance eyebrow for all three `about_other`
+  outcomes; absent for all 24 others. Asserting only the positive half would
+  pass on a screen that draws the block unconditionally.
+- **Display bans scanned, not eyeballed** — every `Text` of every outcome is
+  scanned for `%`, and `LinearProgressIndicator`/`CircularProgressIndicator`/
+  `Slider` are asserted absent (AC-13/AC-14/AC-19). On the picker, every `Text`
+  is scanned for "mở khoá"/"chuỗi" and for the `n/m` shape (AC-18/AC-19).
+- **The 5-second undo, measured** — `zodiac_shell_screen_test.dart` reads the
+  `SnackBar` widget and asserts `duration == Duration(seconds: 5)` and a
+  non-null action; the undo tap is then asserted to delete exactly the card id
+  that was just created, and a following add still lands.
+- **Card contract** — `origin: ActivityCardOrigin.zodiacShell`,
+  `status: ActivityCardStatus.idea`, title equal to the suggestion title, and
+  no `AlertDialog` anywhere on the path (AC-7, §3.2).
+- **Multi-select** — all three suggestions go to the store from one surface, in
+  pack order, with the surface still mounted afterwards.
+- **Leaving is free** — from the result, "Chọn lát khác" returns to the picker
+  with an empty store and no snackbar (AC-10); mid-round, "Để khi khác" clears
+  `set`/`question`/`result` and re-entering asks a fresh question (AC-3).
+- **Accessible name for a text-free button** — the `Semantics` label
+  `zodiac_shell_add_to_my_store_action` is counted on the tree and must appear
+  once per card.
+
+### `.arb` scope
+
+11 keys added to `app_vi.arb` and `app_en.arb`, all chrome: screen title, guess
+label, guess-provenance eyebrow, ask-block title, suggestions subheading, the
+add action, the snackbar line and its undo, the two neutral exits, and the
+positioning note. No quiz prompt, option label, insight, ask line, suggestion
+title or note was copied out of the P1 packs — and the P1 gate proves it: its
+`no shipped wording lives in a Dart file under the feature` scan runs green
+against the two new source files.
+
+### A P1 gate rule that bit the doc comments
+
+`zodiac_shell_content_gate_test.dart`'s `no source writes down how many items a
+package ships (R-15b)` matches the seed counts with
+`RegExp('(?<![\\w.])$count(?![\\w.])')`. The quiz pack ships 10 sets, so a
+*comment* citing `AC-10` or `R-10` matched — the digits are preceded by a
+hyphen, which is not `\w`. Both citations were reworded to state the rule
+instead of its id. The gate rule itself was not touched: it belongs to P1 and
+sits outside this phase's write scope, and the false positive costs a comment
+while the true positive it exists for costs a shipped constant.
+
+### Visual fidelity
+
+- Verdict: `VISUAL_FIDELITY: PASS` ·
+  `Design-Screen: 7-vo-hoang-dao-3-viec` ·
+  report: `visual-fidelity/visual-fidelity-report.md`
+- Capture path: no Android/iOS device is attached to this machine (`adb
+  devices` empty, `flutter devices` lists only macOS and Chrome) and the screen
+  has no entry point until P4, so the repo's established
+  `RepaintBoundary.toImage()` fallback was used inside the story's own widget
+  test, building the real `ZodiacShellScreen` with the real theme, real
+  background and disk-loaded packs.
+- Frames: `implemented-7-vo-hoang-dao-3-viec-md.png` (415x900, the same frame
+  as the reference) and `implemented-7-vo-hoang-dao-3-viec-md-chon-lat.png`
+  (415x1100, the picker, which does not fit a phone frame).
+- Both images were looked at, not just produced green: Vietnamese diacritics
+  all land and every icon draws its glyph rather than a notdef box.
+- Gate verified by running `.claude/hooks/lib/visual_fidelity.py --stage review
+  --stack mobile` against this story directory (silent, exit 0), with a `/tmp`
+  copy whose token was changed to `PASS_STATIC_ONLY` as the control — the
+  control was rejected, so the pass is a real evaluation and not a no-op.
+
+### Notes for P4
+
+- `ZodiacShellScreen` registers nothing in the service locator: it builds its
+  own `ZodiacShellCubit`, whose defaults already resolve the content loader,
+  the rotation store and the card hub. P4 only needs a route that pushes it.
+- `CupidHeader` renders the back control from `Navigator.canPop`, so the push
+  from quick-entry slot 3 gets it for free; it is correctly absent in a capture
+  where the screen is the harness `home`.

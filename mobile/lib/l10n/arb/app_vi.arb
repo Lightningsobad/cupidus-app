@@ -1317,5 +1317,49 @@
   "compat_static_table_note": "Bảng tra soạn sẵn, cố định. Không có gì học từ bạn, nên nó không biết nịnh bạn.",
   "@compat_static_table_note": {
     "description": "Closing note of screen (10), taken from the design canvas. It states in words what AC-28/AC-31 state in code: the 400 cells ship with the app, nothing is computed about the reader, and nothing is stored back."
+  },
+  "zodiac_shell_screen_title": "Cung & trắc nghiệm",
+  "@zodiac_shell_screen_title": {
+    "description": "Title of screen (7), the zodiac/quiz shell, taken from the design canvas frame 7-vo-hoang-dao-3-viec. Chrome only: every slice, question, insight and suggestion on this screen comes from the static content packages, never from here (BR-12)."
+  },
+  "zodiac_shell_guess_label": "Đây là phỏng đoán của bạn",
+  "@zodiac_shell_guess_label": {
+    "description": "Shown above a question asked on the other person's behalf, before the reader answers it. AC-12 requires such an answer to be framed as the reader's own guess rather than something the app confirms."
+  },
+  "zodiac_shell_result_guess_basis": "Dựa trên phỏng đoán của bạn",
+  "@zodiac_shell_result_guess_basis": {
+    "description": "Provenance eyebrow on a result built from a guess about the other person (AC-12). Rendered uppercase, matching the canvas eyebrow above the verdict."
+  },
+  "zodiac_shell_ask_block_title": "Câu để hỏi",
+  "@zodiac_shell_ask_block_title": {
+    "description": "Heading of the ask block inside the verdict, shown only when the outcome speaks about the other person. The question itself is pack content (AC-15); only this heading is chrome."
+  },
+  "zodiac_shell_suggestions_subheading": "3 điều làm được từ đây",
+  "@zodiac_shell_suggestions_subheading": {
+    "description": "Separator heading between the verdict and the three suggestion cards, from the design canvas. The 3 is BR-2's fixed layout contract, not a count of anything the reader did, and not the content package's N."
+  },
+  "zodiac_shell_add_to_my_store_action": "Thêm vào kho của tôi",
+  "@zodiac_shell_add_to_my_store_action": {
+    "description": "The one primary action on a suggestion card. Drawn as a round outlined (+), so this string is the accessible name rather than visible text; it reuses STORY-004/005's shared suggestion-card action (ux/uiux-spec.md section 5)."
+  },
+  "zodiac_shell_card_created_snackbar": "Đã tạo thẻ mới trong kho hoạt động",
+  "@zodiac_shell_card_created_snackbar": {
+    "description": "Undo snackbar shown after a suggestion is pushed to the activity store. The card is created immediately and announced afterwards; there is no blocking confirmation dialog (AC-7)."
+  },
+  "zodiac_shell_card_created_undo": "Hoàn tác",
+  "@zodiac_shell_card_created_undo": {
+    "description": "Undo action on the card-created snackbar, live for 5 seconds. It deletes the card this screen just created and nothing else."
+  },
+  "zodiac_shell_leave_round_action": "Để khi khác",
+  "@zodiac_shell_leave_round_action": {
+    "description": "Neutral exit from a half-answered round (AC-3). No reproach, no tally of abandoned rounds, and the next visit starts clean."
+  },
+  "zodiac_shell_back_to_picker_action": "Chọn lát khác",
+  "@zodiac_shell_back_to_picker_action": {
+    "description": "Leaves the result surface for the picker. A reader who picked none of the three leaves with no consequence and no second ask (AC-10)."
+  },
+  "zodiac_shell_positioning_note": "Cung chỉ là cái vỏ cho vui, không phải phán quyết. Đọc xong chỉ nên thấy muốn hỏi người kia nhiều hơn.",
+  "@zodiac_shell_positioning_note": {
+    "description": "Closing note of the result surface, from the design canvas. It says in words what R-10/AC-16/AC-17 say in code: this is an excuse to start a conversation, not a prophecy, and nothing here rates the other person."
   }
 }
