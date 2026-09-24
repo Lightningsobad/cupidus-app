@@ -1,6 +1,6 @@
 # Story Master: STORY-013 Lối ra khi im lặng/bị từ chối, và lối quay lại sau vắng
 
-Status: TODO
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: mobile (Tech Lead chốt 2026-09-11 — không AC nào cần máy
@@ -21,9 +21,9 @@ B (Lối ra, Lối quay lại), D (SC-5), F (SB-100)
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`,
       `architecture/contract-summary.md`
-- [ ] Implementation (Development) — kế hoạch: `coding-plan/master-plan.md`
+- [x] Implementation (Development) — kế hoạch: `coding-plan/master-plan.md`
       (P1..P6, một lane Mobile, tuần tự)
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — `review/review-report.md`, Outcome: DEFERRED_ONLY
 
 ## Depends On
 - STORY-001 — "đóng ngăn gọn gàng" tác động lên thẻ trong kho chung.
