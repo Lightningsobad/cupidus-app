@@ -3,7 +3,9 @@
 Status: TODO
 Complexity: standard
 Story-Class: standard
-Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
+Implementation Lane: mobile (chốt ở `architecture/solution.md` — AC-22/AC-23
+cấm mọi API ngoài và bắt buộc chạy ngoại tuyến, nên không tồn tại bề mặt
+backend nào)
 Requirement: REQ-016
 Screen: Vỏ hoàng đạo / trắc nghiệm — màn (7), nhóm CỬA VÀO
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục C.7, D (SC-2),
@@ -12,7 +14,7 @@ F (Tầng 4); `req_master.md` SB-174, R-10
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
