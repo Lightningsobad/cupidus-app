@@ -1,20 +1,28 @@
 VISUAL_FIDELITY: PASS
 Design-Screen: sb-212-cam-on-chot-viec-ke-tiep
 
-# STORY-007 — "Cảm ơn + chốt việc kế tiếp", visual fidelity (P2 khung khối + P5 phần 3)
+# STORY-007 — "Cảm ơn + chốt việc kế tiếp", visual fidelity (P2 khung khối + P3 phần 1 + P4 phần 2 + P5 phần 3)
 
-- Story: REQ-016 / STORY-007, phases P2 and P5
+- Story: REQ-016 / STORY-007, phases P2, P3, P4 and P5
   (`coding-plan/phase-P2-block-shell-and-entry-point.md` §6,
+  `coding-plan/phase-P4-photo-attach.md` §6,
   `coding-plan/phase-P5-next-plan-suggestions.md` §6)
 - Requirement: REQ-016_solo_stage1_relationship_assistant
 - Lane: Mobile
-- Date: 2026-09-23
+- Date: 2026-09-24 (P4 re-capture; P2/P5 audit 2026-09-23)
 
 ## Screens under audit
 
 | Design screen id | Platform | Design reference | Implemented |
 | --- | --- | --- | --- |
 | `sb-212-cam-on-chot-viec-ke-tiep` | ios | `design-reference-sb-212-cam-on-chot-viec-ke-tiep-ios.png` (415x900) | `implemented-sb-212-cam-on-chot-viec-ke-tiep-ios.png` (415x900) |
+
+The screen pair above is the audited one. P4 adds a **second state of the same
+screen**, `state-khong-anh-sb-212-cam-on-chot-viec-ke-tiep-ios.png` (415x900,
+ios): the identical surface on a card with no photo, which is the AC-15/BR-9
+shape. It is deliberately not a `design-reference`/`implemented` pair — the
+canvas has no empty-photo frame to compare it against — so it is filed as
+supporting evidence rather than a second row in the table.
 
 Design source resolution: the project configures four design sources, so the
 renderer refuses a default. The surface carrying this story is `cupid-ch-ng-1`
@@ -65,8 +73,12 @@ FLUTTER_ROOT="$HOME/flutter" flutter test \
   animated background glow is frozen rather than caught mid-frame.
 - No iOS status bar and no home indicator: the design reference includes device
   chrome, a direct widget render does not.
+- The thumbnails' files are decoded into the image cache before the widget is
+  pumped. `Image.file` reads from disk, and a read started under the test's fake
+  clock never finishes, so without the warm-up the row captures as blank squares
+  — and waiting on that read afterwards hangs the run rather than failing it.
 
-Both PNGs were opened and inspected. Every glyph rasterises — no tofu — and the
+All three PNGs were opened and inspected. Every glyph rasterises — no tofu — and the
 Vietnamese diacritics in `Cảm ơn + chốt việc kế tiếp` and in the card body above
 it are all correct.
 
@@ -122,23 +134,61 @@ the wording and the dates the app actually ships.
   date to travel with the card, so the date is never absent for a chip that
   exists.
 
-## P2/P3 scope note — one remaining slot is empty on purpose
+## Phần 2 (P4) — matches the design
 
-P2 shipped the frame and its slot contract, P5 filled the third slot, and P3
-(2026-09-24) has now shipped Section 1 — the thank-you draft card, its
-`Chép để gửi Zalo` gradient CTA and the shuffle button, using the
-category-scoped `decline_door` gate resolved by the 2026-09-23 Design Ruling
-Log (`CONTENT_GATE_CATEGORY_COUPLING`, lối A). The implemented PNG above was
-re-captured after P3 landed, so this report's screen pair already reflects
-Section 1 as built. The canvas draws the block with all its sections filled;
-the one still unfilled is P4 (`đính ảnh`), out of P3's write scope. An unfilled
-slot renders nothing at all — no placeholder row — which is also the shape
-AC-15/BR-9 need for "card with no photo". The canvas has no equivalent
-empty-frame state to compare against, so the following is recorded as
-**not-yet-built, not a delta**:
+All three slots are now filled. P4 (2026-09-24) shipped Section 2, so the
+implemented PNG was re-captured with the photo row present and the block no
+longer has an empty slot.
 
-- Section 2: the `Kèm một ảnh tối qua` row with thumbnail, sub-caption and
-  chevron (P4, blocked on `JOURNAL_SOURCE_CONTRACT_CLOSED`).
+The capture is driven through the section's loader seam with three photo files
+on disk, because the merged source (`ActivityCardPhotos` + the journal's
+`originRef` projection) has no seeding surface inside this phase's write scope.
+The thumbnails are flat colour squares rather than photographs on purpose: what
+the capture is evidence *of* is the row's geometry and chrome, and a real
+photograph would only add noise the canvas cannot be compared against.
+
+- One horizontally scrolling row of square thumbnails at the secondary-action
+  tier, indented with the rest of the block, `radiusSmall` corners
+  (`ux/uiux-spec.md` mục 3, phase P4 §3).
+- Each thumbnail is **the photo and nothing else** — no caption, no date, no
+  entry label, no overlay of any kind. Asserted in the tree as well as in the
+  capture: `photo_attach_test.dart` fails if any `Text` appears inside
+  `photo_attach_row` (AC-17, BR-8).
+- Nothing is pre-selected: no accent border, no tick on any thumbnail in the
+  capture, which is AC-16 read straight off the render.
+- No "thêm ảnh mới" affordance in the row — the section opens neither camera nor
+  gallery (`ux/uiux-spec.md` mục 3 dòng 62-63).
+- Section header `KÈM ẢNH · KHÔNG BẮT BUỘC` uses the identical muted caption-caps
+  treatment and letter-spacing as phần 3's `HẸN NHAU LẦN TỚI · KHÔNG BẮT BUỘC`
+  directly beneath it, so the two optional sections read as peers.
+- Vietnamese diacritics in the header (`KÈM ẢNH`, `KHÔNG BẮT BUỘC`) rasterise
+  fully — inspected glyph by glyph, no tofu.
+
+### Empty state — the second capture
+
+`state-khong-anh-sb-212-cam-on-chot-viec-ke-tiep-ios.png` is the same screen
+with the loader returning nothing. Section 2 is **absent entirely**: no header,
+no grey row, no empty frame, no "thêm ảnh đi" CTA — phần 1 sits directly above
+phần 3's header with the block's normal rhythm and no gap where the row was.
+That is AC-15/BR-9 verified by render rather than by assertion alone.
+
+### Deltas inside phần 2 — accepted, with the binding source
+
+- **A row of thumbnails vs the canvas's single list row.** The canvas draws one
+  full-width row: one thumbnail, the title `Kèm một ảnh tối qua`, a sub-caption
+  and a trailing chevron. `ux/uiux-spec.md` mục 3 dòng 53-54 fixes the shape as
+  "một hàng thumbnail ảnh dạng lưới ngang cuộn được", and phase P4 §3 repeats it
+  ("hàng thumbnail cuộn ngang, chỉ ảnh"). The canvas shape also presumes exactly
+  one photo, while AC-14 merges two stores that can each hold several.
+- **Selection in place vs a chevron into somewhere else.** The chevron implies a
+  second destination; AC-16 and phase P4 §3 specify tap-to-select/deselect on the
+  thumbnail itself with a tick top-right, and the block is explicitly a read-only
+  window rather than a door into the journal.
+- **A section header where the canvas has a row title.** `uiux-spec.md` does not
+  name a header for phần 2, and the canvas's own equivalent text
+  (`Kèm một ảnh tối qua`) cannot ship — see the conflict below. A caption-caps
+  header matching phần 3 keeps the section named without putting any journal
+  content on screen.
 
 ## Authority note
 
@@ -177,6 +227,20 @@ gaps and must not be "fixed" toward the canvas without a user ruling.
    and the `· TỐI QUA` half is a recency readout the block has no data for: the
    ledger stores `armed_on` as a civil date and nothing about time of day
    (BR-3, and the P1 column allowlist). No chip ships from this story.
+5. **Section 2's row text `Kèm một ảnh tối qua` / `lấy từ tối qua bạn lưu lúc
+   23h`.** This is the sharpest one. The sub-caption is a journal entry's save
+   timestamp rendered on a screen the photo can be shared from, and AC-17/BR-8
+   allow **only photo file references** to leave the journal — "chữ và siêu dữ
+   liệu không bao giờ rời thiết bị qua đường này" (`ux/uiux-spec.md` mục 3).
+   Phase P4 §3 enforces it at the type level: the projection carries a file path
+   and nothing else, so there is no timestamp in the widget's reach to draw even
+   if a designer asked for it. The row title is the same problem one step softer
+   — `tối qua` is a recency readout derived from entry metadata. Neither ships.
+   The section is named by a caption-caps header carrying no journal content.
+6. **Section 2's trailing chevron.** A chevron reads as "there is more of this
+   somewhere". There is not: the journal is a one-way surface (AC-7) and this
+   section is the single read-only window onto it. AC-16 puts the whole
+   interaction on the thumbnail itself. No chevron ships.
 
 ## Out of scope here — not conflicts, not defects
 

@@ -16,6 +16,7 @@ import '../../../../conversation_starters/domain/starter_content.dart';
 import '../../../domain/activity_card.dart';
 import '../../../domain/activity_card_repository.dart';
 import '../../../domain/occasion_suggestion_service.dart' show civilDate;
+import '../../data/attachable_photos.dart';
 import '../../data/thank_you_activation_dao.dart';
 import '../../data/thank_you_activation_repository_impl.dart';
 import '../../domain/next_plan_suggestion_service.dart';
@@ -23,6 +24,7 @@ import '../../domain/thank_you_activation_service.dart';
 import '../next_plan_cubit.dart';
 import '../thank_you_block_cubit.dart';
 import 'next_plan_section.dart';
+import 'photo_attach_section.dart';
 import 'thanks_section.dart';
 
 /// `mobile/lib/l10n/` is outside this story's write scope, so the block follows
@@ -60,6 +62,7 @@ class ThankYouOptions {
   const ThankYouOptions({
     this.service,
     this.thanks,
+    this.photos,
     this.nextPlan,
     this.slots = const ThankYouSlots(),
   });
@@ -70,11 +73,25 @@ class ThankYouOptions {
   /// registered catalogue and opens STORY-002's real composer sheet.
   final ThanksOptions? thanks;
 
+  /// Seams for phần 2. Null in production, so the section reads the card's own
+  /// photos and the journal's photo projection.
+  final PhotoAttachOptions? photos;
+
   /// Seams for phần 3. Null in production, so the section reads the device
   /// clock, the shipped occasion pack and the registered card store.
   final NextPlanOptions? nextPlan;
 
   final ThankYouSlots slots;
+}
+
+/// Test/preview seam for phần 2 (`ux/uiux-spec.md` mục 3).
+@immutable
+class PhotoAttachOptions {
+  const PhotoAttachOptions({this.loader});
+
+  /// Where the already-saved photos come from. Null in production, so the
+  /// section merges the card's photo rows with the journal's photo projection.
+  final AttachablePhotoLoader? loader;
 }
 
 /// Test/preview seams for phần 3 (`ux/uiux-spec.md` mục 3).
@@ -121,6 +138,14 @@ class _ThankYouSectionState extends State<ThankYouSection> {
 
   bool _thanksAvailable = false;
 
+  List<AttachablePhoto> _photos = const <AttachablePhoto>[];
+
+  /// Shared by phần 2 (which writes it) and phần 1 (which reads it when the
+  /// composer opens), because the photos and the text leave together as one
+  /// share item.
+  final ValueNotifier<List<String>> _selectedPhotos =
+      ValueNotifier<List<String>>(const <String>[]);
+
   @override
   void initState() {
     super.initState();
@@ -145,6 +170,23 @@ class _ThankYouSectionState extends State<ThankYouSection> {
         return;
       }
       setState(() => _thanksAvailable = available);
+    }
+    if (widget.options?.slots.photo == null) {
+      // A store that cannot be read is the same outcome as a card with no
+      // photo: the section stays out of the tree. Attaching is optional, so a
+      // failure here must never cost the user the thank-you itself (AC-25).
+      List<AttachablePhoto> photos = const <AttachablePhoto>[];
+      try {
+        photos = await (widget.options?.photos?.loader ?? loadAttachablePhotos)(
+          widget.card.id,
+        );
+      } catch (_) {
+        photos = const <AttachablePhoto>[];
+      }
+      if (!mounted) {
+        return;
+      }
+      setState(() => _photos = photos);
     }
     if (widget.options?.slots.nextPlan != null) {
       // A caller that already put its own widget in the slot gets exactly
@@ -176,6 +218,7 @@ class _ThankYouSectionState extends State<ThankYouSection> {
 
   @override
   void dispose() {
+    _selectedPhotos.dispose();
     _nextPlan?.close();
     _cubit.close();
     super.dispose();
@@ -203,15 +246,25 @@ class _ThankYouSectionState extends State<ThankYouSection> {
             ? ThanksSection(
                 card: widget.card,
                 options: widget.options?.thanks ?? const ThanksOptions(),
+                attachments: _selectedPhotos,
               )
             : null);
+    // No photo in either store leaves the slot itself out of the tree, so the
+    // block is the other two parts and nothing else (AC-15, BR-9).
+    final Widget? photo = declared.photo ??
+        (_photos.isEmpty
+            ? null
+            : PhotoAttachSection(
+                photos: _photos,
+                selection: _selectedPhotos,
+              ));
     final NextPlanCubit? next = _nextPlan;
     if (next == null || declared.nextPlan != null) {
       return ThankYouBlock(
         cubit: _cubit,
         slots: ThankYouSlots(
           thanks: thanks,
-          photo: declared.photo,
+          photo: photo,
           nextPlan: declared.nextPlan,
         ),
       );
@@ -227,7 +280,7 @@ class _ThankYouSectionState extends State<ThankYouSection> {
           cubit: _cubit,
           slots: ThankYouSlots(
             thanks: thanks,
-            photo: declared.photo,
+            photo: photo,
             nextPlan: state.suggestions.isEmpty
                 ? null
                 : NextPlanSection(suggestions: state.suggestions),

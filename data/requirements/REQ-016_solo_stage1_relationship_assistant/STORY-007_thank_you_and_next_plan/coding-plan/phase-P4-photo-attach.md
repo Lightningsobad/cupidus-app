@@ -214,5 +214,13 @@ này biến mất hoàn toàn khi chưa có ảnh nào.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-24
+- Evidence: `coding-plan/test-results.md` mục `## P4 — Phần 2, đính ảnh`;
+  `visual-fidelity/visual-fidelity-report.md` mục `## Phần 2 (P4)`.
+- Ghi chú về §6 "How the implemented screen is captured": `capture-mobile-screen.sh`
+  và `contracts/design-fidelity-spec.md` **không tồn tại** trong repo lẫn
+  worktree. Không phải `MOBILE_RUNTIME_UNAVAILABLE`: dùng đúng lối dự phòng mà
+  P2/P3/P5 của chính story này đã dùng — chụp `RepaintBoundary.toImage` trong
+  widget test của story, ở viewport iOS tham chiếu, với `ActivityCardDetailScreen`
+  thật. Hai trạng thái đều đã chụp như §6 yêu cầu.
