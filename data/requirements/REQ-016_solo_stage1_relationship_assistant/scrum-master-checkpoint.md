@@ -1,6 +1,6 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-## Current state (as of Round 9, 2026-09-20)
+## Current state (as of Round 19, 2026-09-24)
 
 Ground truth = integration-worktree `story_master.md` copies +
 `git-story-boundary.sh status`, not narrative history.
@@ -11,28 +11,73 @@ Ground truth = integration-worktree `story_master.md` copies +
 | STORY-002 | STORY-001 | DONE, merged |
 | STORY-003 | NONE | DONE, merged |
 | STORY-004 | STORY-001 | DONE, merged |
-| STORY-005 | STORY-001, STORY-004 | DONE, merged, but REWORK IN FLIGHT (Design Ruling Log 2026-09-20 "Neo thiết kế"). P5 DONE, P6 DONE. **P7 code implemented + committed by Scrum Master** (commit `fa9c0ad5`, own scope green: conversation_starters + content-gate suites, `flutter analyze` 0 error, visual fidelity PASS eyeballed) but worker left phase/master-plan status `BLOCKED` because a broad `flutter test test/core/database/` (OUTSIDE P7 WriteScope) hit 11 pre-existing reds from Drift `schemaVersion` drifting to 9 via 3 sibling merges (STORY-009/010/013) — filed as **`BUG-20260923-001`** (non-blocking, pre-existing, out of scope). Worker's own build-evidence gate got session-locked by that one red run (known pattern), so a **fresh** `Alex-Mobile-Dev` was re-dispatched round 10 (`Mode: completion/resume`, `Session-Recovery: YES`, BaseHead `fa9c0ad5`, doc-only WriteScope) just to flip phase-P7 §7 + master-plan §5 row `BLOCKED`→`DONE` citing the bug — no code change. **Open Reviewer question for STORY-005's eventual story review**: P7's WriteScope also carried two scope-adjacent edits outside its own §3 (`StarterGateRule.assertiveClaim` addition, with a `firstWhere`-no-`orElse` `StateError` risk flagged by the worker; `ActivityCardOrigin` append-only assertion changed to a frozen-prefix `take(5)` comparison) — Reviewer must rule in/out-of-scope, Scrum Master does not resolve this itself. After completion/resume returns DONE: run the final canvas-diff visual-fidelity gate + full Reviewer story review (not Tier-0) before re-sealing STORY-005. |
+| STORY-005 | STORY-001, STORY-004 | **DONE, merged.** Final-synthesis review (RunId `...-reviewer-finalsynth`, fresh agent, did not continue the slice reviewer's context) returned **`Outcome: CLEAN`** (`review/review-report.md`, 134 lines, committed `f3fecc50`, merged `91d6da49`) — B-1 independently re-verified via diff scope + PNG commit-history cross-check, no new findings, D-1..D-6 remain deferred/non-blocking. `story_master.md` updated to Status DONE, Implementation/Review checked, `DESIGN_ANCHOR_ADJUDICATION_REQUIRED` flipped YES→NO with the resolved item→commit mapping (committed `b954964d`, merged `518d2453`). Boundary sealed via `git-story-boundary.sh complete` (`MERGE_COMPLETE: true`). **Open note carried forward**: `BUG-20260923-002`'s 3 assertions are already green on this story's branch (fixed by P7) — re-verify on the requirement integration branch before dispatching a bug-fixer, do not assume still-red. |
 | STORY-006 | STORY-001 | DONE, merged |
-| STORY-007 | STORY-001, STORY-002, STORY-003, STORY-005 | Tech Lead COMPLETED (architecture + master-plan sealed by Scrum Master, commit `d36e7a4a`, boundary refreshed). Phases P1-P5 all NOT_STARTED; single mobile lane, strictly sequential (P1→P2→P3/P4/P5, P3/P4 gated on decisions below). **P1 (activation ledger) DISPATCHED round 10** — fresh `Alex-Mobile-Dev-2`, RunId `...-STORY-007_thank_you_and_next_plan-mobile-dev`, BaseHead `d36e7a4a`. schemaVersion 9→10 bump owned by this phase; worker told to abort with `DRIFT_SCHEMA_COLLISION` if base version has already moved. P2 and P5 are next-ready only after P1 ships (single-lane cap, do not dispatch in parallel). P3/P4 remain blocked on the two decisions below. |
+| STORY-007 | STORY-001, STORY-002, STORY-003, STORY-005 | Tech Lead COMPLETED (architecture + master-plan sealed, commit `d36e7a4a`→superseded). **P1 (activation ledger) DONE, committed** (30-file commit, HEAD now `4a241d2f0de7e6cbee251a8f17f3d1d6e7165a9f` after repo commit-hook re-seal; schemaVersion 9→10; targeted tests +127 pass; full-suite regression 37 red→18 red, no new failures, 19 fixed were pre-existing v7→v9 fallout from STORY-013; `flutter analyze` 0 new issues on new code). Boundary `refresh-base`'d to that HEAD, `Alex-Mobile-Dev-2` released. 3 flagged deviations from original P1 handoff (wrong test filenames in handoff; codegen+wipe-registry writes fell outside declared WriteScope but were necessary; `stage1_wipe_registry_parity_test.dart` pre-existing red needs a PO/Tech Lead decision touching 3 other stories' tables — not yet raised to user, non-blocking for P1). **P2 (block shell + entry point) DONE, committed** (commit `35c9c815`, boundary refreshed, agent released; block widget+cubit+3 slots, single attach point in `activity_card_detail_screen.dart`, visual-fidelity PASS vs `sb-212-cam-on-chot-viec-ke-tiep`, regression fixes for pre-existing GetIt registration gaps in 3 unrelated card-detail tests). **P1 arm/cancel wiring gap CLOSED** (commit `d684c7e5`, boundary refreshed): confirmed the gap was real (listener existed, zero callers in `mobile/lib`, no DI registration); fixed via `ThankYouActivationAwareCardRepository` decorator wired at the DI composition root (`service_locator.dart`), STORY-001's own files untouched; new repository test 4/4 pass through the real card store, full `test/features/activity_cards` suite green. **Open Reviewer/user question, recorded not acted on**: P2 worker flagged 4 `DESIGN_SPEC_CONFLICT` items — biggest is canvas `sb-212` drawing a standalone screen with its own chrome vs. AC-7 + `architecture/solution.md` §3 + `uiux-spec.md` §6 requiring a nested block; worker followed AC/spec (same precedent as STORY-006 P2 with `sb-211`) and shipped the nested block, flagging the canvas mismatch for the record only. **P5 (next-plan suggestions) DONE, committed round 13** (commit `5fa0e972`, boundary refreshed, agent manually released — its Stop hook was permanently wedged on `BUILD_FAILED_BUT_COMPLETE` after 6 identical blocks, confirmed by the worker itself, so Scrum Master released it per the explicit-worker-request+confirmed-wedge exception rather than retrying). P5's own scope was fully green and already committed-ready in the worktree (its own doc edits had already flipped phase-P5 §7 and master-plan §5 P5 row to `DONE`); Scrum Master 3-part-verified directly (WriteScope match confirmed via `git diff --stat`, evidence read from `test-results.md`/`visual-fidelity-report.md`) and committed without needing a fresh re-dispatch. One line outside declared WriteScope, accepted as required: `ActivityCardOrigin.nextPlanAfterDate` in `activity_card.dart` (pinned by `architecture/contract-summary.md` §2/§4 + AC-24, append-only enum, no schemaVersion bump). Visual fidelity vs `sb-212` PASS with 3 documented, accepted deltas. **New non-blocking bug filed**: `BUG-20260923-002` — 3 pre-existing `test/features/conversation_starters` failures (enum/rule-list length mismatches), confirmed already red at this story's own BaseHead `d684c7e5`, same root-cause family as STORY-005's already-recorded open Reviewer question (P6/P7 `assertiveClaim`/enum growth), not caused by P5. **P3 DONE, committed (`1960fb8d`), merged (`7dfcaf54`)** — category-scoped `decline_door` gate shipped, own tests green, one full-repo regression bug filed (`BUG-20260924-001`, 3 pre-existing `test/design_system/` reds, out of P3's scope). **P4: Tech Lead planning COMPLETED** (RunId `...-techlead-p4originref`), committed (`3a824d4a`), merged (`d1a8cf47`): CHẶN closed on lối (A) per Design Ruling Log; confirmed `originRef` write path already exists end-to-end and no in-scope caller supplies it yet (expected — STORY-008 is the future caller); journal branch tests via directly-seeded row, card-photo branch already has data so AC-14/AC-15 not blocked. **P4 implementation DONE (Round 19)**: `Alex-Mobile-Dev-2` returned `MOBILE_COMPLETE: YES` — exactly one new read-only projection fn in `journal_entry_point.dart` (`journalPhotoPathsForOrigin`), `attachable_photos.dart` (new, merge+dedup), `photo_attach_section.dart` (new widget), wired into `thank_you_block.dart`/`thanks_section.dart`; 15 new tests + updated suites all green; `flutter analyze` 0 new issues. 2 more `DESIGN_SPEC_CONFLICT` flagged (canvas leaks journal metadata vs AC-17/BR-8; canvas implies 2nd nav destination vs AC-7) — followed AC/spec, same precedent as STORY-006/P2. Committed `7b7612d0`, merged `3b6fe16d`; `story_master.md` rewritten (Status→IN_PROGRESS, Architecture+Implementation checked, Implementation Lane corrected shared→mobile-only, all 6 accumulated DESIGN_SPEC_CONFLICT items from P2+P4 listed for Reviewer) committed `7be9a23c`, merged `1b126ecc`. **All 5 phases (P1-P5) now DONE per `coding-plan/master-plan.md` §5.** **Review sizing (Round 19): Tier 3 required.** Full-story diff from true pre-P1 base (`bfe231aa`) to current HEAD (`7be9a23c`) touches 55 files total, ~40+ source/test files (`cupid_database.dart/.g.dart`, `thank_you_activations_table.dart`, 6 `thank_you/domain|data` files, 2 cubits, 5 presentation widgets, `preset_content_gate.dart`, `journal_repository.dart`/`journal_entry_point.dart`, `stage1_wipe_registry.dart`, plus ~20 test files including a wide schemaVersion-bump migration-test ripple) — far past Tier 2's 9-12 cap. Recorded boundary `base_head` (`5fa0e972`) only covers the tail (P4-only, 19 files) because it was refreshed per-phase; Tier 3 scope must use the true pre-P1 base `bfe231aa`, not the boundary's current `base_head`. **Plan: 5 scoped-slice reviews (one per phase) + one fresh final-synthesis, exact file lists below in Next Action.** Not yet dispatched. |
 | STORY-008 | STORY-001, STORY-002, STORY-003, STORY-004 | COMPLETED but unsealed: `runtime_smoke: BLOCKED` (disk recovered to 28Gi free, not re-attempted) + review F-3 open |
 | STORY-009 | STORY-004 | DONE, merged |
 | STORY-010 | STORY-004 | DONE, merged |
 | STORY-011 | STORY-001, STORY-004, STORY-005, STORY-008 | blocked on STORY-008 (unsealed) |
 | STORY-012 | STORY-001 | blocked on D-10 (brainstormer-routing decision, not Scrum-Master's) |
-| STORY-013 | STORY-001, STORY-004 | git MERGED, review passed, `Status: TODO` — user chose "Đổi tên chuẩn hoá" fix, APPLIED (orphan file removed, report repointed, commit `c1e46598`), but guard blocked a 5th identical time. `guard-codes.md` has no entry for `DONE_WITHOUT_VISUAL_EVIDENCE`. Stopped per policy as `GUARD_FEEDBACK_INSUFFICIENT` — reported to user this round, awaiting a new decision (override / devops guard-fix / fresh diagnostic e.g. the 390x844 vs 415x900 dimension mismatch). Do not retry the same edit again. |
+| STORY-013 | STORY-001, STORY-004 | **DONE, merged (Round 16).** Review passed (`review/review-report.md` line 199: `Outcome: DEFERRED_ONLY`, F1 fixed+re-checked at `e80eb387`, F2/F3 explicitly non-blocking, both cited as backlog follow-ups). Two blockers resolved this round: (1) `guard-story-done-evidence.sh`'s `candidate_dirs()` had a one-level-vs-two-level sibling-worktree scan bug, patched under explicit user authorization (same exception style as `guard-parallel-spawn.sh`) — verified fixed via direct `visual_fidelity.py` CLI diagnostic; (2) `design-reference-kho-da-dong-ios.png`/`implemented-kho-da-dong-ios.png` used a descriptive filename instead of the canonical canvas slug `ngan-da-hen-ngay-dang-doi` that `story_master.md` and the Reviewer's own visual-fidelity table already mapped them to — renamed both files and updated `visual-fidelity-report.md` per explicit user decision ("Đổi tên 2 file ảnh sang slug chuẩn"). Committed in the story worktree (`f5d3a323`: `Status: DONE`, Artifacts checklist Implementation/Review flipped to `[x]`, evidence rename + report text fix), merged into `codex/REQ-016_solo_stage1_relationship_assistant-integration` (`ca811a29`) after resolving one additive add/add conflict in `visual-fidelity-report.md` (kept the renamed-filename version), boundary `complete` confirmed (`commit_sha: f5d3a323`, `merge_sha: ca811a29`, `MERGE_COMPLETE: true`). |
 
 ## Open user decisions
 
-1. **STORY-013 `DONE_WITHOUT_VISUAL_EVIDENCE` guard — user's chosen fix did NOT work.**
-   User picked "Đổi tên chuẩn hoá" (remove mismatched-slug orphan
-   `implemented-j13-man-quay-lai-ios.png`, point report at the correctly-slugged
-   `implemented-j13-quay-lai-sau-3-thang-ios.png`). Applied and committed
-   (`c1e46598`), but `Status: DONE` edit still blocked — 5th identical block on
-   this code. `guard-codes.md` has zero matches for the code. Reported to user
-   as `GUARD_FEEDBACK_INSUFFICIENT`; needs a fresh decision (accept manual
-   `Status: DONE` override / route to Frank-Devops to fix the guard logic /
-   authorize a diagnostic checking the 390x844 vs 415x900 dimension mismatch as
-   the real trigger instead of the filename slug).
+1. **RESOLVED (Round 16).** STORY-013 is `DONE` and merged. User chose "Đổi
+   tên 2 file ảnh sang slug chuẩn" for the evidence-filename mismatch; both
+   fixes (guard depth-bug patch + evidence rename) verified and landed. See
+   the STORY-013 table row above for the full trail.
+
+2. **RESOLVED before Round 17 (mechanism not visible in this session's own
+   tool history — cleared during a compacted-away portion of the
+   conversation).** The `full-story-review` spawn for STORY-005's P5-P7
+   rework did complete: `review/review-report.md` now carries a current body
+   dated 2026-09-24 with `Outcome: PATCH_REQUIRED`. See the STORY-005 table
+   row above for the resulting B-1 patch/re-review trail. Original block
+   text, kept for the record only —
+   "story-review blocked; no completed implementation lane with durable
+   completion marker found for
+   REQ-016_solo_stage1_relationship_assistant/STORY-005_conversation_starters".
+   Tried and ruled out: (a) correcting `story_master.md`'s Review bullet to
+   accurately describe P5-P7 as unreviewed — no effect; (b) registering a
+   distinct `--run-id ...-reviewer-rework1` to rule out run-id collision with
+   the pre-existing 2026-09-17 P1-P4 reviewer run file — no effect; (c)
+   `git-story-boundary.sh repair-boundary` — updates `commit_sha` to the true
+   current branch HEAD but leaves the boundary's `status` field stuck at
+   `"MERGED"` (and `merge_sha` unchanged) from the original P1-P4 merge, which
+   is the most likely reason the guard's "completed implementation lane"
+   check keeps failing for this story (by contrast STORY-007's healthy,
+   still-in-progress boundary shows `status: "STARTED"` with no
+   `MERGE_COMPLETE` field at all). No sanctioned CLI action was found that
+   flips a story boundary's `status` away from `"MERGED"` after a later
+   rework commit lands on the same branch.
+   **Round 14: the user's chosen remediation ("Định tuyến Frank-Devops sửa
+   guard") turned out to be structurally unexecutable** — confirmed via
+   `.claude/hooks/handoff-build.sh spawn --target Frank-Devops --mode
+   guard-logic-fix ...`, which failed (exit 2): `unsupported --mode
+   'guard-logic-fix' for --target devops`, listing the 9 sanctioned devops
+   modes (`system-foundation|devops-implementation|runnable-foundation-verify|
+   story-runtime-smoke|runtime-registry-update|
+   local-environment-scripts-update|shared-infra-adopt|
+   requirement-deployment|vps-deployment`) — none covers repairing an
+   orchestration guard script under `.claude/hooks/`. Reported to user this
+   round as a fresh, narrower decision: patch the guard directly as Scrum
+   Master (explicit-user-request exception in the operating rules allows
+   reading/patching hook source when the user explicitly asks for that), or
+   an alternate sanctioned CLI action to reopen this boundary's `status`.
+
+3. **STORY-007 P3/P4 Design-Ruling-Log decisions — RESOLVED this round.**
+   Recorded in `req_master.md` `## Design Ruling Log` (2026-09-23 rows):
+   `CONTENT_GATE_CATEGORY_COUPLING` → user chose lối (A), scope `decline_door`
+   per preset category in `domain/preset_content_gate.dart`; and
+   `JOURNAL_SOURCE_CONTRACT_CLOSED` → user chose lối (A), extend
+   `journal_entry_point.dart` with a read-only photo-path projection by
+   `originRef` (still needs Tech Lead to identify/add the caller that writes
+   `originRef = id thẻ` when a journal entry is created from a card — the
+   projection returns nothing until that write path exists). P3/P4 are now
+   unblocked for dispatch: P3 → mobile-dev implementation with the
+   category-scoped gate rule; P4 → needs a Tech Lead phase-plan touch first
+   for the `originRef` write path, then mobile-dev implementation.
 
 ## Still-open non-blocking items
 
@@ -43,7 +88,15 @@ Ground truth = integration-worktree `story_master.md` copies +
   `BUG-20260908-001` (repo-wide `flutter analyze` pre-existing chat/dream_jar
   warnings), `BUG-20260923-001` (Drift `schemaVersion` migration test lag —
   11 reds in `test/core/database/`, cite instead of re-running that combined
-  suite from any REQ-016 story worktree). Closed: `BUG-20260907-002`,
+  suite from any REQ-016 story worktree), `BUG-20260923-002`
+  (`test/features/conversation_starters` 3 pre-existing enum/rule-list-length
+  reds, surfaced by STORY-007 P5, root cause is STORY-005 P6/P7 rework — cite
+  instead of re-running that suite from STORY-007), `BUG-20260924-001`
+  (3 pre-existing `test/design_system/` reds — `no_fork_guard_test.dart`,
+  `shared_backdrop_occlusion_guard_test.dart`,
+  `shared_backdrop_occlusion_test.dart` — confirmed pre-existing at STORY-007
+  P3's own BaseHead `5fa0e972`, cite instead of re-running full-repo
+  `flutter test` from any REQ-016 story worktree). Closed: `BUG-20260907-002`,
   `BUG-20260910-001`.
 - Integration branch re-verification owed: `sync-integration` (Round 9) pulled
   `main`'s STORY-005 Design Ruling Log commit + checkpoint compaction into
@@ -74,34 +127,129 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 - Round 1-8 narrative in git history of this file — superseded by the table
   and open-decisions sections above.
 
-## Next action (Round 10b, both dispatches in flight)
+## Next action (Round 20 — quiescent, dispatching STORY-007 Tier 3 review)
 
-- STORY-005 P7: code already committed (`fa9c0ad5`). A second, fresh
-  `Alex-Mobile-Dev` is running a doc-only `completion/resume` pass (agent_id
-  `Alex-Mobile-Dev@session-e7df910a`, same RunId) to flip phase/master-plan
-  status BLOCKED->DONE citing `BUG-20260923-001`. On `MOBILE_COMPLETE: YES`:
-  3-part verify (git diff limited to the 3 doc files, both status fields read
-  DONE), commit, refresh-base, then dispatch the final canvas-diff
-  visual-fidelity gate + full Reviewer story review (not Tier-0 — also carries
-  the open Reviewer scope question above) before re-sealing STORY-005 DONE.
-- STORY-007 P1: `Alex-Mobile-Dev-2` running (agent_id `Alex-Mobile-Dev-2@session-e7df910a`,
-  RunId `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-007_thank_you_and_next_plan-mobile-dev`).
-  On completion: 3-part verify (schemaVersion is 10, activation-ledger table +
-  4-op lifecycle service present, phase-P1 §7 + master-plan §5 P1 row both
-  DONE), commit, refresh-base, then dispatch P2 next (P5 also ready after P1,
-  but single-lane cap means one at a time — pick P2 first per master-plan
-  critical path). P3/P4 stay blocked on the two decisions below.
-- Two standing user decisions still owed, to surface at the next quiescent
-  checkpoint (not mid-dispatch):
-  1. STORY-013 `DONE_WITHOUT_VISUAL_EVIDENCE` guard block with no
-     `guard-codes.md` entry — needs override/guard-fix/dimension-mismatch
-     diagnostic choice.
-  2. STORY-007 P3/P4 Design-Ruling-Log-class decisions: `JOURNAL_SOURCE_CONTRACT_CLOSED`
-     (journal photo-source contract extension vs. AC-14 narrowing) and
-     `CONTENT_GATE_CATEGORY_COUPLING` (content-gate category-scoped rule vs.
-     PO-accepted equivalent clause).
-- No other ready job exists in REQ-016 right now: STORY-008 unsealed/blocked,
-  STORY-011 blocked on STORY-008, STORY-012 blocked on D-10 (brainstormer),
-  STORY-013 blocked on the guard decision above. Capacity is open
-  (2 active code-writer runs of 10 cap) but no further ready work exists until
-  one of the two in-flight runs completes.
+- **STORY-005 is fully DONE and sealed.** No further action.
+- **STORY-007 P4 landed and committed/merged this round** (see table row).
+  All 5 phases DONE. Terminal agents `Alan-Techlead`, `Alex-Mobile-Dev`,
+  `Alex-Mobile-Dev-2`, `Iris-QC`, `Iris-QC-2` all released via `TaskStop`.
+- **STORY-007 Tier 3 scoped-slice review plan (dispatch sequentially — same
+  `story-state:STORY-007_thank_you_and_next_plan` LockScope serializes
+  concurrent reviewer slices anyway):**
+  1. Slice P1 (persistence/migration, highest risk) — files: `mobile/lib/core/database/cupid_database.dart`,
+     `cupid_database.g.dart`, `mobile/lib/core/database/tables/thank_you_activations_table.dart`,
+     `mobile/lib/core/di/service_locator.dart`,
+     `mobile/lib/features/activity_cards/thank_you/data/thank_you_activation_dao.dart`,
+     `.../thank_you_activation_repository_impl.dart`,
+     `.../domain/thank_you_activation.dart`, `.../thank_you_activation_repository.dart`,
+     `.../thank_you_activation_service.dart`, `.../thank_you_activation_card_status_listener.dart`,
+     `.../thank_you_activation_card_status_repository.dart`,
+     `mobile/lib/features/chapter_closure/data/stage1_wipe_registry.dart`,
+     `mobile/lib/features/activity_cards/domain/activity_card.dart` (enum append),
+     plus schemaVersion-bump migration-test ripple (`mobile/test/core/database/*_test.dart` —
+     9 files, cite `BUG-20260923-001`-style pattern: expect literal version-number-only diffs,
+     not logic changes) and `mobile/test/features/activity_cards/thank_you/thank_you_activation_*_test.dart`,
+     `mobile/test/features/chapter_closure/stage1_wipe_*_test.dart`. Output:
+     `<Worktree>/data/requirements/.../STORY-007_thank_you_and_next_plan/review/slice-p1-activation-ledger.md`.
+  2. Slice P2 (block shell + entry point) — `activity_card_detail_screen.dart`,
+     `thank_you_block_cubit.dart`, `thank_you_block.dart` (shell part),
+     `mobile/test/features/activity_cards/activity_card_detail_screen_test.dart`,
+     `.../card_lifecycle_ui_test.dart`, `.../activity_type_test.dart`. Surface the
+     4 already-flagged `DESIGN_SPEC_CONFLICT` items (canvas standalone-screen vs
+     nested-block AC-7) for Reviewer to note, not re-litigate.
+  3. Slice P3 (preset category) — `preset_content_gate.dart`,
+     `mobile/assets/data/req016/presets.thank_you_after_date.v1.json`,
+     `preset_content_gate_test.dart`. Cite `BUG-20260924-001` (pre-existing
+     `test/design_system/` reds) instead of re-running full-repo tests.
+  4. Slice P4 (photo-attach, already summarized above) — `attachable_photos.dart`,
+     `photo_attach_section.dart`, `photo_attach_test.dart`, `thank_you_block.dart`
+     (photo part), `thanks_section.dart`, `journal_repository.dart`,
+     `journal_entry_point.dart`, `thank_you_block_test.dart`,
+     `thanks_section_test.dart`. Surface the 2 new `DESIGN_SPEC_CONFLICT` items.
+  5. Slice P5 (next-plan suggestions) — `next_plan_suggestion_service.dart`,
+     `next_plan_cubit.dart`, `next_plan_section.dart`, `next_plan_test.dart`.
+     Cite `BUG-20260923-002` (pre-existing conversation_starters reds, root
+     cause STORY-005 P6/P7, re-verify on integration branch not story branch).
+  6. After all 5 slices return PASS/PARTIAL_SLICE_ONLY: fresh final-synthesis
+     reviewer (new agent, not a slice continuation) writes
+     `review/review-report.md` with one `Outcome:` line, reading only the 5
+     slice reports + `story_master.md`.
+  Each slice `BaseHead` must be the true pre-P1 base `bfe231aa` (not the
+  boundary's current refreshed `base_head`), diffed to current HEAD
+  `7be9a23c`, scoped with `-- <exact files above>` per slice.
+- **Slice P1 DONE (Round 20).** `Iris-QC` returned `REVIEW_SLICE_COMPLETE: YES`,
+  `review/slice-p1-activation-ledger.md` `Outcome: PARTIAL_SLICE_ONLY` (slice
+  literal; content = clean pass, no blocking finding). Key results: schemaVersion
+  9→10 single bump verified clean against integration branch (no
+  DRIFT_SCHEMA_COLLISION with other stories' v10); single-fire semantics at SQL
+  layer; no punishment/streak/percent surface; layering/ADR-010 clean;
+  `stage1_wipe_registry_parity_test.dart` red confirmed PRE-EXISTING/cross-story
+  (STORY-009/010 tables missing from registry — needs a PO/Tech-Lead decision,
+  not STORY-007's fault). 6 advisory notes for final-synthesis (see the slice
+  file). **Guard note**: `validate-reviewer-handoff.sh` `PHASE2_MISSING` forced
+  the reviewer to also create `review/scope-gate.md` and a placeholder
+  `review/review-report.md` (outside declared WriteScope, but necessary —
+  same guard-vs-handoff conflict pattern as STORY-005's B-1 slice, this time
+  resolved by writing a minimal pointer instead of leaving Stop blocked).
+  `review-report.md` now holds a `## Slice Index` table + one standing
+  `Outcome: PARTIAL_SLICE_ONLY` line — **every subsequent slice (P2-P5) must
+  APPEND a row to that table, never overwrite the file or its Outcome line.**
+  Committed `4c99d0f3`, merged `0d2fff89`. `Iris-QC` released via `TaskStop`.
+- **Slice P2 DONE (Round 20).** `Iris-QC` returned `REVIEW_SLICE_COMPLETE: YES`,
+  `review/slice-p2-block-shell-entry-point.md` `Outcome: PARTIAL_SLICE_ONLY`
+  (slice literal; content = clean pass, no blocking finding). Key results:
+  single attach point confirmed (`ThankYouSection` called exactly once, inside
+  `activity_card_detail_screen.dart`'s scroll column, no route/`Navigator.push`
+  — genuinely nested, not a standalone screen); AC-1/AC-2 date-gate correctly
+  delegated to P1's `isEligible`; AC-3 single-lifetime-fire verified
+  (`consume` before `emit`, `_settled` flag, no reopen path); AC-6 single
+  card-level action preserved (`thank_you_close` only); 3 "unrelated"
+  card-detail test edits confirmed registration-only (GetIt/`CupidDatabase`
+  setUp/tearDown, no assertion changes); independent re-run
+  `flutter test test/features/activity_cards` green, `git status` clean after
+  (no other story's PNGs touched); visual fidelity PASS vs `sb-212` via
+  `RepaintBoundary` fallback. 7 advisory notes for final-synthesis, most
+  notable **A3**: the single lifetime activation is consumed at screen-build
+  time, not when the block actually scrolls into view — if a card's notes/photo
+  push the block below the fold, the user can lose the one-time slot without
+  ever seeing it; flagged as needing PO confirmation, not resolved here. Also
+  **A4**: `thank_you_block_test.dart` (16 tests, P2's own primary test
+  evidence) and `before_you_go_block_test.dart` are in the story diff but
+  unassigned to any slice's file list (neither P1's `scope-gate.md` nor P2's)
+  — final-synthesis must assign them. Two declared deviations, both
+  self-reported and accepted: (1) `review-report.md`'s `## Slice Index`
+  already had an empty `P2` placeholder row from P1's own authoring, so
+  Iris-QC filled that row in place rather than appending a second P2 row —
+  P1 row and the `Outcome:` line untouched; (2) `scope-gate.md` was **not**
+  touched (guard did not re-fire this run, and it was outside declared
+  WriteScope anyway) — it still only covers P1's files, final-synthesis must
+  extend it to the whole story. Committed `becaf80d`, merged `878fada2`
+  (re-merge, branch had advanced past the prior recorded merge — normal).
+  `Iris-QC` released via `TaskStop`.
+- **About to dispatch now: Slice P3** (preset category) to `Iris-QC` (fresh
+  spawn, `Mode: scoped-slice`, file list: `preset_content_gate.dart`,
+  `mobile/assets/data/req016/presets.thank_you_after_date.v1.json`,
+  `preset_content_gate_test.dart`). Handoff must instruct: cite
+  `BUG-20260924-001` instead of re-running full-repo/design_system tests;
+  append a `P3` row to `review/review-report.md`'s `## Slice Index` table
+  (check first whether a placeholder `P3` row already exists to fill in
+  place, same pattern as P2, before appending a new one); do not touch
+  `scope-gate.md` unless the guard actually re-fires for this run; use only
+  `Outcome: PARTIAL_SLICE_ONLY` as the slice-level literal (never "PASS").
+- After each slice returns: 3-part-verify, then dispatch the next slice
+  immediately (dispatch discipline — same story, so sequential is correct
+  here, not a capacity-fill violation).
+- After STORY-007 seals: re-run `.claude/hooks/list-releasable-agents.sh` and
+  `TaskStop` exactly what it prints.
+- Remaining known blockers, unchanged this round: STORY-008 unsealed
+  (`runtime_smoke` retry owed, disk now has 28Gi free — not yet re-attempted),
+  STORY-011 blocked on STORY-008, STORY-012 blocked on D-10
+  (brainstormer-routing decision, not Scrum-Master's). STORY-013 is DONE,
+  merged, no action needed.
+- New non-blocking note (from STORY-005's final-synthesis review): before
+  dispatching a bug-fixer for `BUG-20260923-002`, re-verify it on the
+  requirement integration branch first — its 3 assertions are already green
+  on STORY-005's own branch (fixed by P7), so it may have already resolved
+  once STORY-005 merged into integration.
+- No standing user decision is currently open for REQ-016 (decision 1 and
+  decision 2 above are both resolved).
