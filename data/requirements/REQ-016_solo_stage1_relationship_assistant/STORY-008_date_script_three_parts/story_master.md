@@ -1,6 +1,6 @@
 # Story Master: STORY-008 Kịch bản buổi hẹn 3 phần
 
-Status: TODO
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: mobile (chốt ở `architecture/solution.md` §4 — không có
@@ -22,9 +22,11 @@ SC-6), A (J5, J7), F (3d)
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
-- [ ] Implementation (Development) — kế hoạch: `coding-plan/master-plan.md`
+- [x] Implementation (Development) — kế hoạch: `coding-plan/master-plan.md`
   (P1 → P2 → P3 → P4, một lane Mobile Developer)
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — `review/review-report.md`, `Outcome: DEFERRED_ONLY`
+  (rework re-review 2026-09-24, lượt 4: F-1..F-5 và D-1 đều đóng; D-2..D-7,
+  N-1, N-2 hoãn không chặn)
 
 ## Depends On
 - STORY-001 — vào từ một thẻ *Đã hẹn ngày*.
