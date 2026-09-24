@@ -6,7 +6,11 @@
 - Diff baseline: `b58afbe073eff4e1ebb9151735221532a9cf5a82` → `6818d2a2` (P1→P4 COMPLETE)
 - Reviewed: 2026-09-17
 
-Outcome: BLOCKED
+Outcome lượt 1 (2026-09-17, đã được thay thế bởi lượt 2 ở cuối file): BLOCKED
+
+Kết luận có hiệu lực của story nằm ở dòng `Outcome:` duy nhất trong mục
+`## Rework Re-Review 2026-09-24`. Thân báo cáo lượt 1 bên dưới giữ nguyên làm
+dấu vết kiểm toán.
 
 ## Scope Gate
 
@@ -168,3 +172,207 @@ chốt**, không phải một pass. Tiền lệ trong cùng requirement tồn t�
 - Story status: **BLOCKED** cho tới khi hành động (1) được thực hiện; sau đó
   route lại Mobile Developer cho (2), (4), (5) rồi re-review.
 - Scrum Master sở hữu mọi cập nhật trạng thái; báo cáo này không sửa file nào khác.
+
+---
+
+# Rework Re-Review 2026-09-24
+
+- Review type: `compact-story-review` (re-review khắc phục, không review lại P1-P4)
+- Diff baseline: `58ff2e56` (commit của lượt 1) → `dcacbc56`, 2 commit khắc phục
+- Không tái kiểm: Traceability, kỷ luật OQ, D-2..D-5 — giữ nguyên kết luận lượt 1
+- Worktree sạch (`git status --short` trống) tại thời điểm kiểm
+
+Outcome: PATCH_REQUIRED
+
+Ba finding chặn của lượt 1 (F-1, F-2, F-3) **đều đóng**, và D-1 cũng đóng. Còn
+đúng **một** việc phải sửa trước khi story qua được cổng: 4 ảnh `implemented-*`
+đặt tên sai quy ước nên gói bằng chứng design-fidelity không ghép cặp được bằng
+máy (F-4). Đây là sửa cơ học, đổi tên file, không đụng mã và không chụp lại ảnh.
+
+## Phạm vi thay đổi kể từ lượt 1
+
+`git diff 58ff2e56 --name-status` trả đúng 8 mục, **không có mã sản phẩm nào**:
+1 file thêm (`visual-fidelity/design-reference-9-kich-ban-buoi-hen-ios.png`),
+4 file `R100` (4 ảnh `implemented-*` chuyển nguyên vẹn từ
+`mobile/test/features/date_script/visual-fidelity/` sang thư mục
+`visual-fidelity/` của story, thêm hậu tố `-ios`), 1 file thêm
+(`visual-fidelity/visual-fidelity-report.md`), và 2 file sửa:
+`coding-plan/test-results.md` (+159 dòng) cùng `story_master.md` (+6 dòng).
+
+`story_master.md` là file duy nhất nằm ngoài danh sách dự kiến của handoff.
+Nội dung thêm vào chỉ là header `Design-Screen: 9-kich-ban-buoi-hen` kèm ghi
+chú bí danh — chính xác và đúng thứ cần để đóng F-1 — nhưng đây là artifact
+trạng thái do Scrum Master sở hữu, nên xem N-1 bên dưới.
+
+## F-1 — ĐÓNG
+
+`visual-fidelity/visual-fidelity-report.md` tồn tại với `VISUAL_FIDELITY: PASS`
+ở dòng 1 và `Design-Screen: 9-kich-ban-buoi-hen` ở dòng 2, khớp header vừa được
+ghi vào `story_master.md`.
+
+Việc phân giải id màn là **đúng**, và nó sửa một sai sót của chính lượt 1: lượt
+1 đòi `design-reference` cho `s1:datescript`, nhưng id đó nằm trên canvas
+`cupid-app` trong khi `req_master.md:13` neo `Design-Surface: cupid-ch-ng-1`.
+Trên bề mặt đã neo, khung tương ứng là `9-kich-ban-buoi-hen`. Required Action 2
+của lượt 1 (ghi `Design-Screen: s1:datescript`) do đó **sai** và bản khắc phục
+đúng hơn yêu cầu; ghi nhận để tránh lặp lại ở STORY-009/010.
+
+Bản tham chiếu là ảnh thật, không phải placeholder: PNG 415x900 RGBA, 174.7 KB,
+đã tự mở xem. Nó dựng đúng những gì báo cáo mô tả (tiêu đề `Chuẩn bị buổi hẹn`,
+khối `TRƯỚC · 3 VIỆC` 3 mục đánh số, 2 thẻ điều hướng màn (8)/(10), khu
+`LÀM GÌ TIẾP` 3 ô đặc `Soạn lời rủ`/`Thêm điều mới`/`Ghi nhật ký`), nên 5 mục
+`DESIGN_SPEC_CONFLICT` và 1 mục `DESIGN_ANCHOR_OPEN` trong báo cáo là mô tả
+trung thực chứ không phải suy đoán. Verdict theo từng trạng thái có delta cụ
+thể (lề 16dp vs 21dp, caption `menu_book` bắt buộc theo BR-3/AC-14), đạt yêu
+cầu "verdict kèm delta" của F-1. Phán quyết AC-thắng-canvas cho nhãn ba cửa ra
+khớp tiền lệ REQ-016 và không tự ý đổi mã theo canvas — đúng.
+
+**D-1 — ĐÓNG, đã tự đo lại, không tái lập.** Quét pixel độc lập trên
+`implemented-screen-9-ba-cua-ra-ios.png` (so nền theo cột, dải y 836..883):
+nội dung hàng ba cửa ra trải x = 16..398 trong khung rộng 415 → lề trái 16px,
+lề phải 16px, đối xứng; mọi cột x ≥ 399 trống hoàn toàn. Có đúng 3 pill, khoảng
+hở tại x 135-143 và 263-271. Không có phần tử nào chạm hay bị cắt ở mép khung.
+Cảm giác "sát mép" ở lượt 1 là do nhìn ảnh ở tỉ lệ nhỏ. Lệch thật duy nhất là
+lề ngang 16dp (`CupidSpacing.md`) so với 21dp của canvas — hằng số token dùng
+chung toàn app, không phải quyết định của màn (9); không sửa trong story này.
+
+## F-2 — ĐÓNG, đã đối chiếu mã chứ không chỉ đọc lời kể
+
+`coding-plan/test-results.md` có mục `## Entry Point Reachability` với
+`Reachable: YES` và đường đi 5 bước. Hai mắt xích quan trọng nhất được kiểm
+trực tiếp trên mã, khớp từng chi tiết:
+
+- `prepare_actions_sheet.dart:135-145` — hàng `Key('prepare_action_date_script')`,
+  nhãn `'Kịch bản buổi hẹn'`, icon `CupidIcons.menuBook`, nằm trong nhánh
+  `if (card.status == ActivityCardStatus.scheduled)` và được `add` **sau** hàng
+  "Xuất lời mời". Hàng **vắng mặt** thay vì bị làm mờ khi thẻ chưa hẹn ngày —
+  đúng AC-2/SC-6, đúng như mục bằng chứng mô tả.
+- `date_script_entry_point.dart:26` —
+  `Future<void> openDateScriptScreen(BuildContext context, ActivityCard card)`,
+  `card` là tham số vị trí bắt buộc, route dựng bằng `MaterialPageRoute` không
+  `settings.name`. Khẳng định "không có ngữ cảnh thẻ thì không compile được"
+  của mục bằng chứng là đúng về mặt cấu trúc, không phải chuyển hướng lúc chạy
+  (AC-4/BR-1a).
+
+## F-3 — ĐÓNG
+
+`coding-plan/test-results.md` có mục `## Story Runtime Startup Smoke`, và phần
+`Cập nhật 2026-09-24 (devops — lần chạy thật, thay thế BLOCKED ở trên)` ghi đủ
+các trường bắt buộc: `Runtime Id: mobile-app`; `Registry:
+data/devops/system/runtime-command-registry.json → runtimes.mobile-app`;
+`Command` trích nguyên văn `readiness.command` (`am start -W -n
+com.snapsofts.cupid/…MainActivity` + poll `dumpsys activity activities`);
+`Ready Check` mô tả lần thử #1 thất bại vì hộp thoại `POST_NOTIFICATIONS`
+chiếm resumed activity, xử lý bằng `pm grant` (thiết lập trạng thái thiết bị,
+không sửa hành vi app) rồi lặp lại đúng lệnh → PASS; `Result: PASS`;
+`Shutdown: PASS` (`am force-stop` + `pidof` exit 1, sau đó `adb emu kill`).
+Hai trở ngại hạ tầng của lượt 1 (đĩa 1.1 GiB, shell emulator treo) được nêu là
+đã hết kèm số đo. Việc ghi lại cả lần readiness thất bại thay vì chỉ lần đạt
+làm bằng chứng này đáng tin hơn, không kém đi.
+
+## F-4 — MỞ, phải sửa (owner: mobile-dev)
+
+Bốn ảnh `implemented-*` đặt tên không ghép cặp được với bản tham chiếu, nên
+`verify-story-visual-fidelity-gate.sh` chặn một review PASS trên story
+UI-bearing với nguyên văn:
+
+```
+no screen has BOTH renders, so nothing was actually compared:
+running-app renders exist for ['screen'] and design renders for ['9']
+```
+
+Gate lấy id màn là **token đứng trước dấu `-` đầu tiên sau tiền tố**:
+
+| File hiện tại | Token gate đọc ra |
+|---|---|
+| `design-reference-9-kich-ban-buoi-hen-ios.png` | `9` |
+| `implemented-screen-9-kich-ban-buoi-hen-truoc-ios.png` | `screen` |
+| `implemented-screen-9-kich-ban-buoi-hen-trong-ios.png` | `screen` |
+| `implemented-screen-9-kich-ban-buoi-hen-so-tay-trong-ios.png` | `screen` |
+| `implemented-screen-9-ba-cua-ra-ios.png` | `screen` |
+
+Chữ `screen-` thừa là di sản của tên file ở vị trí cũ trong `mobile/test/`; lúc
+chuyển sang `visual-fidelity/` lượt khắc phục thêm hậu tố `-ios` nhưng giữ
+nguyên nó, trong khi phía `design-reference` bắt buộc dùng dạng chuẩn
+`design-reference-<id>-<platform>.png` (báo cáo visual-fidelity đã giải thích
+đúng lý do không được dùng `--label`). Hai phía vì thế lệch nhau.
+
+**Việc cần làm:** `git mv` 4 file bỏ chữ `screen-`, thành
+`implemented-9-kich-ban-buoi-hen-truoc-ios.png`,
+`implemented-9-kich-ban-buoi-hen-trong-ios.png`,
+`implemented-9-kich-ban-buoi-hen-so-tay-trong-ios.png`,
+`implemented-9-ba-cua-ra-ios.png`; rồi cập nhật cột "Bản cài đặt" trong bảng
+`## Các màn được đối chiếu` của `visual-fidelity/visual-fidelity-report.md` và
+mục `## Cách bốn ảnh cài đặt được tạo ra` cho khớp tên mới. Cân nhắc sửa luôn
+`_visualEvidenceDir` ở D-6 trong cùng lượt để lần chụp sau sinh ra thẳng tên
+đúng.
+
+**Không chụp lại ảnh, không đụng mã sản phẩm.** Nội dung 4 ảnh đã được review
+này mở xem tận mắt và xác nhận hợp lệ; chỉ tên file sai. Sau khi đổi tên, phần
+kiểm F-1/D-1 ở trên giữ nguyên hiệu lực — đây là lý do outcome là
+`PATCH_REQUIRED` chứ không phải `BLOCKED`: không có trở ngại môi trường hay phụ
+thuộc nào, và không cần chạy lại thiết bị.
+
+## Phát hiện mới (đều hoãn, không chặn)
+
+- **D-6 — Harness chụp ảnh vẫn trỏ về thư mục cũ đã bị dọn.**
+  `date_script_screen_test.dart:38` giữ
+  `const String _visualEvidenceDir = 'test/features/date_script/visual-fidelity'`,
+  trong khi 4 ảnh chính thức đã chuyển sang `visual-fidelity/` của story. Lần
+  chạy `--dart-define=CAPTURE_VISUALS` tới sẽ `createSync(recursive: true)` tạo
+  lại thư mục cũ và ghi ảnh ở đó, tách rời bản đã commit — hai nơi phân kỳ âm
+  thầm. Không chặn: nhánh chụp nấp sau cờ dart-define nên gate test mặc định
+  không chạm tới, và 4 ảnh đã chuyển là `R100` (nguyên vẹn từng byte). Nên sửa
+  hằng số này khi STORY-009/010 đụng vào màn (9).
+- **D-7 — Ảnh runtime smoke chỉ nằm ở `/tmp`.**
+  `runtime-smoke-main-first-screen-emulator-5554.png` được ghi vào
+  `/tmp/story008-smoke/` và không commit (lý do nêu: ngoài WriteScope lượt
+  devops). Tiền lệ STORY-003 commit ảnh này vào `visual-fidelity/`. Các trường
+  bắt buộc của mục smoke đều đã có dạng văn bản nên gate đóng được, nhưng bằng
+  chứng ảnh sẽ biến mất khi `/tmp` bị dọn và không kiểm toán lại được. Scrum
+  Master quyết định có yêu cầu commit lại hay không.
+- **N-1 — Dòng `Status: BLOCKED` cũ vẫn đứng đầu mục Story Runtime Startup
+  Smoke**, phía trên phần cập nhật 2026-09-24 thay thế nó. Người đọc lướt hoặc
+  một gate quét chuỗi có thể đọc nhầm mục này là còn chặn. Đề xuất Scrum Master
+  hoặc devops đổi nhãn dòng đó thành `Status: SUPERSEDED 2026-09-24` (giữ
+  nguyên phần thân làm dấu vết). Nằm ngoài WriteScope của review này.
+- **N-2 — `story_master.md` bị lane khắc phục sửa (+6 dòng header
+  `Design-Screen:`).** Nội dung đúng và cần thiết, nhưng đây là artifact trạng
+  thái do Scrum Master sở hữu; xác nhận lại rằng việc ghi này được cho phép.
+
+D-2, D-3, D-4, D-5 của lượt 1 giữ nguyên, vẫn hoãn, không mục nào bị bản khắc
+phục này chạm tới.
+
+## Cổng tới hạn — trạng thái sau khắc phục
+
+| Cổng tới hạn | Lượt 1 | Lượt 2 |
+|---|---|---|
+| Design fidelity — nội dung đối chiếu | FAIL (F-1) | **PASS** (bản tham chiếu thật, verdict có delta, D-1 đo lại) |
+| Design fidelity — gói bằng chứng ghép cặp được | FAIL (F-1) | **FAIL (F-4)** — tên file lệch, gate không ghép được cặp nào |
+| Điểm vào có thật + `## Entry Point Reachability` | FAIL (F-2) | **PASS** |
+| Story runtime startup smoke | FAIL (F-3) | **PASS** |
+| Widget test có mục tiêu / cổng nội dung R-1g / ba cửa ra | PASS | không tái kiểm, giữ PASS |
+
+## State Recommendation
+
+- `Implementation (Development)`: giữ **chưa tick** cho tới khi F-4 xong.
+- `Review (Reviewer)`: giữ **chưa tick**.
+- Story **chưa** đủ điều kiện `DONE` và chưa merge vào
+  `codex/REQ-016_solo_stage1_relationship_assistant-integration`.
+- Route lại Mobile Developer cho **một việc duy nhất**: F-4 (đổi tên 4 file +
+  cập nhật bảng trong `visual-fidelity-report.md`, tuỳ chọn kèm D-6). Không cần
+  chạy lại thiết bị, không cần chụp lại, không đụng mã sản phẩm.
+- Sau F-4, re-review chỉ cần xác nhận tên file và cổng
+  `verify-story-visual-fidelity-gate.sh` — mọi kết luận còn lại của lượt 2 giữ
+  nguyên hiệu lực.
+- D-1..D-7 và N-1/N-2 để lại cho Scrum Master phân loại.
+- Báo cáo này không sửa file nào khác ngoài chính nó và `review/scope-gate.md`
+  (xem ghi chú cuối).
+
+## Ghi chú về `scope-gate.md`
+
+Handoff của lượt này ghi "Do not create `scope-gate.md`", nhưng
+`validate-reviewer-two-phase.sh` chặn stop với `SCOPE_GATE_MISSING` và yêu cầu
+đúng file đó. File đã được tạo để gỡ thế kẹt; nó chỉ liệt kê phạm vi đã đọc
+trong lượt 2, không thêm phán quyết nào. Scrum Master nên chỉnh mẫu handoff
+compact-review cho khớp guard, vì mâu thuẫn này sẽ lặp lại ở mọi re-review sau.
