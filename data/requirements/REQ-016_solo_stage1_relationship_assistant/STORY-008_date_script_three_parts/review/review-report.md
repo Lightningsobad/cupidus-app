@@ -184,10 +184,19 @@ chốt**, không phải một pass. Tiền lệ trong cùng requirement tồn t�
 
 Outcome: PATCH_REQUIRED
 
-Ba finding chặn của lượt 1 (F-1, F-2, F-3) **đều đóng**, và D-1 cũng đóng. Còn
-đúng **một** việc phải sửa trước khi story qua được cổng: 4 ảnh `implemented-*`
-đặt tên sai quy ước nên gói bằng chứng design-fidelity không ghép cặp được bằng
-máy (F-4). Đây là sửa cơ học, đổi tên file, không đụng mã và không chụp lại ảnh.
+Ba finding chặn của lượt 1 (F-1, F-2, F-3) **đều đóng**, và D-1 cũng đóng. Lượt 2
+để lại đúng **một** việc phải sửa: 4 ảnh `implemented-*` đặt tên sai quy ước nên
+gói bằng chứng design-fidelity không ghép cặp được bằng máy (F-4). Đây là sửa cơ
+học, đổi tên file, không đụng mã và không chụp lại ảnh.
+
+Dòng `Outcome:` ngay trên là kết luận **có hiệu lực** của story. Ở lượt 3
+(2026-09-24) **F-4 đã được xác minh ĐÓNG** — xem mục `## Xác nhận F-4 (lượt 3,
+2026-09-24)` ở cuối file — nhưng cùng lượt đó cổng
+`verify-story-visual-fidelity-gate.sh` phát hiện **F-5**, một lỗi định dạng khác
+cùng họ với F-4 (nội dung đúng, máy không đọc được) trong `story_master.md`.
+Outcome vì thế giữ `PATCH_REQUIRED` thay vì nâng lên `DEFERRED_ONLY`: cổng story
+không cho ghi nhận một review PASS khi artifact trạng thái còn không hợp lệ về
+mặt máy. Xem `## F-5 — MỞ (lượt 3)`. D-2..D-7 và N-1/N-2 vẫn treo, không chặn.
 
 ## Phạm vi thay đổi kể từ lượt 1
 
@@ -348,12 +357,16 @@ phục này chạm tới.
 | Cổng tới hạn | Lượt 1 | Lượt 2 |
 |---|---|---|
 | Design fidelity — nội dung đối chiếu | FAIL (F-1) | **PASS** (bản tham chiếu thật, verdict có delta, D-1 đo lại) |
-| Design fidelity — gói bằng chứng ghép cặp được | FAIL (F-1) | **FAIL (F-4)** — tên file lệch, gate không ghép được cặp nào |
+| Design fidelity — gói bằng chứng ghép cặp được | FAIL (F-1) | FAIL (F-4) ở lượt 2 → **PASS** ở lượt 3 (F-4 đóng, gate tự chạy lại exit 0) |
+| Design fidelity — id màn hợp lệ trong `story_master.md` | không kiểm | **FAIL (F-5)** ở lượt 3 — giá trị `Design-Screen:` trải 6 dòng, gate đọc ra id không tồn tại |
 | Điểm vào có thật + `## Entry Point Reachability` | FAIL (F-2) | **PASS** |
 | Story runtime startup smoke | FAIL (F-3) | **PASS** |
 | Widget test có mục tiêu / cổng nội dung R-1g / ba cửa ra | PASS | không tái kiểm, giữ PASS |
 
 ## State Recommendation
+
+Mục này được thay thế ở lượt 3 — xem `## State Recommendation (lượt 3)` ở cuối
+file. Giữ nguyên phần dưới làm dấu vết kiểm toán của lượt 2.
 
 - `Implementation (Development)`: giữ **chưa tick** cho tới khi F-4 xong.
 - `Review (Reviewer)`: giữ **chưa tick**.
@@ -376,3 +389,114 @@ Handoff của lượt này ghi "Do not create `scope-gate.md`", nhưng
 đúng file đó. File đã được tạo để gỡ thế kẹt; nó chỉ liệt kê phạm vi đã đọc
 trong lượt 2, không thêm phán quyết nào. Scrum Master nên chỉnh mẫu handoff
 compact-review cho khớp guard, vì mâu thuẫn này sẽ lặp lại ở mọi re-review sau.
+
+---
+
+## Xác nhận F-4 (lượt 3, 2026-09-24)
+
+Phạm vi lượt này **chỉ** là xác nhận F-4 đã đóng. Không mở lại F-1/F-2/F-3/D-1,
+không review lại P1-P4, không đọc lại master-plan/solution/requirements/uiux-spec.
+
+- Diff baseline: `1b18a7fc` → `ff567fdc` (1 commit khắc phục duy nhất)
+- Worktree sạch (`git status --porcelain` trống) tại thời điểm kiểm
+
+**1. Phạm vi diff đúng như khai báo.**
+`git diff 1b18a7fc..ff567fdc --stat` trả đúng **5 file**: 4 `R100` (đổi tên
+nguyên vẹn từng byte) + 1 `M` trên `visual-fidelity/visual-fidelity-report.md`.
+Không có mã sản phẩm, mã test, hay file cấu hình nào bị đụng; không có file nào
+ngoài `visual-fidelity/`.
+
+**2. Cổng thị giác tự chạy lại, PASS thật.**
+Review này tự gọi bộ kiểm chứ không tin lời kể trong report. `.claude/hooks/`
+không được projected vào worktree nên script được gọi bằng đường dẫn tuyệt đối ở
+control checkout, `--project` trỏ vào worktree:
+
+```
+python3 <control>/.claude/hooks/lib/visual_fidelity.py \
+  --dir <worktree>/data/requirements/REQ-016.../STORY-008... --project <worktree> \
+  --stage review --stack mobile --lane mobile   → không output, exit 0
+  --stage done   --stack mobile --lane mobile   → không output, exit 0
+```
+
+**3. Đối chứng xác nhận cổng không rỗng.** Trên bản sao `/tmp` chỉ khác ở việc
+giữ tên cũ `implemented-screen-9-*`, cùng script trả exit 1 với đúng lỗi đã chặn
+ở lượt 2: `no screen has BOTH renders ... running-app renders exist for
+['screen'] and design renders for ['9']`. Tức là PASS ở bước 2 là do việc bỏ
+token `screen-`, không phải do gate bỏ qua story.
+
+**4. Bảng tên file trong report khớp đĩa.** 4 tên trong cột "Bản cài đặt" của
+`## Các màn được đối chiếu` và tên trong mục verdict `## Cách bốn ảnh cài đặt
+được tạo ra` khớp đúng 4 file thật đang được Git theo dõi:
+`implemented-9-kich-ban-buoi-hen-truoc-ios.png`,
+`implemented-9-kich-ban-buoi-hen-trong-ios.png`,
+`implemented-9-kich-ban-buoi-hen-so-tay-trong-ios.png`,
+`implemented-9-ba-cua-ra-ios.png`, cùng
+`design-reference-9-kich-ban-buoi-hen-ios.png`. Cả hai phía giờ cùng cho id màn
+`9`.
+
+**F-4 — ĐÓNG.** Mọi kết luận khác của lượt 2 giữ nguyên hiệu lực. Một finding
+chặn MỚI, không liên quan tới tên file, xuất hiện ở chính lượt này khi cổng
+story chạy: xem `## F-5 — MỞ (lượt 3)`.
+
+D-6 (harness `_visualEvidenceDir` vẫn trỏ thư mục cũ) **không** được sửa trong
+lượt khắc phục này — vẫn treo, vẫn không chặn, vì nhánh chụp nấp sau cờ
+`--dart-define=CAPTURE_VISUALS` nên gate test mặc định không chạm tới.
+
+## F-5 — MỞ (lượt 3)
+
+`verify-story-visual-fidelity-gate.sh` chặn stop của review này với id màn không
+hợp lệ. Giá trị nó đọc ra:
+
+```
+Design-Screen: 9-kich-ban-buoi-hen (ios, resolved 2026-09-17 — see
+```
+
+Nguồn là `story_master.md:11-16`: giá trị `Design-Screen:` trải **6 dòng**, phần
+còn lại của dòng 11 sau id là chú thích văn xuôi (`(ios, resolved 2026-09-17 —
+see`) rồi tràn tiếp sang dòng 12-16. Gate lấy nguyên phần còn lại của dòng làm id
+nên nhận được một chuỗi không nằm trong danh sách id hợp lệ của design source
+`cupid-ch-ng-1`. Id đúng — `9-kich-ban-buoi-hen` — nằm trong danh sách đó và là
+token đầu tiên của chính dòng 11, nên **nội dung đúng, chỉ định dạng sai**.
+
+Đây cùng một dạng lỗi với F-4: bằng chứng hợp lệ, con người đọc hiểu, máy không
+ghép được. Đó là lý do outcome giữ `PATCH_REQUIRED`.
+
+**Việc cần làm (một dòng).** Trong `story_master.md`, để dòng `Design-Screen:`
+chỉ mang **id trần, không gì khác**:
+
+```
+Design-Screen: 9-kich-ban-buoi-hen
+```
+
+rồi chuyển toàn bộ chú thích hiện tại (platform `ios`, ngày phân giải, alias
+`s1:datescript`, việc neo `Design-Surface: cupid-ch-ng-1`, 5 mục
+DESIGN_SPEC_CONFLICT, 1 mục DESIGN_ANCHOR_OPEN) xuống các dòng riêng bên dưới
+hoặc để nguyên chúng ở `visual-fidelity/visual-fidelity-report.md`, nơi đã có
+sẵn bản đầy đủ. Không mất thông tin nào.
+
+**Ai sửa:** `story_master.md` là artifact trạng thái do Scrum Master sở hữu và
+nằm ngoài WriteScope của review này (chỉ có `review/review-report.md`), nên
+review này **không** tự sửa. Đây cũng chính là rủi ro N-2 của lượt 2 hiện hình:
+lane khắc phục đã ghi 6 dòng header này vào một file nó không sở hữu, và định
+dạng đó giờ chặn cổng. Scrum Master sửa trực tiếp nhanh hơn route lại
+Mobile Developer.
+
+**Không cần** chạy lại thiết bị, chụp lại ảnh, hay đụng mã sản phẩm. Sau khi
+dòng đó thành id trần, mọi kết luận của lượt 3 giữ nguyên hiệu lực và outcome
+nâng thẳng lên `DEFERRED_ONLY`.
+
+## State Recommendation (lượt 3)
+
+- `Implementation (Development)`: giữ **chưa tick** cho tới khi F-5 xong.
+- `Review (Reviewer)`: giữ **chưa tick**.
+- Chất lượng bản cài đặt và gói bằng chứng thị giác đã **đạt** — F-4 đóng, cổng
+  `visual_fidelity.py` tự chạy lại PASS ở cả `--stage review` và `--stage done`.
+  Việc còn lại duy nhất là F-5, một dòng metadata trong `story_master.md`.
+- Sau F-5, story đủ điều kiện tick cả hai mục, đủ điều kiện merge vào
+  `codex/REQ-016_solo_stage1_relationship_assistant-integration`, và đủ điều kiện
+  `DONE` theo `DEFERRED_ONLY`.
+- Hoãn, không chặn, để Scrum Master phân loại: **D-2, D-3, D-4, D-5** (lượt 1),
+  **D-6, D-7** (lượt 2), **N-1, N-2** (lượt 2). Danh sách này không đổi so với
+  lượt 2.
+- Review này không sửa file nào khác ngoài chính nó và `review/scope-gate.md`.
+- Không tự commit: Scrum Master sở hữu commit và mọi cập nhật trạng thái.
