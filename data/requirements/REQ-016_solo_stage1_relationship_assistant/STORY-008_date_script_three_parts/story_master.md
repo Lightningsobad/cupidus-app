@@ -8,6 +8,12 @@ lane backend/devops; story không ghi DB, không gọi mạng, `schemaVersion` k
 Requirement: REQ-016
 Screen: Kịch bản buổi hẹn 3 phần — màn (9), **nhóm KHOÁ VỊ TRÍ**. Chỉ vào được
 từ một thẻ *Đã hẹn ngày* ở màn (1).
+Design-Screen: 9-kich-ban-buoi-hen (ios, resolved 2026-09-17 — see
+`visual-fidelity/visual-fidelity-report.md`; alias `s1:datescript` là id trên
+canvas `cupid-app` KHÔNG được neo, `req_master.md:13` neo
+`Design-Surface: cupid-ch-ng-1`. Khung canvas có 5 mục DESIGN_SPEC_CONFLICT vs
+AC ràng buộc — AC thắng theo tiền lệ canvas-vs-AC của REQ-016 — và 1 mục
+DESIGN_ANCHOR_OPEN cần Product Owner phán quyết, không chặn ship)
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục C.9, D (SC-2,
 SC-6), A (J5, J7), F (3d)
 

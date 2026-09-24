@@ -384,9 +384,112 @@ Không chạy repo-wide `flutter analyze` (baseline repo khác 0). Startup smoke
    trực quan chưa được cài. Provisioning runtime nằm ngoài quyền của lane này,
    nên đối chiếu dựa trên `ux/uiux-spec.md` §2.5/§3 và ảnh chụp thật của bản
    dựng.
+    **Đính chính 2026-09-17 (mobile-verification):** deviation này sai hai chỗ.
+    (a) Runtime trực quan chạy được trong worktree này, đã render thật — xem
+    `devops-visual-runtime-fix.md` và `../visual-fidelity/visual-fidelity-report.md`.
+    (b) Bề mặt thiết kế của requirement là `cupid-ch-ng-1`
+    (`req_master.md:13 Design-Surface:`), không phải `cupid-app`; id màn (9)
+    trên canvas đã neo là **`9-kich-ban-buoi-hen`**, còn `s1:datescript` chỉ tồn
+    tại trên canvas `cupid-app` và bị `guard-design-render-surface.sh` chặn.
 10. **Chạy hồi quy `test/features/invite_composer/` ghi đè một ảnh của
     STORY-002.** `implemented-11-chuan-bi-chon-hanh-dong-ios.png` bị chụp lại
     dù không bật `--dart-define=CAPTURE_VISUALS` (74253 → 72804 byte). File đó
     ngoài WriteScope của story này nên đã `git checkout --` trả về đúng bản đã
     commit. Đáng lưu ý cho chủ sở hữu STORY-002: nhóm chụp ảnh ở đó không bị
     chặn sau cờ dart-define như của STORY-008.
+
+## Entry Point Reachability
+
+**Reachable: YES.** Cửa vào duy nhất, nằm trong luồng "chuẩn bị" của một thẻ
+*Đã hẹn ngày*, đúng AC-1/AC-2 và khoá vị trí AC-3/AC-4/AC-5.
+
+Đường đi, từng bước một, đều là mã đã ship (không phải route ẩn, không phải
+màn preview):
+
+1. **Màn (1)** — kho hoạt động. Người dùng mở một thẻ ở trạng thái
+   *Đã hẹn ngày* (`ActivityCardStatus.scheduled`).
+2. **`ActivityCardDetailScreen`** — chi tiết thẻ đó. Hành động chính **duy
+   nhất** cấp thẻ cho trạng thái `scheduled` là "Chuẩn bị cho tươm tất"
+   (`activity_card_detail_screen.dart:1377-1382`). Đúng một hành động chính,
+   theo SC-4 / STORY-001 AC-11 / AC-6 — màn (9) không thêm cái thứ hai.
+3. Bấm hành động đó gọi `widget.prepareActions(context, cubit.state.card)`
+   (`activity_card_detail_screen.dart:1441`), mặc định là
+   `showPrepareActionsSheet` (`…:71`) → bottom sheet **"Chuẩn bị"**.
+4. **Hàng thứ hai của sheet** — `prepare_actions_sheet.dart`,
+   `_resolveActions()` dòng 135-145: hàng `Key('prepare_action_date_script')`,
+   nhãn "Kịch bản buổi hẹn" / "Date script", icon `CupidIcons.menuBook`. Hàng
+   này **chỉ được thêm vào danh sách khi `card.status ==
+   ActivityCardStatus.scheduled`** — vắng mặt hẳn chứ không phải bị làm mờ, vì
+   một hàng xám vẫn là một affordance chỉ về màn (9) (AC-2/SC-6). Nó đứng sau
+   "Xuất lời mời", đúng thứ tự khu vực Chuẩn bị mà `STORY-006/ux/uiux-spec.md`
+   §1 đã khoá.
+5. `run:` của hàng gọi `openDateScript(context, card)`, mặc định là
+   **`openDateScriptScreen(context, card)`** trong
+   `mobile/lib/features/date_script/date_script_entry_point.dart` — route ẩn
+   danh, `card` là tham số vị trí **bắt buộc**, nên không có cách nào mở màn
+   (9) mà không mang theo ngữ cảnh thẻ nguồn. Đây cũng là lý do
+   `Direct URL only acceptable: NO` của AC-4 đạt được về mặt cấu trúc chứ
+   không chỉ bằng quy ước.
+
+Đường đi này được kiểm bằng test chứ không chỉ bằng mắt: xem `### AC coverage`
+của P3 (`date_script_location_lock_test.dart` quét toàn `lib/` cho mọi
+`ActivityCardStatus`, và test dựng `prepare_actions_sheet` thật để bấm hàng).
+
+## Story Runtime Startup Smoke
+
+**Status: BLOCKED — đây KHÔNG phải một lần chạy đạt.** Không có ảnh
+`runtime-smoke-main-first-screen-*.png` cho story này, và không được diễn giải
+mục này là gate 12g đã đóng. Gate chỉ đóng khi có một lần chạy thật, hoặc khi
+Scrum Master ghi `Runtime-Smoke: WAIVED — <lý do>` vào `story_master.md`.
+
+Đã thử đúng hình dạng bằng chứng của tiền lệ
+(`STORY-006/coding-plan/test-results.md` §Story Runtime Startup Smoke,
+`STORY-003/visual-fidelity/runtime-smoke-main-first-screen-emulator-5554.png`)
+và dừng lại ở hai trở ngại hạ tầng, cả hai đều ngoài quyền của lane mobile.
+
+**1. Shell của `emulator-5554` không phản hồi.**
+
+```
+adb devices -l        → emulator-5554  device product:sdk_gphone64_arm64 device:emu64a
+adb -s emulator-5554 get-state → device            (exit 0, ~1s)
+adb -s emulator-5554 shell df -h /data             → treo, không xuất ra gì
+adb -s emulator-5554 shell getprop sys.boot_completed → treo, không xuất ra gì
+adb -s emulator-5554 exec-out echo ok              → treo, không xuất ra gì
+```
+
+Ba lệnh shell riêng biệt treo quá 5 phút, không trả một byte nào, trong khi
+`get-state` vẫn trả `device` tức thì. Thiết bị có mặt ở tầng adb nhưng không
+phục vụ được `shell`, nên không thể `am start`, không thể đọc
+`dumpsys activity activities`, không thể `logcat`, không thể `screencap`.
+
+**2. Đĩa máy chủ không đủ để dựng APK debug.**
+
+```
+df -h /   → 460Gi tổng, 1.1Gi trống (95% đầy)   [đo lúc 2026-09-17, sau khi chạy test]
+```
+
+Tiền lệ STORY-006 ghi rõ ngưỡng thật: `flutter build apk --debug --flavor local`
+**fail exit 255** với `java.io.IOException: No space left on device` khi còn
+250 MiB, và chỉ PASS sau khi đĩa được giải phóng về ~10 GiB. Với 1.1 GiB trống,
+`flutter build apk --debug --flavor local -t lib/main.dart --split-per-abi`
+gần như chắc chắn fail giữa chừng và còn có nguy cơ làm đầy nốt đĩa của các
+worktree song song khác đang chạy trên cùng máy này. Không chạy.
+
+**Cái đã chạy được và đã đạt**, làm bằng chứng bù một phần:
+
+```
+cd mobile && flutter test test/features/date_script/ test/features/activity_cards/ test/features/invite_composer/
+→ 00:31 +465 ~4: All tests passed!   (exit 0)
+```
+
+Bao gồm 9 test hành vi dựng `DateScriptScreen` thật, các test dựng
+`prepare_actions_sheet` và `ActivityCardDetailScreen` thật cho đường vào, và
+bốn ảnh `RepaintBoundary` ở
+`../visual-fidelity/implemented-screen-9-*-ios.png`. Đó là bằng chứng màn (9)
+dựng và tương tác đúng, **không** phải bằng chứng app khởi động được trên
+thiết bị — hai việc khác nhau, và mục này chỉ thiếu việc thứ hai.
+
+**Việc cần làm để đóng mục này** (owner: devops hoặc user, không phải mobile):
+giải phóng đĩa máy chủ về ≥10 GiB và khôi phục/khởi động lại `emulator-5554`;
+sau đó lặp lại đúng chuỗi lệnh của STORY-006 §Story Runtime Startup Smoke.
+Hoặc Scrum Master ghi `Runtime-Smoke: WAIVED — <lý do>` vào `story_master.md`.
