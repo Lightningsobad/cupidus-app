@@ -15,7 +15,7 @@ closure decision has been made yet.
 | Slice | Scope | Report | Blocking | Deferred | Status |
 |-------|-------|--------|----------|----------|--------|
 | P1 | Content pack and gate (deterministic zodiac content data + offline content gate) | `review/slice-P1.md` | 0 | 3 | REVIEWED |
-| P2 | Deterministic session | — | — | — | PENDING |
+| P2 | Deterministic session (resolver, rotation cursor, play-session cubit, activity-card origin) | `review/slice-P2.md` | 0 | 2 | REVIEWED |
 | P3 | Result surface screens | — | — | — | PENDING |
 | P4 | Entry point wiring | — | — | — | PENDING |
 
@@ -25,6 +25,10 @@ closure decision has been made yet.
 - P1 deferred items D-P1-1 (architecture `schemaId` sketch vs shipped
   `schema_id`), D-P1-2 (time-gating scan covers item keys only, not the package
   envelope), D-P1-3 (stale phase §3 input-layer task text) are carried forward.
+- P2 deferred items D-P2-1 (test-results row 1 command does not match its
+  reported count) and D-P2-2 (cubit has no failure path for pack loading) are
+  carried forward. D-P2-2 is addressed to the P3 slice: check what
+  `ZodiacShellStage.loading` renders when it never resolves.
 - P1 judges no story-level mobile gate: runtime startup smoke, entry point
   reachability, and implemented visual fidelity remain open and belong to the
   later slices and the synthesis.
