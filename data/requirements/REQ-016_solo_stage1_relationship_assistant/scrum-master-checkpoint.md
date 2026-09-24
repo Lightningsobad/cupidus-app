@@ -260,25 +260,64 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
   A5 BaseHead bookkeeping mismatch) are non-blocking, deferred to
   final-synthesis. Committed `26ca73ce`, merged `12460988` (re-merge, normal).
   `Iris-QC` released via `TaskStop`.
-- **About to dispatch now: Slice P4** (photo attach) to `Iris-QC` (fresh
-  spawn, `Mode: scoped-slice`, file list: `attachable_photos.dart`,
-  `photo_attach_section.dart`, `photo_attach_test.dart`, `thank_you_block.dart`
-  photo part, `thanks_section.dart`, `journal_repository.dart`,
-  `journal_entry_point.dart`, `thank_you_block_test.dart`,
-  `thanks_section_test.dart` — confirm exact paths via
-  `git diff --name-only bfe231aa`, the P3 handoff's guessed paths for the
-  gate file were wrong so do not trust guessed paths blindly here either).
-  Handoff must instruct: surface the 2 already-flagged `DESIGN_SPEC_CONFLICT`
-  items (canvas leaks journal metadata vs AC-17/BR-8; canvas implies a 2nd
-  nav destination vs AC-7) for final-synthesis, not re-litigate; also
-  resolve advisory **A4 from Slice P2** by claiming
-  `thank_you_block_test.dart` (16 tests) for this slice's own file list if the
-  diff confirms it belongs to P4/photo-attach evidence rather than P2's shell
-  — check before assuming; append a `P4` row to `review/review-report.md`'s
-  `## Slice Index` (fill an existing placeholder row in place if present,
-  same pattern as P2/P3); do not touch `scope-gate.md` unless the guard
-  actually re-fires; use only `Outcome: PARTIAL_SLICE_ONLY` as the slice-level
-  literal (never "PASS").
+- **Slice P4 DONE (Round 20).** `Iris-QC` returned `REVIEW_SLICE_COMPLETE: YES`,
+  `review/slice-p4-photo-attach.md` `Outcome: PARTIAL_SLICE_ONLY` (slice
+  literal; content = clean PASS, 0 blocking findings). Confirmed: AC-14..AC-18
+  + BR-8/BR-9 all satisfied (dedup+merge of card-photo + journal-photo
+  sources, empty state truly removes the slot rather than rendering blank,
+  attach is an explicit uncommitted-by-default tap-to-select action,
+  photo-only projection with zero journal text/timestamp leak, no staged
+  copy outside the journal's own delete authority); `JOURNAL_SOURCE_CONTRACT_CLOSED`
+  ruling honored (exactly one new read-only projection fn, still only 4
+  entry-point declarations total, no FK/reverse-dependency `journal`→
+  `activity_cards`); no schema/migration touched in P4 (confirmed via
+  `core/database/` diff showing only P1's 3 files); no second nav destination;
+  broken photo source fails soft (empty list, block survives); independent
+  re-run `flutter test test/features/activity_cards/thank_you/
+  test/features/journal/` → `+169 ~6` all pass, `git status` clean after.
+  Visual fidelity: opened and eyeballed all 3 PNGs directly (not just read
+  the report line) — confirmed correct 3-thumbnail row, no tick marks, no
+  text overlay, full Vietnamese diacritics, no tofu. 6 advisories, all
+  DEFERRED/non-blocking except two flagged for **Scrum Master/final-synthesis
+  attention (not code defects)**: (A1) my own P4 handoff cited the wrong ACs
+  — I wrote "AC-4/AC-5" when the governing set is actually AC-14..AC-18 +
+  BR-8/BR-9 (AC-4/AC-5 are P1's activation-trigger criteria); Iris-QC
+  self-corrected and reviewed against the right ACs, but **future handoffs
+  in this story must cite AC-14..AC-18/BR-8/BR-9 for photo-attach, not
+  AC-4/AC-5**; (2) `visual-fidelity-report.md` line 1 says
+  `VISUAL_FIDELITY: PASS` while the same report also carries a
+  `DESIGN_SPEC_CONFLICT` entry for this phase — the visual-fidelity gate's
+  own default posture wants `BLOCKED: DESIGN_SPEC_CONFLICT` for that
+  combination, but this story's own precedent (P2, STORY-006 P2) already
+  settled "follow AC/spec over canvas" for conflicts of this shape;
+  final-synthesis must make one explicit, story-level call on how to record
+  this PASS+CONFLICT pairing rather than let it stand ambiguous. Also closed
+  Slice P2's advisory A4: `thank_you_block_test.dart` (16 tests) is now
+  claimed as P4's own primary test evidence (photo slot + share-composer
+  wiring), confirmed by content, not left unassigned. Both
+  `DESIGN_SPEC_CONFLICT` items independently re-verified against the actual
+  canvas PNG (not just trusted from the implementation-time note): confirmed
+  real (canvas shows a journal-metadata caption line + a trailing chevron
+  implying a second destination). Committed `8dbf2806`, merged `deab88bb`
+  (re-merge, normal). `Iris-QC` released via `TaskStop`.
+- **About to dispatch now: Slice P5** (next-plan suggestions) — LAST scoped
+  slice before final-synthesis. Target `Iris-QC` (fresh spawn,
+  `Mode: scoped-slice`). Confirm exact file paths via
+  `git -C <Worktree> diff --name-only bfe231aa -- mobile/lib mobile/test |
+  grep -i "next_plan"` before building the handoff (two prior slices had
+  handoff path/AC guesses corrected by the reviewer — verify first this
+  time). Expected files per master-plan: `next_plan_suggestion_service.dart`,
+  `next_plan_cubit.dart`, `next_plan_section.dart`, `next_plan_test.dart` (or
+  equivalents). Handoff must instruct: cite `BUG-20260923-002` (now committed
+  to `master_bugs_list.md` as of this round) if the conversation_starters
+  suite surfaces those same 3 pre-existing reds — do not re-run that suite
+  broadly, and re-verify root-cause note that it's already green on
+  STORY-005's own branch (fixed by P7) so it may have already resolved on
+  integration; fill the existing `P5` placeholder row in
+  `review/review-report.md`'s `## Slice Index` in place; do not touch
+  `scope-gate.md` unless the guard re-fires (it has not fired since P1); use
+  only `Outcome: PARTIAL_SLICE_ONLY` as the slice-level literal (never
+  "PASS").
 - After each slice returns: 3-part-verify, then dispatch the next slice
   immediately (dispatch discipline — same story, so sequential is correct
   here, not a capacity-fill violation).
