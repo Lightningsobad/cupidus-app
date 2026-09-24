@@ -182,21 +182,22 @@ chốt**, không phải một pass. Tiền lệ trong cùng requirement tồn t�
 - Không tái kiểm: Traceability, kỷ luật OQ, D-2..D-5 — giữ nguyên kết luận lượt 1
 - Worktree sạch (`git status --short` trống) tại thời điểm kiểm
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
 Ba finding chặn của lượt 1 (F-1, F-2, F-3) **đều đóng**, và D-1 cũng đóng. Lượt 2
 để lại đúng **một** việc phải sửa: 4 ảnh `implemented-*` đặt tên sai quy ước nên
 gói bằng chứng design-fidelity không ghép cặp được bằng máy (F-4). Đây là sửa cơ
 học, đổi tên file, không đụng mã và không chụp lại ảnh.
 
-Dòng `Outcome:` ngay trên là kết luận **có hiệu lực** của story. Ở lượt 3
-(2026-09-24) **F-4 đã được xác minh ĐÓNG** — xem mục `## Xác nhận F-4 (lượt 3,
-2026-09-24)` ở cuối file — nhưng cùng lượt đó cổng
-`verify-story-visual-fidelity-gate.sh` phát hiện **F-5**, một lỗi định dạng khác
-cùng họ với F-4 (nội dung đúng, máy không đọc được) trong `story_master.md`.
-Outcome vì thế giữ `PATCH_REQUIRED` thay vì nâng lên `DEFERRED_ONLY`: cổng story
-không cho ghi nhận một review PASS khi artifact trạng thái còn không hợp lệ về
-mặt máy. Xem `## F-5 — MỞ (lượt 3)`. D-2..D-7 và N-1/N-2 vẫn treo, không chặn.
+Dòng `Outcome:` ngay trên là kết luận **có hiệu lực** của story. Lịch sử của nó:
+lượt 3 (2026-09-24) xác minh **F-4 ĐÓNG** — xem `## Xác nhận F-4 (lượt 3,
+2026-09-24)` — nhưng cùng lượt đó cổng `verify-story-visual-fidelity-gate.sh`
+phát hiện **F-5**, một lỗi định dạng khác cùng họ với F-4 (nội dung đúng, máy
+không đọc được) trong `story_master.md`, nên lượt 3 giữ `PATCH_REQUIRED`. Lượt 4
+(2026-09-24) đã xác minh **F-5 ĐÓNG** sau khi Scrum Master sửa đúng đề xuất của
+lượt 3, và vì thế nâng outcome lên `DEFERRED_ONLY` theo đúng điều kiện lượt 3 đã
+ghi sẵn. Xem `## Xác nhận F-5 (lượt 4, 2026-09-24)`. Không còn finding chặn nào
+mở. D-2..D-7 và N-1/N-2 vẫn treo, không chặn.
 
 ## Phạm vi thay đổi kể từ lượt 1
 
@@ -442,7 +443,7 @@ D-6 (harness `_visualEvidenceDir` vẫn trỏ thư mục cũ) **không** đượ
 lượt khắc phục này — vẫn treo, vẫn không chặn, vì nhánh chụp nấp sau cờ
 `--dart-define=CAPTURE_VISUALS` nên gate test mặc định không chạm tới.
 
-## F-5 — MỞ (lượt 3)
+## F-5 — ĐÓNG ở lượt 4 (nội dung dưới đây là bản ghi khi mở ở lượt 3)
 
 `verify-story-visual-fidelity-gate.sh` chặn stop của review này với id màn không
 hợp lệ. Giá trị nó đọc ra:
@@ -485,7 +486,7 @@ Mobile Developer.
 dòng đó thành id trần, mọi kết luận của lượt 3 giữ nguyên hiệu lực và outcome
 nâng thẳng lên `DEFERRED_ONLY`.
 
-## State Recommendation (lượt 3)
+## State Recommendation (lượt 3 — đã được thay thế bởi lượt 4 ở cuối file)
 
 - `Implementation (Development)`: giữ **chưa tick** cho tới khi F-5 xong.
 - `Review (Reviewer)`: giữ **chưa tick**.
@@ -500,3 +501,44 @@ nâng thẳng lên `DEFERRED_ONLY`.
   lượt 2.
 - Review này không sửa file nào khác ngoài chính nó và `review/scope-gate.md`.
 - Không tự commit: Scrum Master sở hữu commit và mọi cập nhật trạng thái.
+
+## Xác nhận F-5 (lượt 4, 2026-09-24)
+
+Phạm vi lượt 4 là **duy nhất** việc xác nhận F-5. Không tái kiểm F-1..F-4, D-1,
+và không đọc lại `coding-plan/master-plan.md`, `architecture/solution.md`,
+`requirements/requirements.md`, `ux/uiux-spec.md`. Baseline: `ff567fdc..HEAD`
+(HEAD = `6c41ac26`).
+
+**1. `Design-Screen:` giờ là id trần — ĐÚNG.** Đọc `story_master.md` dòng 9-18:
+dòng 11 hiện là `Design-Screen: 9-kich-ban-buoi-hen`, không còn văn xuôi trên
+cùng dòng. Chú thích cũ nằm nguyên vẹn ở dòng riêng `Design-Screen-Note:` ngay
+bên dưới; `git diff` cho thấy đúng 3 dòng thêm / 2 dòng xóa, không mất nội dung
+nào (chỉ `(` đầu chú thích và `)` cuối được thay bằng dấu câu thường).
+
+**2. Diff kể từ BaseHead không chạm mã — ĐÚNG.**
+`git diff ff567fdc..HEAD --name-status` trả đúng 3 file, tất cả là artifact:
+`story_master.md` (M, fix F-5), `review/review-report.md` (M, lượt 3),
+`review/scope-gate.md` (M, lượt 3). Không có file nào dưới `mobile/lib/` hay
+`mobile/test/`. `git status --short` trống — worktree sạch tại thời điểm kiểm.
+
+**3. Cổng thị giác PASS thật — ĐÚNG.** Lượt 4 tự chạy lại, không tin lời kể:
+`python3 .claude/hooks/lib/visual_fidelity.py --dir <story> --project <worktree>
+--stage done --stack mobile --lane mobile` → **exit 0, không in gì**. Không còn
+báo id không hợp lệ. Đây chính là lệnh đã chặn stop ở lượt 3.
+
+**Kết luận.** Điều kiện mà lượt 3 tự đặt ra ("sau khi dòng đó thành id trần, mọi
+kết luận của lượt 3 giữ nguyên hiệu lực và outcome nâng thẳng lên
+`DEFERRED_ONLY`") đã được thỏa đầy đủ. **F-5 ĐÓNG.** Không còn finding chặn nào
+mở trên story này.
+
+## State Recommendation (lượt 4 — có hiệu lực)
+
+- `Implementation (Development)`: **đủ điều kiện tick**.
+- `Review (Reviewer)`: **đủ điều kiện tick**.
+- Story **sẵn sàng để Scrum Master merge** vào
+  `codex/REQ-016_solo_stage1_relationship_assistant-integration`, và đủ điều kiện
+  `DONE` theo `Outcome: DEFERRED_ONLY`.
+- Danh sách hoãn **không đổi**, giữ nguyên để Scrum Master phân loại: **D-2, D-3,
+  D-4, D-5** (lượt 1), **D-6, D-7** (lượt 2), **N-1, N-2** (lượt 2).
+- Lượt 4 chỉ sửa `review/review-report.md` và `review/scope-gate.md`; không sửa
+  `story_master.md` (chỉ đọc để xác nhận) và không tự commit.
