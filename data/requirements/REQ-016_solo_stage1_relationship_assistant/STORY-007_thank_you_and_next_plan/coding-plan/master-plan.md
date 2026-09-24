@@ -91,13 +91,24 @@ Artifact hygiene:
   module vật lý đã kiểm chứng, không còn chỗ nào phải bind khi chạy.
 - `schemaVersion` trên base là **9**; P1 bump lên **10**. Nếu lúc bắt đầu P1 số
   đã khác 9 thì một nhánh song song đã bump trước — dừng, đừng bump chồng.
-- **Hai quyết định phải có trước khi dispatch phase tương ứng.** Cả hai là xung
-  đột giữa AC của story này và hợp đồng đã ship của story phụ thuộc, không phải
-  việc lập trình:
-  - P4 — `JOURNAL_SOURCE_CONTRACT_CLOSED`: nhật ký là hợp đồng một chiều, AC-14
-    không có đường lấy ảnh. Chọn (A) mở rộng entry point bằng một hàm chiếu
-    chỉ-đọc + một story ghi `originRef`, hay (B) thu hẹp AC-14 còn ảnh của thẻ.
-  - P3 — `CONTENT_GATE_CATEGORY_COUPLING`: cổng nội dung bắt mọi preset phải có
-    clause `decline_door`, gói cảm ơn sẽ chết ở cổng. Chọn (A) đưa luật về
-    phạm vi danh mục, hay (B) PO chấp nhận clause tương đương.
-  P1, P2, P5 không vướng hai quyết định này và dispatch được ngay.
+- **P4 — `JOURNAL_SOURCE_CONTRACT_CLOSED` đã đóng, P4 dispatch được.** Ngày
+  2026-09-23 người dùng chốt lối (A) (`req_master.md` mục `## Design Ruling
+  Log`): `journal_entry_point.dart` được thêm **đúng một** hàm chiếu chỉ-đọc trả
+  về đường dẫn ảnh theo `originRef`, không văn bản, không mốc thời gian. Chi
+  tiết thi hành ở `phase-P4-photo-attach.md` §3 Bước 1.
+- **Phụ thuộc còn lại của P4, không phải blocker.** Ống dẫn ghi `originRef` đã
+  hoàn chỉnh sẵn từ `JournalComposerSeed.originRef` xuống tận cột
+  `JournalEntries.origin_ref`; thứ duy nhất thiếu là một caller truyền
+  `JournalComposerSeed(originRef: <id thẻ>)`. Trên base này **không có** luồng
+  tạo mục nhật ký từ thẻ ở bất kỳ đâu (không file nào dưới
+  `features/activity_cards/**` nhắc tới nhật ký), và `ux/uiux-spec.md` mục 3
+  cấm khối của STORY-007 tự mở lối ghi nhật ký — nên lệnh ghi đó **không thuộc
+  phạm vi STORY-007**. Nhánh nhật ký của AC-14 sẽ rỗng trên app thật cho tới khi
+  story sở hữu màn tạo-mục-từ-thẻ (`journal_entry_point.dart` dòng 4-5 ghi
+  STORY-008, hiện `TODO`) truyền `originRef`; nhánh ảnh thẻ có dữ liệu ngay nên
+  AC-14/AC-15 vẫn chạy. Trong P4, nhánh nhật ký được kiểm bằng hàng gieo sẵn
+  qua `JournalRepository.saveEntry(... originRef:)`.
+- **P3 — `CONTENT_GATE_CATEGORY_COUPLING` (lịch sử).** Cổng nội dung bắt mọi
+  preset phải có clause `decline_door`. P3 đã `DONE`, nên quyết định này đã được
+  xử lý trong lúc thi hành P3; giữ lại ở đây làm dấu vết, không phải việc đang
+  chờ.
