@@ -1,13 +1,19 @@
 import '../../../core/content/content_package.dart';
 import '../../activity_cards/domain/activity_card.dart';
 import '../../activity_cards/domain/activity_card_repository.dart';
+import '../../context_notebook/context_notebook_entry_point.dart';
 import '../data/calendar_event_state_repository.dart';
 import 'starter_content.dart';
+import 'starter_selector.dart';
 
 /// A calendar event that is still worth offering, carrying the one date it
 /// will be offered for.
 class VisibleCalendarEvent {
-  const VisibleCalendarEvent({required this.event, required this.date});
+  const VisibleCalendarEvent({
+    required this.event,
+    required this.date,
+    this.reason,
+  });
 
   /// Carried whole so the screen reads `name` and `calendar` off the package
   /// rather than re-deriving either in Dart (R-15a).
@@ -16,6 +22,10 @@ class VisibleCalendarEvent {
   /// Civil `YYYY-MM-DD`: this event's own nearest occurrence on or after the
   /// injected `today`.
   final String date;
+
+  /// The filled reason line, or `null` when this event declares none or the
+  /// notebook holds nothing to fill it with. Never a half-filled string.
+  final String? reason;
 
   String get id => event.id;
 }
@@ -46,6 +56,7 @@ class CalendarEventService {
   Future<List<VisibleCalendarEvent>> visibleEvents({
     required String ownerKey,
     required String today,
+    required List<NotebookEntry> notebook,
   }) async {
     final Set<String> handled = await _stateRepository.handledEventIds(
       ownerKey,
@@ -60,7 +71,17 @@ class CalendarEventService {
       if (date == null) {
         continue;
       }
-      visible.add(VisibleCalendarEvent(event: event, date: date));
+      visible.add(
+        VisibleCalendarEvent(
+          event: event,
+          date: date,
+          reason: resolveEventReason(
+            event: event,
+            notebook: notebook,
+            today: today,
+          ),
+        ),
+      );
     }
 
     visible.sort((VisibleCalendarEvent a, VisibleCalendarEvent b) {
@@ -113,6 +134,43 @@ class CalendarEventService {
         eventId: eventId,
         state: CalendarEventHandledState.dismissed,
       );
+}
+
+/// The reason line drawn under [event]'s name, or `null` when the event
+/// declares none and when nothing the reader wrote can fill the one it declares
+/// (AC-15/AC-16: the sentence comes from the pack, the value from the
+/// notebook — never from a keyword guess, a model, or the network).
+///
+/// Pure over (event, notebook, today), and it picks the notebook entry with
+/// exactly the key [StarterSelector] uses for a contextual starter, so the same
+/// day renders the same reason twice running (AC-17).
+String? resolveEventReason({
+  required CalendarEvent event,
+  required List<NotebookEntry> notebook,
+  required String today,
+}) {
+  final String? template = event.reasonTemplate;
+  final StarterContextSlot? slot = event.reasonContextSlot;
+  if (template == null || slot == null) {
+    return null;
+  }
+
+  final List<NotebookEntry> matches = notebook
+      .where(
+        (NotebookEntry entry) =>
+            entry.kind.wireValue == slot.wireValue && entry.value.isNotEmpty,
+      )
+      .toList(growable: false)
+    ..sort((NotebookEntry a, NotebookEntry b) => a.id.compareTo(b.id));
+  if (matches.isEmpty) {
+    return null;
+  }
+
+  final int key = stableContentKey('$today|${event.id}');
+  return template.replaceAll(
+    starterValueToken,
+    matches[key % matches.length].value,
+  );
 }
 
 /// The smallest date in [dates] that is not before [today], or `null` when

@@ -18,12 +18,14 @@ import 'package:cupid_mobile/features/context_notebook/data/context_notebook_rep
 import 'package:cupid_mobile/features/context_notebook/domain/ask_cadence_policy.dart';
 import 'package:cupid_mobile/features/context_notebook/domain/context_notebook_models.dart';
 import 'package:cupid_mobile/features/conversation_starters/data/calendar_event_state_repository.dart';
+import 'package:cupid_mobile/features/conversation_starters/domain/event_date_label.dart';
 import 'package:cupid_mobile/features/conversation_starters/domain/starter_content.dart';
 import 'package:cupid_mobile/features/conversation_starters/domain/starter_selector.dart';
 import 'package:cupid_mobile/features/conversation_starters/presentation/cubit/conversation_starters_cubit.dart';
 // The entry point exports only the screen and its id, so the internals this
 // file asserts on are reached through their own library.
 import 'package:cupid_mobile/features/conversation_starters/presentation/screens/conversation_starters_screen.dart';
+import 'package:cupid_mobile/features/conversation_starters/presentation/widgets/starter_hero_card.dart';
 import 'package:cupid_mobile/features/conversation_starters/presentation/widgets/starter_line.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:drift/native.dart';
@@ -128,6 +130,8 @@ Map<String, Object?> _event(
   String name,
   List<String> dates, {
   String? activityType,
+  String? reasonTemplate,
+  String? reasonContextSlot,
 }) =>
     <String, Object?>{
       'id': id,
@@ -135,7 +139,18 @@ Map<String, Object?> _event(
       'calendar': 'solar',
       'dates': dates,
       'activity_type': ?activityType,
+      'reason_template': ?reasonTemplate,
+      'reason_context_slot': ?reasonContextSlot,
     };
+
+/// The reason line an event draws under its name, or `null` when the row is
+/// silent — read off the widget tree rather than off the cubit.
+String? _reasonOnScreen(WidgetTester tester, String eventId) {
+  final Finder finder = find.byKey(Key('starter_event_reason_$eventId'));
+  return finder.evaluate().isEmpty
+      ? null
+      : tester.widget<Text>(finder).data;
+}
 
 Widget _host(Widget child) => MaterialApp(
       theme: buildCupidTheme(
@@ -153,7 +168,15 @@ Widget _host(Widget child) => MaterialApp(
 
 /// The ids currently on screen, top to bottom — the rotation evidence AC-27
 /// asks for, read off the widgets rather than off the cubit.
+///
+/// The hero card comes first because it renders element `[0]` of the round;
+/// the secondary lines follow in the selector's order, so this list stays the
+/// round itself and the ordering tables below keep their meaning.
 List<String> _starterIdsOnScreen(WidgetTester tester) => <String>[
+      for (final StarterHeroCard hero in tester.widgetList<StarterHeroCard>(
+        find.byType(StarterHeroCard),
+      ))
+        hero.starter.id,
       for (final StarterLine line in tester.widgetList<StarterLine>(
         find.byType(StarterLine),
       ))
@@ -165,17 +188,18 @@ List<String> _renderedText(WidgetTester tester) => <String>[
         text.data ?? text.textSpan?.toPlainText() ?? '',
     ];
 
-/// Rendered text minus the `dd/mm` event badges, which are the one legitimate
-/// `n/m` shape on this screen and would otherwise read as the "x/N" progress
-/// counter the forbidden-shape scan is looking for.
-List<String> _renderedTextOutsideDateBadges(WidgetTester tester) => <String>[
+/// Rendered text minus the event rows, whose names now carry a `dd/mm` date
+/// inline — the one legitimate `n/m` shape on this screen, which would
+/// otherwise read as the "x/N" progress counter the forbidden-shape scan is
+/// looking for.
+List<String> _renderedTextOutsideEventNames(WidgetTester tester) => <String>[
       for (final Text text in tester.widgetList<Text>(find.byType(Text)))
-        if (!_isDateBadge(text.key))
+        if (!_isEventName(text.key))
           text.data ?? text.textSpan?.toPlainText() ?? '',
     ];
 
-bool _isDateBadge(Key? key) =>
-    key is ValueKey<String> && key.value.startsWith('starter_event_date_');
+bool _isEventName(Key? key) =>
+    key is ValueKey<String> && key.value.startsWith('starter_event_name_');
 
 Future<void> _loadDesignFonts(WidgetTester tester) async {
   await tester.runAsync(() async {
@@ -221,6 +245,7 @@ Future<void> _captureAtReferenceViewport(
   String fileName, {
   CupidPlatform platform = CupidPlatform.material,
   Size viewport = _referenceViewport,
+  Future<void> Function(WidgetTester)? beforeCapture,
 }) async {
   tester.view.physicalSize = viewport;
   tester.view.devicePixelRatio = 1;
@@ -248,6 +273,11 @@ Future<void> _captureAtReferenceViewport(
     ),
   );
   await tester.pumpAndSettle();
+
+  if (beforeCapture != null) {
+    await beforeCapture(tester);
+    await tester.pumpAndSettle();
+  }
 
   final RenderRepaintBoundary boundary =
       tester.renderObject(find.byKey(_captureBoundaryKey))
@@ -298,17 +328,24 @@ void main() {
         ),
       );
 
-  Widget startersScreen(ContentPackageLoader loader) =>
+  Widget startersScreen(
+    ContentPackageLoader loader, {
+    void Function(ConversationStartersCubit)? onCubitCreated,
+  }) =>
       ConversationStartersScreen(
         today: _today,
-        cubitBuilder: () => ConversationStartersCubit(
-          notebook: _RepositoryReader(notebook),
-          cardRepository: cards,
-          eventStateRepository: CalendarEventStateRepository(database),
-          ownerKeyStore: owner,
-          today: _today,
-          loader: loader,
-        ),
+        cubitBuilder: () {
+          final ConversationStartersCubit cubit = ConversationStartersCubit(
+            notebook: _RepositoryReader(notebook),
+            cardRepository: cards,
+            eventStateRepository: CalendarEventStateRepository(database),
+            ownerKeyStore: owner,
+            today: _today,
+            loader: loader,
+          );
+          onCubitCreated?.call(cubit);
+          return cubit;
+        },
         // The screen still hands its own entry point and target list to the
         // builder, so injecting the notebook seams here does not take the
         // production ask identity out of the assertions.
@@ -399,10 +436,10 @@ void main() {
       for (int taps = 0; taps <= 5; taps++) {
         table.add(_starterIdsOnScreen(tester));
 
-        final TextButton button = tester.widget<TextButton>(
+        final InkWell button = tester.widget<InkWell>(
           find.byKey(const Key('starter_next_round')),
         );
-        expect(button.onPressed, isNotNull, reason: 'tap $taps left it enabled');
+        expect(button.onTap, isNotNull, reason: 'tap $taps left it enabled');
 
         await tester.tap(find.byKey(const Key('starter_next_round')));
         await tester.pumpAndSettle();
@@ -445,6 +482,219 @@ void main() {
       await pumpStarters(tester, starterCount: 12);
 
       expect(_starterIdsOnScreen(tester), hasLength(kStartersPerRound));
+    });
+  });
+
+  group('phân cấp hero/phụ của khối Bản A (ruling 2026-09-20 mục 2)', () {
+    testWidgets('kho đủ dài: một thẻ hero + hai câu phụ dưới caption (N = 12)',
+        (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 12);
+
+      expect(find.byKey(const Key('starter_hero_card')), findsOneWidget);
+      expect(find.byKey(const Key('starter_hero_caption')), findsOneWidget);
+      expect(find.text('CÂU HÔM NAY'), findsOneWidget);
+      expect(find.byKey(const Key('starter_topic_caption')), findsOneWidget);
+      expect(find.text('CÙNG CHỦ ĐỀ'), findsOneWidget);
+      expect(find.byType(StarterLine), findsNWidgets(2));
+
+      // The hero is element [0] of the round the selector returned — this
+      // phase adds no second ordering rule on top of AC-17.
+      final StarterHeroCard hero =
+          tester.widget<StarterHeroCard>(find.byType(StarterHeroCard));
+      expect(hero.starter.id, (await expectedRound(12, 0)).first);
+    });
+
+    testWidgets('N = 2: một hero + đúng một câu phụ',
+        (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 2);
+
+      expect(find.byKey(const Key('starter_hero_card')), findsOneWidget);
+      expect(find.byKey(const Key('starter_topic_caption')), findsOneWidget);
+      expect(find.byType(StarterLine), findsOneWidget);
+    });
+
+    testWidgets('N = 1: chỉ thẻ hero, không caption "CÙNG CHỦ ĐỀ", không ô rỗng',
+        (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 1);
+
+      expect(find.byKey(const Key('starter_hero_card')), findsOneWidget);
+      expect(find.byKey(const Key('starter_topic_caption')), findsNothing);
+      expect(find.text('CÙNG CHỦ ĐỀ'), findsNothing);
+      expect(find.byType(StarterLine), findsNothing);
+      expect(find.byKey(const Key('starter_line_placeholder')), findsNothing);
+      expect(_starterIdsOnScreen(tester), hasLength(1));
+    });
+
+    testWidgets('hero nổi hơn câu phụ về cỡ chữ, không cùng một cỡ',
+        (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 12);
+
+      final List<String> ids = _starterIdsOnScreen(tester);
+      final TextStyle heroStyle = tester
+          .widget<Text>(find.byKey(Key('starter_line_text_${ids.first}')))
+          .style!;
+      final TextStyle secondaryStyle = tester
+          .widget<Text>(find.byKey(Key('starter_line_text_${ids[1]}')))
+          .style!;
+
+      expect(heroStyle.fontSize, greaterThan(secondaryStyle.fontSize!));
+      expect(
+        heroStyle.fontWeight!.value,
+        greaterThan(secondaryStyle.fontWeight!.value),
+      );
+    });
+
+    testWidgets('bấm quá số mục thì hero luôn còn chữ (N = 2)',
+        (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 2);
+
+      for (int taps = 0; taps <= 5; taps++) {
+        final StarterHeroCard hero =
+            tester.widget<StarterHeroCard>(find.byType(StarterHeroCard));
+        expect(hero.starter.text, isNotEmpty, reason: 'sau $taps lần bấm');
+        expect(
+          tester
+              .widget<Text>(
+                find.byKey(Key('starter_line_text_${hero.starter.id}')),
+              )
+              .data,
+          hero.starter.text,
+        );
+
+        await tester.tap(find.byKey(const Key('starter_next_round')));
+        await tester.pumpAndSettle();
+      }
+    });
+
+    testWidgets('cùng (ngày, sổ tay, page) ra cùng một hero qua hai lần dựng '
+        '(AC-17)', (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 12);
+      final String first =
+          tester.widget<StarterHeroCard>(find.byType(StarterHeroCard)).starter.id;
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+
+      await pumpStarters(tester, starterCount: 12);
+      final String second =
+          tester.widget<StarterHeroCard>(find.byType(StarterHeroCard)).starter.id;
+
+      expect(second, first);
+    });
+  });
+
+  group('nhãn và affordance (ruling 2026-09-20 mục 3, 4, 5)', () {
+    testWidgets('thẻ hero có nút đặc "Chép để nhắn" kèm icon copy',
+        (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 12);
+
+      final String heroId = _starterIdsOnScreen(tester).first;
+      final Finder cta = find.byKey(Key('starter_line_copy_$heroId'));
+      expect(cta, findsOneWidget);
+
+      final CupidPrimaryButton button = tester.widget<CupidPrimaryButton>(cta);
+      expect(button.label, 'Chép để nhắn');
+      expect(button.leadingIcon, CupidIcons.contentCopy);
+      expect(find.text('Chép để nhắn'), findsOneWidget);
+
+      // Thẻ hero không còn nút icon copy trần; hai câu phụ thì vẫn giữ.
+      expect(
+        find.descendant(
+          of: find.byType(StarterHeroCard),
+          matching: find.byType(StarterCopyButton),
+        ),
+        findsNothing,
+      );
+      expect(find.byType(StarterCopyButton), findsNWidgets(2));
+    });
+
+    testWidgets('nút tròn refresh thay text button "Xem câu khác"',
+        (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 12);
+
+      final Finder next = find.byKey(const Key('starter_next_round'));
+      expect(next, findsOneWidget);
+      expect(tester.widget<InkWell>(next).onTap, isNotNull);
+      expect(
+        find.descendant(of: find.byType(StarterHeroCard), matching: next),
+        findsOneWidget,
+      );
+
+      // Chữ biến mất khỏi thân màn, nhãn chỉ còn ở tầng trợ năng.
+      expect(find.text('Xem câu khác'), findsNothing);
+      final Semantics semantics = tester.widget<Semantics>(
+        find.ancestor(of: next, matching: find.byType(Semantics)).first,
+      );
+      expect(semantics.properties.button, isTrue);
+      expect(semantics.properties.label, 'Xem câu khác');
+
+      expect(find.byIcon(CupidIcons.refresh), findsOneWidget);
+      final Size size = tester.getSize(next);
+      expect(size.width, greaterThanOrEqualTo(kStarterCopyTapTarget));
+      expect(size.height, greaterThanOrEqualTo(kStarterCopyTapTarget));
+    });
+
+    testWidgets('dòng trấn an nằm dưới hàng CTA của thẻ hero',
+        (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 12);
+
+      final Finder reassurance =
+          find.byKey(const Key('starter_hero_reassurance'));
+      expect(reassurance, findsOneWidget);
+      expect(
+        tester.widget<Text>(reassurance).data,
+        'Câu này nhắn liền, không cần lưu. Quay lại là có câu khác.',
+      );
+      expect(
+        find.descendant(
+          of: find.byType(StarterHeroCard),
+          matching: reassurance,
+        ),
+        findsOneWidget,
+      );
+
+      final String heroId = _starterIdsOnScreen(tester).first;
+      expect(
+        tester.getTopLeft(reassurance).dy,
+        greaterThan(
+          tester.getBottomLeft(find.byKey(Key('starter_line_copy_$heroId'))).dy,
+        ),
+      );
+    });
+
+    testWidgets('khối sự kiện đọc nhãn mới, nhãn cũ biến mất',
+        (WidgetTester tester) async {
+      await pumpStarters(
+        tester,
+        starterCount: 12,
+        events: <Map<String, Object?>>[
+          _event('ev-upcoming', 'Fixture dated event', <String>['2026-10-20']),
+        ],
+      );
+
+      expect(
+        tester
+            .widget<Text>(find.byKey(const Key('starter_events_heading')))
+            .data,
+        'CÓ LỊCH SẴN · RỦ ĐI ĐƯỢC',
+      );
+      expect(find.text('Sự kiện có lịch'), findsNothing);
+      expect(find.byIcon(CupidIcons.event), findsOneWidget);
+
+      expect(find.text('Thêm vào Muốn làm'), findsOneWidget);
+      expect(find.text('Thêm vào kho'), findsNothing);
+      expect(find.byIcon(CupidIcons.add), findsOneWidget);
+
+      final Semantics pill = tester.widget<Semantics>(
+        find
+            .descendant(
+              of: find.byKey(const Key('starter_event_add_ev-upcoming')),
+              matching: find.byType(Semantics),
+            )
+            .first,
+      );
+      expect(pill.properties.button, isTrue);
+      expect(pill.properties.label, 'Thêm vào Muốn làm');
     });
   });
 
@@ -521,25 +771,42 @@ void main() {
       expect(_renderedText(tester), isNot(contains('Fixture past event')));
     });
 
-    testWidgets('badge ngày đọc đúng dd/mm của lần tới',
+    testWidgets('ngày nằm trong dòng tên, không còn badge riêng (ruling 6b)',
         (WidgetTester tester) async {
       await pumpStarters(tester, starterCount: 12, events: twoUpcoming);
 
       expect(
         tester
-            .widget<Text>(find.byKey(const Key('starter_event_date_ev-upcoming')))
+            .widget<Text>(find.byKey(const Key('starter_event_name_ev-upcoming')))
             .data,
-        '20/10',
+        'Fixture dated event — thứ Ba 20/10',
       );
       expect(
         tester
-            .widget<Text>(find.byKey(const Key('starter_event_name_ev-upcoming')))
+            .widget<Text>(find.byKey(const Key('starter_event_name_ev-later')))
             .data,
-        'Fixture dated event',
+        'Fixture later event — thứ Hai 02/11',
       );
+
+      // Đúng một dòng cho mỗi sự kiện: badge leading đã bỏ hẳn.
+      for (final String id in <String>['ev-upcoming', 'ev-later']) {
+        expect(find.byKey(Key('starter_event_date_$id')), findsNothing);
+        expect(find.byKey(Key('starter_event_name_$id')), findsOneWidget);
+      }
+      expect(find.text('20/10'), findsNothing);
     });
 
-    testWidgets('"Thêm vào kho" tạo thẻ conversationStarter rồi bỏ dòng đi',
+    testWidgets('ngày hiển thị khớp VisibleCalendarEvent.date',
+        (WidgetTester tester) async {
+      await pumpStarters(tester, starterCount: 12, events: twoUpcoming);
+
+      final String rendered = tester
+          .widget<Text>(find.byKey(const Key('starter_event_name_ev-upcoming')))
+          .data!;
+      expect(rendered, endsWith(eventDateLabel('2026-10-20')));
+    });
+
+    testWidgets('"Thêm vào Muốn làm" tạo thẻ conversationStarter rồi bỏ dòng đi',
         (WidgetTester tester) async {
       await pumpStarters(
         tester,
@@ -634,7 +901,7 @@ void main() {
         // "1/2", "2/2" and friends, anywhere outside the dd/mm event badges.
         expect(
           RegExp(r'\d{1,3}\s*/\s*\d{1,3}').hasMatch(
-            _renderedTextOutsideDateBadges(tester).join('\n'),
+            _renderedTextOutsideEventNames(tester).join('\n'),
           ),
           isFalse,
           reason: 'a x/N counter surfaced at $stage',
@@ -762,12 +1029,110 @@ void main() {
     });
   });
 
+  group('dòng lý do dưới tên sự kiện (ruling 2026-09-20 mục 7)', () {
+    const String template = 'Đúng dòng "{value}" trong sổ tay';
+
+    List<Map<String, Object?>> eventsWithAndWithoutReason() =>
+        <Map<String, Object?>>[
+          _event(
+            'ev-upcoming',
+            'Fixture dated event',
+            <String>['2026-10-20'],
+            reasonTemplate: template,
+            reasonContextSlot: 'interest',
+          ),
+          _event('ev-later', 'Fixture later event', <String>['2026-11-02']),
+        ];
+
+    testWidgets('sổ tay có mục khớp: chỉ sự kiện khai template mới có lý do',
+        (WidgetTester tester) async {
+      await notebook.addEntry(
+        kind: NotebookKind.interest,
+        value: 'Cà phê sáng',
+        source: ContextEntrySource.manual,
+      );
+
+      await pumpStarters(
+        tester,
+        starterCount: 12,
+        events: eventsWithAndWithoutReason(),
+      );
+
+      expect(
+        _reasonOnScreen(tester, 'ev-upcoming'),
+        'Đúng dòng "Cà phê sáng" trong sổ tay',
+      );
+      expect(_reasonOnScreen(tester, 'ev-later'), isNull);
+    });
+
+    testWidgets('sổ tay rỗng: không dòng lý do nào, và không ô nào lộ {value}',
+        (WidgetTester tester) async {
+      expect(await notebook.entries(), isEmpty);
+
+      await pumpStarters(
+        tester,
+        starterCount: 12,
+        events: eventsWithAndWithoutReason(),
+      );
+
+      expect(_reasonOnScreen(tester, 'ev-upcoming'), isNull);
+      expect(_reasonOnScreen(tester, 'ev-later'), isNull);
+      expect(
+        _renderedText(tester).where((String text) => text.contains('{value}')),
+        isEmpty,
+      );
+    });
+
+    testWidgets(
+        'trả lời xong câu hỏi: dòng lý do hiện ra, nhưng dòng đã bỏ qua '
+        'không sống lại (AC-12, AC-14)', (WidgetTester tester) async {
+      late ConversationStartersCubit cubit;
+      tester.view.physicalSize = _tallViewport;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        _host(
+          startersScreen(
+            fixtureLoader(
+              starterCount: 12,
+              events: eventsWithAndWithoutReason(),
+            ),
+            onCubitCreated: (ConversationStartersCubit created) =>
+                cubit = created,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(_reasonOnScreen(tester, 'ev-upcoming'), isNull);
+
+      await tester.tap(find.byKey(const Key('starter_event_dismiss_ev-later')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('starter_event_ev-later')), findsNothing);
+
+      await notebook.addEntry(
+        kind: NotebookKind.interest,
+        value: 'Cà phê sáng',
+        source: ContextEntrySource.askOnTheSpot,
+      );
+      await cubit.refreshContext();
+      await tester.pumpAndSettle();
+
+      expect(
+        _reasonOnScreen(tester, 'ev-upcoming'),
+        'Đúng dòng "Cà phê sáng" trong sổ tay',
+      );
+      expect(find.byKey(const Key('starter_event_ev-later')), findsNothing);
+    });
+  });
+
   testWidgets(
     'captures 6-moi-chuyen-a-a',
     (WidgetTester tester) async {
       await notebook.addEntry(
         kind: NotebookKind.interest,
-        value: 'Cà phê sáng',
+        value: 'thích đọc sách cũ',
         source: ContextEntrySource.manual,
       );
 
@@ -777,12 +1142,23 @@ void main() {
           fixtureLoader(
             starterCount: 12,
             events: <Map<String, Object?>>[
-              _event('ev-a', 'Sinh nhật bạn ấy', <String>['2026-10-20']),
+              _event(
+                'ev-a',
+                'Sinh nhật bạn ấy',
+                <String>['2026-10-20'],
+                reasonTemplate: 'Đúng dòng "{value}" trong sổ tay',
+                reasonContextSlot: 'interest',
+              ),
               _event('ev-b', 'Kỷ niệm quen nhau', <String>['2026-11-02']),
             ],
           ),
         ),
         'implemented-6-moi-chuyen-a-a-material.png',
+        // The canvas frames the event strip with no ask card above it. Left up,
+        // the card fills the lower half and pushes the reason line — the one
+        // thing this phase adds — below the reference fold.
+        beforeCapture: (WidgetTester tester) =>
+            tester.tap(find.byKey(const Key('ask-skip'))),
       );
 
       expect(

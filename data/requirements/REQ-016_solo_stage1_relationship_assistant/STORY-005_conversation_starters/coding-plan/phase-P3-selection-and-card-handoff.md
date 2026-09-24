@@ -145,5 +145,5 @@ sự kiện thành thẻ qua đúng cửa ghi của STORY-001.
 
 ## 7. Status
 
-- Status: COMPLETE
+- Status: DONE
 - Last updated: 2026-09-16

@@ -156,5 +156,5 @@ dải lối vào nhanh của Trang chủ vào màn đó.
 
 ## 7. Status
 
-- Status: COMPLETE
+- Status: DONE
 - Last updated: 2026-09-17

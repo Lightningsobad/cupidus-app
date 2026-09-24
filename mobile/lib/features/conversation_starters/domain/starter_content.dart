@@ -111,6 +111,8 @@ class CalendarEvent implements ContentItem {
     required this.calendar,
     required this.dates,
     this.activityTypeWireValue,
+    this.reasonTemplate,
+    this.reasonContextSlot,
   });
 
   @override
@@ -131,6 +133,14 @@ class CalendarEvent implements ContentItem {
   /// leniently here would turn the first case into the second and let a typo
   /// ship as a card with no type.
   final String? activityTypeWireValue;
+
+  /// The sentence drawn under the event name, carrying [starterValueToken]
+  /// once. Optional, and paired with [reasonContextSlot]: an event with no
+  /// natural reason ships neither key and draws no line at all.
+  final String? reasonTemplate;
+
+  /// Which recorded notebook kind fills [reasonTemplate]'s token.
+  final StarterContextSlot? reasonContextSlot;
 
   ActivityType? get activityType =>
       activityTypeFromWireValue(activityTypeWireValue);
@@ -178,6 +188,19 @@ CalendarEvent calendarEventFromJson(Map<String, Object?> json, String source) {
     );
   }
 
+  final String? rawReasonSlot =
+      optionalContentString(json, 'reason_context_slot', source);
+  StarterContextSlot? reasonContextSlot;
+  if (rawReasonSlot != null) {
+    reasonContextSlot = StarterContextSlot.fromWireValue(rawReasonSlot);
+    if (reasonContextSlot == null) {
+      throw ContentPackageFormatException(
+        source,
+        'event "$id" declares unsupported reason_context_slot "$rawReasonSlot"',
+      );
+    }
+  }
+
   return CalendarEvent(
     id: id,
     name: requireContentString(json, 'name', source),
@@ -187,5 +210,7 @@ CalendarEvent calendarEventFromJson(Map<String, Object?> json, String source) {
     ),
     activityTypeWireValue:
         optionalContentString(json, 'activity_type', source),
+    reasonTemplate: optionalContentString(json, 'reason_template', source),
+    reasonContextSlot: reasonContextSlot,
   );
 }

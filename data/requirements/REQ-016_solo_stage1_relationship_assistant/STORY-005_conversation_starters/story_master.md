@@ -1,6 +1,6 @@
 # Story Master: STORY-005 Mồi chuyện — kho câu thường xanh và sự kiện có lịch
 
-Status: DONE
+Status: IN_PROGRESS
 Complexity: standard
 Story-Class: standard
 Implementation Lane: mobile-only (Tech Lead chốt: toàn bộ bề mặt nằm trong
@@ -14,26 +14,38 @@ Design-Screen: `6-moi-chuyen-a-a` (surface `cupid-ch-ng-1`, biến thể ios; xe
   chưa được phán quyết, xem §7 của báo cáo.
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục C.6, D (SC-2),
 F (3c, C1, C7)
+Runtime-Smoke: WAIVED — no phase changes the app startup path (per
+  `review/review-report.md` D-3, 2026-09-24)
 
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`,
       `architecture/contract-summary.md`
-- [x] Implementation (Development) — mobile-dev P1-P4 complete, committed
-      3ff29be43d1e754548767a87246df3e0c1e181a2
-- [x] Review (Reviewer) — Outcome: DEFERRED_ONLY (2026-09-17,
-      `review/review-report.md`). Merged into
-      `codex/REQ-016_solo_stage1_relationship_assistant-integration`
-      (merge `2b5d841f`, re-merged `2406c82e` after the visual-confirm patch).
-      `design-reference-6-moi-chuyen-a-a-ios.png` was produced 2026-09-20 (see
-      `visual-fidelity/visual-fidelity-report.md` §3) and directly eyeballed
-      against `implemented-6-moi-chuyen-a-a-material.png`;
-      `VISUAL_FIDELITY: PASS` confirmed. The report also carries
-      `DESIGN_ANCHOR_ADJUDICATION_REQUIRED: YES` for 6 canvas-vs-spec-text
-      items with no AC backing (§7) — a scope judgment call, not an
-      implementation defect, so it does not block `Status: DONE` (see report
-      §8). Open for a separate Scrum-Master/user decision.
+- [ ] Implementation (Development) — mobile-dev P1-P4 complete, committed
+      3ff29be43d1e754548767a87246df3e0c1e181a2. **Rework round (Design
+      Ruling Log 2026-09-20, "Neo thiết kế") added P5-P7 on the same story
+      branch**: P5 `ae908e93`, P6 `9ab00f48`, P7 `fa9c0ad5` (own scoped
+      tests green, `flutter analyze` 0 error), status-flip doc commit
+      `353c648e` (P7 blocked→DONE, citing `BUG-20260923-001` — pre-existing
+      Drift schemaVersion drift in `test/core/database/`, out of this
+      story's scope). Run
+      `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-005_conversation_starters-mobile-dev`
+      is `status: COMPLETED`, `completion_marker: MOBILE_COMPLETE: YES`.
+- [ ] Review (Reviewer) — P1-P4 DEFERRED_ONLY (2026-09-17,
+      `review/review-report.md`, superseded body of this file) covered ONLY
+      P1-P4 (merge `2b5d841f`, re-merged `2406c82e` after the visual-confirm
+      patch). **P5-P7 rework review returned `Outcome: PATCH_REQUIRED`
+      (2026-09-24, same `review/review-report.md`, now current body)**: P5-P7
+      code itself is correct/in-scope/well-evidenced (all 6 "Neo thiết kế"
+      items implemented, PNGs match), but blocking finding B-1 — this story's
+      own `visual-fidelity/visual-fidelity-report.md` was never updated after
+      the rework and still describes the pre-rework P4 build as current,
+      contradicting what actually shipped. Routed as a **documentation-only**
+      patch to mobile-dev (no code change, no re-capture, no device — see
+      B-1 steps 1-5 in the review report). Deferred D-3 also asks Scrum
+      Master to add `Runtime-Smoke: WAIVED — no phase changes the app startup
+      path` to this file once B-1 lands.
 
 ## Depends On
 - STORY-001 — bản A+ đổi thẳng thành thẻ trong kho chung.

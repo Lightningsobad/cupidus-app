@@ -1,155 +1,155 @@
-# Review Report — STORY-005 Mồi chuyện (compact story review)
+# Review Report: STORY-005 Mồi chuyện — rework P5-P7
 
-Reviewer: Iris-QC · Date: 2026-09-17 · Mode: compact-story-review
-Branch: `codex/REQ-016_solo_stage1_relationship_assistant-STORY-005_conversation_starters`
-Worktree HEAD: `5be5a4df` · Diff baseline used: `b58afbe0` (merge-base with
-`codex/REQ-016_solo_stage1_relationship_assistant-integration`)
+Outcome: PATCH_REQUIRED
 
-Outcome: DEFERRED_ONLY
+- Review type: `full-story-review` (P5-P7 rework only)
+- Scope gate: `review/scope-gate.md` (`SCOPE_GATE_COMPLETE: YES`)
+- Reviewer date: 2026-09-24
+- Diff baseline: `a4386f76` → `1dd4ba01` (`git merge-base --is-ancestor` = YES)
+- P1-P4: out of scope, covered by the approved `Outcome: DEFERRED_ONLY` review
+  dated 2026-09-17 (previous body of this file; cited, not re-litigated)
 
-## Scope Gate
+## 1. Rationale
 
-- Lane: mobile-only, đúng `story_master.md` và `architecture/solution.md` §1
-  Key Discovery 1. Không có lane backend — nhất quán với AC-15/AC-16.
-- Diff chạm 45 đường dẫn: 2 asset pack, 14 file `mobile/lib`, 15 file
-  `mobile/test`, phần còn lại là artifact story. Không file nào nằm ngoài
-  `mobile/` hoặc ngoài thư mục story.
-- `git status` trong worktree sạch; không có PNG của story khác bị ghi đè.
-- **Lệch handoff (không chặn):** `BaseHead: 3ff29be4` trong handoff là commit
-  P4, không phải điểm rẽ nhánh. Diff từ giá trị đó chỉ ra `story_master.md`.
-  Review này dùng merge-base thật `b58afbe0`. Scrum Master nên sửa `BaseHead`
-  trong run file trước vòng review kế tiếp.
-- Không đụng `pubspec.yaml`, không thêm dependency, không thêm route vào shell
-  điều hướng (màn push bằng `MaterialPageRoute` từ ô lối-vào-nhanh).
+The P5-P7 code is correct, in scope, and well evidenced. All six items the user
+adjudicated under "Neo thiết kế" (2026-09-20) are implemented, and the two
+images prove it: I opened `design-reference-6-moi-chuyen-a-a-ios.png` and
+`implemented-6-moi-chuyen-a-a-material.png` and the build matches the canvas on
+every adjudicated item, with no tofu and no layout break.
 
-## Risk Surface → Critical Gate
+One critical gate fails, and it is the gate this particular rework exists for.
+`visual-fidelity/visual-fidelity-report.md` was never updated: it is still the
+P4-dated (2026-09-17) report. It carries `DESIGN_ANCHOR_ADJUDICATION_REQUIRED:
+YES`, and its §6/§7 still describe the pre-rework build as current — "Cài đặt
+theo spec" for the event-block labels (item 5) and the leading `dd/mm` badge
+(item 6b), and "Không ship" for the reason line (item 7). All three shipped.
+Its §8 states the condition explicitly: *"Nếu người dùng chọn đường 1 ở §7, mục
+này phải được mở lại cùng phase rework."* Path 1 was chosen; the report was not
+reopened. `ux/uiux-spec.md` §2/§5 was patched for the same ruling (`06dc96a4`),
+so the omission is this one artifact, not the documentation round as a whole.
 
-| Risk surface (`master-plan.md` §3A) | Gate | Kết quả |
+This is not a style note. `visual-fidelity-report.md` is the artifact the DONE
+gate and the REQ-016 requirement-integration review both read. Left as is, the
+next reader concludes the hero hierarchy, the new labels, the inline date and
+the reason line were not delivered, and that a user ruling is still pending.
+Reviewer rule 12c forbids recording `DEFERRED_ONLY` for a gate that is the
+primary proof of the changed behavior, and for a design-anchor rework that gate
+is exactly this one. The fix is cheap and needs no re-capture: the P7 PNG on
+disk is already the anchor image.
+
+## 2. Blocking findings
+
+### B-1 — stale per-story visual-fidelity evidence (owner: mobile-dev)
+
+- File: `data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-005_conversation_starters/visual-fidelity/visual-fidelity-report.md`
+- Evidence: not present in `git diff --name-only a4386f76` — only the PNG beside
+  it changed. Header still reads `phase P4`, `Date: 2026-09-17`; §7 still lists
+  items 2, 3, 4, 5, 6b, 7 as open adjudication with an "Đang cài" column
+  describing the pre-rework build.
+- Required (no re-capture, no device, no new render):
+  1. Clear `DESIGN_ANCHOR_ADJUDICATION_REQUIRED: YES` → `NO`, recording that
+     path 1 ("Neo thiết kế") was taken and delivered by P5/P6/P7.
+  2. Rewrite §7 as a resolved table: item 2 → P5 `ae908e93`; items 3, 4, 5, 6b →
+     P6 `9ab00f48`; item 7 → P7 `fa9c0ad5`.
+  3. Correct §6 items 5, 6b and 7 so the "Đang cài" statements match the build.
+  4. Re-anchor §1/§4b on the current
+     `implemented-6-moi-chuyen-a-a-material.png` (the P7 capture) and carry over
+     the per-phase eyeball comparisons already written in `test-results.md`
+     ("Kiểm tra thị giác" under P5, P6 and P7), including P7's resolution of the
+     P6 fold limitation via the `ask-skip` tap before capture.
+  5. Record the two remaining unadjudicated canvas deltas below (D-1, D-2) so a
+     later round does not reopen them as a fidelity gap.
+- Keep `VISUAL_FIDELITY: PASS`. I verified the verdict against both images and
+  it is not contradicted — only the body behind it is out of date.
+
+## 3. Adjudication requested by P7
+
+`test-results.md` P7 §"Sửa trôi enum do merge song song" asks the Reviewer to
+rule on two edits inside WriteScope but outside phase §3. Both **ACCEPTED**.
+
+| # | Edit | Ruling |
 |---|---|---|
-| Cổng nhập nội dung R-15c (AC-29) | `starter_content_gate_test.dart` đọc 2 pack thật trên đĩa; 12 `StarterGateRule` đều có ≥1 ca âm | `+38 All tests passed!` — ĐẠT (xem F-1) |
-| Hết-vòng với mọi N (AC-27/AC-28) | `starter_selector_test.dart` tham số hoá N ∈ {1,2,3,4,10,137}, chu kỳ suy ra từ `n ~/ gcd(perPage,n)`; widget test bảng bấm→id với N=2 và N=12 | ĐẠT |
-| Tất định (AC-17) | hai lần gọi cùng đầu vào trả đúng cùng `id`+`text`; `stableContentKey` không dựa `String.hashCode`; domain không gọi `DateTime.now()` | ĐẠT |
-| Không mạng / không AI (AC-15/AC-16) | chạy trọn luồng dưới `HttpClient` ném lỗi nếu bị mở; không import HTTP trong feature tree; không dependency lịch âm | ĐẠT |
-| Ghi thẻ đúng hợp đồng STORY-001 (AC-11/AC-12) | thẻ `status=idea`, `origin=conversationStarter`, `scheduledOn` = ngày sự kiện; bấm hai lần chỉ 1 thẻ; `fromWireValue` vẫn đọc 4 giá trị cũ, giá trị mới append cuối | ĐẠT |
-| Migration Drift 6→7 | 6 test migration; 5 bảng client-owned giữ nguyên hàng qua upgrade; nhánh `if (from < 7)` chỉ `CREATE TABLE`, không `DROP`; 11 điểm hằng số `schemaVersion` sửa cùng commit | ĐẠT |
-| Visual fidelity màn (6) | `VISUAL_FIDELITY: PASS`, ảnh đã mở ra nhìn (dấu tiếng Việt đúng, `content_copy`/`close` không tofu), đối chiếu 13 mục `uiux-spec` §2 | ĐẠT (xem F-3) |
+| 1 | `starter_content_gate.dart`: add `assertiveClaim` as the 7th `StarterGateRule` | Accept — not cosmetic. `_starterRuleFor` uses `firstWhere` with no `orElse`, so a pack carrying an assertive-claim violation threw `StateError` instead of being rejected: a live AC-29 hole. Sibling sweep satisfied (rule 12d): `gift_content_gate.dart` consulted as the pattern, 218 → 266 sibling content-gate tests re-run green. |
+| 2 | `calendar_event_service_test.dart:390`: frozen-length → `take(5)` frozen-prefix comparison | Accept — the contract the test defends is the Drift-persisted wire prefix, not the list length. The weaker form still fails on reorder or on moving `conversation_starter`, and it is forward-compatible with STORY-007's additive `nextPlanAfterDate`. |
 
-## Build / Analyze / Test Evidence
+## 4. Risk surfaces and critical gates
 
-| Gate | Lệnh | Kết quả |
+| Risk surface | Critical gate | Result |
 |---|---|---|
-| Build | `flutter build apk --debug` (nguồn: runtime registry `mobile-app.buildCommand`) | `✓ Built .../app-local-debug.apk` 51.9s |
-| Static analysis | `flutter analyze lib test` | exit 1, **0 error**, 35 warning, 198 info. Nền repo phi-zero có sẵn (đã xác lập ở các story trước); 0 error là gate đúng. Không warning nào rơi vào file của story |
-| Analyze thu hẹp | `flutter analyze --no-fatal-infos --no-fatal-warnings` trên file đã đụng (P1, P2, P3) | `No issues found!` (P1, P2); P3 còn 4 `info` thuộc nhóm lint có sẵn, 0 error/warning |
-| Unit/widget | P1 `+38`, P2 `+13`, P3 `+41`, P4 `+103 ~1` | tất cả xanh |
-| Hồi quy | `test/core/database + activity_cards + conversation_starters` `+346 ~2`; `conversation_starters + activity_cards + gift_ideas + context_notebook` `+508 ~8` | xanh, skip là nợ có sẵn |
-| Capture thị giác | `conversation_starters_screen_test.dart --dart-define=CAPTURE_VISUALS=true` | `+19: All tests passed!` |
+| Typed contract (`CalendarEvent` +2 optional keys, `StarterGateRule` +4 values) | targeted gate + service tests | PASS — `starter_content_gate_test` `+48`, `calendar_event_service_test` `+24` |
+| Content-invariant gate (AC-29) | negative case per new rule, ship pack clean | PASS — 3 new rules each exercised; `violations.isEmpty` on the shipped pack, 6 of 8 events carry a reason, 2 deliberately carry neither key |
+| Mobile interaction (hero/secondary, CTA, refresh disc) | widget tests + static analysis | PASS — screen suite `+33`; `flutter analyze lib test` 0 error, 0 new diagnostic on touched files |
+| Mobile navigation / discoverability (12e1) | entry point verified in code | PASS — `activity_card_hub_view.dart:313` `QuickEntryCell.conversationStarters` → `openConversationStartersScreen`; discoverable hub cell, not URL-only. See D-3 for the missing evidence heading. |
+| Design fidelity, mobile lane (12e2/12e3) | both images opened, verdict checked | **FAIL** — see B-1. Images themselves are real, correct screen, correct `Design-Screen: 6-moi-chuyen-a-a`, no tofu, no error frame. |
+| Local storage / offline (AC-15/AC-16) | no network path added | PASS — new data rides the existing static asset pack; no dependency, no `pubspec.yaml` change |
+| Persistence / schema | Drift untouched | PASS — `git diff 9ab00f48 -- mobile/lib/core/database/` empty; `schemaVersion` not touched |
+| App startup / runtime smoke (12g) | startup path unchanged | NOT_APPLICABLE as recorded in `master-plan.md` §4 and P4 evidence. See D-3. |
+| Configuration / setup (12a) | — | NOT_APPLICABLE — no env var, no external integration, no manual step; no `configuration-guide.md` impact |
 
-3 test đỏ ở `test/design_system` được khai là nợ có sẵn. Đã đối chiếu: cả 7+2
-đường dẫn bị tố (`activity_card_detail_screen.dart`,
-`reminder_schedule_screen.dart`, `skill_profile_screen.dart`,
-`quick_capture_sheet.dart`, `gift_ideas_screen.dart`, `service_locator.dart`,
-màn chat…) **không** nằm trong diff của story. Khai báo nhất quán với diff —
-chấp nhận. Guard này đã bắt đúng một chỗ do P4 gây ra
-(`conversation_starters_screen.dart:204`) và chỗ đó đã sửa.
+Pre-existing reds, both filed and confirmed out of this story's write scope:
+`BUG-20260923-001` (11 `test/core/database/` cases, `schemaVersion` 9 vs
+asserted 7/8) — P7 proved it at BaseHead on a clean detached worktree, which is
+the right standard. `BUG-20260923-002` (3 `conversation_starters` cases) — its
+three assertions are **already fixed on this branch** by P7; they stay red only
+on STORY-007's branch, which lacks P7. See D-4.
 
-## AC Coverage
+## 5. Acceptance traceability
 
-Có bằng chứng trực tiếp: AC-1..AC-9, AC-11..AC-18, AC-20..AC-22, AC-26..AC-30.
-AC-19/AC-23/AC-24 phủ gián tiếp bằng test cấm-chuỗi/cấm-widget của AC-27
-(không `%`, `đã hết`, `còn lại`, `streak`, `chuỗi ngày`, `điểm`; không
-`Checkbox`/`Switch`/`Slider`/progress) cộng với việc không tồn tại đường mạng
-nào — đủ cho compact tier, không cần ca kiểm riêng.
+| AC (verbatim from `requirements/requirements.md`) | Phase | Verdict |
+|---|---|---|
+| AC-2 / AC-3 — copy to clipboard, create no card, keep no saved list | P5, P6 | PASS — one shared `copyStarter`; hero CTA and secondary icon write the same payload; no store added |
+| AC-4 / AC-27 / AC-28 — wrap-around, no "đã hết", no progress indicator, any N ≥ 1 | P5, P6 | PASS — refresh control has no `enabled` flag; N=1/2/12 table; N=1 asserts no placeholder box |
+| AC-12 / AC-14 — converted/dismissed events do not come back; one-tap dismiss | P7 | PASS — `refreshContext` recomputes over `state.events`, never re-calls `visibleEvents`; widget test dismisses `ev-later`, adds a notebook entry, and it stays gone |
+| AC-13 — past events leave silently | (P4) | Unchanged by P5-P7 |
+| AC-15 / AC-16 — no network, no AI | P6, P7 | PASS — reason line is pack sentence + notebook value, no keyword guess, no model |
+| AC-17 — deterministic for the same inputs | P5, P7 | PASS — `resolveEventReason` keys on `stableContentKey('$today\|$eventId')`, the same FNV-1a `StarterSelector` uses, over notebook matches sorted by `id`; hero is element `[0]`, no second selection rule |
+| AC-20 (R-1g) — a starter must end by asking | P7 | PASS, and correctly inverted for the new field: `eventReasonAsksQuestion` uses `starterStructureHitsIn` in reverse because a reason line retells what the reader wrote and must *not* ask. Confirmed against `invariant_terms.dart:209` — the helper fires when text does not end in `?`/`？`, so `.isEmpty` is the right test |
+| AC-29 / AC-30 — runnable gate, content stays data | P7 | PASS — both new keys optional; `reason_context_slot` rejected at parse time when unknown |
+| `uiux-spec.md` §2/§5 | P5-P7 | PASS — patched in `06dc96a4` (Tech Lead/Scrum Master ownership, not the implementer's) |
 
-AC-25 (kiểm duyệt hai lớp SB-123) là quy trình biên tập trước bản build người
-dùng thật, không phải cổng chạy được của story này — đúng nguyên văn AC-25 sau
-khi D-15 tách hai vai trò. Không tính là thiếu bằng chứng.
+Citation correction (D-5): the handoff named "requirements.md AC-1..AC-6". Those
+are `story_master.md`'s own six-item list. The ACs in `requirements.md` that
+actually govern P5-P7 are the rows above; this review checked the verbatim text,
+not the handoff's ids.
 
-## OQ Decisions
+## 6. Deferred findings
 
-- **OQ-3 ĐÃ ĐÓNG 2026-09-06 bằng D-15 → R-15.** Cả ba nhánh đều được tôn trọng:
-  R-15a (hai gói asset có `schema_id` + `id` bền từng mục, không chuỗi nội dung
-  trong Dart/l10n — có test quét `lib/**`), R-15b (không hằng số đếm seed ở đâu;
-  N suy ra từ dữ liệu), R-15c (cổng nhập chạy được làm đỏ suite).
-- **OQ-2** không thuộc story này (STORY-001) — không có dấu vết vi phạm.
-- SB-144/145/146 (trò "đoán") **không** ship — đúng `story_master.md` Out of
-  Scope. Bản B feed tin thật cũng không có phiên bản rút gọn nào (AC-19/BR-7).
+- **D-1 — event block container vs canvas.** The canvas draws the event block as
+  a dashed-border card with a full-width "+ Thêm vào Muốn làm" button; the build
+  uses a thin divider plus a row with a trailing pill and an `×`. Not among the
+  six adjudicated items, and the `×` itself is AC-14-backed, so the row shape is
+  partly AC-driven. Pre-existing from P4, not worsened here. Record it in B-1
+  step 5 rather than reopening it.
+- **D-2 — canvas chrome absent.** Back chevron, status bar and the tab strip
+  ("Câu để nhắn / Tuần này có gì / Đoán thử") are not in the build. "Đoán thử" is
+  SB-144/145/146, explicitly out of scope in `story_master.md`. Record, do not
+  act.
+- **D-3 — evidence headings missing.** `coding-plan/test-results.md` has no
+  `## Entry Point Reachability` and no `## Story Runtime Startup Smoke` heading;
+  smoke is recorded as `NOT_APPLICABLE` in `master-plan.md` §4 and in the P4
+  section instead, and `story_master.md` carries no `Runtime-Smoke: WAIVED` line.
+  I verified the entry point independently in code (§4), and P5-P7 change no
+  startup path, so this is hygiene, not a behavioral gap. Scrum Master should add
+  `Runtime-Smoke: WAIVED — no phase changes the app startup path` to
+  `story_master.md` so the DONE gate reads it from the file the rule names.
+- **D-4 — `BUG-20260923-002` will likely resolve on merge.** Its three
+  assertions are green on this branch. Before dispatching a bug-fixer, re-verify
+  against `codex/REQ-016_solo_stage1_relationship_assistant-integration` after
+  STORY-005 merges; a fixer sent now would find nothing to fix here and may
+  re-break P7's deliberate `take(5)` prefix form.
+- **D-5 — handoff AC ids.** See §5.
+- **D-6 — cross-enum wire coupling.** `resolveEventReason` matches notebook
+  entries with `entry.kind.wireValue == slot.wireValue`. If `NotebookKind` and
+  `StarterContextSlot` wire values ever diverge, the reason line disappears
+  silently instead of failing. Same coupling `StarterSelector` already carries,
+  so no new risk, but no test pins the mapping itself.
 
-## Findings
+## 7. State recommendation
 
-**F-1 — DEFERRED (AC-29, mệnh đề "nội dung do CMS ngoài repo cấp").**
-`validateStarterPacks` chỉ được gọi từ `starter_content_gate_test.dart`; đường
-nạp runtime (`ConversationStartersCubit.load` → `ContentPackageLoader`) chỉ
-parse cấu trúc, không chạy cổng bất biến. Với build hiện tại điều này **không
-phải lỗi**: AC-15/AC-16 cấm mọi nguồn nội dung ngoài asset ship kèm, nên không
-tồn tại đường CMS để lọt qua, và `validateStarterPacks` là hàm thuần nhận
-`ContentPackage` nên đã gọi được trên bất kỳ nguồn nào. Ghi lại để story/
-requirement nào mở nguồn nội dung ngoài repo phải nối cổng này vào đường nạp
-trước khi render. Không chặn STORY-005.
-
-**F-2 — DEFERRED, cần phán quyết cấp requirement (AC-18).**
-`master-plan.md` §6 note A-1 chốt rằng AC-18 ("ngày lịch âm **tính** tất định
-trên thiết bị") được thoả bằng ngày dân dụng chốt sẵn trong
-`calendar_events.v1.json` (`"calendar": "lunar"` chỉ là provenance), theo quy
-ước `occasions.v1.json` STORY-001 đã ship. Đọc theo nghĩa đen, AC-18 đòi một
-**phép tính**; cài đặt hiện tại thoả "tất định" và "không lấy từ dịch vụ ngoài"
-nhưng không thoả "tính". Đây là lệch câu chữ AC, không phải lỗi cài đặt — thuộc
-Design/Requirement Ruling của Product Owner, cùng hạng với D-series trong
-`req_master.md` `## Design Ruling Log`. Hệ quả dữ liệu: gói chỉ ship 2 lần xuất
-hiện mỗi sự kiện (tới 2028), cạn lịch sau đó là thuộc tính dữ liệu theo AC-30.
-
-**F-3 — DEFERRED, 8 điểm `DESIGN_SPEC_CONFLICT` chờ ruling.**
-`visual-fidelity/visual-fidelity-report.md` §6 ghi 8 điểm canvas `(6) Mồi
-chuyện A / A+` lệch `uiux-spec.md`/`requirements.md`. Mobile-dev đã làm đúng
-việc: ship theo spec/AC và **không** tự sửa về phía canvas. Phân loại lại để
-Scrum Master định tuyến:
-- Điểm 1 (tab "Đoán thử", "Tuần này có gì"), 4 (dòng trấn an), 6 (nút bỏ qua),
-  7 (dòng lý do), 8 (ô hỏi tại chỗ): **AC quyết định, đã đóng.** Không cần
-  ruling — SB-144/145/146 hoãn, bản B out of scope, AC-27 cấm gợi ý "còn lại",
-  AC-14 và AC-6 đòi đúng thứ đã ship.
-- Điểm 2 (hero + cặp phụ vs 3 dòng ngang hàng), 3 (nhãn "Chép để nhắn" + icon
-  `refresh`), 5 (nhãn khối/nút): **thuần spec-vs-canvas, chưa có AC nào chạm
-  tới.** Tiền lệ D-1/D-2/D-3/D-18/D-19 trong `req_master.md` là "Design canvas
-  thắng" khi user chọn anchor-on-design. Ba điểm này cần một phán quyết của
-  user/PO chứ không phải của Reviewer, và nếu canvas thắng thì đó là phạm vi
-  implementation mới, không phải lỗi của STORY-005.
-- `Design-Screen: 6-moi-chuyen-a-a` là **suy ra**, chưa liệt kê xác nhận, vì
-  trình dựng canvas trả `VISUAL_RUNTIME_MISSING` (install defect của runtime,
-  ngoài lane Mobile). Cần DevOps cấp lại trình dựng rồi xác nhận id; không phải
-  nợ của Mobile.
-
-**F-4 — DEFERRED, sai trích dẫn artifact trong tài liệu.**
-`coding-plan/test-results.md` mục P4 khai nhãn "Xem câu khác" đến từ **cả**
-`ux/uiux-spec.md` §2.2 **và** `requirements/requirements.md`. Grep cho đúng một
-match trong toàn bộ thư mục story — nhãn chỉ nằm ở `uiux-spec.md`. Quyết định
-ship không đổi (uiux-spec là artifact ràng buộc của story); chỉ sửa câu trích
-dẫn khi có dịp chạm vào file này. Không chặn.
-
-## Residual Risks
-
-- Gói sự kiện cạn lịch sau 2028; AC-30 đã đặt đó là thuộc tính dữ liệu, nhưng
-  chưa có cơ chế nhắc cập nhật gói. Thuộc vận hành nội dung, không thuộc story.
-- `handledEventIds` không phân biệt `converted` và `dismissed`; P4 hiện không
-  cần, nhưng STORY-007 (đọc lại kho mồi) có thể cần — đã ghi rõ trong ghi chú
-  hợp đồng P2→P3.
-- Badge ngày chỉ hiện `dd/mm`, không năm. Với gói hiện tại mọi sự kiện đều
-  trong vòng ~16 tháng nên không mơ hồ; nếu gói mở rộng nhiều năm thì cần xem
-  lại theo AC-10.
-
-## Recommendation
-
-Story đạt cổng review. Mọi risk surface được `master-plan.md` §3A đặt tên đều
-có cổng tới hạn tương ứng chạy xanh, có build gate và analyze gate từ runtime
-registry, và không có phát hiện nào cần vá code trước khi merge. Bốn phát hiện
-đều là nợ hoãn được: F-1 là ràng buộc cho story mở nguồn CMS, F-2 và F-3 cần
-phán quyết cấp requirement của Product Owner/user, F-4 là đính chính câu chữ.
-
-Đề nghị Scrum Master:
-1. Cho phép merge story branch vào `codex/REQ-016_solo_stage1_relationship_assistant-integration`.
-2. Sửa `BaseHead` trong run file STORY-005 sang merge-base thật.
-3. Đưa F-2 và các điểm 2/3/5 của F-3 vào hàng đợi Design/Requirement Ruling của
-   REQ-016; không mở lại trước khi có quyết định của user.
-4. Ghi `VISUAL_RUNTIME_MISSING` thành việc của DevOps để xác nhận
-   `Design-Screen:` và dựng lại được ảnh design reference.
-
-REVIEW_SLICE_COMPLETE: NOT_APPLICABLE (compact tier, không chia slice)
+- Uncheck `Implementation (Development)`; leave `Review (Reviewer)` unchecked.
+- Story status → `IN_PROGRESS`.
+- Route B-1 to `mobile-dev` as a documentation-only pass inside
+  `STORY-005_conversation_starters/visual-fidelity/`. No code change, no
+  re-capture, no device. Everything it needs is already on disk.
+- On the re-review: verify B-1 only. §3, §4 and §5 above stand and do not need
+  re-running.

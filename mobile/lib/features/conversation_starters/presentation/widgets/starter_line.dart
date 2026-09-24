@@ -58,30 +58,58 @@ class StarterLine extends StatelessWidget {
             ),
           ),
           const SizedBox(width: CupidSpacing.sm),
-          Semantics(
-            button: true,
-            label: starterText(context, 'Sao chép', 'Copy'),
-            child: InkWell(
-              key: Key('starter_line_copy_${starter.id}'),
-              onTap: () async {
-                await Clipboard.setData(ClipboardData(text: starter.text));
-                onCopied();
-              },
-              customBorder: const CircleBorder(),
-              child: const SizedBox(
-                width: kStarterCopyTapTarget,
-                height: kStarterCopyTapTarget,
-                child: Center(
-                  child: CupidIcon(
-                    CupidIcons.contentCopy,
-                    variant: CupidIconVariant.line,
-                    size: CupidSpacing.lg,
-                  ),
-                ),
-              ),
+          StarterCopyButton(starter: starter, onCopied: onCopied),
+        ],
+      ),
+    );
+  }
+}
+
+/// Writes [starter] to the clipboard, then fires [onCopied].
+///
+/// The one copy behaviour on this screen, shared by the secondary lines' icon
+/// control and the hero card's solid CTA: both write the same payload, create
+/// no card and keep no list (AC-2/AC-3). Only the affordance differs.
+Future<void> copyStarter(RenderedStarter starter, VoidCallback onCopied) async {
+  await Clipboard.setData(ClipboardData(text: starter.text));
+  onCopied();
+}
+
+/// The copy control a secondary starter line gets.
+///
+/// Keeps the `starter_line_copy_<id>` key the hero's CTA also carries, so a
+/// caller asking for "the copy control of this starter" finds one either way.
+class StarterCopyButton extends StatelessWidget {
+  const StarterCopyButton({
+    super.key,
+    required this.starter,
+    required this.onCopied,
+  });
+
+  final RenderedStarter starter;
+
+  final VoidCallback onCopied;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: starterText(context, 'Sao chép', 'Copy'),
+      child: InkWell(
+        key: Key('starter_line_copy_${starter.id}'),
+        onTap: () => copyStarter(starter, onCopied),
+        customBorder: const CircleBorder(),
+        child: const SizedBox(
+          width: kStarterCopyTapTarget,
+          height: kStarterCopyTapTarget,
+          child: Center(
+            child: CupidIcon(
+              CupidIcons.contentCopy,
+              variant: CupidIconVariant.line,
+              size: CupidSpacing.lg,
             ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -3,10 +3,10 @@ import '../../../core/content/invariant_terms.dart';
 import '../../activity_cards/domain/activity_type.dart';
 import 'starter_content.dart';
 
-/// What a conversation-starter pack can break. The first six pair by wire value
-/// with [InvariantRule], so the rules every package family is measured against
-/// stay in `core/content/invariant_terms.dart` and this enum only names them
-/// (D-15). The rest are this family only.
+/// What a conversation-starter pack can break. The first seven pair by wire
+/// value with [InvariantRule], so the rules every package family is measured
+/// against stay in `core/content/invariant_terms.dart` and this enum only names
+/// them (D-15). The rest are this family only.
 enum StarterGateRule {
   flattery('flattery'),
   percentDisplay('percent_display'),
@@ -14,12 +14,16 @@ enum StarterGateRule {
   scoreOrRatio('score_or_ratio'),
   recipientBehaviour('recipient_behaviour'),
   manipulativeTone('manipulative_tone'),
+  assertiveClaim('assertive_claim'),
   missingQuestionEnding('missing_question_ending'),
   contextSlotMismatch('context_slot_mismatch'),
   valueTokenMismatch('value_token_mismatch'),
   emptyEventDates('empty_event_dates'),
   malformedEventDate('malformed_event_date'),
-  unknownActivityType('unknown_activity_type');
+  unknownActivityType('unknown_activity_type'),
+  eventReasonSlotMismatch('event_reason_slot_mismatch'),
+  eventReasonTokenMismatch('event_reason_token_mismatch'),
+  eventReasonAsksQuestion('event_reason_asks_question');
 
   const StarterGateRule(this.wireValue);
 
@@ -62,6 +66,12 @@ List<StarterViolation> validateStarterPacks({
     violations.addAll(
       _displayViolations(calendarEvents.id, event.id, event.name),
     );
+    final String? reasonTemplate = event.reasonTemplate;
+    if (reasonTemplate != null) {
+      violations.addAll(
+        _displayViolations(calendarEvents.id, event.id, reasonTemplate),
+      );
+    }
     violations.addAll(_eventViolations(calendarEvents.id, event));
   }
 
@@ -172,6 +182,54 @@ Iterable<StarterViolation> _eventViolations(
       rule: StarterGateRule.unknownActivityType,
       detail: 'activity_type "$rawType" is not one of the shipped activity '
           'types',
+    );
+  }
+
+  yield* _eventReasonViolations(packageId, event);
+}
+
+Iterable<StarterViolation> _eventReasonViolations(
+  String packageId,
+  CalendarEvent event,
+) sync* {
+  final String? template = event.reasonTemplate;
+
+  if ((template == null) != (event.reasonContextSlot == null)) {
+    yield StarterViolation(
+      packageId: packageId,
+      itemId: event.id,
+      rule: StarterGateRule.eventReasonSlotMismatch,
+      detail: 'a reason line needs both reason_template and '
+          'reason_context_slot, and this event declares only one of them',
+    );
+  }
+
+  if (template == null) {
+    return;
+  }
+
+  final int tokenCount = starterValueToken.allMatches(template).length;
+  if (tokenCount != 1) {
+    yield StarterViolation(
+      packageId: packageId,
+      itemId: event.id,
+      rule: StarterGateRule.eventReasonTokenMismatch,
+      detail: 'a reason_template must carry "$starterValueToken" exactly once, '
+          'and this one carries it $tokenCount times',
+    );
+  }
+
+  // Inverted on purpose: the shared helper reports a line that does *not* end
+  // by asking, and a reason line is the one display string that must not ask —
+  // it retells what the reader already wrote down (R-1g governs
+  // `StarterItem.text` only).
+  if (starterStructureHitsIn(template).isEmpty) {
+    yield StarterViolation(
+      packageId: packageId,
+      itemId: event.id,
+      rule: StarterGateRule.eventReasonAsksQuestion,
+      detail: 'a reason_template states what the reader recorded, so it must '
+          'not end by asking them something',
     );
   }
 }

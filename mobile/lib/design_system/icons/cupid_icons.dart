@@ -397,6 +397,13 @@ abstract final class CupidIcons {
   /// crossed hammer-and-wrench, distinct from `construction`/0xea3c. REQ-016
   /// STORY-004: the leading glyph on the screen (5) provenance explainer band.
   static const IconData handyman = IconData(0xf10b, fontFamily: fontFamily);
+
+  /// `refresh` glyph, confirmed in the bundled font's cmap at 0xe5d5 (single
+  /// codepoint, no alias; `autorenew`/0xe028, `sync`/0xe627, `cached`/0xe86a
+  /// and `restart_alt`/0xf053 are distinct glyphs — do not substitute any of
+  /// them). REQ-016 STORY-005: the "xem câu khác" disc beside the Mồi chuyện
+  /// hero CTA.
+  static const IconData refresh = IconData(0xe5d5, fontFamily: fontFamily);
 }
 
 /// Third-party sign-in brand marks.

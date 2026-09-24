@@ -410,3 +410,376 @@ story khác, **chưa** được liệt kê xác nhận bằng trình dựng.
 **P4 COMPLETE.** No blocker. Không đổi `pubspec.yaml`, không thêm phụ thuộc,
 không đổi schema Drift, không thêm route vào shell điều hướng (màn được push
 bằng `MaterialPageRoute` từ ô lối-vào-nhanh).
+
+## P5 — Phân cấp hero/phụ (ruling 2026-09-20 mục 2), 2026-09-20
+
+Worktree: `story-REQ-016_solo_stage1_relationship_assistant-STORY-005_conversation_starters`.
+BaseHead: `06dc96a489a6fcb734690cd26ad113c2ae725a0f`.
+
+### Lệnh đã chạy
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `flutter test test/features/conversation_starters/conversation_starters_screen_test.dart --reporter failures-only` | `+24 ~1: All other tests passed!` (1 skipped = test chụp ảnh, tắt khi không có `CAPTURE_VISUALS`) |
+| `flutter test <file trên> --plain-name "phân cấp hero/phụ" --reporter expanded` | `+6: All tests passed!` — liệt kê đủ 6 case mới |
+| `flutter test test/features/conversation_starters --reporter failures-only` | `+106 ~1 -3` — 3 đỏ **có sẵn từ trước**, xem mục dưới |
+| `flutter test <file trên> --dart-define=CAPTURE_VISUALS=true --reporter failures-only` | `+25: All tests passed!`, ảnh đã ghi |
+| `flutter analyze lib/features/conversation_starters/presentation test/.../conversation_starters_screen_test.dart` | 7 issues, **toàn bộ là `info` có sẵn trong `conversation_starters_cubit.dart`**; 0 issue ở file đã chạm |
+| `flutter analyze lib test` | 0 error, 35 warning, 230 info — đúng baseline repo, không có mục nào ở file đã chạm |
+
+### Ba test đỏ là baseline của nhánh, không do P5
+
+`starter_content_gate_test.dart` (2 case) và `calendar_event_service_test.dart`
+(1 case) so khớp danh sách thành viên enum và đang thiếu ba giá trị mà story
+khác đã thêm: `assertive_claim` (`InvariantRule`),
+`missing_question_ending` (`StarterGateRule`), `compatibility_lookup`
+(`ActivityCardOrigin`). `git log -S` cho thấy cả ba đã có mặt ở commit tổ tiên
+của BaseHead (`47c52888` STORY-009, `6d59a6d0`/`406c0bc6` STORY-010), tức là đỏ
+trước khi phase này bắt đầu. Diff của P5 gồm đúng 4 file (3 widget/screen + 1
+test) và **không** file nào trong hai test đỏ import chúng — kiểm bằng danh sách
+`import` của cả hai file. Việc sửa chúng thuộc lane sở hữu enum, không phải P5.
+
+### Bảng N → (thẻ hero, câu phụ, caption "CÙNG CHỦ ĐỀ")
+
+| N (số mục trong gói) | thẻ hero | câu phụ (`StarterLine`) | caption `CÙNG CHỦ ĐỀ` |
+| --- | --- | --- | --- |
+| 1 | 1 | 0 | không |
+| 2 | 1 | 1 | có |
+| 12 | 1 | 2 | có |
+
+Ở N = 1 còn khẳng định không có `starter_line_placeholder`, không có hộp rỗng,
+và `_starterIdsOnScreen` dài đúng 1 (AC-28).
+
+### Bao phủ acceptance criteria của phase
+
+| Tiêu chí §4 | Cách phủ |
+| --- | --- |
+| đúng một hero + tối đa hai câu phụ | `kho đủ dài: một thẻ hero + hai câu phụ dưới caption (N = 12)` |
+| N = 1 không caption, không hộp rỗng | `N = 1: chỉ thẻ hero, không caption "CÙNG CHỦ ĐỀ", không ô rỗng` |
+| N = 2 một hero + đúng một phụ | `N = 2: một hero + đúng một câu phụ` |
+| bấm quá số mục vẫn có hero, nút không tắt | `bấm quá số mục thì hero luôn còn chữ (N = 2)` + test AC-27 sẵn có (`button.onPressed` khác null ở cả 6 lần đo) |
+| cùng (ngày, sổ tay, page) ra cùng hero | `cùng (ngày, sổ tay, page) ra cùng một hero qua hai lần dựng (AC-17)`; và hero được khẳng định bằng `expectedRound(12, 0).first` |
+| không bộ đếm/phần trăm/"đã xem hết"/nút lưu | test quét chuỗi cấm sẵn có, chạy lại xanh với bố cục mới |
+| không khoá ARB mới | hai caption đi qua `starterText(context, vi, en)`; `starter_content_gate_test.dart` không đổi |
+
+Thứ tự không đổi: hero là phần tử `[0]` của danh sách `StarterSelector` trả về.
+Helper `_starterIdsOnScreen` đọc hero trước rồi tới các `StarterLine`, nên các
+bảng xoay vòng AC-27 giữ nguyên ý nghĩa và vẫn xanh.
+
+### Kiểm tra thị giác
+
+Đã chụp lại `visual-fidelity/implemented-6-moi-chuyen-a-a-material.png` và **mở
+ra nhìn bằng mắt**. Thẻ hero có caption `CÂU HÔM NAY` (mint, IN HOA, giãn chữ)
+trên câu hero cỡ `cardTitle` đậm hơn hẳn hai câu phụ; dưới đó caption
+`CÙNG CHỦ ĐỀ` muted rồi hai hộp bo góc nền `colorSurfaceAlt` — đúng tương quan
+canvas `design-reference-6-moi-chuyen-a-a-ios.png`. Dấu tiếng Việt lên đủ ở cả
+`Mồi chuyện`, `CÂU HÔM NAY`, `CÙNG CHỦ ĐỀ`, `Xem câu khác`; glyph `content_copy`
+rasterise đúng, không ô tofu.
+
+Khoảng cách còn lại so với canvas — nút đặc `Chép để nhắn`, icon `refresh`, dòng
+trấn an dưới thẻ hero, nhãn khối sự kiện, badge ngày — là mục 3/4/5/6b/7, thuộc
+P6/P7, cố ý **không** làm ở phase này. Nút copy trên hai câu phụ được **giữ**
+theo §3 của phase file (canvas không vẽ, nhưng gỡ affordance ngoài phạm vi
+ruling là tự phân xử).
+
+`git status` sau khi chụp: chỉ 4 file mã/test của phase và đúng một PNG của
+story này thay đổi; không đụng PNG visual-fidelity của story khác.
+
+### Result
+
+**P5 COMPLETE.** No blocker. Không đổi `pubspec.yaml`, không thêm phụ thuộc,
+không đổi schema Drift, không thêm khoá ARB, không đổi `RenderedStarter` hay
+`StarterSelector`.
+
+## P6 — Nhãn, affordance và ngày inline (ruling 2026-09-20 mục 3, 4, 5, 6b), 2026-09-20
+
+Worktree: `story-REQ-016_solo_stage1_relationship_assistant-STORY-005_conversation_starters`.
+BaseHead: `ae908e93b87e399f0e9da55deb45bc791dd16c39`.
+
+### Lệnh đã chạy
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `flutter test test/features/conversation_starters/event_date_label_test.dart` | `+5: All tests passed!` |
+| `flutter test test/features/conversation_starters/conversation_starters_screen_test.dart -r github` | `29 tests passed, 1 skipped` (skip = test chụp ảnh, tắt khi không có `CAPTURE_VISUALS`) |
+| `flutter test test/features/conversation_starters/conversation_starters_screen_test.dart --dart-define=CAPTURE_VISUALS=true -r github` | `30 tests passed` — ảnh đã ghi |
+| `flutter test <5 file còn lại của thư mục> test/design_system -r github` | xanh, trừ đúng 3 đỏ baseline mô tả dưới |
+| `flutter analyze lib test` | 265 issues: **0 error**, 35 warning, 230 info — trùng khít baseline ghi ở P5; **0 chẩn đoán ở cả 7 file đã chạm** |
+
+Exit code của `flutter analyze` là 1 theo đúng baseline nhánh (info/warning có sẵn);
+gate của phase là zero **error** và không warning mới ở file đã chạm — cả hai đạt.
+
+### Ba test đỏ vẫn là baseline của nhánh, không do P6
+
+Y hệt danh sách P5 đã lập: `starter_content_gate_test.dart` (2 case, dòng 471 và
+498) và `calendar_event_service_test.dart` (1 case, dòng 390) so khớp danh sách
+thành viên enum và thiếu `assertive_claim` (`InvariantRule`),
+`missing_question_ending` (`StarterGateRule`), `compatibility_lookup`
+(`ActivityCardOrigin`). `git diff --name-only ae908e93` của P6 trả đúng 5 file
+sửa + 2 file mới, **không** file nào trong đó, và cũng không file nào trong đồ
+thị import của hai test đỏ. Sửa chúng thuộc lane sở hữu enum.
+
+### Bảng nhãn cũ → nhãn mới (4 chuỗi của ruling)
+
+| Mục ruling | Nhãn cũ | Nhãn mới |
+| --- | --- | --- |
+| 3 | text button `Xem câu khác` (chữ, trên thân màn) | nút đặc `Chép để nhắn` + nút tròn icon `refresh` (nhãn `Xem câu khác` chuyển vào `Semantics`) |
+| 4 | *(không có)* | `Câu này nhắn liền, không cần lưu. Quay lại là có câu khác.` |
+| 5 | tiêu đề `Sự kiện có lịch` | `CÓ LỊCH SẴN · RỦ ĐI ĐƯỢC` |
+| 5 | pill `Thêm vào kho của tôi` | `Thêm vào Muốn làm` |
+| 6b | badge `dd/mm` riêng (`starter_event_date_<id>`) | ngày gộp vào dòng tên: `<tên> — thứ Bảy 16/08` |
+
+Mục 6b dùng dạng **tuyệt đối** (`thứ Bảy 16/08`), không phải dạng tương đối
+(`thứ Bảy này`): `eventDateLabel` là hàm thuần của chuỗi `YYYY-MM-DD` mà gói
+ship, không đọc đồng hồ, nên nhãn không thể lệch khỏi ngày thẻ đang mang.
+
+### Codepoint của `CupidIcons.refresh` và nguồn tra
+
+`0xe5d5`. Tra bằng `fontTools` `getBestCmap()` chạy thẳng trên font đang bundle
+`mobile/assets/fonts/MaterialSymbolsRounded-Variable.ttf` — không lấy từ trí nhớ
+(tiền lệ D-20/R8-F-2). Cmap xác nhận đây là codepoint đơn, không alias;
+`autorenew`/`0xe028`, `sync`/`0xe627`, `cached`/`0xe86a`, `restart_alt`/`0xf053`
+là glyph khác, đã ghi trong doc comment của token để không ai thay bừa.
+
+### Bao phủ acceptance criteria của phase
+
+| Tiêu chí §4 | Cách phủ |
+| --- | --- |
+| hero có đúng một nút đặc + một nút tròn, hết text button | `thẻ hero có nút đặc "Chép để nhắn" kèm icon copy`, `nút tròn refresh thay text button "Xem câu khác"` (`find.text('Xem câu khác')` findsNothing) |
+| nút đặc ghi clipboard, toast, không tạo thẻ | `copy một câu (AC-2, AC-3)` chạy lại xanh trên affordance mới |
+| bấm nút tròn quá số mục vẫn ra câu, không bao giờ tắt | `bấm nhiều lần hơn số câu vẫn luôn ra câu, nút không bao giờ tắt (N = 2)` — đọc `InkWell.onTap` của `starter_next_round` |
+| `Semantics` nhãn `Xem câu khác`, vùng chạm ≥44pt | cùng test; khẳng định `properties.button == true`, `properties.label` và kích thước ≥ `kStarterCopyTapTarget` |
+| dòng trấn an dưới hàng CTA | `dòng trấn an nằm dưới hàng CTA của thẻ hero` — so `getBottomLeft` của CTA với `getTopLeft` của dòng |
+| nhãn khối sự kiện + pill mới, hành vi không đổi | `khối sự kiện đọc nhãn mới, nhãn cũ biến mất`; `"Thêm vào Muốn làm" tạo thẻ conversationStarter rồi bỏ dòng đi`; `"Bỏ qua" ...` |
+| hết badge riêng, ngày nằm trong dòng tên | `ngày nằm trong dòng tên, không còn badge riêng (ruling 6b)` — `starter_event_date_<id>` findsNothing |
+| ngày khớp `VisibleCalendarEvent.date` | `ngày hiển thị khớp VisibleCalendarEvent.date` — `endsWith(eventDateLabel('2026-10-20'))` |
+| `refresh` render glyph thật, không tofu | mục "Kiểm tra thị giác" dưới |
+| không khoá ARB mới, không chuỗi nội dung vào Dart, không gọi mạng | mọi nhãn đi qua `starterText(context, vi, en)`; `app_vi.arb` không đổi; test cổng nội dung và test "không lời gọi mạng" chạy lại xanh |
+
+Unit `eventDateLabel` phủ bảy thứ trong tuần (2026-08-17 … 2026-08-23), số 0 dẫn
+đầu (`2026-01-05` → `thứ Hai 05/01`), năm nhuận/cuối năm, tính thuần, và từ chối
+chuỗi không phải `YYYY-MM-DD` (`throwsFormatException`).
+
+Hai neo key được **giữ nguyên** để regression P4/P5 không mất điểm bám:
+`starter_line_copy_<id>` chuyển sang nút đặc của hero, `starter_next_round`
+chuyển sang nút tròn. Nút tròn dựng bằng `InkWell` chứ không `IconButton`, nên
+khẳng định sẵn có `expect(find.byType(IconButton), findsNothing)` vẫn đúng.
+Bộ lọc quét chuỗi cấm dạng `x/N` đổi từ "trừ các key badge ngày" sang "trừ các
+key `starter_event_name_`", vì ngày inline giờ nằm trong chính dòng tên.
+
+### Kiểm tra thị giác
+
+Đã chụp lại `visual-fidelity/implemented-6-moi-chuyen-a-a-material.png` và **mở
+ra nhìn bằng mắt**. Glyph `refresh` mới thêm rasterise đúng thành vòng tròn có
+mũi tên trong đĩa viền `colorLine` — **không ô tofu**, đây là rủi ro lớn nhất của
+phase và đã loại trừ bằng mắt chứ không bằng một lần chạy xanh. Nút đặc
+`Chép để nhắn` là dải gradient hồng-tím full-width kèm icon copy, đĩa refresh nằm
+sát phải cùng hàng, dòng trấn an muted nằm ngay dưới — khớp canvas
+`design-reference-6-moi-chuyen-a-a-ios.png`. Dấu tiếng Việt đủ ở `Mồi chuyện`,
+`CÂU HÔM NAY`, `Chép để nhắn`, `Câu này nhắn liền, không cần lưu. Quay lại là có
+câu khác.`, `CÙNG CHỦ ĐỀ`.
+
+Giới hạn đã biết của ảnh này: trong khung reference `415x900`, ô hỏi sổ tay
+(`ContextAskCard`) chiếm nửa dưới màn và đẩy khối sự kiện xuống dưới fold, nên
+mục 5 và 6b **không đối chiếu được bằng mắt** trong ảnh — canvas vẽ khối sự kiện
+ngay dưới hai câu phụ vì canvas không vẽ ô hỏi. Đây là chênh lệch bố cục có sẵn
+từ trước P6 (giống như canvas có tab bar mà màn chưa có), không do phase này gây
+ra; P6 cố ý **không** đụng vào điều kiện hiện của ô hỏi vì nó nằm ngoài ruling và
+ngoài Write Scope. Bằng chứng mục 5/6b vì vậy đến từ bốn test widget liệt kê ở
+bảng trên. Đã thử nạp thêm entry `NotebookKind.event` vào fixture chụp để ô hỏi
+rút lui — không có tác dụng — và đã hoàn tác để fixture chụp không lệch khỏi
+bản gốc.
+
+`git status` sau khi chụp: 5 file mã/test sửa + 2 file mới + đúng một PNG của
+story này; không đụng PNG visual-fidelity của story khác.
+
+### Result
+
+**P6 DONE.** No blocker. Không đổi `pubspec.yaml`, không thêm phụ thuộc, không
+đổi schema Drift, không thêm khoá ARB, không đổi `RenderedStarter`,
+`StarterSelector` hay `VisibleCalendarEvent`. Không đụng
+`phase-P7-event-reason-field.md`.
+
+## P7 — Dòng lý do của sự kiện (ruling 2026-09-20 mục 7), 2026-09-23
+
+Worktree: `story-REQ-016_solo_stage1_relationship_assistant-STORY-005_conversation_starters`.
+BaseHead: `9ab00f489dfff89137cbf6d695a72718e9144c96`.
+
+### Lệnh đã chạy
+
+| Lệnh | Kết quả |
+| --- | --- |
+| `flutter test test/features/conversation_starters/starter_content_gate_test.dart` | `+48: All tests passed!` |
+| `flutter test test/features/conversation_starters/calendar_event_service_test.dart` | `+24: All tests passed!` |
+| `flutter test test/features/conversation_starters/` | `+140 ~1: All other tests passed!` (skip = test chụp ảnh) |
+| `flutter test test/features/conversation_starters/conversation_starters_screen_test.dart --dart-define=CAPTURE_VISUALS=true` | `+33: All tests passed!` — ảnh đã ghi |
+| `flutter test test/core/content/ <6 file content-gate anh em>` | `+218: All tests passed!` |
+| `flutter test test/core/database/` | `+93 -11` — **toàn bộ 11 đỏ là baseline nhánh**, xem mục dưới |
+| `flutter analyze lib/features/conversation_starters test/features/conversation_starters` | 10 issues: **0 error**, 0 warning, 10 info `prefer_initializing_formals` có sẵn trên dòng khởi tạo không hề chạm |
+| `flutter analyze lib test` | **0 error**; 0 chẩn đoán mới ở file đã chạm |
+
+Exit code của `flutter analyze` là 1 theo baseline nhánh; gate của phase là zero
+**error** và không warning mới ở file đã chạm — cả hai đạt.
+
+### `mobile/lib/core/database/` không có một thay đổi nào
+
+`git diff 9ab00f48 --stat -- mobile/lib/core/database/` trả về **rỗng**. Phase này
+không thêm cột, bảng, migration Drift nào và không đụng `schemaVersion` (§1C).
+Dữ liệu mới đi hoàn toàn qua gói nội dung `req016.calendar_events.v1`, giữ nguyên
+`schema_id`, thêm hai khoá **tuỳ chọn** `reason_template` / `reason_context_slot`.
+
+### 11 test đỏ của `test/core/database/` đã đỏ sẵn **tại BaseHead** — chặn P7
+
+`schemaVersion` hiện là **9** sau ba merge anh em (`84a3c4b4` STORY-009,
+`32f6a085` STORY-010, `ba18b8bc` STORY-013), trong khi các test migration cũ vẫn
+khẳng định "lands on v7"/"lands on v8". Đây đúng lớp lỗi va chạm `schemaVersion`
+giữa các nhánh song song.
+
+**Bằng chứng BaseHead (chạy thật, không suy luận).** Dựng worktree tách rời sạch
+tại đúng BaseHead rồi chạy lại:
+
+```
+git worktree add --detach /tmp/p7-basehead-proof 9ab00f489dfff89137cbf6d695a72718e9144c96
+git -C /tmp/p7-basehead-proof rev-parse HEAD   # 9ab00f489dfff89137cbf6d695a72718e9144c96
+git -C /tmp/p7-basehead-proof status --short   # rỗng — cây sạch, không mang thay đổi của P7
+cd /tmp/p7-basehead-proof/mobile && flutter pub get && flutter gen-l10n
+flutter test test/core/database/
+```
+
+Kết quả tại BaseHead: `+93 -11: Some tests failed.` — **trùng khít** con số và
+trùng khít 11 tên test với lần chạy trên cây làm việc của P7. Khẳng định đỏ mẫu,
+nguyên văn:
+
+```
++0 -1: v6 -> v7 lands on v7 with both closure-ledger tables present [E]
+  Expected: <7>
+    Actual: <9>
+  test/core/database/chapter_closure_migration_test.dart 119:7
+```
+
+Worktree tạm đã gỡ bằng `git worktree remove --force` sau khi lấy bằng chứng.
+
+Đường dẫn đỏ, tất cả **ngoài Write Scope** của P7:
+
+- `mobile/test/core/database/calendar_event_state_migration_test.dart` (4 case)
+- `mobile/test/core/database/chapter_closure_migration_test.dart` (2 case)
+- `mobile/test/core/database/relationship_labels_migration_test.dart` (5 case)
+
+Bằng chứng bổ trợ không do P7: diff `core/database` rỗng như mục trên, và
+`grep -rl conversation_starters test/core/database/` không trả file nào — đồ thị
+import của các test đó không chạm file nào P7 sửa. Sửa chúng thuộc lane sở hữu
+Drift; P7 bị cấm mở Drift theo §1C nên không tự vá.
+
+### Sửa trôi enum do merge song song (ngoài phạm vi P7, cần Reviewer phán)
+
+Hai sửa nằm trong Write Scope nhưng **không** thuộc yêu cầu §3 của P7. Cả hai là
+hệ quả của story anh em merge vào nhánh khi STORY-005 đang bay:
+
+1. `starter_content_gate.dart`: STORY-009 (`47c52888`, merge `84a3c4b4`) thêm
+   `assertiveClaim('assertive_claim')` vào `InvariantRule` và cập nhật năm cổng
+   anh em, nhưng bỏ sót cổng của STORY-005. Ngoài hai test đỏ, đây còn là rủi ro
+   `StateError` lúc chạy: `_starterRuleFor` dùng `firstWhere` **không** `orElse`.
+   Đã vá bằng cách soi `gift_content_gate.dart`, chèn `assertiveClaim` làm giá
+   trị thứ bảy, và sửa hai khẳng định "sáu" thành "bảy".
+2. `calendar_event_service_test.dart`: STORY-010 (`32f6a085`) nối
+   `compatibilityLookup` vào `ActivityCardOrigin`, làm đỏ test append-only vốn so
+   khớp danh sách enum đủ 5 phần tử. Hợp đồng mà test đó bảo vệ là *đoạn đầu bị
+   đóng băng* (wire value ghi xuống Drift), nên khẳng định đổi sang so `take(5)`
+   với tiền tố đóng băng — nối thêm vào cuối vẫn xanh, chen vào giữa hoặc đổi chỗ
+   `conversation_starter` vẫn đỏ.
+
+218 test của sáu cổng nội dung anh em chạy lại xanh sau sửa (1).
+
+### Bảng sổ tay → dòng lý do
+
+`resolveEventReason` là hàm thuần, khoá chọn `stableContentKey('$today|$eventId')`
+— cùng phép FNV-1a mà `StarterSelector` dùng, nên AC-17 giữ một quy tắc chứ không
+mọc quy tắc thứ hai.
+
+| Cấu hình sổ tay | Sự kiện | Dòng lý do |
+| --- | --- | --- |
+| rỗng | có `reason_template` + slot `interest` | *(không có dòng)* |
+| 1 mục `interest` = `Cà phê sáng`, 1 mục `event` | có template slot `interest` | `Đúng dòng "Cà phê sáng" trong sổ tay` |
+| 4 mục `interest` | có template slot `interest` | một mục tất định; đảo thứ tự nhập **không** đổi kết quả |
+| 8 mục `interest` | bốn sự kiện id khác nhau | ra nhiều hơn một dòng — không khoá cứng vào một mục |
+| 1 mục `interest` giá trị rỗng | có template slot `interest` | *(không có dòng)* — không dựng ngoặc trống |
+| bất kỳ | **không** khai template | *(không có dòng)* |
+
+### Cổng nhập của gói ship
+
+`validateStarterPacks` thêm ba luật: `event_reason_slot_mismatch` (khai một trong
+hai khoá), `event_reason_token_mismatch` (số `{value}` khác 1),
+`event_reason_asks_question` (dòng lý do kết thúc bằng dấu hỏi — đây là chuỗi
+hiển thị duy nhất **không** được hỏi, nên dùng `starterStructureHitsIn` đảo
+chiều thay vì nhân bản hằng dấu hỏi). Template cũng đi qua `_displayViolations`
+nên bảy luật `InvariantRule` (tâng bốc, phần trăm, chuỗi, điểm/tỉ lệ, hành vi
+người nhận, giọng thao túng, khẳng định chắc nịch) áp lên nó y như tên sự kiện.
+`violations.isEmpty` cho gói ship kèm: sáu trên tám sự kiện mang lý do;
+`tet_duong_lich` và `gio_to_hung_vuong` cố ý không mang khoá nào, chứng minh cặp
+khoá là tuỳ chọn thật.
+
+### AC-12/AC-14 không bị dòng lý do làm sống lại
+
+`refreshContext` dựng lại lý do **trên `state.events`**, không gọi lại
+`visibleEvents`. Gọi lại sẽ dựng dải từ gói và kéo về những dòng vừa "Thêm vào
+Muốn làm" hoặc vừa bỏ qua. Test widget bỏ qua `ev-later`, ghi thêm mục sổ tay,
+gọi `refreshContext`: `ev-upcoming` mọc dòng lý do, `ev-later` vẫn biến mất.
+
+### Kiểm tra thị giác
+
+Đã chụp lại `visual-fidelity/implemented-6-moi-chuyen-a-a-material.png` và **mở
+ra nhìn bằng mắt**. Dòng lý do hiện đúng dưới dòng tên, cỡ `caption`, màu
+`colorTextMuted`: `Đúng dòng "thích đọc sách cũ" trong sổ tay` dưới
+`Sinh nhật bạn ấy — thứ Ba 20/10`. Đây là chỗ dễ ra tofu nhất của phase vì có cả
+dấu ngoặc kép lẫn dấu tiếng Việt: **không ô tofu nào** — `Đ`, `ú`, `ò`, `í`, `ọ`,
+`á`, `ũ`, `ổ` rasterise đủ nét, cặp `"` thẳng nguyên vẹn. `Kỷ niệm quen nhau —
+thứ Hai 02/11` không có dòng lý do, đúng như gói fixture khai. Badge
+`CÓ LỊCH SẴN · RỦ ĐI ĐƯỢC` và icon lịch/`×` vẫn nguyên.
+
+Giới hạn bố cục mà P6 ghi lại đã **gỡ được**: P6 kết luận ô hỏi sổ tay chiếm nửa
+dưới khung `415x900` và đẩy khối sự kiện xuống dưới fold, và ghi rằng nạp thêm
+entry `NotebookKind.event` không có tác dụng (đúng — P7 thử lại, vẫn không). Cách
+hiệu quả là chạm `ask-skip` trước khi chụp: ô hỏi rút lui và khối sự kiện lên
+đúng vị trí canvas vẽ. `_captureAtReferenceViewport` vì thế nhận thêm tham số tuỳ
+chọn `beforeCapture`; khung reference, nền, font và nền tảng Material giữ y
+nguyên. Ảnh giờ đối chiếu được trực tiếp với
+`design-reference-6-moi-chuyen-a-a-ios.png`, gồm cả mục 5 và 6b mà P6 phải để
+lại cho test widget.
+
+`git status` sau khi chụp: đúng 10 file, tất cả nằm trong Write Scope, và **đúng
+một** PNG — của chính story này; không đụng PNG visual-fidelity của story khác.
+
+### Result
+
+**Toàn bộ công việc mã của P7 đã xong và xanh**, nhưng phase **không** được báo
+COMPLETE: `flutter test test/core/database/` — một cổng bắt buộc của §6 — thoát
+khác 0, và một test đỏ thì không bao giờ được miễn.
+
+`BLOCKER: PREEXISTING_TEST_FAILURE`
+
+- Lệnh: `flutter test test/core/database/`
+- Khẳng định đỏ: `Expected: <7> Actual: <9>` tại
+  `test/core/database/chapter_closure_migration_test.dart:119` (và 10 case cùng
+  lớp)
+- Bằng chứng BaseHead: `+93 -11` y hệt trên cây sạch tại
+  `9ab00f489dfff89137cbf6d695a72718e9144c96` — xem mục trên
+- Đường dẫn ngoài phạm vi: `mobile/test/core/database/` và
+  `mobile/lib/core/database/cupid_database.dart` (`schemaVersion` = 9)
+
+Không đổi `pubspec.yaml`, không thêm phụ thuộc, không đổi schema Drift, không đổi
+`schema_id` của gói, không thêm khoá ARB. Hai sửa trôi enum nêu trên nằm ngoài §3
+và cần Reviewer xác nhận.
+
+### Định đoạt (2026-09-23, vòng sau khi mở bug)
+
+`BLOCKED` → `DONE`. Lý do: 11 case đỏ của `test/core/database/` là trôi
+`schemaVersion` có sẵn từ trước, đã mở bug riêng
+`BUG-20260923-001_drift_schema_version_migration_test_lag`, nằm ngoài Write Scope
+của P7 (§1C cấm P7 mở Drift) và không chặn REQ-016. Không đổi một dòng mã nào ở
+vòng này; chạy lại đúng các lệnh scoped ghi ở bảng trên tại HEAD
+`fa9c0ad5e2d196b1415f4773c3478a85c39c61c0` và tất cả vẫn xanh:
+`flutter test test/features/conversation_starters/` → `+140 ~1: All other tests
+passed!`; `flutter test test/core/content/` + bảy cổng nội dung anh em →
+`+266: All tests passed!`;
+`flutter analyze lib/features/conversation_starters test/features/conversation_starters`
+→ 10 issues, **0 error**, 0 warning (đúng 10 `prefer_initializing_formals` có sẵn).
