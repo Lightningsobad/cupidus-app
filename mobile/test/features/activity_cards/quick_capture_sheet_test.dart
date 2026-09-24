@@ -151,6 +151,31 @@ void main() {
       expect(draft.title, isEmpty);
     });
 
+    testWidgets('a caller-supplied origin is stamped on the card', (
+      WidgetTester tester,
+    ) async {
+      final _RecordingRepository repository = _RecordingRepository();
+      await _openSheet(
+        tester,
+        repository,
+        QuickCaptureMode.title,
+        origin: ActivityCardOrigin.dateScript,
+      );
+
+      await tester.enterText(
+        find.byKey(const Key('activity_quick_capture_field')),
+        'Đi xem phim tài liệu',
+      );
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      // STORY-008's exit reuses this one form instead of building a second
+      // capture surface; only the provenance differs from the hub's own "+".
+      expect(repository.drafts.single.origin, ActivityCardOrigin.dateScript);
+      expect(repository.drafts.single.origin.wireValue, 'date_script');
+      expect(repository.drafts.single.title, 'Đi xem phim tài liệu');
+    });
+
     testWidgets('an empty submit writes nothing', (WidgetTester tester) async {
       final _RecordingRepository repository = _RecordingRepository();
       await _openSheet(tester, repository, QuickCaptureMode.title);
@@ -228,8 +253,9 @@ void main() {
 Future<void> _openSheet(
   WidgetTester tester,
   ActivityCardRepository repository,
-  QuickCaptureMode mode,
-) async {
+  QuickCaptureMode mode, {
+  ActivityCardOrigin? origin,
+}) async {
   await tester.pumpWidget(
     _host(
       Scaffold(
@@ -241,6 +267,7 @@ Future<void> _openSheet(
               context,
               mode: mode,
               repository: repository,
+              origin: origin,
             ),
             child: const SizedBox.expand(),
           ),

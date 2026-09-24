@@ -19,11 +19,13 @@ import 'package:flutter_test/flutter_test.dart';
 /// `activity_card_detail_screen_test.dart`, where the card is behind the sheet.
 const Size _designFrame = Size(415, 900);
 
-ActivityCard _card() => ActivityCard(
+ActivityCard _card({
+  ActivityCardStatus status = ActivityCardStatus.scheduled,
+}) => ActivityCard(
   id: 'card-1',
   ownerKey: 'owner-1',
   title: 'xem phim Dune',
-  status: ActivityCardStatus.scheduled,
+  status: status,
   origin: ActivityCardOrigin.manual,
   scheduledOn: '2026-08-15',
   timeOfDaySlot: TimeOfDaySlot.evening,
@@ -148,6 +150,7 @@ void main() {
     WidgetTester tester, {
     required PresetCatalogue catalogue,
     InviteComposerOpener? openComposer,
+    ActivityCardStatus status = ActivityCardStatus.scheduled,
   }) async {
     tester.view.physicalSize = _designFrame;
     tester.view.devicePixelRatio = 1;
@@ -167,7 +170,7 @@ void main() {
 
     pendingSheet = showPrepareActionsSheet(
       hostContext,
-      _card(),
+      _card(status: status),
       catalogue: catalogue,
       openComposer:
           openComposer ??
@@ -196,7 +199,14 @@ void main() {
   testWidgets('does not open at all when the pack holds no preset (AC-27)', (
     WidgetTester tester,
   ) async {
-    await openSheet(tester, catalogue: _catalogue(presetCount: 0));
+    // A card that is not *Đã hẹn ngày*, so the invite row is the only row this
+    // sheet could have had: STORY-008 gives a scheduled card a date script row
+    // that resolves without the invite pack.
+    await openSheet(
+      tester,
+      catalogue: _catalogue(presetCount: 0),
+      status: ActivityCardStatus.idea,
+    );
 
     // Not an empty sheet and not an error screen: no sheet.
     expect(find.byKey(const Key('prepare_actions_sheet')), findsNothing);
@@ -207,7 +217,11 @@ void main() {
   testWidgets('does not open when the pack asset is missing (AC-27)', (
     WidgetTester tester,
   ) async {
-    await openSheet(tester, catalogue: _missingPackCatalogue());
+    await openSheet(
+      tester,
+      catalogue: _missingPackCatalogue(),
+      status: ActivityCardStatus.idea,
+    );
 
     expect(find.byKey(const Key('prepare_actions_sheet')), findsNothing);
     expect(find.byType(BottomSheet), findsNothing);

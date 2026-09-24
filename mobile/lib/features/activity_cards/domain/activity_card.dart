@@ -29,7 +29,8 @@ enum ActivityCardOrigin {
   giftSuggestion('gift_suggestion'),
   conversationStarter('conversation_starter'),
   compatibilityLookup('compatibility_lookup'),
-  nextPlanAfterDate('next_plan_after_date');
+  nextPlanAfterDate('next_plan_after_date'),
+  dateScript('date_script');
 
   const ActivityCardOrigin(this.wireValue);
 

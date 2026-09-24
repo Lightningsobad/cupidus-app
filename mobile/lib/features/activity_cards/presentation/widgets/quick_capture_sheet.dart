@@ -31,10 +31,18 @@ class QuickCaptureSheet extends StatefulWidget {
     super.key,
     required this.mode,
     required this.repository,
+    this.origin,
   });
 
   final QuickCaptureMode mode;
   final ActivityCardRepository repository;
+
+  /// Provenance stamped on the created card. Null keeps the hub's own values
+  /// ([ActivityCardOrigin.manual] / [ActivityCardOrigin.pastedLink]); a caller
+  /// that reached this form from elsewhere passes the value STORY-001 reserved
+  /// for it, so the card records where it came from without that surface
+  /// building a second capture form.
+  final ActivityCardOrigin? origin;
 
   /// Opens the sheet and completes with the created card, or `null` when the
   /// user dismissed it without entering anything.
@@ -42,6 +50,7 @@ class QuickCaptureSheet extends StatefulWidget {
     BuildContext context, {
     required QuickCaptureMode mode,
     required ActivityCardRepository repository,
+    ActivityCardOrigin? origin,
   }) {
     final CupidPlatformTokens platform = context.cupidPlatform;
     return showModalBottomSheet<ActivityCard>(
@@ -54,7 +63,7 @@ class QuickCaptureSheet extends StatefulWidget {
         ),
       ),
       builder: (BuildContext _) =>
-          QuickCaptureSheet(mode: mode, repository: repository),
+          QuickCaptureSheet(mode: mode, repository: repository, origin: origin),
     );
   }
 
@@ -130,12 +139,12 @@ class _QuickCaptureSheetState extends State<QuickCaptureSheet> {
       widget.mode == QuickCaptureMode.link
           ? NewActivityCard(
               title: '',
-              origin: ActivityCardOrigin.pastedLink,
+              origin: widget.origin ?? ActivityCardOrigin.pastedLink,
               sourceLink: trimmed,
             )
           : NewActivityCard(
               title: trimmed,
-              origin: ActivityCardOrigin.manual,
+              origin: widget.origin ?? ActivityCardOrigin.manual,
             ),
     );
     if (!mounted) {
