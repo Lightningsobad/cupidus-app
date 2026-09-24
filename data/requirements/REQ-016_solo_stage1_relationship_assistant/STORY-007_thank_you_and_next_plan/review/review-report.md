@@ -22,7 +22,7 @@ Outcome: PARTIAL_SLICE_ONLY
 | P1 | Activation ledger: persistence, bump `schemaVersion` 9→10, đăng ký `stage1_wipe_registry` | `review/slice-p1-activation-ledger.md` | Không có phát hiện chặn |
 | P2 | Khung khối + điểm gắn: `ThankYouSection` lồng trên `activity_card_detail_screen.dart`, `ThankYouBlockCubit`, phần khung của `thank_you_block.dart` | `review/slice-p2-block-shell-entry-point.md` | Không có phát hiện chặn (7 mục advisory, A3 cần PO xác nhận) |
 | P3 | Danh mục preset "cảm ơn sau buổi hẹn": gói asset mới + luật `decline_door` theo phạm vi danh mục trong `invite_composer/domain/preset_content_gate.dart` | `review/slice-p3-preset-category.md` | Không có phát hiện chặn (5 mục advisory; A3 cần Scrum Master commit hàng ruling `CONTENT_GATE_CATEGORY_COUPLING`) |
-| P4 | Photo attach | chưa trả | — |
+| P4 | Đính ảnh: `attachable_photos.dart`, `photo_attach_section.dart`, khe ảnh + `_selectedPhotos` trong `thank_you_block.dart`, hàm chiếu chỉ-đọc `journalPhotoPathsForOrigin` ở cổng nhật ký | `review/slice-p4-photo-attach.md` | Không có phát hiện chặn (6 mục advisory; A1 handoff dẫn sai AC-4/AC-5 thay vì AC-14..AC-18/BR-8/BR-9; cặp `VISUAL_FIDELITY: PASS` + `DESIGN_SPEC_CONFLICT` cần final-synthesis quyết) |
 | P5 | Next-plan suggestions | chưa trả | — |
 
 ## Scope Gate
