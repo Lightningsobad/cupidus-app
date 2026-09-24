@@ -171,5 +171,11 @@ có**, chỉ khác tham số danh mục. Engine render không được sửa m�
 
 ## 7. Status
 
-- Status: NOT_STARTED
-- Last updated: 2026-09-20
+- Status: DONE
+- Last updated: 2026-09-24
+- Evidence: `coding-plan/test-results.md` mục "P3 — Danh mục preset "cảm ơn sau
+  buổi hẹn""
+- Blocker `CONTENT_GATE_CATEGORY_COUPLING`: RESOLVED theo lối A
+  (`req_master.md` `## Design Ruling Log`, 2026-09-23). Cổng nhập nay nhận
+  `categoryId` từ người gọi; danh mục lời mời giữ nguyên độ chặt, cả hai chiều
+  đều có test.

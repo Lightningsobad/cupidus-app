@@ -484,3 +484,128 @@ so khớp phần 3 và ba delta đã chấp nhận (ba hàng thay vì hai theo A
 `git status --porcelain` trong worktree sau khi chạy: 5 file sửa + 4 file mới,
 tất cả thuộc phase này — **không** PNG visual-fidelity của story khác bị ghi
 đè.
+
+## P3 — Danh mục preset "cảm ơn sau buổi hẹn"
+
+- Date: 2026-09-24
+- BaseHead: `5fa0e972bf21ab1e38bd05d5a381e21d90fa97c5`
+- Result: **PASS**
+
+### Nội dung đã ship
+
+`mobile/assets/data/req016/presets.thank_you_after_date.v1.json`,
+`schema_id` = `req016.presets.v1` (dùng chung, không fork), 10 khung:
+
+| id | frame | decline_door |
+| --- | --- | --- |
+| `thank_you_after_date.gon_gang.v1` | Gọn gàng | – |
+| `thank_you_after_date.tu_cuoi_minh.v1` | Tự cười mình | – |
+| `thank_you_after_date.nhe_nhang.v1` | Nhẹ nhàng | – |
+| `thank_you_after_date.tin_nhan_muon.v1` | Tin nhắn muộn | – |
+| `thank_you_after_date.nhac_chi_tiet.v1` | Nhắc một chi tiết | – |
+| `thank_you_after_date.cho_hen.v1` | Chỗ hẹn hôm nay | – |
+| `thank_you_after_date.thoi_gian.v1` | Cảm ơn thời gian | – |
+| `thank_you_after_date.ke_lai.v1` | Kể lại một câu | – |
+| `thank_you_after_date.ru_tiep_nhe.v1` | Rủ tiếp nhẹ | có (BR-6) |
+| `thank_you_after_date.hen_lan_sau.v1` | Hẹn lần sau | có (BR-6) |
+
+Không có id danh mục nào được viết vào `preset_catalogue.dart`:
+`thankYouAfterDateCategoryId` khai báo trong file của STORY-007
+(`thank_you/presentation/widgets/thanks_section.dart`) và `presetAssetKey()`
+dịch thẳng sang khoá asset (AC-21/AC-29).
+
+### Cổng nội dung theo phạm vi danh mục (lối A, ruling 2026-09-23)
+
+`validatePresetPack` nhận thêm tham số bắt buộc `categoryId` do **người gọi**
+cấp (không đọc từ `package.id`, để một gói không thể tự khai danh mục nhằm
+thoát luật). Danh sách `_declineDoorCategories = {inviteCategoryId}` liệt kê
+danh mục **nợ** lối từ chối, nên danh mục mới không bị nêu tên trong file gate
+(AC-36). Luật "≤ 1 lối từ chối" và "lối từ chối không gắn điều kiện" vẫn áp
+cho mọi danh mục.
+
+Cả hai chiều đều có test đỏ-được:
+
+- `preset_content_gate_test.dart` → *the same pack under a non-invite category
+  is not a violation* (cùng fixture, chiều lời mời vẫn `declineDoorMissing`).
+- `thanks_section_test.dart` → *bộ seed cảm ơn nạp dưới danh mục lời mời thì
+  hỏng ngay*.
+
+### Lệnh đã chạy và kết quả thật
+
+1. Suite của STORY-002 sau khi vá assert theo danh mục:
+
+   ```
+   flutter test test/features/invite_composer --reporter failures-only
+   +123: All tests passed!
+   ```
+
+2. Suite của sub-feature (gồm 24 test mới của P3):
+
+   ```
+   flutter test test/features/activity_cards/thank_you --reporter failures-only
+   +82 ~1: All other tests passed!
+   ```
+
+   (`~1` là test chụp ảnh, chỉ chạy khi có `--dart-define=CAPTURE_VISUALS=true`.)
+
+3. Cổng nhập bắt buộc — fixture vi phạm làm hỏng bản dựng: `%`
+   (`percentDisplay`), câu đo hành vi người kia "đã xem"
+   (`recipientBehaviour`), lối từ chối gắn `{date}` (`declineDoorConditional`),
+   hai lối từ chối trong một khung (`declineDoorMissing`). Bộ seed đang ship
+   chạy qua cổng và trả về rỗng.
+
+4. Xoay vòng và tất định:
+   - N = 10 (bộ seed): `selectFrame(10)` → `frameIndex 0`, `selectFrame(-1)` →
+     `frameIndex 9`, trạng thái vẫn `ready`, không có thông báo "hết khung".
+   - N = 1 (gói tổng hợp): mọi chỉ số `1, 2, -1, 7` đều về `frameIndex 0`.
+   - `renderInvite` gọi hai lần trên cùng thẻ + cùng khung → cùng chuỗi, với cả
+     10 khung.
+   - Thẻ thiếu `scheduledOn`/`location`/`durationMinutes`/`timeOfDaySlot`: cả
+     10 khung ra chuỗi không rỗng và **không** chứa `{` hay `}`.
+
+5. Phân tích tĩnh:
+
+   ```
+   flutter analyze --no-fatal-infos --no-fatal-warnings lib test
+   ```
+
+   0 error. Phần warning/info là nền sẵn có của repo (xem ghi chú baseline của
+   các phase trước); riêng hai file mới của P3 không sinh issue nào.
+
+### Hồi quy toàn bộ app — 3 test đỏ có sẵn, không thuộc P3
+
+```
+flutter test --reporter failures-only
++... -3: Some tests failed.
+```
+
+Cả 3 nằm trong `test/design_system/` và nêu đích danh các file **không** có
+trong diff của phase này:
+
+- `no_fork_guard_test.dart` — 9 vi phạm `Colors.` / `Platform.is` ở
+  `context_notebook`, `compatibility_lookup`, `activity_card_detail_screen`,
+  `quick_capture_sheet`, `your_view_portrait`, `frame_chip_strip`,
+  `gift_ideas`, `service_locator`.
+- `shared_backdrop_occlusion_guard_test.dart` — 3 màn hình tô nền đặc
+  (`chapter_closure`, `activity_card_detail_screen`, `reminders`).
+- `shared_backdrop_occlusion_test.dart` — `chat ... pumpAndSettle timed out`.
+
+`git diff --name-only 5fa0e972` của phase này chỉ gồm `thank_you_block.dart`,
+`preset_content_gate.dart`, hai file test, PNG visual-fidelity của chính
+STORY-007, cùng 3 file mới (asset pack, `thanks_section.dart`,
+`thanks_section_test.dart`) — không file nào bị các guard trên nêu tên, và
+`test/core` (320 test) xanh hoàn toàn.
+
+### Visual fidelity
+
+```
+flutter test test/features/activity_cards/thank_you/thank_you_block_test.dart \
+  --dart-define=CAPTURE_VISUALS=true --reporter failures-only
++19: All tests passed!
+```
+
+Bản chụp `implemented-sb-212-cam-on-chot-viec-ke-tiep-ios.png` nay có phần 1:
+chip viền `Soạn lời cảm ơn` với icon `edit_note`, nằm trên phần 3. Đã soi bằng
+mắt: đủ dấu tiếng Việt, không ô tofu, icon vẽ đúng chứ không phải ô vuông thay
+thế. `git status --porcelain` sau khi chạy: 5 file sửa + 3 file mới, tất cả
+thuộc phase này — **không** PNG của story khác bị ghi đè.

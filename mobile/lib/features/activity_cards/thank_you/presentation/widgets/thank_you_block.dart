@@ -23,6 +23,7 @@ import '../../domain/thank_you_activation_service.dart';
 import '../next_plan_cubit.dart';
 import '../thank_you_block_cubit.dart';
 import 'next_plan_section.dart';
+import 'thanks_section.dart';
 
 /// `mobile/lib/l10n/` is outside this story's write scope, so the block follows
 /// the same file-local bilingual helper the other activity-card surfaces use
@@ -58,11 +59,16 @@ class ThankYouSlots {
 class ThankYouOptions {
   const ThankYouOptions({
     this.service,
+    this.thanks,
     this.nextPlan,
     this.slots = const ThankYouSlots(),
   });
 
   final ThankYouActivationService? service;
+
+  /// Seams for phần 1. Null in production, so the section resolves the
+  /// registered catalogue and opens STORY-002's real composer sheet.
+  final ThanksOptions? thanks;
 
   /// Seams for phần 3. Null in production, so the section reads the device
   /// clock, the shipped occasion pack and the registered card store.
@@ -113,6 +119,8 @@ class _ThankYouSectionState extends State<ThankYouSection> {
   /// any other card never reaches the occasion pack at all.
   NextPlanCubit? _nextPlan;
 
+  bool _thanksAvailable = false;
+
   @override
   void initState() {
     super.initState();
@@ -128,6 +136,15 @@ class _ThankYouSectionState extends State<ThankYouSection> {
     await _cubit.resolve();
     if (!mounted || !_cubit.state.isVisible) {
       return;
+    }
+    if (widget.options?.slots.thanks == null) {
+      final bool available = await thankYouPresetsAvailable(
+        widget.options?.thanks?.catalogue,
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() => _thanksAvailable = available);
     }
     if (widget.options?.slots.nextPlan != null) {
       // A caller that already put its own widget in the slot gets exactly
@@ -178,9 +195,26 @@ class _ThankYouSectionState extends State<ThankYouSection> {
   Widget _block() {
     final ThankYouSlots declared =
         widget.options?.slots ?? const ThankYouSlots();
+    // A category that does not resolve to a pack with presets leaves the slot
+    // itself out of the tree, so the entry point is never a row that opens an
+    // empty sheet (AC-27).
+    final Widget? thanks = declared.thanks ??
+        (_thanksAvailable
+            ? ThanksSection(
+                card: widget.card,
+                options: widget.options?.thanks ?? const ThanksOptions(),
+              )
+            : null);
     final NextPlanCubit? next = _nextPlan;
     if (next == null || declared.nextPlan != null) {
-      return ThankYouBlock(cubit: _cubit, slots: declared);
+      return ThankYouBlock(
+        cubit: _cubit,
+        slots: ThankYouSlots(
+          thanks: thanks,
+          photo: declared.photo,
+          nextPlan: declared.nextPlan,
+        ),
+      );
     }
 
     return BlocProvider<NextPlanCubit>.value(
@@ -192,7 +226,7 @@ class _ThankYouSectionState extends State<ThankYouSection> {
         builder: (BuildContext context, NextPlanState state) => ThankYouBlock(
           cubit: _cubit,
           slots: ThankYouSlots(
-            thanks: declared.thanks,
+            thanks: thanks,
             photo: declared.photo,
             nextPlan: state.suggestions.isEmpty
                 ? null

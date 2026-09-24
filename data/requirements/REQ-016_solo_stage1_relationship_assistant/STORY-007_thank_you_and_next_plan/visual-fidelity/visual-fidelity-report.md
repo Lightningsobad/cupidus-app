@@ -122,18 +122,21 @@ the wording and the dates the app actually ships.
   date to travel with the card, so the date is never absent for a chip that
   exists.
 
-## P2 scope note — the remaining two slots are empty on purpose
+## P2/P3 scope note — one remaining slot is empty on purpose
 
-P2 shipped the frame and its slot contract; P5 fills the third slot. The canvas
-draws the block with all its sections filled, and the two still unfilled are P3
-(`soạn lời cảm ơn`) and P4 (`đính ảnh`), both out of P5's write scope. An
-unfilled slot renders nothing at all — no placeholder row — which is also the
-shape AC-15/BR-9 need for "card with no photo". The canvas has no equivalent
-empty-frame state to compare against, so the following are recorded as
-**not-yet-built, not deltas**:
+P2 shipped the frame and its slot contract, P5 filled the third slot, and P3
+(2026-09-24) has now shipped Section 1 — the thank-you draft card, its
+`Chép để gửi Zalo` gradient CTA and the shuffle button, using the
+category-scoped `decline_door` gate resolved by the 2026-09-23 Design Ruling
+Log (`CONTENT_GATE_CATEGORY_COUPLING`, lối A). The implemented PNG above was
+re-captured after P3 landed, so this report's screen pair already reflects
+Section 1 as built. The canvas draws the block with all its sections filled;
+the one still unfilled is P4 (`đính ảnh`), out of P3's write scope. An unfilled
+slot renders nothing at all — no placeholder row — which is also the shape
+AC-15/BR-9 need for "card with no photo". The canvas has no equivalent
+empty-frame state to compare against, so the following is recorded as
+**not-yet-built, not a delta**:
 
-- Section 1: the thank-you draft card, its `Chép để gửi Zalo` gradient CTA and
-  the shuffle button (P3, blocked on `CONTENT_GATE_CATEGORY_COUPLING`).
 - Section 2: the `Kèm một ảnh tối qua` row with thumbnail, sub-caption and
   chevron (P4, blocked on `JOURNAL_SOURCE_CONTRACT_CLOSED`).
 

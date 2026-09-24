@@ -14,7 +14,9 @@ import 'package:cupid_mobile/features/activity_cards/thank_you/domain/thank_you_
 import 'package:cupid_mobile/features/activity_cards/thank_you/domain/thank_you_activation_service.dart';
 import 'package:cupid_mobile/features/activity_cards/thank_you/presentation/thank_you_block_cubit.dart';
 import 'package:cupid_mobile/features/activity_cards/thank_you/presentation/widgets/thank_you_block.dart';
+import 'package:cupid_mobile/features/activity_cards/thank_you/presentation/widgets/thanks_section.dart';
 import 'package:cupid_mobile/features/conversation_starters/domain/starter_content.dart';
+import 'package:cupid_mobile/features/invite_composer/domain/preset_catalogue.dart';
 import 'package:cupid_mobile/core/database/cupid_database.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:drift/drift.dart' hide isNull;
@@ -145,6 +147,39 @@ NextPlanOptions _shippedNextPlan() => NextPlanOptions(
       repository: _StubRepository(),
     );
 
+/// Serves the shipped thank-you pack off disk instead of `rootBundle`, so phần
+/// 1 resolves the same content the app ships without a composition root.
+class _DiskBundle extends CachingAssetBundle {
+  @override
+  Future<ByteData> load(String key) async {
+    final File file = File(key);
+    if (!file.existsSync()) {
+      throw FlutterError('no asset on disk under "$key"');
+    }
+    return ByteData.view(file.readAsBytesSync().buffer);
+  }
+}
+
+class _MissingBundle extends CachingAssetBundle {
+  @override
+  Future<ByteData> load(String key) async =>
+      throw FlutterError('no asset bundled under "$key"');
+}
+
+/// Phần 1 wired to the shipped pack, with the composer replaced by a no-op: the
+/// sheet itself belongs to STORY-002 and has its own tests.
+ThanksOptions _shippedThanks() => ThanksOptions(
+      catalogue: PresetCatalogue(
+        loader: ContentPackageLoader(bundle: _DiskBundle()),
+      ),
+      openComposer: (
+        BuildContext context,
+        ActivityCard card,
+        String categoryId,
+      ) async =>
+          true,
+    );
+
 Widget _host(
   Widget child, {
   CupidPlatform platform = CupidPlatform.material,
@@ -243,6 +278,7 @@ void main() {
     ActivityCard? card,
     ThankYouSlots slots = const ThankYouSlots(),
     NextPlanOptions? nextPlan,
+    ThanksOptions? thanks,
   }) async {
     await tester.pumpWidget(
       _host(
@@ -253,6 +289,7 @@ void main() {
           thankYou: ThankYouOptions(
             service: service,
             slots: slots,
+            thanks: thanks,
             nextPlan: nextPlan ?? _emptyNextPlan(),
           ),
         ),
@@ -483,6 +520,52 @@ void main() {
     });
   });
 
+  group('phần 1 nối vào khung (P3)', () {
+    testWidgets('bộ nội dung cảm ơn có preset thì khe phần 1 hiện chip',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await armYesterday();
+
+      await pumpDetail(tester, thanks: _shippedThanks());
+
+      expect(find.byKey(const Key('thank_you_slot_thanks')), findsOneWidget);
+      expect(find.byKey(const Key('thanks_compose_chip')), findsOneWidget);
+      expect(find.text('Soạn lời cảm ơn'), findsOneWidget);
+    });
+
+    testWidgets('không nạp được bộ nội dung thì khối bỏ hẳn khe phần 1',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await armYesterday();
+
+      await pumpDetail(
+        tester,
+        thanks: ThanksOptions(
+          catalogue: PresetCatalogue(
+            loader: ContentPackageLoader(bundle: _MissingBundle()),
+          ),
+        ),
+      );
+
+      expect(find.byKey(const Key('thank_you_block')), findsOneWidget);
+      expect(find.byKey(const Key('thank_you_slot_thanks')), findsNothing);
+      expect(find.byKey(const Key('thanks_compose_chip')), findsNothing);
+    });
+
+    testWidgets('phần 1 không kéo theo CTA cấp thẻ thứ hai (AC-6, BR-1)',
+        (WidgetTester tester) async {
+      _useTallViewport(tester);
+      await armYesterday();
+
+      await pumpDetail(tester, thanks: _shippedThanks());
+
+      expect(
+        find.byKey(const Key('card_detail_primary_action')),
+        findsOneWidget,
+      );
+    });
+  });
+
   group('không phạt im lặng (AC-25, AC-28)', () {
     testWidgets('đóng khối chỉ để lại đúng một hàng CONSUMED, không gì khác',
         (WidgetTester tester) async {
@@ -551,6 +634,7 @@ void main() {
                 repository: _StubRepository(),
                 thankYou: ThankYouOptions(
                   service: service,
+                  thanks: _shippedThanks(),
                   nextPlan: _shippedNextPlan(),
                 ),
               ),
