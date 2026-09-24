@@ -21,7 +21,7 @@ Outcome: PARTIAL_SLICE_ONLY
 |---|---|---|---|
 | P1 | Activation ledger: persistence, bump `schemaVersion` 9→10, đăng ký `stage1_wipe_registry` | `review/slice-p1-activation-ledger.md` | Không có phát hiện chặn |
 | P2 | Khung khối + điểm gắn: `ThankYouSection` lồng trên `activity_card_detail_screen.dart`, `ThankYouBlockCubit`, phần khung của `thank_you_block.dart` | `review/slice-p2-block-shell-entry-point.md` | Không có phát hiện chặn (7 mục advisory, A3 cần PO xác nhận) |
-| P3 | Preset category | chưa trả | — |
+| P3 | Danh mục preset "cảm ơn sau buổi hẹn": gói asset mới + luật `decline_door` theo phạm vi danh mục trong `invite_composer/domain/preset_content_gate.dart` | `review/slice-p3-preset-category.md` | Không có phát hiện chặn (5 mục advisory; A3 cần Scrum Master commit hàng ruling `CONTENT_GATE_CATEGORY_COUPLING`) |
 | P4 | Photo attach | chưa trả | — |
 | P5 | Next-plan suggestions | chưa trả | — |
 
