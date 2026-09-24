@@ -1,9 +1,11 @@
 # Story Master: STORY-007 "Cảm ơn + chốt việc kế tiếp" (SB-212)
 
-Status: TODO
+Status: IN_PROGRESS
 Complexity: standard
 Story-Class: standard
-Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
+Implementation Lane: mobile-only (Tech Lead chốt: một lane Mobile Developer
+  duy nhất viết hợp đồng và toàn bộ consumer trong cùng lane, tuần tự — xem
+  `coding-plan/master-plan.md` mục 2)
 Requirement: REQ-016
 Screen: Khối mở rộng trên chi tiết thẻ ở màn (1). **Không phải màn hình thứ 12.**
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục E (SB-212),
@@ -12,8 +14,19 @@ A (J9), C.11
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`,
+      `architecture/contract-summary.md`,
+      `coding-plan/master-plan.md` (5 phase, contract-first: NO, parallel: NO)
+- [x] Implementation (Development) — P1-P5 tất cả `DONE` (xem
+      `coding-plan/master-plan.md` mục 5). P1 activation ledger, P2 block
+      shell + entry point, P3 thank-you preset category, P4 photo-attach
+      (đóng `JOURNAL_SOURCE_CONTRACT_CLOSED` lối A, commit `7b7612d0`), P5
+      next-plan suggestions. Ghi nhận các `DESIGN_SPEC_CONFLICT` cần Reviewer
+      xem qua (không tự giải quyết): P2 có 4 mục, P4 có 2 mục (canvas lộ
+      metadata nhật ký vi phạm AC-17/BR-8; canvas ngụ ý đích điều hướng thứ
+      hai vi phạm AC-7) — cả 6 mục đều làm theo AC/spec, không theo canvas.
+      Nhánh nhật ký của AC-14/AC-4 kiểm bằng hàng gieo sẵn (chưa có caller
+      trong phạm vi story này; STORY-008 sẽ cung cấp màn tạo-mục-từ-thẻ).
 - [ ] Review (Reviewer)
 
 ## Depends On
