@@ -8,6 +8,7 @@ cấm mọi API ngoài và bắt buộc chạy ngoại tuyến, nên không tồ
 backend nào)
 Requirement: REQ-016
 Screen: Vỏ hoàng đạo / trắc nghiệm — màn (7), nhóm CỬA VÀO
+Design-Screen: 7-vo-hoang-dao-3-viec
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục C.7, D (SC-2),
 F (Tầng 4); `req_master.md` SB-174, R-10
 

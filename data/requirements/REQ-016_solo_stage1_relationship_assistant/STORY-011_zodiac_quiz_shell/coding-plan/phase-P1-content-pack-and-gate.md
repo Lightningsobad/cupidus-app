@@ -138,5 +138,7 @@ lẫn tầng ĐẦU RA.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-24
+- Evidence: `coding-plan/test-results.md` → "Phase P1 — Content Pack And Gate
+  (Mobile)" (tests 67/67 + regression 15/15, scoped analyze clean)
