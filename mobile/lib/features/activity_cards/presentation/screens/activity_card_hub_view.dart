@@ -13,6 +13,7 @@ import '../../../chapter_closure/presentation/widgets/close_chapter_dialog.dart'
 import '../../../chapter_closure/presentation/widgets/closed_archive_actions.dart';
 import '../../../conversation_starters/conversation_starters_entry_point.dart';
 import '../../../gift_ideas/gift_ideas_entry_point.dart';
+import '../../../zodiac_shell/zodiac_shell_entry_point.dart';
 import '../../domain/activity_card.dart';
 import '../../domain/activity_card_repository.dart';
 import '../activity_card_list_cubit.dart';
@@ -291,17 +292,17 @@ class _ActivityCardHubBody extends StatelessWidget {
   }
 }
 
-/// Only the cell whose story has shipped gets a destination; the other two keep
-/// the neutral "sắp có" answer `ux/uiux-spec.md` §6 prescribes for an unfilled
-/// entry point, so this stays a routing switch rather than three separate
-/// strips.
+/// All three cells now lead somewhere, each through its own feature's single
+/// entry-point function, so this stays a routing switch rather than three
+/// separate strips. No cell carries an unlock condition: none of the three
+/// destinations is gated on location, paid tier, or onboarding progress.
 ///
 /// Top-level rather than a method because both hub states carry the strip — the
 /// populated hub and Minute-1, which is the first hub a new user sees — and they
 /// have to route a cell to the same place.
 ///
-/// The pane is reloaded on the way back because screen (5) creates cards in this
-/// very store, and a stale list would make the add look like it failed.
+/// The pane is reloaded on the way back because screens (5) and (7) create cards
+/// in this very store, and a stale list would make the add look like it failed.
 Future<void> _openQuickEntryCell(
   BuildContext context,
   ActivityCardListCubit cubit,
@@ -313,13 +314,7 @@ Future<void> _openQuickEntryCell(
     case QuickEntryCell.conversationStarters:
       await openConversationStartersScreen(context);
     case QuickEntryCell.zodiacShell:
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          key: const Key('activity_quick_entry_coming_soon'),
-          content: Text(activityHubText(context, 'Sắp có', 'Coming soon')),
-        ),
-      );
-      return;
+      await openZodiacShellScreen(context);
   }
 
   if (cubit.isClosed) {

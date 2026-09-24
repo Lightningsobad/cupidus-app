@@ -310,3 +310,162 @@ while the true positive it exists for costs a shipped constant.
 - `CupidHeader` renders the back control from `Navigator.canPop`, so the push
   from quick-entry slot 3 gets it for free; it is correctly absent in a capture
   where the screen is the harness `home`.
+
+## Phase P4 — Entry Point Wiring (Mobile)
+
+Run at: 2026-09-24 · Worktree:
+`.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-011_zodiac_quiz_shell`
+
+### Commands and results
+
+| Command | Result |
+| --- | --- |
+| `flutter test test/features/zodiac_shell/zodiac_shell_entry_point_test.dart` | 8/8 PASS (+2 capture tests skipped without the flag) |
+| `flutter test test/features/activity_cards/quick_entry_strip_test.dart` | 5/5 PASS |
+| `flutter test test/features/zodiac_shell/ test/features/activity_cards/` | `+492 ~9: All other tests passed!` (0 failures, 9 skips) |
+| `flutter test test/features/zodiac_shell/zodiac_shell_entry_point_test.dart --dart-define=CAPTURE_VISUALS=true` | 10/10 PASS, 2 PNGs written |
+| `flutter analyze lib test` | 271 issues, **0 errors**, delta 0 — see below |
+| `flutter build apk --debug` | `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk` |
+| `visual_fidelity.py --stage review --stack mobile --lane mobile` | exit 0 |
+
+`flutter analyze` was run whole-tree this phase (`lib test`, as §6 of the phase
+file requires) rather than scoped like P1-P3. The baseline is non-zero, so the
+delta is established a different way: **no** issue line in the 271 names any of
+the four files this phase created or edited, and the error count is 0. The
+first run reported 272 — one `unused_import` of `zodiac_shell_entry_point.dart`
+in this phase's own test, which was removed before the result above. The test
+reaches the screen by tapping from the hub, so it never referenced the symbol.
+
+The build command was run bare, with no `| tail` / `| grep` / redirect, so its
+full output is on the record.
+
+### Required assertion evidence
+
+- **Navigation is proved from the hub, not from a direct push** —
+  `zodiac_shell_entry_point_test.dart` mounts `ActivityCardHubView` with a fake
+  `NavigatorObserver`, taps `activity_quick_entry_slot_2`, then asserts
+  `find.byType(ZodiacShellScreen)` is on screen, `observer.pushed.last` is a
+  `MaterialPageRoute<void>` (full-screen route, not a sheet), and the hub is
+  gone. Asserting only that a route was pushed would pass on a route to the
+  wrong screen.
+- **Both hub surfaces route identically** — the same assertion runs against the
+  populated hub and against the Minute-1 empty store, which is the first hub a
+  new account sees. A cell wired in only one of the two states is the failure
+  this pair exists to catch.
+- **Back returns to the hub** — tapping `CupidIcons.arrowBack` on the pushed
+  screen restores the hub. `tester.pageBack()` cannot be used: the app draws its
+  own `CupidHeader` rather than a `CupertinoNavigationBar`/`AppBar` back button.
+- **No gating, scanned rather than asserted by absence of a lock icon** — the
+  source of `zodiac_shell_entry_point.dart` is read off disk, comment lines are
+  stripped, and the remaining code is required to contain none of `Geolocator`,
+  `premium`, `paywall`, `subscription`, `entitlement`, `onboarding`,
+  `isUnlocked`, `isLocked` — **and no `if (` at all**. The comment-stripping is
+  load-bearing: the file's own doc comment names the rules it does not
+  implement, so an unfiltered scan would fail on itself. The same scan runs
+  against `quick_entry_strip.dart`.
+- **The placeholder branch is gone** — a scan requires the hub source to no
+  longer contain `activity_quick_entry_coming_soon` and to contain
+  `openZodiacShellScreen(context)`.
+- **The forbidden direct imports are absent** — the hub source is matched with
+  `RegExp(r'\bZodiacShellScreen\b')` (a plain `contains` is useless here:
+  `openZodiacShellScreen` contains that substring), and against
+  `ZodiacShellCubit` and `zodiac_shell/presentation`. It must import only
+  `zodiac_shell_entry_point.dart`.
+- **The module exposes exactly one symbol** — the entry-point source is matched
+  for top-level declarations and must yield exactly one function, with no
+  `export ` and no `class `. Unlike `gift_ideas`/`conversation_starters` this
+  file deliberately carries no `export`, so the cubit, resolver, rotation store
+  and packs stay unreachable from outside (AC-20).
+- **Strip shape pinned independently** — `quick_entry_strip_test.dart` holds the
+  three cells, their order, their labels and their glyphs; one handler call per
+  tap asserted as `expect(selected, QuickEntryCell.values)`; no locked variant
+  and no "Sắp có" text on slot 2; and the narrow-frame (280x400) branch scrolls
+  horizontally with every cell still at least `kQuickEntryMinCellWidth` wide.
+
+### A test that was written and then deleted
+
+A case that pushed the screen and asserted `zodiac_picker_list` renders was
+removed rather than fixed. The pushed screen's real `ZodiacShellCubit.load()`
+does asset I/O that the widget test's fake-async zone never runs, and a
+`tester.runAsync` delay did not help. P3's `zodiac_shell_screen_test.dart`
+already proves pack loading against the real assets; the two from-hub push
+tests already satisfy §6 of the phase file. Keeping a flaky third assertion
+would have added no coverage.
+
+### Visual fidelity
+
+- Verdict: `VISUAL_FIDELITY: PASS` for the surface P4 owns ·
+  report: `visual-fidelity/visual-fidelity-report.md` §P4
+- Design screens resolved by `--list-screens` and rendered by `--screen=<slug>`,
+  never `--label`: `tab-y-tuong-hub-cua-vao` (the canvas frame that actually
+  draws the three entry points), plus `man-goc-muon-lam` and `phut-1-kho-trong`
+  (the two hub states). New `Design-Screen:` lines were added to the report
+  header alongside P3's.
+- Capture path: still no device attached, so the P3 `RepaintBoundary` harness
+  was reused inside this phase's own test —
+  `implemented-man-goc-muon-lam-md-quick-entry.png` and
+  `implemented-phut-1-kho-trong-md-quick-entry.png`, both 415x900.
+- Both PNGs were opened and read, not merely produced green: "Vỏ hoàng đạo",
+  "Gợi ý quà", "Mồi chuyện", "Bắt đầu từ một điều nhỏ nhé." and the surrounding
+  card text all carry their diacritics, and the filled `auto_awesome` sparkles,
+  `redeem` and `mood` glyphs all draw rather than a notdef box. No lock, no
+  "Sắp có" badge, no dimming on slot 2 in either image.
+- Gate control: the same `visual_fidelity.py` invocation pointed one directory
+  too deep returned exit 1 with the "does not record `VISUAL_FIDELITY: PASS`"
+  message, so the exit 0 above is a real evaluation and not a no-op.
+- Recorded as deferred, not as a P4 defect: the canvas draws the three entry
+  points as a vertical list with chevrons inside the Ý tưởng tab, while the
+  shipped shape is a horizontal three-cell strip on the Muốn làm hub. That shape
+  is STORY-001's and was already filled for slots 0 and 1 by STORY-004/005; P4
+  may not change cell order, `kQuickEntryCellCount`, or the strip keys. The cell
+  label "Vỏ hoàng đạo" also differs from the canvas row's "Cung & trắc nghiệm" —
+  unchanged on purpose, because the label is AC-28-governed and "Cung & trắc
+  nghiệm" is the *screen* title, which screen (7) already renders.
+
+### Three stale placeholder tests retired
+
+Removing the snackbar branch broke three pre-existing tests that asserted the
+placeholder §3 is contracted to remove. All three failed with
+`Found 0 widgets with key [<'activity_quick_entry_coming_soon'>]`:
+
+| File | Line | Case |
+| --- | --- | --- |
+| `test/features/gift_ideas/gift_ideas_screen_test.dart` | 1166 | "the still-unfilled Minute-1 cell keeps the neutral message" |
+| `test/features/gift_ideas/gift_ideas_screen_test.dart` | 1189 | "the still-unfilled cell answers with the neutral message" |
+| `test/features/conversation_starters/conversation_starters_screen_test.dart` | 1000 | `ô cung hoàng đạo vẫn giữ câu trả lời "sắp có"` |
+
+All three are stale by construction — each was written while STORY-011 was
+unshipped — and the codebase already carried the precedent for retiring them at
+`gift_ideas_screen_test.dart:1163`, where slot 1 left that list when STORY-005
+shipped screen (6) and its regression moved to the owning story's suite. All
+three were deleted and both precedent comments rewritten to name slot 2 and to
+point at `test/features/zodiac_shell/zodiac_shell_entry_point_test.dart`, which
+is where the replacement coverage lives. Nothing else in either file was
+touched; the neighbouring "slot 0 / slot 1 reaches its own screen" assertions
+still run and still pass.
+
+A write-scope note, because the handoff prose and the registered run state
+disagreed: the WriteScope list written in the handoff message names 8 paths and
+does not include these two files, but `write_scope` in
+`data/runtime/parallel-runs/RUN-REQ-016_solo_stage1_relationship_assistant-STORY-011_zodiac_quiz_shell-mobile-dev.json`
+names 10 and does, at entries 5 and 6 (identically in `write_scope_normalized`
+and `write_scope_raw`). That run file is this run — matching `agent_id`,
+`tool_use_id` and a `registered_at` from the same spawn — and it is the record
+the spawn guard enforces, so it governs. Scrum Master was told before the edit
+and can revert these two files if the 8-path prose list was the intended grant.
+
+Verification after the deletions:
+
+| Command | Result |
+| --- | --- |
+| `flutter test test/features/gift_ideas/ test/features/conversation_starters/` | `+240 ~2: All other tests passed!` |
+| `flutter test test/features/zodiac_shell/ test/features/activity_cards/ test/features/gift_ideas/ test/features/conversation_starters/` | `+732 ~11: All other tests passed!` |
+| `flutter analyze lib test` | 271 issues, 0 errors, still no issue naming any file this phase touched |
+
+### Worktree hygiene
+
+`git status --porcelain` after the final test run showed
+`STORY-002_invite_message_composer/visual-fidelity/implemented-11-chuan-bi-chon-hanh-dong-ios.png`
+modified — the mobile suite rewrites that other story's PNG, exactly as it did
+in P2 and P3. It was reverted with `git checkout --`, and the final status
+contains only files inside this phase's declared write scope.

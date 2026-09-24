@@ -1160,59 +1160,13 @@ void main() {
       );
     });
 
-    // Slot 1 ("mồi chuyện") left this list when STORY-005 shipped screen (6);
-    // its own navigation regression lives in
-    // `test/features/conversation_starters/conversation_starters_screen_test.dart`.
-    testWidgets('the still-unfilled Minute-1 cell keeps the neutral message',
-        (WidgetTester tester) async {
-      await registerCompositionRoot();
-      tester.view.physicalSize = _tallTestViewport;
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-      await tester.pumpWidget(_host(ActivityCardHubView(repository: cards)));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(MinuteOneEmptyState), findsOneWidget);
-
-      await tester.tap(find.byKey(const Key('activity_quick_entry_slot_2')));
-      await tester.pump();
-
-      expect(
-        find.byKey(const Key('activity_quick_entry_coming_soon')),
-        findsOneWidget,
-      );
-      expect(find.byType(GiftIdeasScreen), findsNothing);
-
-      await tester.pumpAndSettle(const Duration(seconds: 5));
-    });
-
-    testWidgets('the still-unfilled cell answers with the neutral message',
-        (WidgetTester tester) async {
-      await registerCompositionRoot();
-      await cards.createCard(
-        const NewActivityCard(
-          title: 'Thẻ đã có',
-          origin: ActivityCardOrigin.manual,
-        ),
-      );
-
-      tester.view.physicalSize = _tallTestViewport;
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-      await tester.pumpWidget(_host(ActivityCardHubView(repository: cards)));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(const Key('activity_quick_entry_slot_2')));
-      await tester.pump();
-
-      expect(
-        find.byKey(const Key('activity_quick_entry_coming_soon')),
-        findsOneWidget,
-      );
-      expect(find.byType(GiftIdeasScreen), findsNothing);
-
-      await tester.pumpAndSettle(const Duration(seconds: 5));
-    });
+    // Slot 1 ("mồi chuyện") left this list when STORY-005 shipped screen (6),
+    // and slot 2 ("vỏ hoàng đạo") when STORY-011 shipped screen (7). Each
+    // keeps its navigation regression in its own suite:
+    // `test/features/conversation_starters/conversation_starters_screen_test.dart`
+    // and `test/features/zodiac_shell/zodiac_shell_entry_point_test.dart`.
+    // No cell answers with the neutral "sắp có" message any more, so this file
+    // asserts only that slot 0 reaches this feature's own screen.
   });
 
   testWidgets('captures 5-goi-y-qua-thang-cong-suc',

@@ -1,13 +1,20 @@
 VISUAL_FIDELITY: PASS
 Design-Screen: 7-vo-hoang-dao-3-viec
+Design-Screen: tab-y-tuong-hub-cua-vao
+Design-Screen: man-goc-muon-lam
+Design-Screen: phut-1-kho-trong
 
-# STORY-011 — Vỏ hoàng đạo / trắc nghiệm, màn (7), visual fidelity
+# STORY-011 — Vỏ hoàng đạo / trắc nghiệm, màn (7) + cửa vào, visual fidelity
 
-- Story: REQ-016 / STORY-011, phase P3
-  (`coding-plan/phase-P3-result-surface-screens.md` §7)
+- Story: REQ-016 / STORY-011, phase P3 (màn 7) và phase P4 (cửa vào)
+  (`coding-plan/phase-P3-result-surface-screens.md` §7,
+  `coding-plan/phase-P4-entry-point-wiring.md` §6)
 - Requirement: REQ-016_solo_stage1_relationship_assistant
 - Lane: Mobile
 - Date: 2026-09-24
+
+Phần §1-§7 và Deferred bên dưới là audit của P3 (màn 7) và không đổi. Audit
+của P4 (dải lối-vào-nhanh trên hub) nằm ở §P4 cuối tệp.
 
 ## Screens under audit
 
@@ -147,3 +154,103 @@ không ô tofu, icon `auto_awesome`/`chevron_right`/`help`/`local_activity`/`add
 - Frame canvas cho màn chọn lát và cho màn câu hỏi: chưa có, nên hai bề mặt đó
   chỉ audit được theo luật đo được. Cần UI/UX bổ sung frame nếu muốn audit
   pixel.
+
+---
+
+# §P4 — Cửa vào: ô thứ 3 của dải lối-vào-nhanh
+
+- Phase: P4 `entry-point-wiring`, §6 "Per-story visual fidelity: REQUIRED"
+- Bề mặt audit: **dải lối-vào-nhanh trên hub**, không phải màn (7) — màn (7)
+  đã audit ở §1-§7.
+- Date: 2026-09-24
+
+## P4.1 Ảnh đã chụp
+
+| Design screen id | Platform | Design reference | Implemented |
+| --- | --- | --- | --- |
+| `tab-y-tuong-hub-cua-vao` | ios | `design-reference-tab-y-tuong-hub-cua-vao-ios.png` (415x900) | — (xem P4.3: frame vẽ ba lối vào ở dạng danh sách dọc trong tab Ý tưởng) |
+| `man-goc-muon-lam` | ios | `design-reference-man-goc-muon-lam-ios.png` (415x900) | `implemented-man-goc-muon-lam-md-quick-entry.png` (415x900) |
+| `phut-1-kho-trong` | ios | `design-reference-phut-1-kho-trong-ios.png` (415x900) | `implemented-phut-1-kho-trong-md-quick-entry.png` (415x900) |
+
+Hai ảnh implemented chụp bằng `RepaintBoundary` trong chính test của phase
+(`test/features/zodiac_shell/zodiac_shell_entry_point_test.dart`, nhóm "bằng
+chứng visual-fidelity", `skip: !kCaptureVisuals`), cùng harness mà P3 đã dùng:
+không có thiết bị nào gắn vào máy (`adb devices` trống), nên đường chụp thật
+bằng `capture-mobile-screen.sh` không khả dụng và đây là đường dự phòng đã có
+tiền lệ. Lệnh chụp:
+
+```
+flutter test test/features/zodiac_shell/zodiac_shell_entry_point_test.dart \
+  --dart-define=CAPTURE_VISUALS=true
+```
+
+Hai ảnh phủ **cả hai** trạng thái hub mang dải: hub đã có thẻ
+(`man-goc-muon-lam`) và Phút-1 kho trống (`phut-1-kho-trong`) — đúng hai bề mặt
+mà `_openQuickEntryCell` phải định tuyến giống hệt nhau.
+
+Render tham chiếu dùng slug id, không dùng `--label`:
+
+```
+node .ai-team-bundle/runtime/tools/render-design-canvas.js \
+  --surface=cupid-ch-ng-1 --screen=<slug> --platform=ios --out=<thư mục này>
+```
+
+## P4.2 Soi mắt: dấu tiếng Việt và glyph icon
+
+Đã mở từng PNG và đọc trực tiếp, không chỉ dựa vào test xanh.
+
+- Nhãn ba ô, đủ dấu, không tofu: **"Gợi ý quà"**, **"Mồi chuyện"**,
+  **"Vỏ hoàng đạo"** — dấu hỏi trên `ỏ`, dấu huyền trên `à`/`ồ`, dấu nặng trên
+  `ạ`/`ệ`, `ĩ` của "nghĩ" đều hiện đúng.
+- Chữ xung quanh trong cùng khung hình cũng đúng dấu: "Tất cả", "Mới nghĩ ra",
+  "Đã hẹn ngày", "Đi ăn quán Huế mới mở", "Xem phim cuối tuần", "Hẹn ngày",
+  "Chuẩn bị", "Bắt đầu từ một điều nhỏ nhé.", "Dán cái link vừa thấy".
+- Glyph icon là glyph thật, không phải ô vuông trống: hộp quà (`redeem`) ở ô 1,
+  mặt cười (`mood`) ở ô 2, **chùm sao lấp lánh đặc (`auto_awesome`) ở ô 3**,
+  cộng dấu `+` của FAB, icon nhãn ngày, và icon mắt xích của thẻ dán link ở
+  Phút-1.
+- Không có ổ khoá, không có huy hiệu "Sắp có", không có lớp phủ mờ trên ô 3 ở
+  **cả hai** ảnh.
+
+## P4.3 So với canvas
+
+Frame canvas mang ba lối vào là `tab-y-tuong-hub-cua-vao` ("Ý tưởng — Ba lối
+vào"), không phải hai frame hub. Hai frame hub (`man-goc-muon-lam`,
+`phut-1-kho-trong`) **không vẽ dải lối-vào-nhanh** — dựng ra mới thấy.
+
+Ba chỗ lệch, cả ba đều có sẵn từ trước P4:
+
+1. **Hình dạng và chỗ đặt**: canvas vẽ ba lối vào là danh sách dọc ba hàng có
+   chevron phải, nằm trong tab Ý tưởng. Bản dựng ship một dải ngang ba ô trên
+   hub Muốn làm. Đây là hình dạng do STORY-001 dựng và STORY-004/005 đã lấp ô 1
+   và ô 2 vào; P4 chỉ nối đích cho ô 3 và không được sửa thứ tự ô,
+   `kQuickEntryCellCount`, hay key `activity_quick_entry_strip`. Không phải
+   khuyết điểm của P4 — ghi nhận để UI/UX phân xử ở cấp requirement nếu muốn.
+2. **Nhãn ô 3**: hàng canvas ghi "Cung & trắc nghiệm"; ô dải ghi "Vỏ hoàng
+   đạo". Không đổi: "Vỏ hoàng đạo" là nhãn do AC-28 quy định cho ô, còn "Cung &
+   trắc nghiệm" là **tiêu đề màn (7)** — và màn (7) đang dựng đúng tiêu đề đó
+   (§1-§7). Theo phán quyết neo-thiết-kế của requirement, canvas thắng spec ở
+   tranh chấp canvas-vs-spec, nhưng mục do AC quy định thì giữ nguyên.
+3. **Dòng phụ của hàng**: canvas có "Vui thôi — nhưng cuối cùng vẫn ra 3 điều
+   làm thật" dưới tên. Ô dải ngang không có chỗ cho dòng phụ theo hình dạng của
+   STORY-001. Cùng gốc với mục 1.
+
+Khớp với canvas: glyph chùm sao cho lối vào thứ ba, thứ tự ba lối vào (quà →
+mồi chuyện → cung), và việc **không lối vào nào có điều kiện mở khoá** — canvas
+cũng không vẽ ổ khoá hay huy hiệu trả phí trên hàng nào.
+
+## P4.4 Phán quyết
+
+`VISUAL_FIDELITY: PASS` cho bề mặt P4 sở hữu. Thứ P4 phải chứng minh bằng ảnh —
+ô 3 luôn hiện, đúng nhãn "Vỏ hoàng đạo", đúng glyph `auto_awesome` đặc, không
+biến thể khoá, ở cả hub đầy lẫn Phút-1 — đều thấy được trong hai ảnh và đều
+đúng. Ba chỗ lệch ở P4.3 là lệch cấu trúc có sẵn của dải, nằm ngoài write scope
+của P4.
+
+## P4 Deferred
+
+- Phân xử canvas-vs-bản dựng cho **hình dạng** ba lối vào (dải ngang trên hub
+  Muốn làm so với danh sách dọc trong tab Ý tưởng, mục 1 và 3 ở P4.3). Đổi được
+  thì phải đổi ở `quick_entry_strip.dart` và ở cả hai trạng thái hub — tức là
+  scope của STORY-001, không phải của STORY-011. Cần UI/UX xác nhận frame
+  `tab-y-tuong-hub-cua-vao` có còn là thiết kế hiện hành cho ba lối vào không.

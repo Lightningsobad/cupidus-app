@@ -135,5 +135,24 @@ khoá theo địa điểm nào chắn trước nó.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-24
+- Bằng chứng: `coding-plan/test-results.md` §P4;
+  `visual-fidelity/visual-fidelity-report.md` §P4
+- Lệnh đã chạy và kết quả:
+  - `flutter test test/features/zodiac_shell/ test/features/activity_cards/`
+    → `+492 ~9: All other tests passed!`
+  - `flutter test test/features/zodiac_shell/ test/features/activity_cards/
+    test/features/gift_ideas/ test/features/conversation_starters/`
+    → `+732 ~11: All other tests passed!`
+  - `flutter analyze lib test` → 271 issue, **0 error**, không issue nào trỏ vào
+    tệp P4 sửa/tạo (delta 0 so với nền có sẵn)
+  - `flutter build apk --debug` (chạy trần, không pipe)
+    → `✓ Built build/app/outputs/flutter-apk/app-local-debug.apk`
+  - Cổng visual fidelity `visual_fidelity.py --stage review --stack mobile`
+    → exit 0
+- 3 test đã lỗi thời ghim placeholder `activity_quick_entry_coming_soon` —
+  `gift_ideas_screen_test.dart` dòng 1166 và 1189,
+  `conversation_starters_screen_test.dart` dòng 1000 — đã được gỡ. Hai tệp đó
+  nằm trong `write_scope` đã đăng ký của run (10 mục), dù danh sách prose trong
+  handoff (8 mục) không kể tên chúng; chi tiết ở `test-results.md` §P4.
