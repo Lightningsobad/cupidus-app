@@ -12,6 +12,7 @@
 | P6 | Mobile Developer | DONE | 2026-09-17 |
 | P7 | Mobile Developer | DONE | 2026-09-17 |
 | P8 | Mobile Developer | DONE | 2026-09-17 |
+| P9 | Mobile Developer | DONE | 2026-09-25 |
 
 ## P1 – Ba gói nội dung preset + cổng nhập luật bất biến
 
@@ -1705,3 +1706,160 @@ unchanged`), liệt kê id thật bằng `render-design-canvas.js --list-screens
 (kích thước byte trùng khớp từng file), nên mọi so sánh đã ghi trong
 `visual-fidelity-report.md` vẫn còn giá trị; chỉ bảng đặt cặp ảnh được cập nhật
 sang tên file mới.
+
+## P9 – Nhãn-mí pha + chấm màu trên widget (D-10)
+
+### Files shipped
+
+- `mobile/lib/features/phase_status/domain/phase_content.dart` — thêm trường
+  bắt buộc `eyebrow` (constructor, field, `requireContentString(json,
+  'eyebrow', source)`), và đưa `eyebrow` vào `displayStrings` nên nó đi qua
+  đúng cổng `CONTENT-GATE`/AC-39 như hai chuỗi kia.
+- `mobile/lib/features/phase_status/data/home_widget_bridge.dart` — thêm
+  `widgetKeyEyebrowLine = 'eyebrow_line'`, chèn vào `widgetPayloadKeys` đúng
+  thứ tự hợp đồng (§2: `phase_id`, `primary_line`, `secondary_line`,
+  `eyebrow_line`, `card_id`, `computed_on`), và `widgetKeyEyebrowLine:
+  item.eyebrow` trong `buildWidgetPayload` — **không** đi qua `_fill`, nên
+  không có đường nào để một con số lọt vào nhãn-mí (AC-9). Tách
+  `widgetPhaseIdDateDay` thành bốn hằng `widgetPhaseIdWaiting/Upcoming/
+  DateDay/Quiet` để phía Swift có nguồn hợp lệ cho ba giá trị `phase_id` mới
+  dùng tới.
+- `mobile/assets/data/req016/phase_content.v1.json` — **9/9 entry** được thêm
+  `eyebrow` (trường bắt buộc nên bỏ sót một entry là parser vỡ ngay):
+
+  | # | `id` | `phase_id` | `surface` | `eyebrow` |
+  |---|---|---|---|---|
+  | 1 | `phase.waiting.prepare.v1` | `waiting` | both | `PHA 1 · ĐANG ĐỢI` |
+  | 2 | `phase.waiting.notebook.v1` | `waiting` | screen | `PHA 1 · ĐANG ĐỢI` |
+  | 3 | `phase.waiting.quiet_note.v1` | `waiting` | widget | `PHA 1 · ĐANG ĐỢI` |
+  | 4 | `phase.upcoming.countdown.v1` | `upcoming` | both | `PHA 2 · SẮP HẸN` |
+  | 5 | `phase.upcoming.prepare.v1` | `upcoming` | screen | `PHA 2 · SẮP HẸN` |
+  | 6 | `phase.date_day.today.v1` | `date_day` | both | `PHA 3 · ĐÚNG NGÀY HẸN` |
+  | 7 | `phase.date_day.evening.v1` | `date_day` | screen | `PHA 3 · ĐÚNG NGÀY HẸN` |
+  | 8 | `phase.quiet.gathering.v1` | `quiet` | both | `PHA 4 · KHOẢNG LẶNG` |
+  | 9 | `phase.quiet.neutral.v1` | `quiet` | widget | `PHA 4 · KHOẢNG LẶNG` |
+
+  Bốn tên pha lấy nguyên văn từ `ux/uiux-spec.md` §1 ("dùng lại đúng bốn tên ở
+  mục 1"), không tự nghĩ chữ mới và không chép nhãn trên canvas (canvas nhắc
+  người kia — AC-11/AC-12/BR-11 cấm).
+- `mobile/android/app/src/main/res/layout/cupid_phase_widget.xml` — hàng
+  `cupid_phase_widget_eyebrow_row` (`ImageView` chấm 8dp + `TextView` 10sp
+  bold, `letterSpacing` 0.08) đặt trên dòng chính, mặc định `gone`. Không
+  `android:text`, không `textColor` (màu đặt lúc chạy).
+- `mobile/android/app/src/main/kotlin/com/snapsofts/cupid/CupidPhaseWidgetProvider.kt`
+  — đọc `eyebrow_line` + `phase_id`, set text/màu chữ, và vẽ chấm tròn bằng
+  `setImageViewBitmap` (một bitmap 24px `ANTI_ALIAS_FLAG`). Lý do không dùng
+  `res/drawable` shape: `res/drawable` nằm ngoài write scope của phase này.
+  Bảng màu để trong `private object CupidWidgetPalette` cùng file (cũng vì
+  `res/values` ngoài write scope), với đúng bốn vai trò
+  `DOT_WAITING`/`DOT_UPCOMING`/`DOT_TODAY`/`DOT_QUIET`.
+- `mobile/ios/CupidPhaseWidget/CupidPhaseWidget.swift` — `keyEyebrowLine` +
+  ba `phaseId*` mới trong `CupidWidgetContract`; `CupidWidgetPalette` thêm
+  `mint`, `accentPurpleDark` và bốn alias vai trò + `dot(for:)`;
+  `CupidPhaseEntry.eyebrowLine`/`dotColor`; `HStack` chấm 7pt + nhãn-mí 10pt
+  bold `tracking` 0.8 ở đầu `VStack`.
+- `mobile/test/features/phase_status/native_copy_scan_test.dart` — nhóm mới
+  "the phase eyebrow and its colour dot (D-10, AC-9/AC-37/BR-15)", 5 case.
+- `mobile/test/features/phase_status/phase_content_gate_test.dart` và
+  `mobile/test/features/phase_status/home_widget_bridge_test.dart` — fixture
+  và case mới cho `eyebrow`/`eyebrow_line` (đúng hai file test hiện có của hai
+  file `lib` trong write scope, không đặt tên test mới).
+
+### Commands run
+
+```
+flutter test test/features/phase_status/native_copy_scan_test.dart --reporter failures-only
++34: All tests passed!
+```
+
+```
+flutter test test/features/phase_status/phase_content_gate_test.dart --reporter failures-only
++18: All tests passed!
+```
+
+```
+flutter test test/features/phase_status/home_widget_bridge_test.dart --reporter failures-only
++22: All tests passed!
+```
+
+```
+flutter test test/features/phase_status --reporter failures-only
++245 ~6: 6 skipped tests.
++245 ~6: All other tests passed!
+```
+
+P8 để lại `+235 ~6`; P9 ra `+245 ~6` — tăng 10 case, không giảm case nào
+(AC "không giảm số case so với P8").
+
+```
+flutter analyze lib/features/phase_status test/features/phase_status
+   info • prefer_initializing_formals • phase_status_cubit.dart:122:9
+   info • prefer_initializing_formals • phase_status_cubit.dart:124:9
+   info • prefer_initializing_formals • phase_status_cubit.dart:125:9
+   info • prefer_initializing_formals • phase_status_cubit.dart:126:9
+   info • prefer_initializing_formals • phase_status_cubit.dart:127:9
+5 issues found. (ran in 2.8s)
+```
+
+0 error, 0 warning — đúng baseline đã ghi ở `master-plan.md` §6 Notes; 5 info
+là của `phase_status_cubit.dart`, file P9 không đụng tới.
+
+```
+flutter analyze lib test --no-fatal-infos --no-fatal-warnings
+227 issues found. (ran in 2.3s)
+```
+
+Chạy rộng ra cả `lib test` để bắt call-site vỡ do `eyebrow` thành trường bắt
+buộc: **0 dòng `error •`** trong 227 issue, và không issue nào trỏ vào sáu file
+P9 sửa. Hai call-site duy nhất phải sửa là
+`home_widget_bridge_test.dart:267,341` (`PhaseContentItem(...)` thiếu tham số
+bắt buộc) — đã sửa, ghi ở trên.
+
+### Risk surface evidence
+
+- `HARDCODED-COPY` (AC-37/BR-15): test quét cả ba file native, khẳng định
+  không file nào chứa bất kỳ chuỗi `eyebrow` nào của gói đã ship; literal
+  Kotlin vẫn phải khớp `^[a-z0-9_]*$`; literal Swift vẫn phải đến từ tập hằng
+  `widget*` của Dart ∪ từ vựng deep-link ∪ `{'', '/'}`. Đổi câu nhãn-mí chỉ cần
+  sửa `phase_content.v1.json`.
+- `WIDGET-STALE`: `widgetPayloadKeys` được assert bằng danh sách 6 chuỗi đúng
+  thứ tự hợp đồng, và mọi pha đều phải đẩy `eyebrow_line`.
+- `WIDGET-LEAK` (AC-11/AC-12/BR-11): case "no field the user typed reaches a
+  payload value" quét **mọi** value của payload nên phủ luôn khoá mới; nhãn-mí
+  lấy từ gói nội dung nên không thể mang chữ người dùng gõ.
+- D-11/D-12 không hồi quy: case `CupidPhaseSplit.of` và case cấm
+  `?android:attr/`/`Color.clear` giữ nguyên văn assertion, vẫn PASS. Một hằng
+  Kotlin được đổi tên `DOT_PX` → `CIRCLE_PX` **vì** test vai trò quét
+  `DOT_[A-Z_]+` và phải thấy đúng bốn vai trò, không phải năm.
+
+### AC coverage
+
+| AC | Bằng chứng |
+|---|---|
+| AC-9 | `home_widget_bridge_test.dart`: mọi pha đẩy `eyebrow_line` lấy từ gói; nhãn-mí không đổi theo `memoryCount` và không chứa `{n}`. Chấm/nhãn đổi theo `phase_id` ở cả hai nền tảng (case vai trò token). |
+| AC-37/BR-15 | nhóm quét native ở trên |
+| "không entry nào thiếu `eyebrow`" | `phase_content_gate_test.dart`: case "every shipped phase line carries an eyebrow" (9/9 từ đĩa) **và** case "a phase entry without an eyebrow fails to parse" khẳng định `ContentPackageFormatException` cả khi thiếu trường lẫn khi rỗng |
+| D-11/D-12 không hồi quy | mục Risk surface ở trên |
+| `flutter test test/features/phase_status` xanh, không giảm case | `+245 ~6` so với `+235 ~6` ở P8 |
+
+### Điểm cần Scrum Master / Reviewer biết
+
+1. **Ảnh bản dựng của widget vẫn chưa có (ô 7 `NOT_COMPARED`).** §6 của phase
+   file vừa đòi "phải chụp và so sánh" vừa ghi "không chạy build native" và
+   "Runtime startup smoke: NO". Bề mặt cần chụp là widget của hệ điều hành
+   (`RemoteViews` / WidgetKit), không nằm trong cây widget Flutter nên harness
+   `RepaintBoundary` không với tới; đường duy nhất còn lại là vẽ lại widget
+   bằng Dart rồi chụp bản vẽ đó, tức là bịa bằng chứng. Đã đối chiếu canvas ↔
+   mã từng thuộc tính trong `visual-fidelity/visual-fidelity-report.md` (lượt
+   patch #3) thay cho ảnh, và ghi tồn dư R-5 kèm chủ sở hữu.
+2. **D-13 (quan sát, không tự sửa).** Chấm `date_day` theo §3a là
+   `--dot-today` = `#FF7FB6`, đúng lúc nền `date_day` (D-12) là gradient
+   hồng→tím: chấm hồng trên nền hồng gần như không đọc được, còn canvas vẽ chỗ
+   đó bằng một tia chớp sáng. Sửa là đổi hợp đồng §3a, nên để UI/UX +
+   Tech Lead quyết.
+3. **Hai file test ngoài danh sách WriteScope của handoff** —
+   `phase_content_gate_test.dart` và `home_widget_bridge_test.dart` — được sửa
+   theo diễn đạt Write Scope §1B của phase file ("test cho
+   `phase_content.dart`/`home_widget_bridge.dart`, đúng tên file test hiện có").
+   Không file test nào bị nới lỏng: cả hai chỉ thêm case và thêm trường bắt
+   buộc vào fixture.

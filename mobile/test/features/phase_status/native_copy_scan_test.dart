@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -29,6 +30,8 @@ const String _pbxprojPath = 'ios/Runner.xcodeproj/project.pbxproj';
 
 const String _bridgePath =
     'lib/features/phase_status/data/home_widget_bridge.dart';
+
+const String _packPath = 'assets/data/req016/phase_content.v1.json';
 
 List<File> _swiftSources() => <String>['ios/Runner', _iosWidgetRoot]
     .map((String dir) => Directory(dir))
@@ -180,9 +183,11 @@ void main() {
       provider = File(_providerPath).readAsStringSync();
     });
 
-    test('it reads exactly the three payload keys a drawing needs', () {
+    test('it reads exactly the payload keys a drawing needs', () {
       expect(provider.contains('"primary_line"'), isTrue);
       expect(provider.contains('"secondary_line"'), isTrue);
+      expect(provider.contains('"eyebrow_line"'), isTrue);
+      expect(provider.contains('"phase_id"'), isTrue);
       expect(provider.contains('"card_id"'), isTrue);
     });
 
@@ -306,10 +311,12 @@ void main() {
       }
     });
 
-    test('it reads the same three payload keys the Android provider does', () {
+    test('it reads the same payload keys the Android provider does', () {
       final String swift = File(_widgetSwiftPath).readAsStringSync();
       expect(swift.contains('"primary_line"'), isTrue);
       expect(swift.contains('"secondary_line"'), isTrue);
+      expect(swift.contains('"eyebrow_line"'), isTrue);
+      expect(swift.contains('"phase_id"'), isTrue);
       expect(swift.contains('"card_id"'), isTrue);
       expect(swift.contains('UserDefaults(suiteName:'), isTrue);
     });
@@ -350,6 +357,7 @@ void main() {
       expect(
         drawn,
         <String>[
+          'entry.eyebrowLine',
           'split.lead',
           'split.number',
           'split.trail',
@@ -401,6 +409,108 @@ void main() {
       expect('widgetURL'.allMatches(swift).length, 1);
       expect(swift.contains('Link('), isFalse);
       expect(swift.contains('Button('), isFalse);
+    });
+  });
+
+  group('the phase eyebrow and its colour dot (D-10, AC-9/AC-37/BR-15)', () {
+    test('the bridge declares the eyebrow key and pushes all six', () {
+      final Map<String, String> constants = _dartWidgetConstants();
+      expect(constants['widgetKeyEyebrowLine'], 'eyebrow_line');
+
+      final String bridge = File(_bridgePath).readAsStringSync();
+      final RegExpMatch? keys = RegExp(
+        r'const List<String> widgetPayloadKeys = <String>\[([\s\S]*?)\];',
+      ).firstMatch(bridge);
+      expect(keys, isNotNull);
+      expect(
+        RegExp(r'widget[A-Za-z0-9]+')
+            .allMatches(keys!.group(1)!)
+            .map((Match m) => constants[m.group(0)!])
+            .toList(),
+        <String>[
+          'phase_id',
+          'primary_line',
+          'secondary_line',
+          'eyebrow_line',
+          'card_id',
+          'computed_on',
+        ],
+        reason: 'contract-summary.md 2/3 order, and every push writes all six '
+            'so no key survives into the next phase (WIDGET-STALE)',
+      );
+    });
+
+    test('no native file carries an eyebrow line of the shipped pack', () {
+      final List<String> eyebrows = <String>[
+        for (final Object? item
+            in (jsonDecode(File(_packPath).readAsStringSync())
+                as Map<String, Object?>)['items']! as List<Object?>)
+          (item! as Map<String, Object?>)['eyebrow']! as String,
+      ];
+      expect(eyebrows, isNotEmpty);
+
+      for (final File file in <File>[
+        ..._nativeSources(),
+        File(_widgetSwiftPath),
+      ]) {
+        final String source = file.readAsStringSync();
+        for (final String eyebrow in eyebrows) {
+          expect(source.contains(eyebrow), isFalse, reason: file.path);
+        }
+      }
+    });
+
+    test('the layout declares the eyebrow row and holds no string of its own',
+        () {
+      final String layout = File(_layoutPath).readAsStringSync();
+      for (final String id in <String>[
+        '@+id/cupid_phase_widget_eyebrow_row',
+        '@+id/cupid_phase_widget_eyebrow',
+        '@+id/cupid_phase_widget_dot',
+      ]) {
+        expect(layout.contains(id), isTrue, reason: id);
+      }
+      expect(layout.contains('android:text='), isFalse);
+    });
+
+    test('the provider maps phase_id onto exactly the four token roles', () {
+      final String provider = _withoutComments(
+        File(_providerPath).readAsStringSync(),
+      );
+      expect(
+        RegExp(r'DOT_[A-Z_]+')
+            .allMatches(provider)
+            .map((Match m) => m.group(0)!)
+            .toSet(),
+        <String>{'DOT_WAITING', 'DOT_UPCOMING', 'DOT_TODAY', 'DOT_QUIET'},
+        reason: 'contract-summary.md 3a fixes four roles, and a fifth would be '
+            'a colour nothing in the contract can explain',
+      );
+      expect(provider.contains('?android:attr/'), isFalse);
+      expect(provider.contains('android.R.color'), isFalse);
+      expect(provider.contains('setImageViewBitmap'), isTrue);
+    });
+
+    test('the extension maps phase_id onto exactly the four token roles', () {
+      final String swift = _withoutComments(
+        File(_widgetSwiftPath).readAsStringSync(),
+      );
+      expect(
+        RegExp(r'dot(Waiting|Upcoming|Today|Quiet)\b')
+            .allMatches(swift)
+            .map((Match m) => m.group(0)!)
+            .toSet(),
+        <String>{'dotWaiting', 'dotUpcoming', 'dotToday', 'dotQuiet'},
+      );
+      for (final String systemColour in <String>[
+        'Color.primary',
+        'Color.secondary',
+        'Color.accentColor',
+        '.foregroundStyle(.tint)',
+      ]) {
+        expect(swift.contains(systemColour), isFalse, reason: systemColour);
+      }
+      expect(swift.contains('CupidWidgetPalette.dot(for: phaseId)'), isTrue);
     });
   });
 

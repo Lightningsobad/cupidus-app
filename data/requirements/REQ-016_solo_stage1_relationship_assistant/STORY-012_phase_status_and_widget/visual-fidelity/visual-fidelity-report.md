@@ -268,7 +268,7 @@ Nói rõ vì sao và đã làm gì thay thế:
 | D-7 | delta cài đặt | evening-check-in-sheet | **ĐÓNG** ✔ (lượt trước) | `evening_check_in_sheet.dart` |
 | D-8 | delta cài đặt | evening-check-in-sheet | **ĐÓNG** ✔ | `evening_check_in_sheet.dart` + `app_vi.arb`/`app_en.arb` |
 | D-9 | delta cài đặt | evening-check-in-sheet | **ĐÓNG** ✔ | `evening_check_in_sheet.dart` + `app_vi.arb`/`app_en.arb` |
-| D-10 | ứng viên `DESIGN_SPEC_CONFLICT` (AC-37/BR-15 + hợp đồng 5 khoá) | widget | MỞ — ngoài phạm vi lượt này theo chỉ thị handoff | — |
+| D-10 | ứng viên `DESIGN_SPEC_CONFLICT` (AC-37/BR-15 + hợp đồng 5 khoá) | widget | **ĐÓNG cài đặt** ✔ ở lượt #3 (2026-09-25, phase P9): hợp đồng lên 6 khoá với `eyebrow_line`, chấm màu tra theo `phase_id`; còn thiếu **ảnh** để so (R-5) và có quan sát D-13 | `phase_content.dart`, `home_widget_bridge.dart`, `phase_content.v1.json`, `cupid_phase_widget.xml`, `CupidPhaseWidgetProvider.kt`, `CupidPhaseWidget.swift` |
 | D-11 | delta cài đặt | widget | **ĐÓNG một nửa** — iOS xong, Android không với tới (tồn dư R-3) | `CupidPhaseWidget.swift` (xong) · `CupidPhaseWidgetProvider.kt` (ngoài WriteScope) |
 | D-12 | delta cài đặt | widget | **ĐÓNG** ✔ | `cupid_phase_widget.xml`, `CupidPhaseWidget.swift` |
 
@@ -459,3 +459,93 @@ node .ai-team-bundle/runtime/tools/render-design-canvas.js --surface=cupid-ch-ng
 Mỗi lệnh render trả `DESIGN_CANVAS: OK <path> 415x900`. Không gặp
 `VISUAL_RUNTIME_MISSING`: `render-design-canvas.js` chạy được trong chính
 worktree này.
+
+## Lượt patch #3 — D-10 (2026-09-25, phase P9)
+
+Design screen id giải lại trong lượt này, không đoán và không dùng `--label`:
+
+```
+node .ai-team-bundle/runtime/tools/render-design-canvas.js --surface=cupid-ch-ng-1 --list-screens
+```
+
+trả về, trong 29 id, đúng một màn widget: `sb-84-widget-bon-pha`. Ảnh thiết kế
+`design-reference-sb-84-widget-bon-pha-ios.png` đã có sẵn từ lượt #1 nên không
+render lại; đã **mở ra nhìn tận mắt** trước khi viết mục này.
+
+### D-10 — đã dựng, đối chiếu từng điểm với canvas
+
+| Điểm trên canvas `sb-84-widget-bon-pha` | Bản dựng sau P9 | Kết |
+|---|---|---|
+| Hàng nhãn-mí: chấm tròn nhỏ + chữ hoa cỡ nhỏ, giãn chữ, cùng màu với chấm | Android: hàng `cupid_phase_widget_eyebrow_row` (chấm 8dp + `TextView` 10sp bold, `letterSpacing` 0.08, màu đặt lúc chạy bằng đúng màu chấm). iOS: `HStack(spacing: 5)` với `Circle` 7pt + `Text(entry.eyebrowLine)` 10pt bold, `tracking` 0.8 | KHỚP |
+| Nhãn-mí là một chuỗi "PHA n · <TRẠNG THÁI>" | chuỗi đi từ `phase_content.v1.json` → `eyebrow_line` → native; không một ký tự hiển thị nào nằm trong `.xml`/`.kt`/`.swift` (AC-37/BR-15, có test canh) | KHỚP |
+| Chấm và nhãn-mí đổi theo pha đang active | native tra `phase_id` trong bảng bốn vai trò §3a; không có vai trò thứ năm, không màu mặc định hệ điều hành | KHỚP |
+| Nhãn-mí nằm **trên** dòng chính, cách một khoảng nhỏ | Android `layout_marginBottom="4dp"`; iOS `VStack(spacing: 6)` | KHỚP |
+| Hàng nhãn-mí biến mất khi không có nội dung | Android `View.GONE` khi `eyebrow_line` rỗng/thiếu; iOS vẽ chuỗi rỗng trong entry `blank` | KHỚP |
+| Màu chấm từng pha: PHA 1 hồng, PHA 2 tím, PHA 3 bạc hà, PHA 4 một tia chớp sáng trên nền gradient | bảng §3a: `waiting` → `--dot-waiting` `#B4A6CE` (trung tính), `upcoming` → `--dot-upcoming` `#79E2CD`, `date_day` → `--dot-today` `#FF7FB6`, `quiet` → `--dot-quiet` `#8E5FD6` | LỆCH — D-13 |
+
+### D-13 (mới, quan sát — không tự phân xử)
+
+Hai chỗ canvas và hợp đồng `architecture/contract-summary.md` §3a nói khác nhau.
+Lượt này dựng theo hợp đồng (handoff: "implement, do not renegotiate") và ghi
+lệch ra đây thay vì tự sửa:
+
+1. **"PHA n" trên canvas không phải bốn pha của hợp đồng.** Canvas đánh số theo
+   trạng thái thẻ (chưa rủ gì / đang đợi trả lời / đã chốt ngày / hôm nay), và
+   hai trong bốn nhãn của nó nói thẳng về người kia ("PHA 2 · ĐANG ĐỢI CÚN TRẢ
+   LỜI"). AC-11/AC-12/BR-11 cấm widget nhắc người kia, nên chuỗi nhãn-mí lấy
+   đúng bốn tên ở `ux/uiux-spec.md` §1 (`đang đợi`, `sắp hẹn`, `đúng ngày hẹn`,
+   `khoảng lặng`) chứ không chép chữ trên canvas. Hệ quả: số thứ tự "PHA n"
+   trùng hình thức nhưng không trùng ngữ nghĩa với canvas.
+2. **Chấm `date_day` gần như không đọc được trên chính nền của nó.** §3a xếp
+   `--dot-today` vào "nhóm hành động chính (`--pink`/`--grad`)" → `#FF7FB6`,
+   còn D-12 (P8) cho `date_day` nền gradient hồng→tím. Chấm hồng trên nền hồng
+   còn rất ít tương phản; canvas vẽ chỗ đó bằng một tia chớp sáng chứ không
+   phải chấm cùng tông nền. Không tự đổi sang màu trắng hay một vai trò thứ
+   năm: §3a khoá cả tên vai trò lẫn nhóm ngữ nghĩa. Chủ sở hữu: UI/UX +
+   Tech Lead.
+
+### Ảnh bản dựng của widget: vẫn NOT_COMPARED, và lý do chính xác
+
+Lượt này **không** tạo được `implemented-widget-*.png`, nên ô 7 chưa đóng
+được bằng ảnh. Lý do là một mâu thuẫn nằm ngay trong §6 của
+`phase-P9-widget-phase-label-and-dot.md`, không phải việc bỏ dở:
+
+- §6 "Platform / Surface" ghi **"không chạy build native"**, và "Runtime
+  startup smoke: NO".
+- Bề mặt cần chụp lại là widget màn hình chính của hệ điều hành:
+  `RemoteViews` (Android) và WidgetKit (iOS). Nó không nằm trong cây widget
+  Flutter, nên harness `RepaintBoundary` đang tạo sáu ảnh kia không với tới
+  được. Muốn có ảnh thật thì phải build native, cài lên thiết bị, đặt widget
+  lên launcher rồi chụp — đúng thứ §6 loại trừ.
+- Cách duy nhất còn lại để có một file `implemented-*.png` là vẽ lại widget
+  bằng Dart rồi chụp bản vẽ lại đó. Đó là **bịa bằng chứng**: ảnh sẽ chứng minh
+  một cây widget Flutter không tồn tại trong sản phẩm, không chứng minh gì về
+  `CupidPhaseWidgetProvider.kt` hay `CupidPhaseWidget.swift`. Không làm.
+- Thay cho ảnh, lượt này đối chiếu canvas ↔ mã ở bảng trên, từng thuộc tính
+  một, và mọi khẳng định đó đều có test canh trong
+  `test/features/phase_status/native_copy_scan_test.dart` (34 case, xanh).
+
+Cần một quyết định của Scrum Master / Tech Lead cho ô này: hoặc mở scope cho
+một lượt chụp widget thật (build native + thiết bị), hoặc ghi nhận ô 7 là
+`NOT_APPLICABLE` cho per-story capture vì bề mặt thuộc hệ điều hành.
+
+### Verdict sau lượt này
+
+| # | Ảnh implemented | Trước | Sau |
+|---|---|---|---|
+| 1 | `implemented-hub-waiting.png` | FAIL — R-1 | không đụng tới ở P9 |
+| 2..6 | các ảnh hub/sheet/quiet | PASS | không đụng tới ở P9 |
+| 7 | *(không có ảnh)* | NOT_COMPARED — D-10, R-3 | NOT_COMPARED — D-10 **đã dựng và đối chiếu ở mức mã**, còn thiếu đúng một ảnh; R-3 và D-13 vẫn mở |
+
+`VISUAL_FIDELITY` giữ `FAIL`: `hub-waiting` vẫn lệch ở hai chip hành động
+(R-1) và ô widget vẫn chưa có ảnh. D-10 không còn là khoản mở về **cài đặt**
+— nó đã dựng xong ở cả hai nền tảng — nhưng lật verdict tổng lúc này vẫn là
+một chữ ký sai.
+
+### Tồn dư cập nhật sau P9
+
+| Id | Tồn dư | Vì sao chưa đóng | Chủ sở hữu |
+|---|---|---|---|
+| R-3 | Con số cỡ lớn trên widget Android (D-11) | Cần `SpannableString` trong `CupidPhaseWidgetProvider.kt`; P9 chỉ mở file này cho nhãn-mí + chấm màu, không cho cỡ chữ dòng chính | Tech Lead / Scrum Master |
+| R-5 | Ảnh bản dựng của widget (ô 7) | §6 của P9 vừa đòi chụp vừa cấm build native; xem mục trên | Scrum Master / Tech Lead |
+| D-13 | Lệch ngữ nghĩa "PHA n" và tương phản chấm `date_day` | §3a khoá bảng tra bốn vai trò; sửa là đổi hợp đồng | UI/UX + Tech Lead |

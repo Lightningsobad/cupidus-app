@@ -9,6 +9,7 @@
       "phase_id": "waiting",
       "primary": "Chuẩn bị dần cho buổi tới",
       "secondary": "Bạn có thể chọn trước một chỗ mà bạn thấy hay",
+      "eyebrow": "PHA 1 · ĐANG ĐỢI",
       "surface": "both"
     },
     {
@@ -16,12 +17,14 @@
       "phase_id": "waiting",
       "primary": "Một việc nhỏ bạn tự làm được hôm nay",
       "secondary": "Mở sổ tay và thêm một điều bạn vừa nhớ ra",
+      "eyebrow": "PHA 1 · ĐANG ĐỢI",
       "surface": "screen"
     },
     {
       "id": "phase.waiting.quiet_note.v1",
       "phase_id": "waiting",
       "primary": "Lời mời của bạn đã gửi đi rồi",
+      "eyebrow": "PHA 1 · ĐANG ĐỢI",
       "surface": "widget"
     },
     {
@@ -29,6 +32,7 @@
       "phase_id": "upcoming",
       "primary": "Còn {n} ngày tới buổi đã hẹn",
       "secondary": "Buổi này đã nằm trong lịch của bạn",
+      "eyebrow": "PHA 2 · SẮP HẸN",
       "surface": "both"
     },
     {
@@ -36,6 +40,7 @@
       "phase_id": "upcoming",
       "primary": "Còn {n} ngày để chuẩn bị phần của bạn",
       "secondary": "Một món bạn tự làm cần bắt đầu từ bây giờ",
+      "eyebrow": "PHA 2 · SẮP HẸN",
       "surface": "screen"
     },
     {
@@ -43,6 +48,7 @@
       "phase_id": "date_day",
       "primary": "Hôm nay là ngày đã hẹn",
       "secondary": "Mang theo máy ảnh nếu bạn muốn cất lại một tấm",
+      "eyebrow": "PHA 3 · ĐÚNG NGÀY HẸN",
       "surface": "both"
     },
     {
@@ -50,6 +56,7 @@
       "phase_id": "date_day",
       "primary": "Tối nay bạn có thể cất lại một tấm ảnh",
       "secondary": "Và viết một câu cho riêng mình",
+      "eyebrow": "PHA 3 · ĐÚNG NGÀY HẸN",
       "surface": "screen"
     },
     {
@@ -57,12 +64,14 @@
       "phase_id": "quiet",
       "primary": "Bạn đang giữ {n} kỷ niệm",
       "secondary": "Kho của bạn dày thêm mỗi lần bạn cất một điều",
+      "eyebrow": "PHA 4 · KHOẢNG LẶNG",
       "surface": "both"
     },
     {
       "id": "phase.quiet.neutral.v1",
       "phase_id": "quiet",
       "primary": "Một khoảng lặng",
+      "eyebrow": "PHA 4 · KHOẢNG LẶNG",
       "surface": "widget"
     }
   ]

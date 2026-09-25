@@ -32,6 +32,38 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
+        <!-- D-10: the eyebrow row. The dot is an ImageView with no src: the
+             provider paints a circle of the phase's own token colour into it,
+             because a round shape needs a drawable resource and res/drawable is
+             outside this phase's write scope. Both the dot and the eyebrow text
+             stay GONE until a payload carries eyebrow_line. -->
+        <LinearLayout
+            android:id="@+id/cupid_phase_widget_eyebrow_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/cupid_phase_widget_dot"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_marginEnd="6dp"
+                android:importantForAccessibility="no" />
+
+            <TextView
+                android:id="@+id/cupid_phase_widget_eyebrow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:letterSpacing="0.08"
+                android:maxLines="1"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/cupid_phase_widget_primary"
             android:layout_width="match_parent"

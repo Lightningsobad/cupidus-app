@@ -106,6 +106,7 @@ class PhaseContentItem implements ContentItem {
     required this.phaseId,
     required this.primary,
     required this.secondary,
+    required this.eyebrow,
     required this.surface,
   });
 
@@ -119,10 +120,16 @@ class PhaseContentItem implements ContentItem {
   /// Absent is a valid state, not an error: no second line is drawn.
   final String? secondary;
 
+  /// The generic phase name the widget draws above [primary] (D-10). Required,
+  /// not optional: a phase line that reaches the widget without one would draw
+  /// a headed block with no head, and an absent value here is a content gap the
+  /// parser must report rather than a state the drawing has to survive.
+  final String eyebrow;
+
   final PhaseSurface surface;
 
   /// Every string a reader can see, which is exactly what the gate measures.
-  Iterable<String> get displayStrings => <String>[primary, ?secondary];
+  Iterable<String> get displayStrings => <String>[primary, ?secondary, eyebrow];
 }
 
 /// One drip line for the quiet stretch between dates.
@@ -191,6 +198,7 @@ PhaseContentItem phaseContentItemFromJson(
     phaseId: phaseId,
     primary: requireContentString(json, 'primary', source),
     secondary: optionalContentString(json, 'secondary', source),
+    eyebrow: requireContentString(json, 'eyebrow', source),
     surface: surface,
   );
 }

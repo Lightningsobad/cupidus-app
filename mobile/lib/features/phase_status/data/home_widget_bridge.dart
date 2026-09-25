@@ -22,25 +22,31 @@ import 'phase_content_repository.dart';
 const String widgetKeyPhaseId = 'phase_id';
 const String widgetKeyPrimaryLine = 'primary_line';
 const String widgetKeySecondaryLine = 'secondary_line';
+const String widgetKeyEyebrowLine = 'eyebrow_line';
 const String widgetKeyCardId = 'card_id';
 const String widgetKeyComputedOn = 'computed_on';
 
-/// The complete key set, in contract order. Every push writes all five, using
+/// The complete key set, in contract order. Every push writes all six, using
 /// `null` for the absent ones, so a key left over from an earlier phase cannot
 /// survive into the next payload (`WIDGET-STALE`).
 const List<String> widgetPayloadKeys = <String>[
   widgetKeyPhaseId,
   widgetKeyPrimaryLine,
   widgetKeySecondaryLine,
+  widgetKeyEyebrowLine,
   widgetKeyCardId,
   widgetKeyComputedOn,
 ];
 
-/// The one `phase_id` value the native widget branches on, for the date-day
-/// background the design gives that phase alone (D-12). An identifier the
-/// payload already carries, not a sixth key and not display copy — the widget
-/// still draws only `primary_line` and `secondary_line`.
+/// The four `phase_id` values the native widget branches on: the date-day
+/// background the design gives that phase alone, and the phase colour dot
+/// (D-10/D-12, `architecture/contract-summary.md` §3a). Identifiers the payload
+/// already carries, not extra keys and not display copy — the widget still
+/// draws only `primary_line`, `secondary_line` and `eyebrow_line`.
+const String widgetPhaseIdWaiting = 'waiting';
+const String widgetPhaseIdUpcoming = 'upcoming';
 const String widgetPhaseIdDateDay = 'date_day';
+const String widgetPhaseIdQuiet = 'quiet';
 
 const String widgetAndroidProviderName = 'CupidPhaseWidgetProvider';
 const String widgetIosName = 'CupidPhaseWidget';
@@ -80,6 +86,9 @@ Map<String, String> buildWidgetPayload({
     widgetKeyPrimaryLine: _fill(item.primary, number),
     if (item.secondary != null)
       widgetKeySecondaryLine: _fill(item.secondary!, number),
+    // Never through `_fill`: the eyebrow carries the phase name alone, so a
+    // number has no place in it (AC-9).
+    widgetKeyEyebrowLine: item.eyebrow,
     if (resolution.cardId != null) widgetKeyCardId: resolution.cardId!,
     widgetKeyComputedOn: civilDateIso(today),
   };

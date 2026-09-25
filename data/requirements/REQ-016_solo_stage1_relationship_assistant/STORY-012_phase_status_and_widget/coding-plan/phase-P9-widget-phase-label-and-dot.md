@@ -192,5 +192,11 @@ gọi cả ba là "install delta gộp".
 
 ## 7. Status
 
-- Status: PENDING
+- Status: DONE
 - Last updated: 2026-09-25
+- Tồn dư đã ghi, không phải bỏ dở: ảnh bản dựng của widget (ô 7 trong
+  `visual-fidelity/visual-fidelity-report.md`) vẫn `NOT_COMPARED` — §6 vừa đòi
+  chụp vừa ghi "không chạy build native", mà bề mặt này là widget của hệ điều
+  hành nên không có đường chụp nào không phải build native. Đã đối chiếu
+  canvas ↔ mã từng thuộc tính thay cho ảnh (lượt patch #3 trong report) và ghi
+  R-5 + D-13 kèm chủ sở hữu. Mọi AC ở §4 đều đã có bằng chứng chạy được.

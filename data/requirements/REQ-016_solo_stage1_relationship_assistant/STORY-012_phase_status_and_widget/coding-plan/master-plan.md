@@ -62,7 +62,7 @@
 | P6 | Mobile Developer | Mobile | P1, P2 | YES | DONE |
 | P7 | Mobile Developer | Mobile | P2 | NO | DONE |
 | P8 | Mobile Developer | Mobile | P3, P7 | NO | DONE |
-| P9 | Mobile Developer | Mobile | P4, P5 | YES | PENDING |
+| P9 | Mobile Developer | Mobile | P4, P5 | YES | DONE |
 | P10 | Mobile Developer | Mobile | P6, P8 | YES | PENDING |
 
 Phase file mapping:

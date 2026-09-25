@@ -104,11 +104,12 @@ void main() {
   });
 
   group('the key set is the contract, exactly (contract-summary 2)', () {
-    test('the declared key list is the five contract names in order', () {
+    test('the declared key list is the six contract names in order', () {
       expect(widgetPayloadKeys, <String>[
         'phase_id',
         'primary_line',
         'secondary_line',
+        'eyebrow_line',
         'card_id',
         'computed_on',
       ]);
@@ -176,6 +177,50 @@ void main() {
       );
       expect(quiet.containsKey(widgetKeyCardId), isFalse);
     });
+
+    test('every phase pushes an eyebrow_line, taken from the pack (D-10)', () {
+      for (final SoloPhase phase in SoloPhase.values) {
+        final Map<String, String> payload = buildWidgetPayload(
+          resolution: PhaseResolution(
+            phase: phase,
+            scheduledOn: phase == SoloPhase.upcoming ? '2026-09-19' : null,
+          ),
+          phaseContent: shipped,
+          today: _today,
+          memoryCount: 4,
+        );
+        final String? eyebrow = payload[widgetKeyEyebrowLine];
+        expect(eyebrow, isNotNull, reason: 'no eyebrow for $phase');
+        expect(
+          shipped.items.map((PhaseContentItem item) => item.eyebrow),
+          contains(eyebrow),
+          reason: '$phase',
+        );
+      }
+    });
+
+    test('the eyebrow never carries a count, only the phase name (AC-9)', () {
+      Map<String, String> quietWith(int? memoryCount) => buildWidgetPayload(
+            resolution: const PhaseResolution(phase: SoloPhase.quiet),
+            phaseContent: shipped,
+            today: _today,
+            memoryCount: memoryCount,
+          );
+
+      expect(
+        quietWith(7)[widgetKeyEyebrowLine],
+        quietWith(41)[widgetKeyEyebrowLine],
+      );
+      for (final Map<String, String> payload in <Map<String, String>>[
+        quietWith(7),
+        quietWith(41),
+      ]) {
+        expect(
+          payload[widgetKeyEyebrowLine],
+          isNot(contains(phaseContentNumberPlaceholder)),
+        );
+      }
+    });
   });
 
   group('the lines come from the pack and nowhere else (AC-37/BR-15)', () {
@@ -199,6 +244,7 @@ void main() {
         for (final String key in <String>[
           widgetKeyPrimaryLine,
           widgetKeySecondaryLine,
+          widgetKeyEyebrowLine,
         ]) {
           if (payload[key] case final String line) {
             expect(packStrings, contains(line));
@@ -269,6 +315,7 @@ void main() {
             phaseId: PhaseId.waiting,
             primary: 'screen only',
             secondary: null,
+            eyebrow: 'screen eyebrow',
             surface: PhaseSurface.screen,
           ),
         ]),
@@ -343,6 +390,7 @@ void main() {
             phaseId: PhaseId.waiting,
             primary: 'da doi {n} ngay',
             secondary: null,
+            eyebrow: 'pha 1',
             surface: PhaseSurface.widget,
           ),
         ]),

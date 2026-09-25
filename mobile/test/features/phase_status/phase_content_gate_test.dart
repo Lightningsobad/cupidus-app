@@ -25,6 +25,7 @@ RegExp _standaloneTerm(String term) => RegExp(
 /// it breaks.
 const String _cleanPhasePrimary = 'Chuẩn bị dần cho buổi tới';
 const String _cleanPhaseSecondary = 'Bạn có thể chọn trước một chỗ';
+const String _cleanPhaseEyebrow = 'PHA 1 · ĐANG ĐỢI';
 const String _cleanDripBody = 'Kho của bạn dày thêm khi bạn cất thêm.';
 const String _cleanNudgeTitle = 'Về tới nhà chưa?';
 const String _cleanNudgeBody = 'Cất lại một tấm ảnh nếu bạn muốn.';
@@ -65,6 +66,7 @@ ContentPackage<NudgeItem> _parseNudges(
 String _phaseContentPack({
   String primary = _cleanPhasePrimary,
   String? secondary = _cleanPhaseSecondary,
+  String? eyebrow = _cleanPhaseEyebrow,
 }) =>
     jsonEncode(<String, Object?>{
       'id': 'phase_content.fixture',
@@ -77,6 +79,7 @@ String _phaseContentPack({
           'phase_id': 'waiting',
           'primary': primary,
           'secondary': ?secondary,
+          'eyebrow': ?eyebrow,
           'surface': 'both',
         },
       ],
@@ -116,13 +119,18 @@ String _nudgesPack({
 List<PhaseContentViolation> _violations({
   String phasePrimary = _cleanPhasePrimary,
   String? phaseSecondary = _cleanPhaseSecondary,
+  String phaseEyebrow = _cleanPhaseEyebrow,
   String dripBody = _cleanDripBody,
   String? nudgeTitle = _cleanNudgeTitle,
   String nudgeBody = _cleanNudgeBody,
 }) =>
     validatePhaseContentPackages(
       phaseContent: _parsePhaseContent(
-        _phaseContentPack(primary: phasePrimary, secondary: phaseSecondary),
+        _phaseContentPack(
+          primary: phasePrimary,
+          secondary: phaseSecondary,
+          eyebrow: phaseEyebrow,
+        ),
       ),
       drip: _parseDrip(_dripPack(body: dripBody)),
       nudges: _parseNudges(
@@ -204,6 +212,29 @@ void main() {
       for (final PhaseId id in PhaseId.values) {
         expect(covered, contains(id), reason: id.wireValue);
       }
+    });
+
+    test('every shipped phase line carries an eyebrow (D-10/AC-9)', () {
+      for (final PhaseContentItem item in phaseContent.items) {
+        expect(item.eyebrow.trim(), isNotEmpty, reason: item.id);
+      }
+    });
+
+    test('a phase entry without an eyebrow fails to parse (D-10/AC-9)', () {
+      expect(
+        () => _parsePhaseContent(_phaseContentPack(eyebrow: null)),
+        throwsA(
+          isA<ContentPackageFormatException>().having(
+            (ContentPackageFormatException e) => e.toString(),
+            'message',
+            contains('eyebrow'),
+          ),
+        ),
+      );
+      expect(
+        () => _parsePhaseContent(_phaseContentPack(eyebrow: '')),
+        throwsA(isA<ContentPackageFormatException>()),
+      );
     });
 
     test('every nudge slot of the closed set ships a body', () {
@@ -317,6 +348,23 @@ void main() {
       expect(
         _violations(phaseSecondary: null, nudgeTitle: null),
         isEmpty,
+      );
+    });
+
+    test('the eyebrow is scanned like any other display string (D-10)', () {
+      for (final MapEntry<InvariantRule, List<String>> entry
+          in invariantDeniedTerms.entries) {
+        for (final String term in entry.value) {
+          expect(
+            _rulesFrom(_violations(phaseEyebrow: 'PHA 1 · $term')),
+            contains(entry.key),
+            reason: '${entry.key.wireValue}: $term',
+          );
+        }
+      }
+      expect(
+        _rulesFrom(_violations(phaseEyebrow: 'PHA 1 · 40% ĐANG ĐỢI')),
+        contains(InvariantRule.percentDisplay),
       );
     });
   });

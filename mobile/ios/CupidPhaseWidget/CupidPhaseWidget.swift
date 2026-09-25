@@ -10,8 +10,12 @@ enum CupidWidgetContract {
     static let keyPhaseId = "phase_id"
     static let keyPrimaryLine = "primary_line"
     static let keySecondaryLine = "secondary_line"
+    static let keyEyebrowLine = "eyebrow_line"
     static let keyCardId = "card_id"
+    static let phaseIdWaiting = "waiting"
+    static let phaseIdUpcoming = "upcoming"
     static let phaseIdDateDay = "date_day"
+    static let phaseIdQuiet = "quiet"
     static let deepLinkScheme = "cupidapp"
     static let deepLinkCardHost = "card"
     static let deepLinkHomeHost = "home"
@@ -33,6 +37,33 @@ enum CupidWidgetPalette {
     static let accentPink = Color(red: 1.0, green: 0.498, blue: 0.714)
     // colorAccentPurple #B78CF5
     static let accentPurple = Color(red: 0.718, green: 0.549, blue: 0.961)
+    // colorMint #79E2CD
+    static let mint = Color(red: 0.475, green: 0.886, blue: 0.804)
+    // colorAccentPurpleDark #8E5FD6
+    static let accentPurpleDark = Color(red: 0.557, green: 0.373, blue: 0.839)
+
+    // D-10 (architecture/contract-summary.md 3a): four dot token roles, one per
+    // phase_id of the closed set. No fifth role and no system colour - an
+    // unknown or missing phase_id draws the neutral waiting role.
+    static let dotWaiting = textMuted
+    static let dotUpcoming = mint
+    static let dotToday = accentPink
+    static let dotQuiet = accentPurpleDark
+
+    static func dot(for phaseId: String) -> Color {
+        switch phaseId {
+        case CupidWidgetContract.phaseIdWaiting:
+            return dotWaiting
+        case CupidWidgetContract.phaseIdUpcoming:
+            return dotUpcoming
+        case CupidWidgetContract.phaseIdDateDay:
+            return dotToday
+        case CupidWidgetContract.phaseIdQuiet:
+            return dotQuiet
+        default:
+            return dotWaiting
+        }
+    }
 }
 
 // D-11: the design draws the days number at display size while the rest of the
@@ -70,9 +101,12 @@ struct CupidPhaseEntry: TimelineEntry {
     let phaseId: String
     let primaryLine: String
     let secondaryLine: String
+    let eyebrowLine: String
     let cardId: String
 
     var isDateDay: Bool { phaseId == CupidWidgetContract.phaseIdDateDay }
+
+    var dotColor: Color { CupidWidgetPalette.dot(for: phaseId) }
 
     static func blank(at date: Date) -> CupidPhaseEntry {
         CupidPhaseEntry(
@@ -80,6 +114,7 @@ struct CupidPhaseEntry: TimelineEntry {
             phaseId: CupidWidgetContract.empty,
             primaryLine: CupidWidgetContract.empty,
             secondaryLine: CupidWidgetContract.empty,
+            eyebrowLine: CupidWidgetContract.empty,
             cardId: CupidWidgetContract.empty
         )
     }
@@ -98,6 +133,9 @@ struct CupidPhaseEntry: TimelineEntry {
                 ?? CupidWidgetContract.empty,
             secondaryLine: store.string(
                 forKey: CupidWidgetContract.keySecondaryLine
+            ) ?? CupidWidgetContract.empty,
+            eyebrowLine: store.string(
+                forKey: CupidWidgetContract.keyEyebrowLine
             ) ?? CupidWidgetContract.empty,
             cardId: store.string(forKey: CupidWidgetContract.keyCardId)
                 ?? CupidWidgetContract.empty
@@ -198,6 +236,18 @@ struct CupidPhaseWidgetView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
+            // D-10: the eyebrow row. The dot is the phase token, looked up from
+            // `phase_id`; the line itself is payload, never a literal.
+            HStack(spacing: 5) {
+                Circle()
+                    .fill(entry.dotColor)
+                    .frame(width: 7, height: 7)
+                Text(entry.eyebrowLine)
+                    .font(.system(size: 10, weight: .bold))
+                    .tracking(0.8)
+                    .foregroundColor(entry.dotColor)
+                    .lineLimit(1)
+            }
             (
                 Text(split.lead)
                     + Text(split.number)
