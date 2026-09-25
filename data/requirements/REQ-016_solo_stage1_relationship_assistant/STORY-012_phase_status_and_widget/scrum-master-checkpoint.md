@@ -207,27 +207,21 @@ Story Git Boundary:
 - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget
 - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget
 - MergeTarget: codex/REQ-016_solo_stage1_relationship_assistant-integration
-- BaseHead: d84f18ded661b3e4309c7066ed9b6aa83a2ef579
+- BaseHead: 9db07af14d324e2739fc1d8e5c455ebc0c80c729
 - BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget.json
-- Boundary status: COMMITTED. PO/UX ac-patch (D-10) `84bdd6b2`. Tech Lead
-  architecture-solution + coding-plan (P9+P10 added, D-10) sealed at
-  `f23c9cea` / `139739387aff`. Alex-Mobile-Dev's Phase P9 (MOBILE_COMPLETE:
-  YES, independently verified) sealed -> BaseHead
-  `23e7bb9e78311d1fabba65465af7dce1f28ef967`. P10 dispatch returned ZERO edits
-  + `p10_blocker` (see Current State); Scrum Master committed the
-  checkpoint/test-results drift as `820d1912` and re-sealed -> BaseHead
-  `820d19120ef72936675d76884919f5bcc32024eb`. req_master.md:217 attribution
-  fixed (`4d900c35`); D-13 Design Ruling Log row added + committed (control
-  checkout, `ecade7ad`). Andy-PO's D-13 ac-patch (`requirements.md` +
-  `uiux-spec.md`) verified and committed `e04157b4`; re-sealed -> BaseHead
-  `e04157b42400ee7119235a4a3395c9ffbbc0cde5`. Alan-Techlead
-  `Mode: architecture-solution` (D-13 §3a shape + P10 §7 decision) returned
-  `TECH_LEAD_COMPLETE: YES`, verified, and committed together with the
-  `story_master.md` gate fixes (AC-9 + Implementation Lane) as `c3b4311a`;
-  re-sealed -> BaseHead now `c3b4311a8b338c6435238ce58004b2e92616216c`.
-  Control-checkout `req_master.md` D-13 token-count typo fixed separately on
-  `main` (`2e629add`, outside this story's boundary). Next dispatch: fresh
-  Alan-Techlead `Mode: coding-plan` (WriteScope `coding-plan/` only).
+  (this is the authoritative live value; inline BaseHead text above may lag by
+  one checkpoint-only commit — trust BoundaryState at spawn time)
+- Boundary status: COMMITTED. (Older history: PO/UX ac-patch `84bdd6b2`;
+  Tech Lead P9+P10 coding-plan `f23c9cea`/`139739387aff`; P9 implementation
+  sealed `23e7bb9e`; P10-blocker checkpoint drift `820d1912`;
+  req_master.md:217 fix `4d900c35`; D-13 ruling row `ecade7ad`; Andy-PO D-13
+  ac-patch `e04157b4`; Tech Lead architecture-solution + story_master.md gate
+  fixes `c3b4311a`.) Most recent: Alan-Techlead-2 `Mode: coding-plan` (P10
+  rewrite to `journalAvailable`, new P11 D-13 glyph phase, new P12 R-5 capture
+  phase, master-plan.md update) returned `TECH_LEAD_COMPLETE: YES`, verified
+  (3-part protocol, all 4 output files read directly), committed `9db07af1`,
+  resealed -> BaseHead `9db07af14d324e2739fc1d8e5c455ebc0c80c729`. Next
+  dispatch: fresh Alex-Mobile-Dev, P10 first (sequential P10 -> P11 -> P12).
 
 Last Delegation:
 - Role: tech-lead (Alan-Techlead-2, fresh spawn — prior Alan-Techlead instance
