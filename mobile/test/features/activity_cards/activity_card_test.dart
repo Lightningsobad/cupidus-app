@@ -50,7 +50,24 @@ void main() {
         ActivityCardOrigin.occasionSuggestion,
         ActivityCardOrigin.giftSuggestion,
       ]);
-      expect(ActivityCardOrigin.values.last, ActivityCardOrigin.dateScript);
+      // Its own position, not the tail: append-only means a later story adds a
+      // value behind this one, so pinning `values.last` here would break on the
+      // very append this contract invites (STORY-011 added `zodiacShell`).
+      expect(ActivityCardOrigin.values.indexOf(ActivityCardOrigin.dateScript), 7);
+    });
+
+    test('the zodiac shell has its own origin, appended after date_script', () {
+      expect(
+        ActivityCardOrigin.fromWireValue('zodiac_shell'),
+        ActivityCardOrigin.zodiacShell,
+      );
+      expect(ActivityCardOrigin.zodiacShell.wireValue, 'zodiac_shell');
+      expect(
+        ActivityCardOrigin.values.indexOf(ActivityCardOrigin.zodiacShell),
+        greaterThan(
+          ActivityCardOrigin.values.indexOf(ActivityCardOrigin.dateScript),
+        ),
+      );
     });
 
     test('an unknown wire value is an error, not a silent default', () {

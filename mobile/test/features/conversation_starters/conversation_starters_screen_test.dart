@@ -997,25 +997,9 @@ void main() {
       expect(find.byType(ConversationStartersScreen), findsOneWidget);
     });
 
-    testWidgets('ô cung hoàng đạo vẫn giữ câu trả lời "sắp có"',
-        (WidgetTester tester) async {
-      await registerCompositionRoot();
-
-      tester.view.physicalSize = _tallViewport;
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-      await tester.pumpWidget(_host(ActivityCardHubView(repository: cards)));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(const Key('activity_quick_entry_slot_2')));
-      await tester.pump();
-
-      expect(
-        find.byKey(const Key('activity_quick_entry_coming_soon')),
-        findsOneWidget,
-      );
-      expect(find.byType(ConversationStartersScreen), findsNothing);
-    });
+    // Ô 2 ("vỏ hoàng đạo") rời danh sách này khi STORY-011 ship màn (7):
+    // không còn ô nào trả lời "sắp có" nữa. Hồi quy điều hướng của nó nằm ở
+    // `test/features/zodiac_shell/zodiac_shell_entry_point_test.dart`.
 
     test('entry point id và ô hỏi của màn (6) là đúng hai đích sổ tay', () {
       expect(conversationStartersEntryPointId, 'conversation_starters');
