@@ -13,13 +13,59 @@ Current State:
   edits, and returned `p10_blocker` in the run file
   (`RUN-...-mobile-dev.json`) code `PHASE_SPEC_CONTRADICTS_CODE` — see "P10
   blocker (new, 2026-09-25)" below. D-13 Design Ruling Log row committed in
-  control-checkout `req_master.md`; Andy-PO `Mode: ac-patch` dispatched
-  (`Andy-PO@session-e7df910a`, RunId `...-product-owner`) to check whether
-  AC-9/AC-16..19/AC-37/BR-15/`ux/uiux-spec.md` §2/§4 wording needs a
-  glyph-vs-dot patch — awaiting `PRODUCT_OWNER_COMPLETE`.
-- Completed Checklist: Requirements [x] (commit `84bdd6b2`), UX [x] (same
-  commit), Architecture [x] (contract-summary.md §2/§3/§3a/§4/§6 for D-10,
-  sealed), Implementation [ ] (P9 DONE and sealed, P10 in flight — both
+  control-checkout `req_master.md` (`ecade7ad`). Andy-PO `Mode: ac-patch`
+  RETURNED `PRODUCT_OWNER_COMPLETE: YES` — patched `requirements.md` (AC-9,
+  AC-16..19 area, AC-37/BR-15 phrasing) + `ux/uiux-spec.md` §2/§4 wording from
+  "chấm màu riêng của pha" to shape-neutral "chỉ báo pha", documenting the
+  `date_day` glyph exception; deferred the technical token-shape definition to
+  `contract-summary.md` §3a as instructed. Verified (3-part protocol) and
+  committed `e04157b4`; BaseHead resealed to
+  `e04157b42400ee7119235a4a3395c9ffbbc0cde5`; Andy-PO released (`TaskStop`).
+  Alan-Techlead `Mode: architecture-solution` RETURNED `TECH_LEAD_COMPLETE:
+  YES`. Verified (3-part protocol): run file `COMPLETED`; `git diff
+  e04157b4.. --stat` touched only `architecture/contract-summary.md` (matches
+  declared WriteScope); read the diff directly — §3a renamed to "Chỉ báo pha",
+  added the Hình dạng (D-13) column (3 tokens keep chấm màu đặc, `--dot-today`
+  becomes glyph tia chớp, name unchanged so D-12 mapping is untouched, glyph is
+  a shipped native asset not content-pack/payload), and a new §7 records the
+  P10 decision: **option (a)** — add `bool journalAvailable = true` to
+  `EveningCheckInSheet`/`.show`, gate the "write a sentence" block on that flag
+  (not `openJournal`), leaving `_openFromPayload` and existing P6/P8 test seams
+  untouched; (b)/(c) rejected with rationale. Sealed and committed (see
+  Boundary status). Andy-PO's separate `PRODUCT_OWNER_COMPLETE: NO` message
+  (arrived after the run file already showed `YES`) was reconciled: the actual
+  `requirements.md`/`uiux-spec.md` patch content was independently verified
+  correct and stands as committed; the "NO" was Andy-PO flagging two
+  Scrum-Master-owned `story_master.md` Stop-hook gate gaps outside its own
+  WriteScope (`Target: scrum-master, Mode: ac-patch`), not a defect in its own
+  patch. Both gaps fixed directly by Scrum Master this round (see "story_master.md
+  gate fix" below) and committed together with the Tech Lead seal. Also
+  corrected an off-by-one in the control-checkout `req_master.md` D-13 row
+  ("4 token màu còn lại" -> "3") to match `contract-summary.md` §3a's actual
+  3-dot + 1-glyph split; committed on `main` separately (control-checkout
+  commit, not part of this worktree's history). A separate `Mode: coding-plan`
+  handoff is the next dispatch (guard `TECHLEAD_MODE_MIXED_OUTPUTS` forbids
+  combining architecture-solution and coding-plan outputs in one handoff).
+
+- **story_master.md gate fix (this round, Scrum-Master-owned, per Andy-PO's
+  routed blocker):** (1) added AC-9 covering design-screen visual match for
+  all 7 `Design-Screen` ids against surface `cupid-ch-ng-1`
+  (`validate-story-ac-coverage.sh` gap); (2) changed `Implementation Lane:
+  mobile` to `Implementation Lane: shared (backend + mobile)` with a note that
+  only mobile-dev actually executes code, no backend lane runs — reconciles
+  `Complexity: complex` with the lane field per `validate-lane-consistency.sh`,
+  and matches the exact handoff wording Tech Lead's own `architecture/
+  solution.md` §1 Key Discovery already cites ("Handoff ghi Implementation
+  Lane: shared (backend + mobile)... Không có lane backend trong story này"),
+  verified directly at `architecture/solution.md:30` before editing. Both
+  fixes are uncommitted alongside the Tech Lead seal; committed together this
+  round.
+- Completed Checklist: Requirements [x] (D-13 ac-patch commit `e04157b4`),
+  UX [x] (same commit), Architecture [x] (contract-summary.md §2/§3/§3a/§4/§6/§7
+  for D-10 + D-13 shape + P10 decision, this round's Tech Lead output pending
+  commit below), Implementation [ ] (P9 DONE and sealed; P10 BLOCKED pending
+  the coding-plan rewrite per Tech Lead's §7 decision; D-13 glyph and R-5
+  native-capture phases not yet added to the coding plan — all three will be
   mobile-dev, cannot run concurrently: MAX_CODE_WRITERS_PER_STORY=1), Review
   [ ] (last committed review: final-synthesis Outcome: PATCH_REQUIRED,
   commit `322c4276`, superseded)
@@ -91,28 +137,35 @@ is clean, i.e. after P10 seals):**
   `contract-summary.md` §3a change — Tech Lead must update the contract
   (shape, not just color, so likely a new asset/SF-Symbol/vector-path
   decision) before mobile-dev implements it.
-- Next resume action: on Andy-PO's `PRODUCT_OWNER_COMPLETE`, verify (3-part
-  protocol) + seal via `git-story-boundary.sh refresh-base --run-id
-  ...-product-owner`, release if `list-releasable-agents.sh` prints it, THEN
-  dispatch Alan-Techlead (fresh spawn) `Mode: architecture-solution` covering
-  BOTH open Tech Lead items in one pass: (1) the D-13 §3a glyph-shape contract
-  change, (2) the P10 blocker's (a)/(b)/(c) call on AC-18's
-  `openJournal`-as-availability-proxy (see "P10 blocker" above) — revise
-  `phase-P10-checkin-degrade-parity.md` in place per whichever option Tech
-  Lead picks. Then same-agent `Mode: coding-plan` to add/patch phases: revised
-  P10 (or its replacement), the D-13 glyph-swap implementation
-  (`CupidPhaseWidgetProvider.kt` + `CupidPhaseWidget.swift`), and R-5 native
-  build+device capture for the widget row-7 screenshot (Depends-On the D-13
-  implementation phase so the capture shows the corrected glyph). All three
-  implementation phases are `code-writer` — cannot run concurrently with each
-  other under `MAX_CODE_WRITERS_PER_STORY: 1`.
+- Next resume action: on Alan-Techlead's `TECH_LEAD_COMPLETE` (architecture-
+  solution only), verify (3-part protocol: agent idle/gone, `git diff
+  e04157b4.. --stat` matches WriteScope `architecture/` only, read
+  `contract-summary.md` directly to confirm both the D-13 shape-contract patch
+  AND a stated P10 (a)/(b)/(c) decision + rationale are present), seal via
+  `git-story-boundary.sh refresh-base`, commit. THEN build a SECOND handoff
+  (same agent, `SendMessage` continuation if still addressable, else fresh
+  spawn) `Mode: coding-plan` — separate dispatch, guard
+  `TECHLEAD_MODE_MIXED_OUTPUTS` forbids combining architecture-solution and
+  coding-plan outputs in one handoff — to: (1) revise
+  `phase-P10-checkin-degrade-parity.md` in place per Tech Lead's chosen
+  (a)/(b)/(c) option, (2) add a D-13 glyph-swap implementation phase
+  (`CupidPhaseWidgetProvider.kt` + `CupidPhaseWidget.swift`, Depends-On NONE),
+  (3) add an R-5 native build+device capture phase for the widget row-7
+  screenshot (Depends-On the D-13 implementation phase). All three are
+  `code-writer` phases — cannot run concurrently with each other under
+  `MAX_CODE_WRITERS_PER_STORY: 1`.
 - Confirmed constraint (still applies): a fresh spawn attempt into this
   worktree while it is dirty from an in-flight/uncommitted phase is BLOCKED by
   `git-story-boundary.sh start` ("worktree is dirty") REGARDLESS of
   concurrency class (`planning` included) — always seal/commit the current
   phase before spawning the next, even a planning-only one. Applied again this
-  round: committed the P9-seal-era checkpoint/test-results drift (commit
-  `820d1912`) before dispatching Andy-PO.
+  round: committed the PO ac-patch + checkpoint drift as `e04157b4` and
+  resealed BaseHead before dispatching Alan-Techlead.
+- ALSO NOTE (this round): `list-releasable-agents.sh` printed all three prior
+  agents (Alan-Techlead, Alex-Mobile-Dev, Andy-PO) as releasable once their
+  runs went terminal — all were `TaskStop`-ed. This means Alex-Mobile-Dev's
+  P10 re-dispatch (after Tech Lead resolves the blocker) will need a FRESH
+  spawn, not a `SendMessage` continuation of the earlier instance.
 
 Story Git Boundary:
 - Git-Boundary: REQUIRED
@@ -121,37 +174,45 @@ Story Git Boundary:
 - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget
 - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget
 - MergeTarget: codex/REQ-016_solo_stage1_relationship_assistant-integration
-- BaseHead: 820d19120ef72936675d76884919f5bcc32024eb
+- BaseHead: e04157b42400ee7119235a4a3395c9ffbbc0cde5
 - BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget.json
-- Boundary status: COMMITTED. PO/UX ac-patch `84bdd6b2`. Tech Lead
-  architecture-solution + coding-plan (P9+P10 added) sealed at `f23c9cea` /
-  `139739387aff`. Alex-Mobile-Dev's Phase P9 (MOBILE_COMPLETE: YES,
-  independently verified) sealed -> BaseHead `23e7bb9e78311d1fabba65465af7dce1f28ef967`.
-  P10 dispatch returned ZERO edits + `p10_blocker` (see Current State); Scrum
-  Master committed the checkpoint/test-results drift as `820d1912` and
-  re-sealed -> BaseHead now `820d19120ef72936675d76884919f5bcc32024eb`.
-  req_master.md:217 attribution fixed (`4d900c35`); D-13 Design Ruling Log row
-  added (control checkout, uncommitted-check pending — verify before next
-  Tech Lead dispatch).
+- Boundary status: COMMITTED. PO/UX ac-patch (D-10) `84bdd6b2`. Tech Lead
+  architecture-solution + coding-plan (P9+P10 added, D-10) sealed at
+  `f23c9cea` / `139739387aff`. Alex-Mobile-Dev's Phase P9 (MOBILE_COMPLETE:
+  YES, independently verified) sealed -> BaseHead
+  `23e7bb9e78311d1fabba65465af7dce1f28ef967`. P10 dispatch returned ZERO edits
+  + `p10_blocker` (see Current State); Scrum Master committed the
+  checkpoint/test-results drift as `820d1912` and re-sealed -> BaseHead
+  `820d19120ef72936675d76884919f5bcc32024eb`. req_master.md:217 attribution
+  fixed (`4d900c35`); D-13 Design Ruling Log row added + committed (control
+  checkout, `ecade7ad`). Andy-PO's D-13 ac-patch (`requirements.md` +
+  `uiux-spec.md`) verified and committed `e04157b4`; re-sealed -> BaseHead now
+  `e04157b42400ee7119235a4a3395c9ffbbc0cde5`. Alan-Techlead
+  `Mode: architecture-solution` (D-13 §3a + P10 blocker decision) dispatched
+  next, awaiting `TECH_LEAD_COMPLETE`.
 
 Last Delegation:
-- Role: product-owner (Andy-PO, fresh spawn)
-- Mode: ac-patch
-- RunId: RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-product-owner
-- Scope of this run: check whether AC-9/AC-16..19/AC-37/BR-15 and
-  `ux/uiux-spec.md` §2/§4 describe the `date_day` phase dot's SHAPE in a way
-  that the D-13 lightning-bolt-glyph ruling would contradict; patch only if
-  so. WriteScope: exactly `requirements/requirements.md` +
-  `ux/uiux-spec.md`. Forbidden: `architecture/contract-summary.md`, anything
-  under `mobile/`.
-- Result: DISPATCHED (`Andy-PO@session-e7df910a`), awaiting
-  `PRODUCT_OWNER_COMPLETE`
-- Alex-Mobile-Dev (mobile-dev): P10 run returned `p10_blocker`, made zero
-  edits, `status: COMPLETED` in the run file — NOT released yet (still shows
-  idle in `ListAgents`, will be needed again for the corrected P10 phase
-  after Tech Lead resolves the blocker; do not `TaskStop` it prematurely).
-- Alan-Techlead (tech-lead): confirmed already stopped in a prior round. Will
-  need a FRESH spawn next (not a continuation) once Andy-PO returns.
+- Role: tech-lead (Alan-Techlead, fresh spawn)
+- Mode: architecture-solution (ONLY — coding-plan is a separate follow-up
+  handoff per guard `TECHLEAD_MODE_MIXED_OUTPUTS`)
+- RunId: RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-tech-lead
+- Scope of this run: (1) patch `architecture/contract-summary.md` §3a so the
+  `date_day` token's contract allows a lightning-bolt glyph shape instead of a
+  dot (other 3 tokens unchanged) — D-13; (2) pick and record one of
+  options (a)/(b)/(c) for the P10 `openJournal`-availability-proxy blocker,
+  with rationale, inside `contract-summary.md` (phase-file edit itself is
+  deferred to the coding-plan follow-up). WriteScope: exactly
+  `architecture/` (only `contract-summary.md` as OutputPath).
+- Result: COMPLETED (`Alan-Techlead@session-e7df910a`), `TECH_LEAD_COMPLETE:
+  YES` — verified per 3-part protocol above. Released (`TaskStop`) per
+  `list-releasable-agents.sh` this round; a future Tech Lead dispatch for the
+  coding-plan follow-up needs a FRESH spawn.
+- Next dispatch to build: fresh Alan-Techlead, `Mode: coding-plan`, WriteScope
+  `coding-plan/` only — see "Next Resume Action" below.
+- Prior specialists (Andy-PO ac-patch, Alex-Mobile-Dev P9/P10-blocker runs):
+  all COMPLETED/terminal, verified, sealed, and released via `TaskStop` —
+  every future dispatch for any of these three roles needs a FRESH spawn, not
+  a continuation.
 
 Validation Result:
 - Gate: N/A (design-ruling-required guard satisfied this round: D-13 row
@@ -161,38 +222,50 @@ Validation Result:
 - Missing Exact Paths: N/A
 
 Waiting Reason:
-- Waiting on Andy-PO `Mode: ac-patch` (RunId `...-product-owner`) to return
-  `PRODUCT_OWNER_COMPLETE`.
+- None right now — Tech Lead architecture-solution returned and is verified;
+  next action is Scrum-Master-owned (commit, reseal, then dispatch coding-plan).
 - P10 is BLOCKED, not in flight — do not re-dispatch mobile-dev for P10 until
-  Tech Lead resolves the (a)/(b)/(c) call and (if needed) rewrites
-  `phase-P10-checkin-degrade-parity.md`.
-- R-5, D-13 (now routed), R-3 — see "Open decisions"/"P10 blocker" in Current
-  State above for items still needing a Scrum Master/Tech Lead decision before
-  the story's review gate can close CLEAN.
+  the coding-plan follow-up rewrites `phase-P10-checkin-degrade-parity.md` per
+  Tech Lead's §7 option (a) decision.
+- R-5, R-3 — see "Open decisions"/"P10 blocker" in Current State above for
+  items still needing follow-through before the story's review gate can close
+  CLEAN. D-13 is now fully routed (PO ac-patch + Tech Lead architecture both
+  done).
 
 Next Resume Action:
-1. On Andy-PO's `PRODUCT_OWNER_COMPLETE`: verify (3-part protocol: agent
-   idle/gone, `git diff 820d1912.. --stat` matches the declared WriteScope
-   exactly — `requirements.md`/`uiux-spec.md` only, or a clean no-op — read the
-   agent's own stated conclusion directly), then seal via
-   `git-story-boundary.sh refresh-base --run-id ...-product-owner`, commit,
-   release via `list-releasable-agents.sh` + `TaskStop` if printed.
-2. Dispatch Alan-Techlead (fresh spawn) `Mode: architecture-solution` for BOTH
-   D-13 (§3a glyph-shape) and the P10 blocker (AC-18 proxy choice among
-   (a)/(b)/(c)), then same-agent `Mode: coding-plan` to patch/add phases (see
-   "Next resume action" under P10 blocker/USER DECISIONS above for the full
-   phase list).
-3. Once the corrected P10 + D-13-implementation + R-5-capture phases are all
-   DONE and sealed, tick `story_master.md` Implementation checkbox, then route
-   to Iris-QC (Story-Class `standard` — story owes rendered visual-fidelity
-   evidence, review must assess R-1/R-5 directly).
-4. Once merged, reconcile the control-checkout `story_master.md` Architecture
+1. DONE this round: verified Tech Lead's architecture-solution output
+   (3-part protocol), fixed `story_master.md`'s two Stop-hook gate gaps
+   (AC-9 design-match, Implementation Lane), corrected the control-checkout
+   `req_master.md` D-13 token-count typo. Commit all three worktree files
+   (`architecture/contract-summary.md`, `story_master.md`, this checkpoint)
+   together, then run `git-story-boundary.sh refresh-base --req
+   REQ-016_solo_stage1_relationship_assistant --story
+   STORY-012_phase_status_and_widget` to reseal BaseHead.
+2. Build and dispatch a fresh Alan-Techlead, `Mode: coding-plan`, WriteScope
+   `coding-plan/` only, to: revise `phase-P10-checkin-degrade-parity.md` per
+   the §7 option (a) decision (add `journalAvailable` flag, gate the
+   write-a-sentence block on it), add a D-13 glyph-implementation phase
+   (`CupidPhaseWidgetProvider.kt` + `CupidPhaseWidget.swift`, Depends-On NONE),
+   add an R-5 native build+device capture phase for the widget row-7
+   screenshot (Depends-On the D-13 implementation phase).
+3. Once Tech Lead's coding-plan patch is sealed, dispatch Alex-Mobile-Dev
+   (FRESH spawn — prior instance released) for the corrected P10, then D-13
+   implementation, then R-5 capture, in sequence (all `code-writer`, cannot
+   run concurrently).
+4. Once all three phases are DONE and sealed, tick `story_master.md`
+   Implementation checkbox, then route to Iris-QC (Story-Class `standard` —
+   story owes rendered visual-fidelity evidence, review must assess R-1/R-5
+   directly).
+5. Once merged, reconcile the control-checkout `story_master.md` Architecture
    and Implementation checkboxes (currently stale `[ ]` there — real state
    lives in this worktree).
 
 Files Updated:
-- data/requirements/REQ-016_solo_stage1_relationship_assistant/req_master.md (control checkout, D-13 Design Ruling Log row, commit `ecade7ad`)
-- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/scrum-master-checkpoint.md (this file, in the story worktree; also committed in worktree as `820d1912` for the pre-PO metadata drift)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/req_master.md (control checkout, D-13 Design Ruling Log row, commit `ecade7ad`; token-count typo "4"->"3" corrected this round, pending commit on `main`)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/architecture/contract-summary.md (Tech Lead architecture-solution: §3a D-13 glyph shape + new §7 P10 decision, this round, pending commit)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/story_master.md (this round: added AC-9 design-match, changed Implementation Lane to `shared`, pending commit)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/scrum-master-checkpoint.md (this file, in the story worktree; committed in worktree as `820d1912` (pre-PO drift) and `e04157b4` (PO ac-patch + checkpoint); this round's edits pending commit)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/requirements/requirements.md, ux/uiux-spec.md (Andy-PO ac-patch for D-13, commit `e04157b4`)
 - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/master-plan.md (P9/P10 rows added; P9 -> DONE)
 - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/phase-P9-widget-phase-label-and-dot.md (DONE, sealed)
 - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/phase-P10-checkin-degrade-parity.md (sealed, PENDING -> in flight)

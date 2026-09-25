@@ -3,7 +3,11 @@
 Status: TODO
 Complexity: complex
 Story-Class: standard
-Implementation Lane: mobile (ranh giới đã chốt 2026-09-11 — `architecture/solution.md` §1 Key Discovery: không có lane backend, xem STORY-001 contract-summary §1 + system memory R9)
+Implementation Lane: shared (backend + mobile) — trên thực tế chỉ mobile-dev
+  thực thi mã, không có lane backend nào chạy trong story này (ranh giới đã
+  chốt 2026-09-11 — `architecture/solution.md` §1 Key Discovery: handoff ghi
+  `shared (backend + mobile)`, không có lane backend, xem STORY-001
+  contract-summary §1 + system memory R9)
 Requirement: REQ-016
 Screen: Trạng thái đặc biệt của màn (1) + widget màn hình chính hệ điều hành.
 Không phải màn hình thứ 12.
@@ -87,6 +91,12 @@ do quay lại mà không cần ai trả lời gì cả.
 8. Given người dùng không mở app trong nhiều ngày, when họ mở lại, then app
    **không** hiển thị bất kỳ nội dung trách móc, đếm ngày vắng, hay chuỗi bị
    đứt nào.
+9. Given màn (1) ở từng pha, sheet nhắc tối, các bề mặt khoảng lặng, và widget
+   màn hình chính, when so khớp với thiết kế tham chiếu bề mặt `cupid-ch-ng-1`,
+   then từng màn khớp đúng design screen id tương ứng — `hub-waiting`,
+   `hub-upcoming`, `hub-date_day`, `hub-quiet`, `evening-check-in-sheet`,
+   `quiet-surfaces`, `widget-phases` — không lệch thấy được về bố cục, khoảng
+   cách, màu sắc, và typography.
 
 ## System Integration And Discoverability
 - UI-facing story: YES (gồm cả bề mặt widget của hệ điều hành).

@@ -84,9 +84,9 @@ Quy tắc cho phía tiêu thụ (native):
   đủ sáu khoá — giữ đúng cơ chế "ghi `null` cho khoá vắng mặt" đã có cho
   `secondary_line`/`card_id`, tránh khoá cũ sống sót qua pha kế (`WIDGET-STALE`).
 
-### 3a. Chấm màu theo pha — native design token, KHÔNG phải payload key
+### 3a. Chỉ báo pha — native design token, KHÔNG phải payload key
 
-D-10 (2026-09-17) thêm một chấm màu cạnh `eyebrow_line`. Đây là **design
+D-10 (2026-09-17) thêm một chỉ báo pha cạnh `eyebrow_line`. Đây là **design
 token do native tự tra theo `phase_id` đã có sẵn trong payload** (§2/§3) —
 **không** phải khoá payload thứ bảy, không đi qua Dart/`home_widget`. Cùng cơ
 chế branch-theo-`phase_id` mà `home_widget_bridge.dart` đã dùng cho nền pha
@@ -94,12 +94,12 @@ chế branch-theo-`phase_id` mà `home_widget_bridge.dart` đã dùng cho nền 
 đóng của `phase_id` (§2) sang bốn vai trò token dưới đây, không có giá trị thứ
 năm và không có logic nội suy:
 
-| `phase_id` | Vai trò token | Nhóm ngữ nghĩa (D-12) |
-|---|---|---|
-| `waiting` | `--dot-waiting` | trung tính |
-| `upcoming` | `--dot-upcoming` | nhóm "đã xác nhận" (`--mint`/`--green`) |
-| `date_day` | `--dot-today` | nhóm hành động chính (`--pink`/`--grad`) |
-| `quiet` | `--dot-quiet` | biến thể tối/desaturated cùng bảng |
+| `phase_id` | Vai trò token | Hình dạng (D-13) | Nhóm ngữ nghĩa (D-12) |
+|---|---|---|---|
+| `waiting` | `--dot-waiting` | chấm màu đặc | trung tính |
+| `upcoming` | `--dot-upcoming` | chấm màu đặc | nhóm "đã xác nhận" (`--mint`/`--green`) |
+| `date_day` | `--dot-today` | **glyph tia chớp** | nhóm hành động chính (`--pink`/`--grad`) |
+| `quiet` | `--dot-quiet` | chấm màu đặc | biến thể tối/desaturated cùng bảng |
 
 - Bốn tên vai trò này là **định danh ổn định** implementation phải dùng
   nguyên văn (Android: 4 color resource có tên tương ứng trong
@@ -108,11 +108,29 @@ năm và không có logic nội suy:
   Set/asset cùng tên trong `CupidPhaseWidget.swift`,
   `mobile/ios/CupidPhaseWidget/`).
 - Giá trị hex/màu cụ thể do System UX Memory D-12 (bảng màu thương hiệu tối)
-  định — **không lặp lại ở đây**; contract này chỉ cố định tên vai trò và
-  ánh xạ `phase_id -> vai trò`.
-- Cấm: không đọc màu từ payload, không dùng màu mặc định hệ điều hành, không
-  suy màu bằng logic khác ngoài bảng tra bốn dòng trên (AC-12, "Chấm màu theo
-  pha là design token, không phải nội dung", `ux/uiux-spec.md` §2).
+  định — **không lặp lại ở đây**; contract này chỉ cố định tên vai trò, ánh xạ
+  `phase_id -> vai trò`, và hình dạng của từng vai trò.
+- **Hình dạng (D-13, 2026-09-25).** Ba vai trò `--dot-waiting`,
+  `--dot-upcoming`, `--dot-quiet` giữ nguyên hợp đồng cũ: chấm tròn màu đặc.
+  Riêng `--dot-today` **phải** vẽ bằng **glyph tia chớp** khớp canvas
+  `sb-84-widget-bon-pha`, không phải chấm tròn — vì nền gradient hồng→tím của
+  D-12 ở pha `date_day` làm chấm hồng đặc gần như mất tương phản
+  (`requirements.md` AC-9 vá 2026-09-25, `ux/uiux-spec.md` §2).
+- Tên vai trò `--dot-today` **không đổi** dù hình dạng đổi: nó vẫn là khoá tra
+  màu duy nhất cho pha `date_day`, nên ánh xạ D-12 không phải sửa. Glyph lấy
+  màu (tint) từ chính `dot_today`; không có color resource/asset thứ năm.
+- Glyph là **tài nguyên native ship kèm app**, không phải nội dung: Android là
+  một vector drawable trong `mobile/android/app/src/main/res/drawable/`
+  (`dot_today_bolt`) được tint bằng `@color/dot_today`; iOS là một symbol/asset
+  tương đương trong `mobile/ios/CupidPhaseWidget/` tô bằng Color Set
+  `dot_today`. Nó **không** là mục của gói nội dung §4, **không** thêm khoá
+  payload, và **không** bao giờ đi qua `home_widget` (AC-37/BR-15: chỉ báo pha
+  là token kể cả khi nó là glyph).
+- Cấm: không đọc màu **hoặc hình dạng** từ payload, không dùng màu/icon mặc
+  định hệ điều hành, không suy màu hay hình dạng bằng logic khác ngoài bảng tra
+  bốn dòng trên (AC-12, "Chỉ báo pha là design token, không phải nội dung",
+  `ux/uiux-spec.md` §2). Không dùng glyph cho ba pha còn lại và không dùng chấm
+  cho `date_day`.
 
 ## 4. Lược đồ gói nội dung (R-15a / AC-37)
 
@@ -147,10 +165,68 @@ Story này **không** đổi `CupidDatabase.schemaVersion` và **không** thêm 
 
 - Không đặt bất kỳ chuỗi nội dung nào trong mã Swift/Kotlin/XML, kể cả
   `eyebrow_line` (AC-37/BR-15).
-- Không chọn màu chấm ngoài bảng tra bốn vai trò ở §3a — không màu mặc định
-  hệ điều hành, không suy màu bằng logic riêng theo ngày/ngôn ngữ/số.
+- Không chọn màu **hoặc hình dạng** chỉ báo pha ngoài bảng tra bốn vai trò ở
+  §3a — không màu/icon mặc định hệ điều hành, không suy bằng logic riêng theo
+  ngày/ngôn ngữ/số.
 - Không thêm hành động thứ hai lên widget (không nút "đã xong") — widget có đúng
   một vùng chạm mở deep link (`ux/uiux-spec.md` §2).
 - Không đọc `activity_cards` hay `cupid.sqlite` từ native; native chỉ đọc §2.
 - Không tự tính ngày/đếm ngược trong native, kể cả để "làm tươi lúc nửa đêm".
 - Không thêm khoá mang văn bản người dùng tự gõ, dù trông vô hại (BR-11).
+
+## 7. Quyết định P10 — tín hiệu suy biến AC-18 (2026-09-25)
+
+Phạm vi: `mobile/lib/features/phase_status/presentation/evening_check_in_sheet.dart`
+và test của nó. Không liên quan hợp đồng widget §2-§4.
+
+**Chọn phương án (a): bỏ lệnh cấm "không thêm tham số" của
+`coding-plan/phase-P10-checkin-degrade-parity.md` §3, thêm một cờ năng lực
+build tường minh, mặc định là "đã giao".**
+
+Lý do phương án cũ sai, không chỉ là dead code:
+
+- `_openFromPayload` (`evening_check_in_sheet.dart:562-568`) — nơi gọi sản
+  xuất **duy nhất** — gọi `EveningCheckInSheet.show()` **không** truyền
+  `openJournal`. Vậy `widget.openJournal` là `null` trên **đúng đường sản
+  phẩm thật**, trong khi STORY-003 **đã** giao. Gate `widget.openJournal !=
+  null` của P10 §3 vì thế bị **đảo ngược**: nếu implement đúng như viết, khối
+  "viết một câu" sẽ biến mất ở bản ship — hồi quy trực tiếp AC-16, chứ không
+  phải nhánh phòng thủ không bao giờ chạy. P10 §4 dòng 111-112 mô tả
+  `openJournal != null` là "đường sản phẩm thật" — mô tả này sai so với mã.
+- `_save()` (`evening_check_in_sheet.dart:368`) dùng
+  `widget.openJournal ?? _openJournal`: tham số này là **seam cho test**
+  (thay tuyến điều hướng), không phải tín hiệu tồn tại của nhật ký.
+- `openJournalComposer` (`mobile/lib/features/journal/journal_entry_point.dart:57`)
+  là hàm top-level vô điều kiện — không có trạng thái "vắng mặt" nào để dò ở
+  runtime. `requirements.md:199` (AC-18) có mệnh đề Given phản thực tế hôm nay.
+
+Hợp đồng phải implement:
+
+- Thêm đúng **một** tham số tuỳ chọn có mặc định vào `EveningCheckInSheet` và
+  `EveningCheckInSheet.show`, ví dụ `bool journalAvailable = true`. Đây là
+  **cờ năng lực của bản dựng**, không phải seam test và không phải trạng thái
+  runtime; tài liệu hoá ngay tại khai báo rằng giá trị sản xuất hiện tại luôn
+  là `true`.
+- Khối "viết một câu" (`TextField` + hai `_Chip`, dòng ~233-276) gate bằng
+  `widget.journalAvailable`, **không** bằng `widget.openJournal`. Khi `false`:
+  ẩn hẳn, không `enabled: false`, không xám. Lưới ảnh và dòng trấn an chân màn
+  giữ nguyên vô điều kiện.
+- Vì tham số là tuỳ chọn có mặc định `true`, `_openFromPayload` **không** phải
+  sửa (giữ nguyên ngoài Write Scope của P10), và helper `_sheet()` trong
+  `mobile/test/features/.../evening_check_in_sheet_test.dart:51-65` — vốn để
+  `openJournal` mặc định `null` — vẫn gõ + lưu thành công. **Không assertion
+  P6/P8 nào phải đổi.**
+- Test AC-18 mới dựng sheet với `journalAvailable: false` và khẳng định
+  `eveningCheckInFieldKey` + hai `_Chip` `findsNothing`, còn
+  `eveningCheckInAttachKey` vẫn `findsOneWidget`.
+
+Vì sao không chọn (b)/(c):
+
+- (b) cho `_openFromPayload` truyền `openJournal` tường minh vẫn **không** tạo
+  ra trạng thái vắng mặt nào (nó sẽ luôn truyền non-null), nên gate vẫn chết,
+  đồng thời nới phạm vi sang nơi gọi mà không đổi được kết quả.
+- (c) ghi AC-18 là `NOT_APPLICABLE` là cách đọc mã trung thực nhất, nhưng đổi
+  trạng thái một AC là quyết định của Product Owner, không phải của Tech Lead,
+  và sẽ chặn P10 chờ một vòng ac-patch. Phương án (a) đóng AC-18 ngay trong
+  story này với ~3 dòng. Nếu Product Owner sau này chính thức rút AC-18, gỡ cờ
+  `journalAvailable` là một thay đổi đảo ngược đúng bằng số dòng đã thêm.
