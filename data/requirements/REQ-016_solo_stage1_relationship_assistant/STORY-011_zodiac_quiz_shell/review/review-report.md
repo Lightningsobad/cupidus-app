@@ -16,7 +16,7 @@ closure decision has been made yet.
 |-------|-------|--------|----------|----------|--------|
 | P1 | Content pack and gate (deterministic zodiac content data + offline content gate) | `review/slice-P1.md` | 0 | 3 | REVIEWED |
 | P2 | Deterministic session (resolver, rotation cursor, play-session cubit, activity-card origin) | `review/slice-P2.md` | 0 | 2 | REVIEWED |
-| P3 | Result surface screens | — | — | — | PENDING |
+| P3 | Result surface screens (picker, one-question view, one-scroll result surface, chrome `.arb`) | `review/slice-P3.md` | 0 | 2 | REVIEWED |
 | P4 | Entry point wiring | — | — | — | PENDING |
 
 ## Notes For The Final Synthesis
@@ -29,6 +29,17 @@ closure decision has been made yet.
   reported count) and D-P2-2 (cubit has no failure path for pack loading) are
   carried forward. D-P2-2 is addressed to the P3 slice: check what
   `ZodiacShellStage.loading` renders when it never resolves.
+- P3 deferred items D-P3-1 (the visual-fidelity deviation list omits two copy
+  deltas against the canvas) and D-P3-2 (one report and one `VISUAL_FIDELITY:`
+  token span both the P3 and the P4 surface) are carried forward.
+- D-P2-2 was answered by the P3 slice: CONFIRMED that `ZodiacShellStage.loading`
+  renders `SizedBox.shrink()` forever on a load failure, REFUTED that the reader
+  is trapped (the pushed header has a back control), and the fix reassigned to
+  `ZodiacShellCubit`'s stage enum, which has no error member for any screen to
+  render. Still deferred: no reachable trigger.
+- Per-story visual fidelity is now judged for the P3 surface (`PASS`, gate
+  re-run independently with a negative control). The P4 surface's half of the
+  same report is not judged by any slice yet.
 - P1 judges no story-level mobile gate: runtime startup smoke, entry point
   reachability, and implemented visual fidelity remain open and belong to the
   later slices and the synthesis.
