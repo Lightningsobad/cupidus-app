@@ -258,21 +258,53 @@ Validation Result:
 - Missing Exact Paths: N/A
 
 Waiting Reason:
-- Waiting on Alex-Mobile-Dev (fresh spawn, `Alex-Mobile-Dev@session-e7df910a`)
-  for Phase P12 (`phase-P12-widget-native-capture.md`: R-5 native build +
-  device capture, evidence-only, Write Scope confined to `visual-fidelity/` +
-  `coding-plan/test-results.md`, no product code). Dispatched this round via
-  `Agent()` (RunId reused: `RUN-...-mobile-dev`, BaseHead
-  `ca86b3a2dbadcb3e1ef77b07b18248300665b2a3`). This is the story's LAST phase.
+- Waiting on Alex-Mobile-Dev (same live instance, `Alex-Mobile-Dev@session-e7df910a`,
+  idle not stopped) for the P12 corrective re-dispatch (see "P12 blocker"
+  below). Sent via `SendMessage` (not a fresh `Agent()` spawn — the instance
+  was still addressable/idle, so no name-collision spawn was needed).
+- **P12 blocker (2026-09-25, first attempt) — RESOLVED BY SCOPE WIDENING, not
+  yet re-verified:** P12's first attempt hit `ANDROID_RESOURCE_PARSE_FAILED`:
+  `flutter build apk --debug --flavor local --split-per-abi` failed at
+  `:app:parseLocalDebugLocalResources` because the P11-authored comment in
+  `mobile/android/app/src/main/res/drawable/dot_today_bolt.xml` line 3
+  contains the literal substring `--dot-today`, which XML 1.0 §2.5 forbids
+  inside a comment — this broke the whole Android build, not just the widget.
+  Independently confirmed by Scrum Master: read the file directly (line 3
+  does contain `--dot-today`), confirmed `git status`/`git diff ca86b3a2..`
+  in the worktree touched only `coding-plan/test-results.md` (no product
+  source, no commit), and confirmed the run file showed `status: "BLOCKED"`,
+  `completion_marker: "MOBILE_COMPLETE: NO"`. P11's own comment-stripping
+  ASCII-purity test (`native_copy_scan_test.dart`) can't see inside a comment,
+  and P11 never ran a native build, so this slipped through P11's seal.
+  `list-releasable-agents.sh` did NOT print this Alex-Mobile-Dev instance (run
+  indexed in scheduler `blocked_runs`, not terminal-and-unindexed) — correctly
+  left un-stopped per fail-closed release policy. Fix: Scrum Master widened
+  this dispatch's WriteScope (via `handoff-build.sh spawn --run-id <same>` to
+  regenerate the Handoff Control block, then `SendMessage` to the same live
+  instance) to add `mobile/android/app/src/main/res/drawable/dot_today_bolt.xml`
+  and `mobile/android/app/build.gradle.kts` on top of the original
+  `visual-fidelity/` + `coding-plan/test-results.md` scope. Instructed:
+  comment-only reword of the `--dot-today` substring (no vector/path/fillColor
+  changes), rebuild, then resume P12 from step 3.2 onward (3.1 preflight
+  already passed). Note: `handoff-build.sh spawn` with an existing `--run-id`
+  only prints the block — it does NOT rewrite the run state file; the file
+  still shows the old BLOCKED status/write_scope until the next actual
+  Agent/SendMessage handoff is delivered and the spawn guard processes it.
+- Non-blocking note carried into the corrective dispatch: `ContextCompat`
+  (androidx.core) has still never actually compiled — the original build
+  failed before reaching `:app:compileLocalDebugKotlin`. If it fails to
+  resolve once the XML is fixed, the corrective dispatch is pre-authorized to
+  add one matching `implementation` line for `androidx.core` in
+  `mobile/android/app/build.gradle.kts`, following whatever androidx
+  dependency convention that file already uses — nothing else in that file.
 - R-3 (Android countdown digit `SpannableString` sizing) still open,
   pre-existing, not part of P10/P11/P12 scope — tracked for the review gate,
   not blocking this dispatch.
-- Non-blocking note (Alex-Mobile-Dev's P11 report): P11 did not compile
-  native code — `ContextCompat` reaches the Kotlin file via Flutter's
-  transitive embedding classpath, since `app` doesn't declare `androidx.core`
-  explicitly. First real Kotlin compile is P12; if the symbol is missing
-  there, the minimal fix is `AppCompatResources` or one `implementation` line
-  in `app/build.gradle.kts`. Flag for P12's own dispatch prompt.
+- Non-blocking note (DevOps runtime registry drift, flagged by the P12
+  specialist, not yet actioned): `data/devops/system/runtime-command-registry.json`
+  `mobile-app.buildCommand` is `flutter build apk --debug` and lacks the
+  `--flavor local`/`prod` flag the Gradle project actually requires. Not
+  blocking this story; candidate follow-up for DevOps, not raised yet.
 
 Next Resume Action:
 1. DONE: Tech Lead coding-plan round 2 (P10 rewrite + P11/P12 new phases)
@@ -287,13 +319,27 @@ Next Resume Action:
 3. DONE: `list-releasable-agents.sh` run, `TaskStop`-ed the now-terminal
    Alex-Mobile-Dev P11 instance, then dispatched a FRESH Alex-Mobile-Dev for
    P12 (`phase-P12-widget-native-capture.md`: R-5 native build + device
-   capture, Depends-On P11 — satisfied). IN FLIGHT now
-   (`Alex-Mobile-Dev@session-e7df910a`, RunId
-   `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-mobile-dev`,
-   BaseHead `ca86b3a2dbadcb3e1ef77b07b18248300665b2a3`). Dispatch prompt
-   included the P11 report's `androidx.core` classpath note as a
-   non-blocking heads-up for the first real Kotlin compile. On completion:
-   verify (3-part protocol), commit, reseal, release.
+   capture, Depends-On P11 — satisfied). Dispatch prompt included the P11
+   report's `androidx.core` classpath note as a non-blocking heads-up for the
+   first real Kotlin compile.
+3a. DONE: P12's first attempt returned blocker `ANDROID_RESOURCE_PARSE_FAILED`
+   (see "P12 blocker" under Waiting Reason) — independently verified by
+   Scrum Master (file content, worktree diff, run-file status all confirmed
+   the specialist's report). `list-releasable-agents.sh` did not print this
+   instance, so it was left un-stopped (still idle/addressable, not a stale
+   orphan). Sent a corrective `SendMessage` (built via
+   `handoff-build.sh continue --flow parallel-story` for the base fields, with
+   the parallel-worker extension fields hand-appended per the handoff schema,
+   since the `continue` subcommand does not itself carry `WriteScope`) to the
+   SAME live instance, widening WriteScope to add
+   `mobile/android/app/src/main/res/drawable/dot_today_bolt.xml` and
+   `mobile/android/app/build.gradle.kts`. Same RunId/BaseHead
+   (`ca86b3a2dbadcb3e1ef77b07b18248300665b2a3`, unchanged — no commits
+   happened between the first and second P12 attempts). IN FLIGHT now.
+3b. NEXT (on completion of the corrective dispatch): verify (3-part protocol
+   — note the run file will only reflect the widened write_scope/reset status
+   once this SendMessage is processed by the spawn/parallel guard, not from
+   `handoff-build.sh spawn` alone), commit, reseal, release.
 4. Once all three phases are DONE and sealed, tick `story_master.md`
    Implementation checkbox, then route to Iris-QC (Story-Class `standard` —
    story owes rendered visual-fidelity evidence, review must assess R-1/R-5
@@ -340,7 +386,9 @@ Test Evidence:
   test/features/phase_status` -> 5 info-only issues (pre-existing, none in
   P11-touched files), 0 error/warning. Full text in
   `coding-plan/test-results.md` §P11.
-- P12: none yet, not dispatched.
+- P12: first attempt blocked before any test ran (`ANDROID_RESOURCE_PARSE_FAILED`
+  at the native build step, before steps 3.3-3.6); corrective re-dispatch in
+  flight, no new evidence yet.
 
 Next Valid Step:
 - Role: Alex-Mobile-Dev (fresh spawn, P12 next) -> Iris-QC
