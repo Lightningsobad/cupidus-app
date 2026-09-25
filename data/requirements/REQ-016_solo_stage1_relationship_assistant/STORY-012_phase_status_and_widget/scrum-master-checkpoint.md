@@ -8,8 +8,14 @@ Scope:
 
 Current State:
 - Requirement Status: IN_PROGRESS
-- Story Status: IN_PROGRESS — P9 DONE (MOBILE_COMPLETE: YES, sealed). P10
-  BLOCKED (not in flight): Alex-Mobile-Dev opened the P10 run, made ZERO
+- Story Status: IN_PROGRESS — all 12 phases DONE and sealed (BaseHead
+  `536d47cb92ff747505e7b6f1ac0469aac254cb55`). Implementation complete;
+  routing to Iris-QC for the standard review gate next (see "Next Valid Step"
+  at the end of this file). Historical narrative below (P9/P10 blocker/patch
+  history) retained for audit; superseded by the P10-P12 DONE state recorded
+  further down.
+- (historical, resolved) P9 DONE (MOBILE_COMPLETE: YES, sealed). P10
+  was BLOCKED at one point (not in flight): Alex-Mobile-Dev opened the P10 run, made ZERO
   edits, and returned `p10_blocker` in the run file
   (`RUN-...-mobile-dev.json`) code `PHASE_SPEC_CONTRADICTS_CODE` — see "P10
   blocker (new, 2026-09-25)" below. D-13 Design Ruling Log row committed in
@@ -336,14 +342,44 @@ Next Resume Action:
    `mobile/android/app/build.gradle.kts`. Same RunId/BaseHead
    (`ca86b3a2dbadcb3e1ef77b07b18248300665b2a3`, unchanged — no commits
    happened between the first and second P12 attempts). IN FLIGHT now.
-3b. NEXT (on completion of the corrective dispatch): verify (3-part protocol
-   — note the run file will only reflect the widened write_scope/reset status
-   once this SendMessage is processed by the spawn/parallel guard, not from
-   `handoff-build.sh spawn` alone), commit, reseal, release.
-4. Once all three phases are DONE and sealed, tick `story_master.md`
-   Implementation checkbox, then route to Iris-QC (Story-Class `standard` —
-   story owes rendered visual-fidelity evidence, review must assess R-1/R-5
-   directly).
+3b. DONE (2026-09-25): Alex-Mobile-Dev returned `MOBILE_COMPLETE: YES`.
+   Independently verified (3-part protocol): run file `status: COMPLETED`;
+   `git status --short` + `git diff ca86b3a2..--stat` in the worktree matched
+   the reported six-item scope exactly (four new
+   `implemented-widget-{date-day,waiting,upcoming,quiet}.png` + modified
+   `coding-plan/test-results.md` + `visual-fidelity/visual-fidelity-report.md`;
+   `dot_today_bolt.xml`/`build.gradle.kts` already sealed in `4a52b37c` from the
+   corrective retry); all four PNGs confirmed via `file` as valid 814x396 RGBA
+   images (not empty/corrupt); read `visual-fidelity-report.md` directly and
+   confirmed cell 7 `NOT_COMPARED` -> `FAIL (đã đối chiếu)`, R-5 CLOSED, D-13
+   shape CONFIRMED by image, three new findings opened (R-6 flat widget
+   background, R-7 secondary-line clip at 3x1, R-8 opaque launcher-icon
+   square), `VISUAL_FIDELITY` correctly stays `FAIL` because R-1
+   (Product-Owner-owned hub-waiting action chips) is still open; independently
+   re-ran `python3 .claude/hooks/lib/visual_fidelity.py --stage review --stack
+   mobile` myself and reproduced exit 1 with the exact same R-1 reason,
+   matching the specialist's claim exactly — no discrepancy found. Flipped
+   `phase-P12-widget-native-capture.md` §7 Status to `DONE` and the
+   P10/P11/P12 rows of `master-plan.md`'s Phases Overview table to `DONE`
+   (P10/P11 were already `DONE` in their own phase files but the summary table
+   had drifted stale) — both explicitly outside the run's own WriteScope, so
+   this was Scrum-Master bookkeeping, not permission laundering. Committed all
+   of the above together as `536d47cb92ff747505e7b6f1ac0469aac254cb55`.
+   Resealed boundary: `BaseHead` now `536d47cb92ff747505e7b6f1ac0469aac254cb55`.
+   Run state `worktree_head` updated to match; scheduler indices already
+   showed this run pruned/terminal (active_runs/blocked_runs both empty).
+   Released `Alan-Techlead@session-e7df910a` and
+   `Alex-Mobile-Dev@session-e7df910a` via `TaskStop` per
+   `list-releasable-agents.sh` output (note: the script printed
+   `Alan-Techlead-2@session-e7df910a`, which did not resolve — the live
+   teammate name was the un-suffixed `Alan-Techlead@session-e7df910a`, used
+   instead; `Andy-PO@session-e7df910a` printed but had no running task, no
+   action needed).
+4. NEXT: tick `story_master.md` Implementation checkbox in this worktree, then
+   route to Iris-QC (`Flow: story`, Story-Class `standard` — story owes
+   rendered visual-fidelity evidence; review must assess R-1/R-5/R-3/R-6/R-7/R-8
+   directly against the four new real-device widget captures plus the six
+   existing hub/sheet captures).
 5. Once merged, reconcile the control-checkout `story_master.md` Architecture
    and Implementation checkboxes (currently stale `[ ]` there — real state
    lives in this worktree).
@@ -354,16 +390,18 @@ Files Updated:
 - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/story_master.md (this round: added AC-9 design-match, changed Implementation Lane to `shared`, pending commit)
 - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/scrum-master-checkpoint.md (this file, in the story worktree; committed in worktree as `820d1912` (pre-PO drift) and `e04157b4` (PO ac-patch + checkpoint); this round's edits pending commit)
 - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/requirements/requirements.md, ux/uiux-spec.md (Andy-PO ac-patch for D-13, commit `e04157b4`)
-- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/master-plan.md (P9/P10 rows added; P9 -> DONE; this round: P11/P12 rows added, P10 Parallelizable -> NO, pending commit)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/master-plan.md (P9/P10 rows added; P9 -> DONE; P11/P12 rows added; this round: P10/P11/P12 Status -> DONE, sealed in `536d47cb`)
 - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/phase-P9-widget-phase-label-and-dot.md (DONE, sealed)
-- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/phase-P10-checkin-degrade-parity.md (this round: rewritten to gate on `journalAvailable` per §7 option (a), pending commit)
-- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/phase-P11-widget-date-day-bolt-glyph.md (NEW this round, D-13 glyph implementation, pending commit)
-- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/phase-P12-widget-native-capture.md (NEW this round, R-5 native capture, pending commit)
-- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/test-results.md (P9 evidence appended, sealed)
-- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/visual-fidelity/visual-fidelity-report.md (P9 patch round #3 appended, sealed)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/phase-P10-checkin-degrade-parity.md (DONE, sealed — gates on `journalAvailable` per §7 option (a))
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/phase-P11-widget-date-day-bolt-glyph.md (DONE, sealed — D-13 glyph implementation)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/phase-P12-widget-native-capture.md (DONE, sealed in `536d47cb` — §7 Status flipped by Scrum Master after independent verification)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/test-results.md (P9-P12 evidence appended, sealed)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/visual-fidelity/visual-fidelity-report.md (P9 patch round #3 + P12 ô 7 real-capture round appended, sealed in `536d47cb`)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/visual-fidelity/implemented-widget-{date-day,waiting,upcoming,quiet}.png (NEW, sealed in `536d47cb` — real Android home-screen widget captures)
 - mobile/lib/features/phase_status/domain/phase_content.dart, mobile/lib/features/phase_status/data/home_widget_bridge.dart, mobile/assets/data/req016/phase_content.v1.json, mobile/android/.../cupid_phase_widget.xml, mobile/android/.../CupidPhaseWidgetProvider.kt, mobile/ios/CupidPhaseWidget/CupidPhaseWidget.swift, and their tests (P9 implementation, sealed)
 - P10, sealed (commit `721a6e57`): mobile/lib/features/phase_status/presentation/evening_check_in_sheet.dart (`journalAvailable` flag/gate), mobile/test/features/phase_status/evening_check_in_sheet_test.dart (AC-18 case)
 - P11, sealed (commit `3fabfde`): mobile/android/app/src/main/res/drawable/dot_today_bolt.xml (NEW), mobile/android/app/src/main/kotlin/com/snapsofts/cupid/CupidPhaseWidgetProvider.kt (`boltBitmap()`/`GLYPH_PX`), mobile/android/app/src/main/res/layout/cupid_phase_widget.xml (comment only), mobile/ios/CupidPhaseWidget/CupidPhaseWidget.swift (`CupidPhaseBolt: Shape`), mobile/test/features/phase_status/native_copy_scan_test.dart (4 new cases), coding-plan/phase-P11-widget-date-day-bolt-glyph.md (§7 Status: DONE), coding-plan/test-results.md (P11 evidence appended)
+- P12, sealed (commit `4a52b37c` fix + `536d47cb` evidence): mobile/android/app/src/main/res/drawable/dot_today_bolt.xml (comment-only reword, `--dot-today` -> `dot_today`, no product-code change), four `implemented-widget-*.png`, visual-fidelity-report.md ô 7 round, test-results.md evidence, master-plan.md + phase-P12 Status -> DONE
 
 Test Evidence:
 - P9, sealed: `flutter test test/features/phase_status` -> `+245 ~6` (P8 was
@@ -386,20 +424,28 @@ Test Evidence:
   test/features/phase_status` -> 5 info-only issues (pre-existing, none in
   P11-touched files), 0 error/warning. Full text in
   `coding-plan/test-results.md` §P11.
-- P12: first attempt blocked before any test ran (`ANDROID_RESOURCE_PARSE_FAILED`
-  at the native build step, before steps 3.3-3.6); corrective re-dispatch in
-  flight, no new evidence yet.
+- P12, sealed (commit `536d47cb`): first attempt blocked at the native build
+  step (`ANDROID_RESOURCE_PARSE_FAILED`, XML comment `--dot-today` forbidden by
+  XML 1.0 §2.5), corrected via comment-only reword (already sealed in
+  `4a52b37c`). Corrective retry green:
+  `flutter build apk --debug --flavor local --split-per-abi` produced all
+  three split APKs, `ContextCompat` resolved without touching
+  `build.gradle.kts`; `flutter test test/features/phase_status/native_copy_scan_test.dart`
+  38/38 green (unchanged from P11). Real Android home-screen captures of
+  `CupidPhaseWidgetProvider` RemoteViews for all four phases via
+  `adb exec-out screencap -p` (protected-broadcast workaround: reseed
+  shared-prefs + `adb install -r` instead of `am broadcast`). Full text in
+  `coding-plan/test-results.md` §"Lượt P12".
 
 Next Valid Step:
-- Role: Alex-Mobile-Dev (fresh spawn, P12 next) -> Iris-QC
-- Mode: mobile-implementation (P12 only) -> full/scoped review per
-  Story-Class standard (visual-fidelity evidence owed)
-- Required Inputs: none outstanding — P10/P11 DONE and sealed. P12 phase file
-  is the required input for the next mobile-dev dispatch.
+- Role: Iris-QC (full/scoped review, Story-Class standard — visual-fidelity
+  evidence owed)
+- Mode: review (story-scoped)
+- Required Inputs: all P1-P12 DONE and sealed (BaseHead
+  536d47cb92ff747505e7b6f1ac0469aac254cb55). `story_master.md` Implementation
+  checkbox still needs ticking before dispatch (next immediate action).
 - Output Paths:
-  - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/master-plan.md
-  - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/test-results.md
-  - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/visual-fidelity/visual-fidelity-report.md
+  - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/review/review-report.md
 
 Do Not Re-read:
 - STORY-005/008/009/010/013 completed run files (resolved, merge-scope only)

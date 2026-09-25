@@ -22,13 +22,17 @@ Design-Screen: hub-waiting, hub-upcoming, hub-date_day, hub-quiet,
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
 - [x] Coding Plan (Tech Lead) — `coding-plan/master-plan.md`, `coding-plan/coding-agent-guide.md`, P1–P8
-- [x] Implementation (Development) — mobile-dev P1-P8 complete per
-  `coding-plan/master-plan.md` Phases Overview (all Status: DONE). P6 blocker
+- [x] Implementation (Development) — mobile-dev P1-P12 complete per
+  `coding-plan/master-plan.md` Phases Overview (all Status: DONE, BaseHead
+  `536d47cb92ff747505e7b6f1ac0469aac254cb55`). P6 blocker
   (AC_CONFLICT_CROSS_REQUIREMENT vs REQ-002/STORY-021 AC4) resolved
   2026-09-17 by user decision (Option 1: narrow the guard's
   `flutter_local_notifications` clause to an import boundary under
   `lib/features/reminders/**`, keep the ban on other 3 packages, keep
   REQ-002/STORY-021 DONE). See `coding-plan/phase-P6-evening-check-in.md` §7/§8.
+  P9-P12 closed the widget-phase-label/glyph and R-5 visual-fidelity native
+  capture gaps; see `coding-plan/phase-P9..P12-*.md` §7 and
+  `visual-fidelity/visual-fidelity-report.md` "Lượt P12".
 - [ ] Review (Reviewer)
 
 ## Depends On
