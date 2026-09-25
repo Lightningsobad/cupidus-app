@@ -251,12 +251,19 @@ Validation Result:
 - Missing Exact Paths: N/A
 
 Waiting Reason:
-- None right now — P10 implementation verified and committed; next action is
-  Scrum-Master-owned: release Alex-Mobile-Dev, dispatch fresh Alex-Mobile-Dev
-  for P11.
-- P11/P12 are PENDING, not in flight yet — dispatch strictly sequentially
-  (P11 next, then P12) since all are `code-writer` phases in the single
-  Mobile lane (`MAX_CODE_WRITERS_PER_STORY: 1`).
+- Waiting on Alex-Mobile-Dev (fresh spawn, `Alex-Mobile-Dev@session-e7df910a`)
+  for Phase P11 (`phase-P11-widget-date-day-bolt-glyph.md`: D-13 glyph,
+  Android vector drawable + Kotlin rasterize + iOS `CupidPhaseBolt` Shape).
+  Dispatched this round via `Agent()` (RunId reused:
+  `RUN-...-mobile-dev`, BaseHead `34692db482e9f9e70b65c3bdcea8d72f5ea67ac1`).
+  Note: `handoff-build.sh spawn --depends-on "NONE (...)"` (a free-text
+  parenthetical) was rejected by `guard-parallel-spawn.sh` as `DEP_NOT_MERGED`
+  because it parsed the whole string as a story id; fixed by using a bare
+  `Depends-On: NONE` value and adding the P10-already-sealed context as prose
+  in the dispatch body instead.
+- P12 is PENDING, not in flight yet — dispatch only after P11 verifies and
+  seals (all three are `code-writer` phases in the single Mobile lane,
+  `MAX_CODE_WRITERS_PER_STORY: 1`).
 - R-3 (Android countdown digit `SpannableString` sizing) still open,
   pre-existing, not part of P10/P11/P12 scope — tracked for the review gate,
   not blocking this dispatch.
@@ -266,11 +273,14 @@ Next Resume Action:
    verified, committed `9db07af1`/checkpoint `98b595f8`. P10 implementation
    (`journalAvailable` gate) verified (3-part protocol) and committed
    `721a6e57`, resealed -> BaseHead `721a6e570a810d30f2301685141084c8d1431eee`.
-2. Run `list-releasable-agents.sh`, `TaskStop` the now-terminal
-   Alex-Mobile-Dev P10 instance, then dispatch a FRESH Alex-Mobile-Dev for
+2. DONE: `list-releasable-agents.sh` run, `TaskStop`-ed the now-terminal
+   Alex-Mobile-Dev P10 instance, then dispatched a FRESH Alex-Mobile-Dev for
    P11 (`phase-P11-widget-date-day-bolt-glyph.md`: D-13 glyph, Android vector
-   drawable + Kotlin rasterize + iOS `CupidPhaseBolt` Shape). Verify (3-part
-   protocol), commit, reseal.
+   drawable + Kotlin rasterize + iOS `CupidPhaseBolt` Shape). IN FLIGHT now
+   (`Alex-Mobile-Dev@session-e7df910a`, RunId
+   `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-mobile-dev`,
+   BaseHead `34692db482e9f9e70b65c3bdcea8d72f5ea67ac1`). On completion: verify
+   (3-part protocol), commit, reseal, release.
 3. Dispatch Alex-Mobile-Dev (fresh spawn) for P12
    (`phase-P12-widget-native-capture.md`: R-5 native build + device capture,
    Depends-On P11). Verify, commit, reseal.
