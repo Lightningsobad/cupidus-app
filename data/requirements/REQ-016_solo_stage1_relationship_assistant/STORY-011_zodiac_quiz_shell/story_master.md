@@ -1,6 +1,6 @@
 # Story Master: STORY-011 Vỏ hoàng đạo / trắc nghiệm
 
-Status: TODO
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: mobile (chốt ở `architecture/solution.md` — AC-22/AC-23
@@ -17,7 +17,7 @@ F (Tầng 4); `req_master.md` SB-174, R-10
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
 - [x] Implementation (Development) — P1-P4 DONE, commit `5c757d685417b1d54ee6255512911705e95028b0`
-- [ ] Review (Reviewer)
+- [x] Review (Reviewer) — `review/review-report.md`, Outcome: DEFERRED_ONLY
 
 ## Depends On
 - STORY-001 — kết quả ra 3 thẻ hoạt động đẩy vào kho chung.
