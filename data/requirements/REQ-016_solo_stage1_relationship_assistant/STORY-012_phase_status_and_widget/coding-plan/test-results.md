@@ -1788,25 +1788,37 @@ flutter test test/features/phase_status --reporter failures-only
 +245 ~6: All other tests passed!
 ```
 
+Chạy lại lần cuối không kèm `--reporter` để lấy exit code tường minh:
+
+```
+flutter test test/features/phase_status; echo "EXITCODE=$?"
+00:03 +245 ~6: All tests passed!
+EXITCODE=0
+```
+
 P8 để lại `+235 ~6`; P9 ra `+245 ~6` — tăng 10 case, không giảm case nào
 (AC "không giảm số case so với P8").
 
 ```
-flutter analyze lib/features/phase_status test/features/phase_status
+flutter analyze lib/features/phase_status test/features/phase_status --no-fatal-infos --no-fatal-warnings; echo "EXITCODE=$?"
    info • prefer_initializing_formals • phase_status_cubit.dart:122:9
    info • prefer_initializing_formals • phase_status_cubit.dart:124:9
    info • prefer_initializing_formals • phase_status_cubit.dart:125:9
    info • prefer_initializing_formals • phase_status_cubit.dart:126:9
    info • prefer_initializing_formals • phase_status_cubit.dart:127:9
-5 issues found. (ran in 2.8s)
+5 issues found. (ran in 1.3s)
+EXITCODE=0
 ```
 
 0 error, 0 warning — đúng baseline đã ghi ở `master-plan.md` §6 Notes; 5 info
-là của `phase_status_cubit.dart`, file P9 không đụng tới.
+là của `phase_status_cubit.dart`, file P9 không đụng tới. Hai cờ `--no-fatal-*`
+là bắt buộc chứ không phải để làm đẹp: thiếu chúng, đúng lệnh này exit 1 vì
+5 info tồn dư đó, dù 0 error — xem §6 Notes của `master-plan.md`.
 
 ```
-flutter analyze lib test --no-fatal-infos --no-fatal-warnings
-227 issues found. (ran in 2.3s)
+flutter analyze lib test --no-fatal-infos --no-fatal-warnings; echo "EXITCODE=$?"
+227 issues found. (ran in 2.1s)
+EXITCODE=0
 ```
 
 Chạy rộng ra cả `lib test` để bắt call-site vỡ do `eyebrow` thành trường bắt
