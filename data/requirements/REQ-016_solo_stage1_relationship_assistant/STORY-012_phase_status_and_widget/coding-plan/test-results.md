@@ -2117,3 +2117,115 @@ viết path: thẻ "PHA 4 · HÔM NAY" vẽ tia chớp sáng, cao-hẹp (tỉ l�
 
 P12 (build native + chụp widget thật, đóng ô 7 của bảng đối chiếu) — dispatch
 tuần tự tiếp theo, chưa bắt đầu, ngoài phạm vi lượt này.
+
+## P12 – Build native + chụp widget thật (BLOCKED tại §3.2)
+
+Lượt 2026-09-25. Dừng ở bước §3.2 (build + cài) với blocker
+`ANDROID_RESOURCE_PARSE_FAILED`. Không tạo được ảnh nào, ô 7 của
+`../visual-fidelity/visual-fidelity-report.md` **giữ nguyên** `NOT_COMPARED`;
+không file visual-fidelity nào bị sửa ở lượt này.
+
+### §3.1 Preflight — PASS
+
+```
+$ flutter --version
+Flutter 3.44.1 - channel stable - https://github.com/flutter/flutter.git
+Framework - revision 924134a44c (4 months ago) - 2026-05-29 12:13:22 -0400
+Engine - hash 39b1f7043775b9578bbb26a1676e79c4e31c8b5e (revision c416acfeb8)
+Tools - Dart 3.12.1 - DevTools 2.57.0
+
+$ flutter gen-l10n
+Because l10n.yaml exists, the options defined there will be used instead.
+To use the command line arguments, delete the l10n.yaml file in the Flutter project.
+
+$ adb devices -l
+List of devices attached
+emulator-5554          device product:sdk_gphone64_arm64 model:sdk_gphone64_arm64 device:emu64a transport_id:2
+
+$ adb shell getprop ro.product.cpu.abi
+arm64-v8a
+$ adb shell getprop ro.build.version.sdk
+36
+$ adb shell getprop sys.boot_completed
+1
+```
+
+Đúng một đích Android, đã boot xong. `NO_ANDROID_TARGET` **không** xảy ra, nên
+blocker dưới đây không phải vấn đề môi trường.
+
+`applicationId` xác nhận từ `mobile/android/app/build.gradle.kts:25` là
+`com.snapsofts.cupid`; cùng file dòng 39-48 khai báo `flavorDimensions
+"backend"` với hai flavor `local`/`prod`, nên `buildCommand` của registry
+(`flutter build apk --debug`) phải thêm `--flavor local` mới chạy được — đã
+dùng `--flavor local` và Gradle nhận đúng task `assembleLocalDebug`.
+
+### §3.2 Build — FAIL, blocker `ANDROID_RESOURCE_PARSE_FAILED`
+
+```
+$ flutter build apk --debug --flavor local --split-per-abi
+...
+Running Gradle task 'assembleLocalDebug'...
+[Fatal Error] dot_today_bolt.xml:3:8: The string "--" is not permitted within comments.
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:parseLocalDebugLocalResources'.
+> A failure occurred while executing com.android.build.gradle.internal.res.ParseLibraryResourcesTask$ParseResourcesRunnable
+   > Failed to parse XML file '<worktree>/mobile/build/app/intermediates/packaged_res/localDebug/packageLocalDebugResources/drawable/dot_today_bolt.xml'
+
+BUILD FAILED in 27s
+Gradle task assembleLocalDebug failed with exit code 1
+```
+
+Lệnh chạy trực tiếp, **không** pipe qua `|`.
+
+### Nguyên nhân — khiếm khuyết của P11, không phải của môi trường
+
+`mobile/android/app/src/main/res/drawable/dot_today_bolt.xml` dòng 2-8 là một
+chú thích XML, và dòng 3 chứa chuỗi `--dot-today`. XML 1.0 §2.5 cấm chuỗi `--`
+xuất hiện bên trong chú thích, nên file là XML **không hợp lệ**: AAPT dừng ở
+`parseLocalDebugLocalResources`, trước cả bước biên dịch Kotlin.
+
+Hệ quả rộng hơn bước chụp ảnh: **toàn bộ app Android trên nhánh này hiện không
+build được**, không riêng widget.
+
+Lý do khiếm khuyết này sống sót qua P11: P11 §6 không chạy build native, và
+case canh ASCII "every .kt and .xml file is pure ASCII once comments are
+removed" **bỏ chú thích ra trước khi quét**, nên đúng chỗ hỏng là chỗ nó không
+nhìn. `dot_today_bolt.xml` chưa từng được một parser XML nào đọc trước lượt
+này.
+
+Sửa tối thiểu (một dòng, chỉ trong chú thích, không đổi `pathData`, không đổi
+`android:fillColor`, không đổi tên vai trò): viết lại tham chiếu token ở dòng 3
+sao cho không còn hai dấu gạch liền nhau — ví dụ `dot_today` hoặc
+`the dot-today token role`. Hình dạng, màu và ánh xạ `phase_id -> vai trò`
+không bị ảnh hưởng.
+
+**Không thực hiện ở P12.** `phase-P12-widget-native-capture.md` §1B Write Scope
+chỉ có artifact bằng chứng, và §4 AC cuối ghi rõ: khiếm khuyết phát hiện lúc
+chụp là finding + blocker về Scrum Master, không sửa mã trong P12.
+
+### Câu hỏi còn treo sau blocker này
+
+`ContextCompat` (rủi ro P11 đã nêu ở mục "Điểm cần Scrum Master / Reviewer
+biết" #2) **vẫn chưa được trả lời**: build dừng ở bước xử lý resource, trước
+`:app:compileLocalDebugKotlin`, nên lần biên dịch Kotlin thật đầu tiên vẫn chưa
+diễn ra. Sau khi chú thích XML được sửa, build có thể đỏ lần thứ hai ở
+`ContextCompat`. Hai khiếm khuyết nên được xử lý cùng một lượt trước khi
+dispatch lại P12.
+
+Tương tự, §3.3 (seed prefs), §3.4 (đặt widget lên launcher + chụp), §3.5 (iOS)
+và §3.6 (cập nhật bảng đối chiếu) **chưa chạy** — không có APK để cài.
+
+### git status
+
+`git -C <worktree> status --short` sạch sau lượt này ngoài đúng file bằng chứng
+đang viết (`coding-plan/test-results.md`). Không PNG visual-fidelity nào của
+story khác hay phase trước bị làm bẩn; `mobile/build/` là output bị gitignore.
+
+### Status
+
+`BLOCKED` — chờ quyết định Scrum Master về việc sửa
+`mobile/android/app/src/main/res/drawable/dot_today_bolt.xml` (ngoài Write Scope
+của P12).

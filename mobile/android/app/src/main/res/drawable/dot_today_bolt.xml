@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- D-13 (architecture/contract-summary.md 3a): the shape half of the
-     --dot-today token role, and only that role. The fill below is a solid
+     dot_today token role, and only that role. The fill below is a solid
      placeholder: CupidPhaseWidgetProvider tints this drawable with the
      DOT_TODAY role value before rasterising it, so the colour still comes from
      the single Kotlin palette rather than from a second source here. One
