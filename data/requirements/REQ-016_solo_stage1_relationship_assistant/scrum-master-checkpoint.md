@@ -428,3 +428,49 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
   once STORY-005 merged into integration.
 - No standing user decision is currently open for REQ-016 (decision 1 and
   decision 2 above are both resolved).
+
+## Round 35 (`continue parallel`, 2026-09-25) — STALE-NOTE SUPERSEDE + confirmed final blocker
+
+- Ground truth is the story status table near the top of this file, not the
+  paragraphs above: STORY-008, STORY-009, STORY-010, STORY-011, STORY-013 are
+  all **DONE, merged** (STORY-011 merged Round 34, commit `e346e147`). The
+  "STORY-008 unsealed" / "STORY-011 blocked on STORY-008" notes right above
+  this section are stale carry-over from an earlier round and no longer apply.
+- Pre-flight this round: `preflight_check.py` all PASS (backend already LIVE,
+  no self-heal needed); scheduler was fully quiescent
+  (`active_runs`/`paused_runs`/`blocked_runs` all `[]`); `prune-parallel-runs.sh
+  --apply` scanned 5 run files, pruned 0; `list-releasable-agents.sh` printed
+  one idle finished agent (`Iris-QC@session-e7df910a`, an old scoped-slice
+  reviewer handle) — released it via `TaskStop`.
+- Only STORY-012 remains non-DONE (`Status: TODO` in its own
+  `story_master.md`; PO requirements + UX spec already `[x]`, Architecture/
+  Implementation/Review still unchecked). Confirmed the blocker is real and
+  structural, not stale:
+  - `req_master.md` Design Ruling Log **D-10**: user already resolved the
+    underlying design choice via `AskUserQuestion` on 2026-09-17 ("Theo DESIGN
+    — thêm nhãn-mí + chấm màu"), but executing it requires **Product Owner
+    `Mode: ac-patch`** first (extend `architecture/contract-summary.md` §2 +
+    `home_widget_bridge.dart:22-37` with a new phase-label key, plus a
+    matching label field in the rotating content pack, per AC-37/BR-15
+    no-hardcode rule) before Tech Lead/mobile-dev can implement D-10 together
+    with D-11/D-12.
+  - `req_master.md` Design Ruling Log **D-6** (same story): evening-check-in
+    full-screen rework, also user-resolved "Theo DESIGN", needs a new Tech
+    Lead phase.
+  - Per `role-map.md` "Backlog Shaping Workers": Product Owner and UI/UX
+    Designer are spawnable **only by `brainstormer`**, never directly by
+    Scrum Master, even for an `ac-patch` to an already-existing artifact. A
+    story reaching Scrum Master needing new/patched PO or UX output is a
+    backlog-shaping defect that routes back through `brainstormer`, not a
+    Scrum Master specialist handoff.
+  - Therefore STORY-012 cannot be scheduled in this or any Scrum-Master-owned
+    parallel wave until the D-10 Product Owner `ac-patch` (and, separately,
+    the D-6 Tech Lead phase once that patch lands) is produced via the
+    `brainstormer` → backlog flow. This is a user-decision-adjacent routing
+    blocker, not a design ambiguity — the design choice itself is already
+    closed.
+- Action for user: invoke `brainstormer` for REQ-016 / STORY-012 to run the
+  Product Owner `ac-patch` (D-10) through its `handoff-to-backlog` flow; Scrum
+  Master resumes STORY-012 scheduling once that artifact update lands.
+- No agents left active; scheduler confirmed quiescent again after the
+  `TaskStop` release. `pending_count: 1` (STORY-012) for REQ-016.
