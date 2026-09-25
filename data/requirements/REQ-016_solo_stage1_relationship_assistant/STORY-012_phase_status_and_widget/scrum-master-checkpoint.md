@@ -8,16 +8,19 @@ Scope:
 
 Current State:
 - Requirement Status: IN_PROGRESS
-- Story Status: BLOCKED (mobile-dev patch run WRITE_SCOPE_TOO_NARROW_FOR_C1)
-- Completed Checklist: Requirements [x], UX [x], Architecture [x] (tech-lead
-  run COMPLETED, `architecture/solution.md` + `contract-summary.md` +
-  `coding-plan/master-plan.md` present in worktree), Implementation [ ]
-  (patch cycle in progress, uncommitted changes in worktree), Review [ ]
-  (last committed review: final-synthesis Outcome: PATCH_REQUIRED, commit
-  `322c4276`)
-- Current Phase: Patch cycle after final-synthesis PATCH_REQUIRED review
-  (C-1 evening check-in three photo slots, C-3 iOS URL scheme registration)
-- Phase Statuses: see `coding-plan/master-plan.md` in this worktree
+- Story Status: IN_PROGRESS — Tech Lead architecture-solution run dispatched
+  to extend the widget payload contract for D-10 (phase-label + color dot)
+- Completed Checklist: Requirements [x] (D-10/D-6 ac-patch landed, commit
+  `84bdd6b2`), UX [x] (same commit), Architecture [ ] (contract-summary.md §2
+  extension in flight — see Last Delegation), Implementation [ ] (blocked on
+  contract + coding-plan phase, was previously WRITE_SCOPE_TOO_NARROW_FOR_C1),
+  Review [ ] (last committed review: final-synthesis Outcome: PATCH_REQUIRED,
+  commit `322c4276`, superseded by newer commits)
+- Current Phase: D-10 contract extension (architecture-solution), then a new
+  Mode: coding-plan phase for (a) mobile-dev D-10+D-11+D-12 and (b) D-6/C-1
+  rework with widened WriteScope
+- Phase Statuses: see `coding-plan/master-plan.md` in this worktree (P1-P8
+  existing; new phase(s) pending from the coding-plan run below)
 
 Story Git Boundary:
 - Git-Boundary: REQUIRED
@@ -26,18 +29,27 @@ Story Git Boundary:
 - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget
 - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget
 - MergeTarget: codex/REQ-016_solo_stage1_relationship_assistant-integration
-- BaseHead: 322c4276963313087e27d3bce74cb266a91693c2
+- BaseHead: 84bdd6b2451b44fa6a259f1ffe720308d8a6e9e9
 - BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget.json
-- Boundary status: COMMITTED at commit_sha 27c0a7e8; worktree HEAD has since
-  moved to 322c4276 (final-synthesis review commit); worktree ALSO has
-  UNCOMMITTED changes from the blocked patch run — do not discard them.
+- Boundary status: COMMITTED. PO/UX ac-patch (D-10/D-6, routed via
+  brainstormer, requirements.md + ux/uiux-spec.md) committed `84bdd6b2`;
+  BaseHead refreshed to this commit via `handoff-build.sh spawn` (which calls
+  `git-story-boundary.sh start` internally). Corrected req_master.md:217
+  attribution separately in the control checkout (commit `4d900c35`): the
+  contract-summary.md/home_widget_bridge.dart patch is Tech Lead's, not PO's.
 
 Last Delegation:
-- Role: mobile-dev (Alex-Mobile-Dev-2)
-- Mode: mobile-implementation (patch continuation)
-- Result: BLOCKED — WRITE_SCOPE_TOO_NARROW_FOR_C1
-- Continuation AgentId: none recorded (session b5d3a6bb ended; treat any
-  resume as Session-Recovery: YES)
+- Role: tech-lead (Alan-Techlead)
+- Mode: architecture-solution
+- RunId: RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-tech-lead
+- Scope of this run: extend ONLY `architecture/contract-summary.md` §2 with
+  the new phase-label payload key + 4 color-dot tokens (D-10, AC-37/BR-15).
+  Does NOT touch coding-plan/master-plan.md or implementation files in this
+  run — a follow-up `Mode: coding-plan` handoff is required next to add the
+  phase(s) covering (a) mobile-dev D-10+D-11+D-12 implementation and (b) D-6
+  check-in modal rework + C-1 3-photo-grid WriteScope widening.
+- Result: DISPATCHED, awaiting TECH_LEAD_COMPLETE
+- Continuation AgentId: Alan-Techlead@session-e7df910a
 
 Validation Result:
 - Gate: N/A (blocked before reaching review)
@@ -45,57 +57,66 @@ Validation Result:
 - Missing Exact Paths: N/A
 
 Waiting Reason:
-- Run `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-mobile-dev`
-  reported `WRITE_SCOPE_TOO_NARROW_FOR_C1`: 9 of 10 C-1 deltas (evening
-  check-in three photo slots) live outside the granted WriteScope. Delivered
-  under existing scope: C-3 iOS URL scheme registration + guard test +
-  configuration-guide step (uncommitted in worktree). D-3 also needs a
-  Scrum-Master/Tech-Lead data-contract decision: `ActivityCard` currently
-  carries only a date-only `scheduledOn`, no clock time, which C-1's
-  three-photo-slot UI needs to reconcile.
-- The `continue parallel` invocation that found this state also hit
-  pre-flight FAIL on `backend`: `nest: command not found` (backend-api dev
-  server did not come up after 60s auto-start). No new specialist dispatch
-  was attempted this invocation; this checkpoint is reconciliation/parking
-  only, written into the worktree per `guard-parallel-worktree-scope.sh`
-  (control-checkout writes to this story's data dir are blocked while a
-  parallel run is indexed for it).
+- Direct user instruction (2026-09-25, Vietnamese) confirmed the D-10 blocker
+  was mis-attributed to Product Owner in both this story's prior checkpoint
+  and `req_master.md:217`; corrected to Tech Lead (control-checkout commit
+  `4d900c35`). PO/UX ac-patch (requirements.md/uiux-spec.md) already landed
+  via brainstormer routing, commit `84bdd6b2`.
+- Waiting on Alan-Techlead `Mode: architecture-solution`
+  (RunId ...-tech-lead, agentId `Alan-Techlead@session-e7df910a`) to extend
+  `architecture/contract-summary.md` §2 with the new phase-label payload key
+  + 4 color-dot tokens before the follow-up `Mode: coding-plan` phase can be
+  requested.
+- Prior blocker context (still relevant for the next coding-plan phase, not
+  yet resolved): mobile-dev C-1 patch (evening check-in 3-photo slots) was
+  `WRITE_SCOPE_TOO_NARROW_FOR_C1` — 9/10 deltas outside granted WriteScope.
+  D-3 data-contract question unresolved: `ActivityCard` only has a date-only
+  `scheduledOn`, no clock time, which C-1's UI needs reconciled. The next
+  `Mode: coding-plan` Tech Lead phase must decide this and widen WriteScope.
 
 Next Resume Action:
-1. Fix local backend dependency install (`nest: command not found` — likely
-   missing `node_modules`/`@nestjs/cli`) so pre-flight backend check passes,
-   or confirm this story's remaining patch work does not require the backend
-   runtime before re-dispatching.
-2. Scrum Master decides the WriteScope widening for the C-1 patch: add
-   `mobile/lib/features/activity_cards/presentation/widgets/activity_card_tile.dart`,
-   `mobile/lib/features/activity_cards/presentation/screens/activity_card_hub_view.dart`,
-   `mobile/lib/l10n/arb/`,
-   `mobile/android/app/src/main/res/layout/cupid_phase_widget.xml`,
-   `mobile/ios/CupidPhaseWidget/CupidPhaseWidget.swift` to the STORY-012
-   mobile-dev WriteScope (scope overlap with STORY-009/005/013 mobile-dev on
-   `mobile/lib/features/phase_status`, `mobile/test/features/phase_status`,
-   `mobile/ios/Runner/Info.plist` resolves at merge, not a spawn blocker).
-3. Re-dispatch Alex-Mobile-Dev `Mode: mobile-implementation` (patch
-   continuation) for STORY-012 C-1 with the widened WriteScope and the D-3
-   data-contract decision resolved (or explicitly deferred with a recorded
-   decision).
-4. Once merged, reconcile the control-checkout `story_master.md` Architecture
+1. On `TECH_LEAD_COMPLETE` from the architecture-solution run above, dispatch
+   Alan-Techlead again with `Mode: coding-plan` to add new phase(s) to
+   `coding-plan/master-plan.md`:
+   (a) mobile-dev phase implementing D-10 (phase-label + dot, using the new
+       contract-summary.md §2 key) merged with D-11 (countdown number
+       formatting) and D-12 (dark brand palette/gradient) — WriteScope should
+       include `mobile/lib/features/phase_status/data/home_widget_bridge.dart`,
+       `mobile/android/app/src/main/res/layout/cupid_phase_widget.xml`,
+       `mobile/ios/CupidPhaseWidget/CupidPhaseWidget.swift`.
+   (b) mobile-dev phase finishing the D-6 check-in modal rework + C-1 3-photo
+       grid, with WriteScope widened to include
+       `mobile/lib/features/activity_cards/presentation/widgets/activity_card_tile.dart`,
+       `mobile/lib/features/activity_cards/presentation/screens/activity_card_hub_view.dart`,
+       `mobile/lib/l10n/arb/`, and the D-3 `ActivityCard`/`scheduledOn`
+       data-contract question resolved (or explicitly deferred with a
+       recorded decision).
+2. After the coding-plan phase(s) exist, dispatch Alex-Mobile-Dev
+   `Mode: mobile-implementation` for the new phase(s) per the scheduler-loop
+   role-transition table (`TECH_LEAD_COMPLETE` -> schedule ready
+   implementation lanes).
+3. Once merged, reconcile the control-checkout `story_master.md` Architecture
    and Implementation checkboxes (currently stale `[ ]` there — the real
    state lives in this worktree).
 
 Files Updated:
-- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/scrum-master-checkpoint.md (this file, created in the story worktree)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/scrum-master-checkpoint.md (this file, in the story worktree)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/requirements/requirements.md (PO/UX ac-patch, commit 84bdd6b2, in the story worktree)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/ux/uiux-spec.md (PO/UX ac-patch, commit 84bdd6b2, in the story worktree)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/req_master.md (D-10 attribution fix, control-checkout commit 4d900c35)
 
 Test Evidence:
-- None recorded this invocation (no new work dispatched).
+- None recorded this invocation (planning-lane dispatch only).
 
 Next Valid Step:
-- Role: Scrum Master (re-scope decision), then Alex-Mobile-Dev
-- Mode: mobile-implementation (patch continuation)
-- Required Inputs: widened WriteScope (see Next Resume Action item 2), D-3
-  data-contract decision, backend pre-flight passing (or confirmed
-  not-required for this patch)
+- Role: Alan-Techlead (architecture-solution run in flight), then
+  Alan-Techlead again (Mode: coding-plan), then Alex-Mobile-Dev
+- Mode: architecture-solution (in flight) -> coding-plan -> mobile-implementation
+- Required Inputs: contract-summary.md §2 extension (this run's output), then
+  the coding-plan phase(s) described in Next Resume Action item 1
 - Output Paths:
+  - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/architecture/contract-summary.md
+  - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/master-plan.md
   - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/test-results.md
   - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/visual-fidelity/visual-fidelity-report.md
 
@@ -103,6 +124,9 @@ Do Not Re-read:
 - STORY-005/008/009/010/013 completed run files (resolved, merge-scope only)
 - prior scoped-slice reviewer runs S1-S6a (superseded by final-synthesis
   PATCH_REQUIRED commit 322c4276)
+- requirements.md / uiux-spec.md full bodies (already landed; query only by
+  AC-37/BR-15 and §2 anchors)
 
 Large Files Query Keys:
-- (none loaded this invocation)
+- req_master.md D-10/D-6 Design Ruling Log rows (query: "D-10" / "D-6")
+- architecture/contract-summary.md §2 (widget payload contract)
