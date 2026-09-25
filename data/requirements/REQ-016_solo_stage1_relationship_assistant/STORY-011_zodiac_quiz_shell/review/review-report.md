@@ -17,7 +17,7 @@ closure decision has been made yet.
 | P1 | Content pack and gate (deterministic zodiac content data + offline content gate) | `review/slice-P1.md` | 0 | 3 | REVIEWED |
 | P2 | Deterministic session (resolver, rotation cursor, play-session cubit, activity-card origin) | `review/slice-P2.md` | 0 | 2 | REVIEWED |
 | P3 | Result surface screens (picker, one-question view, one-scroll result surface, chrome `.arb`) | `review/slice-P3.md` | 0 | 2 | REVIEWED |
-| P4 | Entry point wiring | — | — | — | PENDING |
+| P4 | Entry point wiring (single-symbol entry point, hub slot-2 routing, strip contract, three stale-test retirements) | `review/slice-P4.md` | 0 | 3 | REVIEWED |
 
 ## Notes For The Final Synthesis
 
@@ -40,6 +40,24 @@ closure decision has been made yet.
 - Per-story visual fidelity is now judged for the P3 surface (`PASS`, gate
   re-run independently with a negative control). The P4 surface's half of the
   same report is not judged by any slice yet.
+- P4 deferred items D-P4-1 (two of P4's three design anchors draw no quick-entry
+  strip, so the P4 `PASS` rests on one anchor the surface is knowingly deviant
+  against, and the canvas row's subtitle is an undisclosed delta), D-P4-2 (the
+  third cell is flush to the frame edge in the populated-hub capture but inset
+  in the Minute-1 one) and D-P4-3 (the `write_scope` citation for the two
+  retired-test files and the "222" analyzer baseline are both unverifiable from
+  the record) are carried forward.
+- All four slices are now REVIEWED with 0 blocking findings and 10 deferred
+  findings in total. No slice has rendered a story-level verdict.
+- P4's analyzer delta was re-verified independently rather than accepted:
+  targeted `flutter analyze` over the seven P4-adjacent files and over
+  `lib/features/zodiac_shell` both return `No issues found!`, and
+  `flutter analyze test` returns 21 pre-existing issues, none naming a file this
+  story touched. The "222 warnings" baseline itself did not reproduce (D-P4-3).
+- The three stale-test retirements are legitimate: the cited STORY-005 precedent
+  at `gift_ideas_screen_test.dart:1163` exists, and it is honoured in code at
+  `conversation_starters_screen_test.dart:947-998`, not only in a comment.
+  Coverage migrated one-for-one, including the Minute-1 case.
 - P1 judges no story-level mobile gate: runtime startup smoke, entry point
   reachability, and implemented visual fidelity remain open and belong to the
   later slices and the synthesis.
