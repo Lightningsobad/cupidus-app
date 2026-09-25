@@ -258,10 +258,12 @@ Validation Result:
 - Missing Exact Paths: N/A
 
 Waiting Reason:
-- None right now — P11 implementation verified and committed; next action is
-  Scrum-Master-owned: release Alex-Mobile-Dev (P11 instance), dispatch fresh
-  Alex-Mobile-Dev for P12.
-- P12 is PENDING, not in flight yet.
+- Waiting on Alex-Mobile-Dev (fresh spawn, `Alex-Mobile-Dev@session-e7df910a`)
+  for Phase P12 (`phase-P12-widget-native-capture.md`: R-5 native build +
+  device capture, evidence-only, Write Scope confined to `visual-fidelity/` +
+  `coding-plan/test-results.md`, no product code). Dispatched this round via
+  `Agent()` (RunId reused: `RUN-...-mobile-dev`, BaseHead
+  `ca86b3a2dbadcb3e1ef77b07b18248300665b2a3`). This is the story's LAST phase.
 - R-3 (Android countdown digit `SpannableString` sizing) still open,
   pre-existing, not part of P10/P11/P12 scope — tracked for the review gate,
   not blocking this dispatch.
@@ -282,12 +284,16 @@ Next Resume Action:
    `guard-parallel-spawn.sh DEP_NOT_MERGED` note: `--depends-on` must be a
    bare token (`NONE` or a story id), never a free-text parenthetical — that
    string gets parsed as a literal story id.
-3. NEXT: `list-releasable-agents.sh`, `TaskStop` the now-terminal
-   Alex-Mobile-Dev P11 instance, then dispatch a FRESH Alex-Mobile-Dev for
+3. DONE: `list-releasable-agents.sh` run, `TaskStop`-ed the now-terminal
+   Alex-Mobile-Dev P11 instance, then dispatched a FRESH Alex-Mobile-Dev for
    P12 (`phase-P12-widget-native-capture.md`: R-5 native build + device
-   capture, Depends-On P11 — now satisfied). Include the P11 report's
-   `androidx.core` classpath note in the dispatch prompt. Verify (3-part
-   protocol), commit, reseal.
+   capture, Depends-On P11 — satisfied). IN FLIGHT now
+   (`Alex-Mobile-Dev@session-e7df910a`, RunId
+   `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-mobile-dev`,
+   BaseHead `ca86b3a2dbadcb3e1ef77b07b18248300665b2a3`). Dispatch prompt
+   included the P11 report's `androidx.core` classpath note as a
+   non-blocking heads-up for the first real Kotlin compile. On completion:
+   verify (3-part protocol), commit, reseal, release.
 4. Once all three phases are DONE and sealed, tick `story_master.md`
    Implementation checkbox, then route to Iris-QC (Story-Class `standard` —
    story owes rendered visual-fidelity evidence, review must assess R-1/R-5
