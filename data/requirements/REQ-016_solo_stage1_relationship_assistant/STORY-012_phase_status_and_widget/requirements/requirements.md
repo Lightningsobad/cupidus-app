@@ -140,7 +140,11 @@ theo; và cờ đó **chỉ** đổi khi chính người dùng bấm (STORY-001 
 
 **AC-9.** Given người dùng tự thêm widget theo cơ chế của hệ điều hành, when
 widget hiển thị, then nội dung khớp **pha của thẻ gần nhất** trong bốn pha:
-*đang đợi · sắp hẹn · đúng ngày hẹn · khoảng lặng*.
+*đang đợi · sắp hẹn · đúng ngày hẹn · khoảng lặng*. Mỗi pha hiển thị một **nhãn-mí
+pha** (eyebrow) kèm một **chấm màu riêng của pha**. Chữ nhãn-mí lấy từ gói nội
+dung đã ship (AC-37) và chỉ là **tên pha chung chung** — không giờ, không đếm
+ngày, không tên thẻ, không gì về người kia (AC-7, AC-11, AC-12). Vá 2026-09-17:
+thêm nhãn-mí pha + chấm màu theo pha; thiết kế là mốc chuẩn; đóng D-10.
 
 **AC-10.** Given thẻ gần nhất chuyển từ "sắp hẹn" sang "đúng ngày hẹn", when
 widget làm mới, then nội dung widget đổi sang pha thứ tư, phản chiếu khối
@@ -170,14 +174,29 @@ trễ, không hối thúc (R-1c/R-1d).
 
 **AC-16.** Given hôm nay là ngày hẹn của một thẻ, when tới **khoảng 23h**, then
 app gửi **một** nhắc nhẹ "về tới nhà chưa?" dẫn tới **cất ảnh** và **viết một
-câu vào nhật ký**.
+câu vào nhật ký**. Nhắc mở một **màn check-in dạng modal toàn màn hình**, chỉ
+tới được từ nhắc 23h — không phải một đích điều hướng mới, không phải "màn 12",
+nhất quán với "Direct URL: N/A". Khối ngữ cảnh chỉ đọc **tên buổi hẹn** từ các
+trường thẻ STORY-001 (BR-12); đọc không được thì bỏ khối đó, không bao giờ chặn
+màn. Có **ba ô ảnh tuỳ chọn**. Có hai **chip mô tả không bấm được**: một chip
+nói câu viết được lưu vào **nhật ký**, một chip nói chỉ người dùng đọc được. Câu
+viết **không bao giờ** được ghi vào **sổ tay** (STORY-004). Vá 2026-09-17: màn
+check-in modal, khối ngữ cảnh, ba ô ảnh, hai chip mô tả; chữ chip canvas "+ ghi
+vào sổ tay" không áp dụng — một hành động ghi thật sang sổ tay STORY-004 là
+requirement riêng, chờ user xác nhận có mở hay không; thiết kế là mốc chuẩn;
+đóng D-6 (gồm D-7/D-8/D-9).
 
 **AC-17.** Given người dùng bỏ qua nhắc ở AC-16, when thời gian trôi, then app
-**không nhắc lại** về buổi hẹn đó — bỏ qua thì thôi hẳn.
+**không nhắc lại** về buổi hẹn đó — bỏ qua thì thôi hẳn. Dòng trấn an ở chân màn
+check-in chỉ được hứa điều AC-17/BR-10 bảo đảm (không nhắc lại). Vá 2026-09-17:
+giới hạn lời hứa của dòng trấn an chân màn; thiết kế là mốc chuẩn; đóng D-6 (gồm
+D-7/D-8/D-9).
 
 **AC-18.** Given STORY-003 (nhật ký) chưa được giao, when nhắc ở AC-16 kích
 hoạt, then cửa ra "viết một câu" suy biến gọn gàng và phần cất ảnh vẫn dùng
-được; nhắc này **không** chặn vì thiếu STORY-003.
+được; nhắc này **không** chặn vì thiếu STORY-003. Chip "lưu vào nhật ký" (AC-16)
+ẩn **cùng lúc** với cửa ra "viết một câu". Vá 2026-09-17: chip nhật ký ẩn theo
+cửa ra "viết một câu"; thiết kế là mốc chuẩn; đóng D-6 (gồm D-7/D-8/D-9).
 
 **AC-19.** Given nội dung của nhắc này, when người dùng đọc, then nó hỏi **về
 người dùng** ("về tới nhà chưa?"), **không** hỏi về người kia và không yêu cầu
@@ -269,7 +288,11 @@ when chúng được ship, then chúng là **gói dữ liệu có lược đồ 
 cho từng mục**, không phải chuỗi cứng trong **widget**/code. Ràng buộc này cắn
 mạnh nhất ở đây vì bề mặt chính của story là một widget: chuỗi nằm trong mã
 widget là vi phạm trực tiếp. Đổi nguồn nội dung sang CMS ngoài repo **không kéo
-theo một lần sửa code** (R-15a).
+theo một lần sửa code** (R-15a). **Nhãn-mí pha** (AC-9) là một trường mới của
+mỗi mục pha trong gói nội dung, có id bền — không bao giờ là chuỗi trong mã
+widget/native (Android XML, iOS Swift, cầu nối Dart). **Chấm màu** theo pha là
+design token theo pha, không phải nội dung. Vá 2026-09-17: thêm trường nhãn-mí
+pha và phân loại chấm màu là token; thiết kế là mốc chuẩn; đóng D-10.
 
 **AC-38.** Given kho nội dung nhỏ giọt có **N mục bất kỳ** (N ≥ 0), when khoảng
 lặng kéo dài tới lúc duyệt hết kho, then hành vi hết-tập là **im lặng** — đúng
@@ -346,7 +369,11 @@ giữ story này ngoài phạm vi nội dung-nói-về-người-kia nay được
   pha, nội dung nhắc, và kho nhỏ giọt là gói dữ liệu có lược đồ, mỗi mục có **id
   bền**. Cấm chuỗi nội dung nằm trong mã **widget**/code — ràng buộc gắt nhất
   của story này, vì widget là nơi dễ nhúng chuỗi cứng nhất. Tiêu chí nghiệm thu:
-  đổi nguồn sang CMS ngoài repo mà **không sửa một dòng code nào**.
+  đổi nguồn sang CMS ngoài repo mà **không sửa một dòng code nào**. Nhãn-mí pha
+  là trường của mỗi mục pha, có id bền, cấm nằm trong mã widget/native (Android
+  XML, iOS Swift, cầu nối Dart); chấm màu theo pha là design token, không phải
+  nội dung. Vá 2026-09-17: nhãn-mí pha là dữ liệu, chấm màu là token; thiết kế
+  là mốc chuẩn; đóng D-10.
 - **BR-16 (R-15b — N là thuộc tính dữ liệu).** Số mục kho nhỏ giọt và số biến
   thể nội dung mỗi pha là dữ liệu bản đầu, **không** phải hằng số của story; bộ
   seed 10 mục cho gói **xoay vòng** là giá trị bản đầu. Cấm mọi AC, BR, hay bố
@@ -441,14 +468,14 @@ giữ story này ngoài phạm vi nội dung-nói-về-người-kia nay được
 |----|-----------------|
 | AC-1..AC-4 | STORY-006 AC-24/BR-11 phụ thuộc một chiều, hợp đồng thẻ STORY-001 |
 | AC-5..AC-8 | SB-83 "đừng đoán — chuẩn bị" (J4), R-1b, STORY-001 AC-17 |
-| AC-9..AC-13 | SB-84 widget theo pha, R-1b, R-1f, BR-11 widget là bề mặt công cộng |
+| AC-9..AC-13 | SB-84 widget theo pha, R-1b, R-1f, BR-11 widget là bề mặt công cộng, D-10 (2026-09-17) |
 | AC-14..AC-15 | SB-86 đếm ngược, R-1c/R-1d không trách móc |
-| AC-16..AC-19 | SB-85 "về tới nhà chưa?" (J8 hướng vào trong), STORY-003 tuỳ chọn |
+| AC-16..AC-19 | SB-85 "về tới nhà chưa?" (J8 hướng vào trong), STORY-003 tuỳ chọn, D-6 (2026-09-17) |
 | AC-20..AC-23 | SB-87 "món quà đang lớn" (J10), SB-99 nhỏ giọt, BR-9 trần tần suất |
 | AC-24..AC-29 | STORY-001 AC-22, J12 nhận diện cột mốc, R-1 cấm (f), BR-5..BR-8 |
 | AC-30..AC-32 | D-1 nhắc nhẹ, tắt được toàn bộ, BR-10 bỏ qua thì thôi hẳn |
 | AC-33..AC-36 | R-1b, R-7 không AI/không API ngoài, R-14, cổng cứng REQ-016 |
-| AC-37 | R-15a — schema + id bền, cấm chuỗi cứng trong mã widget |
+| AC-37 | R-15a — schema + id bền, cấm chuỗi cứng trong mã widget, D-10 (2026-09-17) |
 | AC-38 | R-15b — N là thuộc tính dữ liệu; kho nhỏ giọt cạn thì im lặng, không nới BR-9 |
 | AC-39 | R-15c — cổng nhập chạy được; BR-14, R-1b, R-1e, cấm %, cấm streak |
 | BR-15..BR-17 | D-15 / R-15 (`req_master.md` mục 15) |

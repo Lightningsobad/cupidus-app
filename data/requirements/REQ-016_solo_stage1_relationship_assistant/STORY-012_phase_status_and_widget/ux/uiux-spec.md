@@ -40,8 +40,33 @@ app:
   định) — không lắp chuỗi tự do người dùng đã nhập vào widget, kể cả khi
   chuỗi đó vô hại; dùng nhãn khái quát ("Một ý tưởng quà đang được chuẩn bị")
   thay vì tên quà thật.
-- Bố cục 1 khối: icon pha (leading) + 1 dòng nhãn pha (`body`, đậm vừa) +
-  tối đa 1 dòng phụ (`caption`). Không carousel, không danh sách nhiều dòng.
+- Bố cục 1 khối, thêm nhãn-mí + chấm màu theo pha (D-10, canvas
+  `widget-phases`): trên cùng là **nhãn-mí pha** — chuỗi ngắn, khái quát,
+  theo đúng phong cách canvas ("PHA n · <tên pha>", chuỗi hiển thị chính xác
+  do content pack quyết định) — kèm một **chấm màu theo pha** ngay cạnh
+  nhãn-mí; dưới đó vẫn là icon pha (leading) + 1 dòng nhãn pha (`body`, đậm
+  vừa) + tối đa 1 dòng phụ (`caption`). Không carousel, không danh sách nhiều
+  dòng.
+- Nhãn-mí là chuỗi hiển thị **thứ ba** của widget (cạnh `primary_line`,
+  `secondary_line`) — lấy từ một **trường mới, ổn định theo id, trong content
+  pack đã ship kèm app** (AC-37/BR-15: mở rộng đúng năm-khoá hợp đồng payload
+  hiện có thêm một khoá nhãn-mí, không hard-code chuỗi hiển thị trong
+  `cupid_phase_widget.xml`/`CupidPhaseWidget.swift`). Nội dung nhãn-mí chỉ là
+  **tên pha khái quát** (dùng lại đúng bốn tên ở mục 1: "Đang đợi" / "Sắp
+  hẹn" / "Đúng ngày hẹn" / "Khoảng lặng", hoặc tương đương) — **không** thời
+  gian, **không** số ngày, **không** tên thẻ/hoạt động cụ thể, **không** bất
+  kỳ điều gì về người kia (AC-9, AC-11, AC-12, BR-11).
+- Chấm màu theo pha là **design token**, không phải nội dung và không phải
+  điểm số: bốn vai trò token riêng cho bốn pha, nhất quán với bảng màu
+  thương hiệu tối của D-12 (không dùng màu mặc định của hệ điều hành) —
+  `--dot-waiting` (Đang đợi, trung tính), `--dot-upcoming` (Sắp hẹn, cùng
+  nhóm "đã xác nhận" với `--mint`/`--green` ở mục 5 survey), `--dot-today`
+  (Đúng ngày hẹn, nhóm `--pink`/`--grad` hành động chính), `--dot-quiet`
+  (Khoảng lặng, biến thể tối/desaturated cùng bảng). Đây là bốn vai trò ngữ
+  nghĩa; giá trị màu cụ thể do D-12 (System UX Memory + mobile-dev) định,
+  không lặp lại ở đây.
+- Vá 2026-09-17: thêm nhãn-mí + chấm màu cho bốn pha; thiết kế là mốc chuẩn;
+  đóng D-10.
 - Nội dung theo pha (copy chính xác do đội nội dung soạn theo R-15 — đây là khung):
 
   | Pha | Dòng chính | Dòng phụ |
@@ -75,14 +100,34 @@ app:
 
 - Thông báo hệ thống thời điểm ~23h ngày hẹn, nội dung hỏi **về người dùng**,
   không hỏi về người kia và không yêu cầu đánh giá buổi hẹn (AC-19).
-- Chạm vào thông báo → mở thẳng luồng 2 bước gộp trong một sheet nhỏ: (1) tuỳ
-  chọn đính ảnh (mở OS picker), (2) một ô nhập 1 câu → lưu vào nhật ký
-  (STORY-003). Không ép cả hai bước — bỏ trống vẫn lưu được (đồng nhất "cất
-  ảnh và viết một câu" nhưng không khoá nhau).
-- Nếu STORY-003 chưa giao (AC-18): bỏ bước (2), chỉ giữ (1) cất ảnh; sheet co
-  lại còn đúng phần dùng được, không hiện ô nhập bị vô hiệu hoá xám.
+- Chạm vào thông báo → mở thẳng một **màn hình đầy đủ dạng modal** (không
+  phải sheet nhỏ), khớp canvas `23h-vua-ve-j8`. Chỉ vào được từ thông báo
+  23h — **không** phải một đích điều hướng mới, **không** có URL trực tiếp,
+  **không** phải "màn thứ 12" (tổng vẫn 11 màn, cùng luật ở đầu file này):
+  - Tiêu đề lớn **hai dòng**.
+  - Một **khối ngữ cảnh** ngay dưới tiêu đề, nhắc lại buổi hẹn đang nói tới —
+    chỉ đọc tên/ngày buổi hẹn từ trường có sẵn của thẻ STORY-001 (BR-12);
+    không đọc được thì bỏ khối này, không chặn màn hình hiển thị.
+  - Một **lưới ba ô ảnh**, mỗi ô tuỳ chọn độc lập (mở OS picker riêng từng
+    ô) — không ép đủ ba ô.
+  - Một **ô nhập nhiều dòng** → lưu vào nhật ký (STORY-003).
+  - Hai **chip mô tả, không chạm được**: một chip nói câu vừa viết sẽ vào
+    **nhật ký**; một chip nói **chỉ người dùng đọc được**. Chữ "+ ghi vào sổ
+    tay" trên canvas **không** được áp dụng — AC-16 chỉ lưu vào nhật ký; sổ
+    tay (STORY-004) nằm ngoài phạm vi theo R-1f. Một hành động "thêm vào sổ
+    tay" thật sẽ là một requirement riêng, cần người dùng xác nhận trước,
+    không suy diễn từ canvas ở đây.
+  - Một **CTA chính cỡ lớn** ở cuối màn.
+  - Không ép cả hai bước (ảnh + câu viết) — bỏ trống hoặc rời màn không làm
+    gì vẫn lưu được phần đã có (giữ nguyên luật "không ép cả hai bước").
+  - Một dòng **trấn an ở chân màn**, chỉ hứa đúng một điều: thông báo này sẽ
+    **không nhắc lại** (AC-17/BR-10) — không hứa badge/tồn đọng nào khác.
+- Nếu STORY-003 chưa giao (AC-18): ẩn cùng lúc ô nhập, chip nhật ký, và lối
+  thoát "viết một câu" — màn chỉ còn lưới ảnh tuỳ chọn, không hiện ô/khối nào
+  ở trạng thái xám vô hiệu hoá.
 - Bỏ qua thông báo (AC-17): không nhắc lại thông báo đó nữa. Không icon/badge
   "còn 1 việc chưa làm" tồn đọng trên app icon hay trong app sau đó.
+- Vá 2026-09-17: màn đầy đủ; thiết kế là mốc chuẩn; đóng D-6 (gồm D-7/D-8/D-9).
 
 ## 5. "Món quà đang lớn" và nhỏ giọt (SB-87/SB-99, khoảng lặng)
 
