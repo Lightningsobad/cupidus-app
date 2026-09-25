@@ -174,7 +174,7 @@ Story Git Boundary:
 - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget
 - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget
 - MergeTarget: codex/REQ-016_solo_stage1_relationship_assistant-integration
-- BaseHead: e04157b42400ee7119235a4a3395c9ffbbc0cde5
+- BaseHead: c3b4311a8b338c6435238ce58004b2e92616216c
 - BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget.json
 - Boundary status: COMMITTED. PO/UX ac-patch (D-10) `84bdd6b2`. Tech Lead
   architecture-solution + coding-plan (P9+P10 added, D-10) sealed at
@@ -186,10 +186,15 @@ Story Git Boundary:
   `820d19120ef72936675d76884919f5bcc32024eb`. req_master.md:217 attribution
   fixed (`4d900c35`); D-13 Design Ruling Log row added + committed (control
   checkout, `ecade7ad`). Andy-PO's D-13 ac-patch (`requirements.md` +
-  `uiux-spec.md`) verified and committed `e04157b4`; re-sealed -> BaseHead now
+  `uiux-spec.md`) verified and committed `e04157b4`; re-sealed -> BaseHead
   `e04157b42400ee7119235a4a3395c9ffbbc0cde5`. Alan-Techlead
-  `Mode: architecture-solution` (D-13 §3a + P10 blocker decision) dispatched
-  next, awaiting `TECH_LEAD_COMPLETE`.
+  `Mode: architecture-solution` (D-13 §3a shape + P10 §7 decision) returned
+  `TECH_LEAD_COMPLETE: YES`, verified, and committed together with the
+  `story_master.md` gate fixes (AC-9 + Implementation Lane) as `c3b4311a`;
+  re-sealed -> BaseHead now `c3b4311a8b338c6435238ce58004b2e92616216c`.
+  Control-checkout `req_master.md` D-13 token-count typo fixed separately on
+  `main` (`2e629add`, outside this story's boundary). Next dispatch: fresh
+  Alan-Techlead `Mode: coding-plan` (WriteScope `coding-plan/` only).
 
 Last Delegation:
 - Role: tech-lead (Alan-Techlead, fresh spawn)
