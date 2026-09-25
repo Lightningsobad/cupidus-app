@@ -43,7 +43,7 @@ app:
 - Bố cục 1 khối, thêm nhãn-mí + chấm màu theo pha (D-10, canvas
   `widget-phases`): trên cùng là **nhãn-mí pha** — chuỗi ngắn, khái quát,
   theo đúng phong cách canvas ("PHA n · <tên pha>", chuỗi hiển thị chính xác
-  do content pack quyết định) — kèm một **chấm màu theo pha** ngay cạnh
+  do content pack quyết định) — kèm một **chỉ báo pha** ngay cạnh
   nhãn-mí; dưới đó vẫn là icon pha (leading) + 1 dòng nhãn pha (`body`, đậm
   vừa) + tối đa 1 dòng phụ (`caption`). Không carousel, không danh sách nhiều
   dòng.
@@ -56,7 +56,7 @@ app:
   hẹn" / "Đúng ngày hẹn" / "Khoảng lặng", hoặc tương đương) — **không** thời
   gian, **không** số ngày, **không** tên thẻ/hoạt động cụ thể, **không** bất
   kỳ điều gì về người kia (AC-9, AC-11, AC-12, BR-11).
-- Chấm màu theo pha là **design token**, không phải nội dung và không phải
+- Chỉ báo pha là **design token**, không phải nội dung và không phải
   điểm số: bốn vai trò token riêng cho bốn pha, nhất quán với bảng màu
   thương hiệu tối của D-12 (không dùng màu mặc định của hệ điều hành) —
   `--dot-waiting` (Đang đợi, trung tính), `--dot-upcoming` (Sắp hẹn, cùng
@@ -65,8 +65,16 @@ app:
   (Khoảng lặng, biến thể tối/desaturated cùng bảng). Đây là bốn vai trò ngữ
   nghĩa; giá trị màu cụ thể do D-12 (System UX Memory + mobile-dev) định,
   không lặp lại ở đây.
+- **Hình dạng** của chỉ báo pha không đồng nhất trên bốn pha: `--dot-waiting`,
+  `--dot-upcoming`, `--dot-quiet` vẽ **chấm màu đặc**; riêng pha *Đúng ngày hẹn*
+  (`--dot-today`) vẽ một **glyph tia chớp** khớp canvas `sb-84-widget-bon-pha`,
+  vì nền gradient hồng→tím của D-12 làm chấm hồng đặc gần như mất tương phản.
+  Đây là vai trò ngữ nghĩa/UX; định nghĩa kỹ thuật của hình dạng token nằm ở
+  `architecture/contract-summary.md` §3a, không lặp lại ở đây.
 - Vá 2026-09-17: thêm nhãn-mí + chấm màu cho bốn pha; thiết kế là mốc chuẩn;
-  đóng D-10.
+  đóng D-10. Vá 2026-09-25: đổi hình dạng chỉ báo pha *Đúng ngày hẹn* từ chấm
+  màu đặc sang glyph tia chớp; ba pha còn lại giữ nguyên chấm; thiết kế là mốc
+  chuẩn; đóng D-13.
 - Nội dung theo pha (copy chính xác do đội nội dung soạn theo R-15 — đây là khung):
 
   | Pha | Dòng chính | Dòng phụ |

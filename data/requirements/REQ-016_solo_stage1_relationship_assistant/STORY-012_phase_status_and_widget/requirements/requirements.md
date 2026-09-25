@@ -141,10 +141,14 @@ theo; và cờ đó **chỉ** đổi khi chính người dùng bấm (STORY-001 
 **AC-9.** Given người dùng tự thêm widget theo cơ chế của hệ điều hành, when
 widget hiển thị, then nội dung khớp **pha của thẻ gần nhất** trong bốn pha:
 *đang đợi · sắp hẹn · đúng ngày hẹn · khoảng lặng*. Mỗi pha hiển thị một **nhãn-mí
-pha** (eyebrow) kèm một **chấm màu riêng của pha**. Chữ nhãn-mí lấy từ gói nội
+pha** (eyebrow) kèm một **chỉ báo pha riêng của pha**. Chữ nhãn-mí lấy từ gói nội
 dung đã ship (AC-37) và chỉ là **tên pha chung chung** — không giờ, không đếm
 ngày, không tên thẻ, không gì về người kia (AC-7, AC-11, AC-12). Vá 2026-09-17:
-thêm nhãn-mí pha + chấm màu theo pha; thiết kế là mốc chuẩn; đóng D-10.
+thêm nhãn-mí pha + chấm màu theo pha; thiết kế là mốc chuẩn; đóng D-10. Vá
+2026-09-25: chỉ báo pha là **chấm màu đặc** ở ba pha *đang đợi · sắp hẹn ·
+khoảng lặng*, và là **glyph tia chớp** ở pha *đúng ngày hẹn* (canvas
+`sb-84-widget-bon-pha`); hình dạng của từng token do
+`architecture/contract-summary.md` §3a định, không lặp lại ở đây; đóng D-13.
 
 **AC-10.** Given thẻ gần nhất chuyển từ "sắp hẹn" sang "đúng ngày hẹn", when
 widget làm mới, then nội dung widget đổi sang pha thứ tư, phản chiếu khối
@@ -290,8 +294,10 @@ mạnh nhất ở đây vì bề mặt chính của story là một widget: chu�
 widget là vi phạm trực tiếp. Đổi nguồn nội dung sang CMS ngoài repo **không kéo
 theo một lần sửa code** (R-15a). **Nhãn-mí pha** (AC-9) là một trường mới của
 mỗi mục pha trong gói nội dung, có id bền — không bao giờ là chuỗi trong mã
-widget/native (Android XML, iOS Swift, cầu nối Dart). **Chấm màu** theo pha là
-design token theo pha, không phải nội dung. Vá 2026-09-17: thêm trường nhãn-mí
+widget/native (Android XML, iOS Swift, cầu nối Dart). **Chỉ báo pha** (chấm màu
+đặc ở ba pha, glyph tia chớp ở pha *đúng ngày hẹn* theo D-13) là design token
+theo pha, không phải nội dung — kể cả khi nó là glyph, nó vẫn là token, không
+phải một mục nội dung phải nằm trong gói. Vá 2026-09-17: thêm trường nhãn-mí
 pha và phân loại chấm màu là token; thiết kế là mốc chuẩn; đóng D-10.
 
 **AC-38.** Given kho nội dung nhỏ giọt có **N mục bất kỳ** (N ≥ 0), when khoảng
@@ -371,9 +377,11 @@ giữ story này ngoài phạm vi nội dung-nói-về-người-kia nay được
   của story này, vì widget là nơi dễ nhúng chuỗi cứng nhất. Tiêu chí nghiệm thu:
   đổi nguồn sang CMS ngoài repo mà **không sửa một dòng code nào**. Nhãn-mí pha
   là trường của mỗi mục pha, có id bền, cấm nằm trong mã widget/native (Android
-  XML, iOS Swift, cầu nối Dart); chấm màu theo pha là design token, không phải
-  nội dung. Vá 2026-09-17: nhãn-mí pha là dữ liệu, chấm màu là token; thiết kế
-  là mốc chuẩn; đóng D-10.
+  XML, iOS Swift, cầu nối Dart); chỉ báo pha là design token, không phải nội
+  dung — dù vẽ bằng chấm màu đặc hay bằng glyph tia chớp (pha *đúng ngày hẹn*,
+  D-13), nó vẫn là token, nên không kéo theo mục nội dung mới nào trong gói. Vá
+  2026-09-17: nhãn-mí pha là dữ liệu, chấm màu là token; thiết kế là mốc chuẩn;
+  đóng D-10.
 - **BR-16 (R-15b — N là thuộc tính dữ liệu).** Số mục kho nhỏ giọt và số biến
   thể nội dung mỗi pha là dữ liệu bản đầu, **không** phải hằng số của story; bộ
   seed 10 mục cho gói **xoay vòng** là giá trị bản đầu. Cấm mọi AC, BR, hay bố

@@ -8,8 +8,15 @@ Scope:
 
 Current State:
 - Requirement Status: IN_PROGRESS
-- Story Status: IN_PROGRESS — P9 DONE (MOBILE_COMPLETE: YES, sealed); P10
-  dispatched to Alex-Mobile-Dev (same agent, reused)
+- Story Status: IN_PROGRESS — P9 DONE (MOBILE_COMPLETE: YES, sealed). P10
+  BLOCKED (not in flight): Alex-Mobile-Dev opened the P10 run, made ZERO
+  edits, and returned `p10_blocker` in the run file
+  (`RUN-...-mobile-dev.json`) code `PHASE_SPEC_CONTRADICTS_CODE` — see "P10
+  blocker (new, 2026-09-25)" below. D-13 Design Ruling Log row committed in
+  control-checkout `req_master.md`; Andy-PO `Mode: ac-patch` dispatched
+  (`Andy-PO@session-e7df910a`, RunId `...-product-owner`) to check whether
+  AC-9/AC-16..19/AC-37/BR-15/`ux/uiux-spec.md` §2/§4 wording needs a
+  glyph-vs-dot patch — awaiting `PRODUCT_OWNER_COMPLETE`.
 - Completed Checklist: Requirements [x] (commit `84bdd6b2`), UX [x] (same
   commit), Architecture [x] (contract-summary.md §2/§3/§3a/§4/§6 for D-10,
   sealed), Implementation [ ] (P9 DONE and sealed, P10 in flight — both
@@ -51,6 +58,26 @@ Current State:
     chips + R-5 above); not a P9 regression, both pre-existing/newly-scoped
     gaps.
 
+**P10 blocker (new, 2026-09-25, from `RUN-...-mobile-dev.json` `p10_blocker`,
+files_changed: NONE — do not treat as P10 progress):** phase-P10 §3 gates the
+"write a sentence" block on `widget.openJournal != null` as a proxy for
+"STORY-003 not yet delivered". In this codebase that proxy is inverted on the
+only production path: `_openFromPayload` (evening_check_in_sheet.dart:562-568)
+calls `.show()` WITHOUT `openJournal`, so `openJournal == null` is the
+production default even though STORY-003 IS delivered; `_save()`
+(line 368) uses `openJournal ?? _openJournal`, proving it is a test seam, not
+an availability signal; `journal_entry_point.dart:57`'s `openJournalComposer`
+is unconditional with no absent state to detect; `requirements.md:195`'s
+AC-18 Given ("STORY-003 chưa được giao") is counterfactual today. Alex's own
+options: (a) lift §3's "no new parameter" ban, add an explicit availability
+flag defaulting to delivered; (b) have `_openFromPayload` pass `openJournal`
+explicitly (widens WriteScope beyond this phase); (c) record AC-18 as
+`NOT_APPLICABLE` for this build (no absent state exists to gate on). This is a
+Tech Lead call (how to implement/rescope AC-18 given the real caller graph),
+not a design-vs-AC ruling — no Design Ruling Log row needed, no
+AskUserQuestion needed unless Tech Lead itself gets stuck. Route to the same
+upcoming Tech Lead dispatch as D-13 (see "Next resume action" below).
+
 **USER DECISIONS (2026-09-25, both resolved — route as soon as the worktree
 is clean, i.e. after P10 seals):**
 - R-5: **Mở scope chụp thật.** Add a new mobile-dev phase that runs an actual
@@ -64,21 +91,28 @@ is clean, i.e. after P10 seals):**
   `contract-summary.md` §3a change — Tech Lead must update the contract
   (shape, not just color, so likely a new asset/SF-Symbol/vector-path
   decision) before mobile-dev implements it.
-- Next resume action after P10 seals: dispatch Alan-Techlead (fresh spawn —
-  previous instance already stopped) `Mode: architecture-solution` for the
-  D-13 §3a glyph-shape contract change, then same-agent `Mode: coding-plan`
-  to add two new phases: (a) implement the D-13 glyph swap
-  (`CupidPhaseWidgetProvider.kt` + `CupidPhaseWidget.swift`), (b) R-5 native
-  build+device capture for the widget row-7 screenshot, Depends-On phase (a)
-  so the capture shows the corrected glyph. Both are `code-writer` phases —
-  cannot run concurrently with each other under
-  `MAX_CODE_WRITERS_PER_STORY: 1`; the `architecture-solution`/`coding-plan`
-  Tech Lead dispatch is `planning` class but a fresh spawn attempt while the
-  worktree is dirty from an in-flight code-writer phase was BLOCKED by
-  `git-story-boundary.sh start` ("worktree is dirty") — confirmed this story
-  worktree cannot host two concurrent specialist dispatches regardless of
-  concurrency class; always seal/commit the current phase before spawning
-  the next, even a planning-only one.
+- Next resume action: on Andy-PO's `PRODUCT_OWNER_COMPLETE`, verify (3-part
+  protocol) + seal via `git-story-boundary.sh refresh-base --run-id
+  ...-product-owner`, release if `list-releasable-agents.sh` prints it, THEN
+  dispatch Alan-Techlead (fresh spawn) `Mode: architecture-solution` covering
+  BOTH open Tech Lead items in one pass: (1) the D-13 §3a glyph-shape contract
+  change, (2) the P10 blocker's (a)/(b)/(c) call on AC-18's
+  `openJournal`-as-availability-proxy (see "P10 blocker" above) — revise
+  `phase-P10-checkin-degrade-parity.md` in place per whichever option Tech
+  Lead picks. Then same-agent `Mode: coding-plan` to add/patch phases: revised
+  P10 (or its replacement), the D-13 glyph-swap implementation
+  (`CupidPhaseWidgetProvider.kt` + `CupidPhaseWidget.swift`), and R-5 native
+  build+device capture for the widget row-7 screenshot (Depends-On the D-13
+  implementation phase so the capture shows the corrected glyph). All three
+  implementation phases are `code-writer` — cannot run concurrently with each
+  other under `MAX_CODE_WRITERS_PER_STORY: 1`.
+- Confirmed constraint (still applies): a fresh spawn attempt into this
+  worktree while it is dirty from an in-flight/uncommitted phase is BLOCKED by
+  `git-story-boundary.sh start` ("worktree is dirty") REGARDLESS of
+  concurrency class (`planning` included) — always seal/commit the current
+  phase before spawning the next, even a planning-only one. Applied again this
+  round: committed the P9-seal-era checkpoint/test-results drift (commit
+  `820d1912`) before dispatching Andy-PO.
 
 Story Git Boundary:
 - Git-Boundary: REQUIRED
@@ -87,74 +121,78 @@ Story Git Boundary:
 - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget
 - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget
 - MergeTarget: codex/REQ-016_solo_stage1_relationship_assistant-integration
-- BaseHead: 23e7bb9e78311d1fabba65465af7dce1f28ef967
+- BaseHead: 820d19120ef72936675d76884919f5bcc32024eb
 - BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget.json
 - Boundary status: COMMITTED. PO/UX ac-patch `84bdd6b2`. Tech Lead
   architecture-solution + coding-plan (P9+P10 added) sealed at `f23c9cea` /
   `139739387aff`. Alex-Mobile-Dev's Phase P9 (MOBILE_COMPLETE: YES,
-  independently verified: git diff matched declared WriteScope plus 3
-  flagged-and-justified out-of-scope files, phase file §7 = DONE,
-  `master-plan.md` P9 row = DONE, `test-results.md` §P9 matches the report's
-  cited numbers) sealed via `git-story-boundary.sh refresh-base` -> BaseHead
-  now `23e7bb9e78311d1fabba65465af7dce1f28ef967`. req_master.md:217
-  attribution fixed in control checkout (commit `4d900c35`).
+  independently verified) sealed -> BaseHead `23e7bb9e78311d1fabba65465af7dce1f28ef967`.
+  P10 dispatch returned ZERO edits + `p10_blocker` (see Current State); Scrum
+  Master committed the checkpoint/test-results drift as `820d1912` and
+  re-sealed -> BaseHead now `820d19120ef72936675d76884919f5bcc32024eb`.
+  req_master.md:217 attribution fixed (`4d900c35`); D-13 Design Ruling Log row
+  added (control checkout, uncommitted-check pending — verify before next
+  Tech Lead dispatch).
 
 Last Delegation:
-- Role: mobile-dev (Alex-Mobile-Dev, same agent instance reused via
-  `SendMessage`, not a fresh spawn — keeps `MAX_CODE_WRITERS_PER_STORY: 1`)
-- Mode: mobile-implementation, Phase P10
-  (`coding-plan/phase-P10-checkin-degrade-parity.md`)
-- RunId: RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-mobile-dev
-  (re-registered for P10 via `handoff-build.sh spawn`; BaseHead bumped to
-  the P9-sealed commit above)
-- Scope of this run: hide the "write a sentence" + 2-chip block together when
-  `widget.openJournal == null` (AC-18). WriteScope: exactly
-  `evening_check_in_sheet.dart` + its test, plus test-results/master-plan/
-  visual-fidelity for evidence. Does NOT touch P9's files again.
-- Result: DISPATCHED via `SendMessage`, awaiting MOBILE_COMPLETE
-- Alan-Techlead (tech-lead): confirmed already stopped (TaskStop returned
-  "No task found" — already released in a prior round). No tech-lead work
-  outstanding for this story.
+- Role: product-owner (Andy-PO, fresh spawn)
+- Mode: ac-patch
+- RunId: RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-product-owner
+- Scope of this run: check whether AC-9/AC-16..19/AC-37/BR-15 and
+  `ux/uiux-spec.md` §2/§4 describe the `date_day` phase dot's SHAPE in a way
+  that the D-13 lightning-bolt-glyph ruling would contradict; patch only if
+  so. WriteScope: exactly `requirements/requirements.md` +
+  `ux/uiux-spec.md`. Forbidden: `architecture/contract-summary.md`, anything
+  under `mobile/`.
+- Result: DISPATCHED (`Andy-PO@session-e7df910a`), awaiting
+  `PRODUCT_OWNER_COMPLETE`
+- Alex-Mobile-Dev (mobile-dev): P10 run returned `p10_blocker`, made zero
+  edits, `status: COMPLETED` in the run file — NOT released yet (still shows
+  idle in `ListAgents`, will be needed again for the corrected P10 phase
+  after Tech Lead resolves the blocker; do not `TaskStop` it prematurely).
+- Alan-Techlead (tech-lead): confirmed already stopped in a prior round. Will
+  need a FRESH spawn next (not a continuation) once Andy-PO returns.
 
 Validation Result:
-- Gate: N/A (P10 implementation lane in flight, not yet reviewed)
+- Gate: N/A (design-ruling-required guard satisfied this round: D-13 row
+  added to req_master.md + Andy-PO ac-patch dispatched; not yet re-verified
+  after Andy-PO returns)
 - Outcome: N/A
 - Missing Exact Paths: N/A
 
 Waiting Reason:
-- Waiting on Alex-Mobile-Dev `Mode: mobile-implementation` (RunId
-  `...-mobile-dev`, re-registered for P10) to deliver Phase P10.
-- P9 is DONE and sealed — see "Open decisions" in Current State above (R-5,
-  D-13, R-3) for items that do NOT block P10 but DO need a Scrum
-  Master/Tech Lead/UI-UX decision before the story's review gate can close
-  CLEAN. These are surfaced to the user, not silently resolved.
-- (Historical, resolved — kept for trace only) Tech Lead's coding-plan run
-  corrected two stale premises from Round 35/36's own framing (see
-  `coding-plan/master-plan.md` §6 Notes): the real D-3 gap was an
-  already-DONE ISO-date-format fix, not an `ActivityCard`/clock-time gap; the
-  real D-6/C-1 gap is narrowly AC-18 in `evening_check_in_sheet.dart`, not a
-  WriteScope-widen into `activity_card_tile.dart`/hub/l10n as previously
-  assumed.
+- Waiting on Andy-PO `Mode: ac-patch` (RunId `...-product-owner`) to return
+  `PRODUCT_OWNER_COMPLETE`.
+- P10 is BLOCKED, not in flight — do not re-dispatch mobile-dev for P10 until
+  Tech Lead resolves the (a)/(b)/(c) call and (if needed) rewrites
+  `phase-P10-checkin-degrade-parity.md`.
+- R-5, D-13 (now routed), R-3 — see "Open decisions"/"P10 blocker" in Current
+  State above for items still needing a Scrum Master/Tech Lead decision before
+  the story's review gate can close CLEAN.
 
 Next Resume Action:
-1. On `MOBILE_COMPLETE` from P10, independently verify (3-part protocol:
-   agent idle, `git diff`/`git status` matches WriteScope, phase file §7 +
-   `master-plan.md` + `test-results.md` read directly show DONE), then seal
-   via `git-story-boundary.sh refresh-base --run-id ...-mobile-dev`, release
-   Alex-Mobile-Dev via `TaskStop` (check `list-releasable-agents.sh` first).
-2. Surface R-5 (visual-fidelity capture scope for the OS-native widget
-   surface) and D-13 (design contrast conflict, needs UI/UX — Scrum Master
-   cannot spawn Pink-Designer directly) to the user as narrow decision gates
-   before the review gate can reach a CLEAN outcome; do not guess either.
-3. Tick `story_master.md` Implementation checkbox once P10 is sealed, then
-   route to Iris-QC (Story-Class `standard`, not Tier 0-eligible — story owes
-   rendered visual-fidelity evidence, review must assess R-1/R-5 directly).
+1. On Andy-PO's `PRODUCT_OWNER_COMPLETE`: verify (3-part protocol: agent
+   idle/gone, `git diff 820d1912.. --stat` matches the declared WriteScope
+   exactly — `requirements.md`/`uiux-spec.md` only, or a clean no-op — read the
+   agent's own stated conclusion directly), then seal via
+   `git-story-boundary.sh refresh-base --run-id ...-product-owner`, commit,
+   release via `list-releasable-agents.sh` + `TaskStop` if printed.
+2. Dispatch Alan-Techlead (fresh spawn) `Mode: architecture-solution` for BOTH
+   D-13 (§3a glyph-shape) and the P10 blocker (AC-18 proxy choice among
+   (a)/(b)/(c)), then same-agent `Mode: coding-plan` to patch/add phases (see
+   "Next resume action" under P10 blocker/USER DECISIONS above for the full
+   phase list).
+3. Once the corrected P10 + D-13-implementation + R-5-capture phases are all
+   DONE and sealed, tick `story_master.md` Implementation checkbox, then route
+   to Iris-QC (Story-Class `standard` — story owes rendered visual-fidelity
+   evidence, review must assess R-1/R-5 directly).
 4. Once merged, reconcile the control-checkout `story_master.md` Architecture
    and Implementation checkboxes (currently stale `[ ]` there — real state
    lives in this worktree).
 
 Files Updated:
-- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/scrum-master-checkpoint.md (this file, in the story worktree)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/req_master.md (control checkout, D-13 Design Ruling Log row, commit `ecade7ad`)
+- data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/scrum-master-checkpoint.md (this file, in the story worktree; also committed in worktree as `820d1912` for the pre-PO metadata drift)
 - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/master-plan.md (P9/P10 rows added; P9 -> DONE)
 - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/phase-P9-widget-phase-label-and-dot.md (DONE, sealed)
 - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/phase-P10-checkin-degrade-parity.md (sealed, PENDING -> in flight)
@@ -172,12 +210,15 @@ Test Evidence:
 - P10: none yet, in flight.
 
 Next Valid Step:
-- Role: Alex-Mobile-Dev (P10 in flight), then Iris-QC
-- Mode: mobile-implementation (P10, in flight) -> compact-story-review or
-  full/scoped review per Story-Class standard
-- Required Inputs: P10 `MOBILE_COMPLETE` result, then user decisions on R-5
-  and D-13 (see Current State "Open decisions") before the review gate can
-  target CLEAN
+- Role: Andy-PO (ac-patch, in flight) -> Alan-Techlead (architecture-solution
+  + coding-plan, fresh spawn) -> Alex-Mobile-Dev (corrected P10 + D-13 +
+  R-5 phases) -> Iris-QC
+- Mode: ac-patch (in flight) -> architecture-solution/coding-plan ->
+  mobile-implementation -> compact-story-review or full/scoped review per
+  Story-Class standard
+- Required Inputs: Andy-PO `PRODUCT_OWNER_COMPLETE`, then Tech Lead's
+  (a)/(b)/(c) call on the P10 blocker and D-13 §3a contract patch, before the
+  review gate can target CLEAN
 - Output Paths:
   - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/master-plan.md
   - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/test-results.md
