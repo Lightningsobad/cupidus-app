@@ -9,6 +9,7 @@ import android.graphics.Paint
 import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
+import androidx.core.content.ContextCompat
 import com.snapsofts.cupid_mobile.MainActivity
 import com.snapsofts.cupid_mobile.R
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
@@ -42,7 +43,14 @@ class CupidPhaseWidgetProvider : HomeWidgetProvider() {
 
             views.setTextViewText(R.id.cupid_phase_widget_eyebrow, eyebrow ?: EMPTY)
             views.setTextColor(R.id.cupid_phase_widget_eyebrow, dotColor)
-            views.setImageViewBitmap(R.id.cupid_phase_widget_dot, dotBitmap(dotColor))
+            views.setImageViewBitmap(
+                R.id.cupid_phase_widget_dot,
+                if (phaseId == CupidWidgetPalette.PHASE_ID_DATE_DAY) {
+                    boltBitmap(context, dotColor)
+                } else {
+                    dotBitmap(dotColor)
+                },
+            )
             views.setViewVisibility(
                 R.id.cupid_phase_widget_eyebrow_row,
                 if (hasEyebrow) View.VISIBLE else View.GONE,
@@ -81,6 +89,18 @@ class CupidPhaseWidgetProvider : HomeWidgetProvider() {
         return bitmap
     }
 
+    // D-13: the date_day role keeps its token colour but changes shape. The app
+    // rasterises the vector in its own process and ships a Bitmap, so this does
+    // not depend on the launcher supporting VectorDrawable inside RemoteViews.
+    private fun boltBitmap(context: Context, color: Int): Bitmap {
+        val bitmap = Bitmap.createBitmap(GLYPH_PX, GLYPH_PX, Bitmap.Config.ARGB_8888)
+        val glyph = ContextCompat.getDrawable(context, R.drawable.dot_today_bolt)!!.mutate()
+        glyph.setTint(color)
+        glyph.setBounds(0, 0, GLYPH_PX, GLYPH_PX)
+        glyph.draw(Canvas(bitmap))
+        return bitmap
+    }
+
     private fun deepLink(cardId: String?): Uri {
         val builder = Uri.Builder().scheme(DEEP_LINK_SCHEME)
         return if (cardId.isNullOrBlank()) {
@@ -103,6 +123,10 @@ class CupidPhaseWidgetProvider : HomeWidgetProvider() {
 
         const val EMPTY = ""
         const val CIRCLE_PX = 24
+
+        // Rasterised larger than the 8dp cell so the glyph edges stay clean;
+        // the three circle roles keep CIRCLE_PX unchanged.
+        const val GLYPH_PX = 48
     }
 }
 

@@ -255,5 +255,12 @@ không xoá/nới case nào đang có:
 
 ## 7. Status
 
-- Status: PENDING
+- Status: DONE
 - Last updated: 2026-09-25
+- Evidence: `coding-plan/test-results.md` mục "P11 – Chỉ báo pha `date_day`:
+  chấm → glyph tia chớp (D-13)" (lệnh + kết quả nguyên văn:
+  `flutter test test/features/phase_status/native_copy_scan_test.dart` `+38`,
+  hồi quy `flutter test test/features/phase_status` `+250 ~6`,
+  `flutter analyze lib/features/phase_status test/features/phase_status` 0 error)
+- Deferred to P12: build native + chụp widget thật (ô 7 của
+  `../visual-fidelity/visual-fidelity-report.md` vẫn mở)

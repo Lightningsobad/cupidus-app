@@ -1980,3 +1980,140 @@ liệu`.
 ### Next phase
 
 P11 (dispatch tuần tự tiếp theo, chưa bắt đầu — ngoài phạm vi lượt này).
+
+## P11 – Chỉ báo pha `date_day`: chấm → glyph tia chớp (D-13)
+
+### Files shipped
+
+| File | Thay đổi |
+|---|---|
+| `mobile/android/app/src/main/res/drawable/dot_today_bolt.xml` | **file mới**: `<vector>` viewport `24x24`, đúng một `<path>` khép kín (`M13,2 L4,13 h6 l-1,9 9,-12 h-6 z`), `android:fillColor="#FFFFFFFF"` là màu giữ chỗ sẽ bị tint thay hoàn toàn. Không gradient, không `<group>`, không `android:tint` cứng |
+| `mobile/android/app/src/main/kotlin/com/snapsofts/cupid/CupidPhaseWidgetProvider.kt` | thêm `import androidx.core.content.ContextCompat`; thêm `boltBitmap(context, color)` cạnh `dotBitmap` (nạp drawable → `mutate()` → `setTint(color)` → `setBounds(0,0,GLYPH_PX,GLYPH_PX)` → `draw(Canvas(bitmap))`); thêm `const val GLYPH_PX = 48` cạnh `CIRCLE_PX = 24`; lời gọi `setImageViewBitmap` **vẫn là một**, chọn hình bằng `if (phaseId == CupidWidgetPalette.PHASE_ID_DATE_DAY)` |
+| `mobile/android/app/src/main/res/layout/cupid_phase_widget.xml` | chỉ chú thích D-10/D-13. `layout_width`/`layout_height` của `cupid_phase_widget_dot` **giữ nguyên `8dp`** — chưa nới, vì điều kiện nới (§3.1: "glyph đọc thành một vệt mờ trên thiết bị") chỉ kiểm chứng được ở P12 |
+| `mobile/ios/CupidPhaseWidget/CupidPhaseWidget.swift` | thêm `private struct CupidPhaseBolt: Shape` dựng đúng cùng đường gấp khúc, chuẩn hoá từ `24x24` sang `rect`; hàng nhãn-mí rẽ bằng `entry.isDateDay` — `CupidPhaseBolt().fill(entry.dotColor).frame(width: 7, height: 9)` cho `date_day`, `Circle()...frame(width: 7, height: 7)` cho ba pha còn lại. `HStack(spacing: 5)` và mọi thuộc tính chữ nhãn-mí không đổi |
+| `mobile/test/features/phase_status/native_copy_scan_test.dart` | thêm hằng `_boltDrawablePath` và **4 case mới** trong nhóm D-10 hiện có; không xoá/nới case nào |
+
+Không thêm color resource `@color/dot_today`, không thêm hằng `DOT_*` thứ năm,
+không thêm Asset Catalog/Color Set iOS, không thêm file `.swift` mới (nên
+`project.pbxproj` không phải chạm), không thêm khoá payload, không đổi
+`CupidDatabase.schemaVersion`.
+
+Màu vẫn đến từ đúng một nguồn mỗi nền tảng: `CupidWidgetPalette.dotFor(phaseId)`
+(Kotlin) và `entry.dotColor` → `CupidWidgetPalette.dot(for:)` (Swift). Xem mục
+"Điểm cần Scrum Master / Reviewer biết" #1 về khác biệt cơ chế so với câu chữ
+của §3a.
+
+### Commands run
+
+```
+$ cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter test \
+    test/features/phase_status/native_copy_scan_test.dart
+00:00 +28: the phase eyebrow and its colour dot (D-10, AC-9/AC-37/BR-15) the bolt drawable is one closed path and carries no copy (D-13)
+00:00 +29: the phase eyebrow and its colour dot (D-10, AC-9/AC-37/BR-15) the provider draws the bolt for date_day and the dot for the rest
+00:00 +30: the phase eyebrow and its colour dot (D-10, AC-9/AC-37/BR-15) the provider borrows no system icon for the indicator
+00:00 +31: the phase eyebrow and its colour dot (D-10, AC-9/AC-37/BR-15) the extension draws the same bolt without an SF Symbol (D-13)
+00:00 +38: All tests passed!
+```
+
+File này: `+34` ở P9/P10 → `+38` ở P11, đúng bằng bốn case mới; bốn case cũ của
+nhóm D-10 (gồm ba khẳng định dòng 476-491 khoá tập `DOT_[A-Z_]+` và tập
+`dot[A-Z][A-Za-z]*` ở đúng bốn tên) vẫn xanh **không sửa một ký tự nào**.
+
+Hồi quy cả thư mục (§6 "toàn bộ `test/features/phase_status` PASS, không giảm
+số case"):
+
+```
+$ cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter test test/features/phase_status
+00:03 +250 ~6: All tests passed!
+EXIT=0
+```
+
+`+246 ~6` ở P10 → `+250 ~6` ở P11, đúng bằng bốn case mới, không case nào mất.
+Không chạy `flutter test` không đối số (baseline repo đang đỏ ở
+`test/design_system/`).
+
+```
+$ cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter analyze \
+    lib/features/phase_status test/features/phase_status
+Analyzing 2 items...
+   info ... phase_status_cubit.dart:122:9 • prefer_initializing_formals
+   info ... phase_status_cubit.dart:124:9 • prefer_initializing_formals
+   info ... phase_status_cubit.dart:125:9 • prefer_initializing_formals
+   info ... phase_status_cubit.dart:126:9 • prefer_initializing_formals
+   info ... phase_status_cubit.dart:127:9 • prefer_initializing_formals
+5 issues found. (ran in 2.6s)
+EXIT=1
+```
+
+**0 error.** Năm `info` là nền có sẵn trong `phase_status_cubit.dart` — file
+P11 không chạm và không nằm trong Write Scope; exit 1 ở đây là do `info`, đúng
+như §6 ghi ("cảnh báo nền của repo không phải bằng chứng cổng").
+
+Hai regex mới (`setImageViewBitmap\(...\)` và `HStack\(spacing: 5\) { ... }`)
+được kiểm riêng bằng một script Dart dùng một lần để in ra đoạn thật sự bắt
+được, tránh khẳng định khớp-rỗng: nhóm Kotlin trả về đúng khối `if (phaseId ==
+CupidWidgetPalette.PHASE_ID_DATE_DAY) { boltBitmap... } else { dotBitmap... }`,
+nhóm Swift trả về đúng khối `if entry.isDateDay { CupidPhaseBolt()... } else {
+Circle()... }` cộng `Text(entry.eyebrowLine)`. Script đã xoá, không để lại
+trong repo.
+
+`git -C <worktree> status --short` sau **cả hai** lượt chạy test: đúng 5 file
+Write Scope (4 `M` + 1 `??`), **không** PNG visual-fidelity nào của story/phase
+khác bị làm bẩn.
+
+### AC coverage
+
+| AC | Bằng chứng |
+|---|---|
+| AC-9 / D-13 (đổi hình đúng một vai trò) | case "the provider draws the bolt for date_day and the dot for the rest": provider chứa `R.drawable.dot_today_bolt`, **vẫn** chứa `drawCircle`, và khối `setImageViewBitmap` chứa `PHASE_ID_DATE_DAY`; case "the extension draws the same bolt without an SF Symbol": Swift chứa `CupidPhaseBolt`, **vẫn** chứa `Circle()`, khối `HStack(spacing: 5)` chứa `entry.isDateDay` |
+| AC-12 / §3a (hình **và** màu chỉ từ bảng tra bốn vai trò) | tập `DOT_[A-Z_]+` Kotlin và tập `dot[A-Z][A-Za-z]*` Swift vẫn đúng bốn tên (case P4/P5 không sửa); provider không chứa `systemName`, `android.R.drawable`, `?android:attr/`; Swift không chứa `Image(systemName:`; hình chọn từ `phase_id`, không từ payload/ngày/ngôn ngữ |
+| AC-37 / BR-15 (glyph là tài nguyên native, không phải nội dung) | `dot_today_bolt.xml` không có `android:text=`/`@string/`; case ASCII "every .kt and .xml file is pure ASCII once comments are removed" quét đệ quy `res/drawable/` và vẫn xanh; case "no native file carries an eyebrow line of the shipped pack" quét cả file mới; không khoá payload mới, không qua `home_widget` |
+| Không hồi quy | `+250 ~6` toàn `test/features/phase_status`, không assertion cũ nào phải sửa |
+| BR-12/AC-4 | không chạm `CupidDatabase.schemaVersion`, không chạm §2/§4 |
+
+### Visual fidelity
+
+`DEFERRED_TO_P12`. Bề mặt là widget hệ điều hành (`RemoteViews` / WidgetKit),
+không nằm trong cây widget Flutter nên harness `RepaintBoundary` không với tới;
+vẽ lại bằng Dart rồi chụp là bịa bằng chứng (đã bác ở
+`phase-P9-widget-phase-label-and-dot.md` §6). Ô 7 của
+`../visual-fidelity/visual-fidelity-report.md` **vẫn mở** và chuyển nguyên
+trạng cho P12 (build native + chụp thật). P11 không chụp và không sửa file
+visual-fidelity nào.
+
+Đối chiếu bằng mắt với ảnh neo
+`../visual-fidelity/design-reference-sb-84-widget-bon-pha-ios.png` trước khi
+viết path: thẻ "PHA 4 · HÔM NAY" vẽ tia chớp sáng, cao-hẹp (tỉ lệ ~7:9) đứng
+đúng chỗ chấm của ba thẻ trên. `pathData` trải x 4..18, y 2..22 trên viewport
+24 (tỉ lệ ~0.7) và `.frame(width: 7, height: 9)` phía iOS khớp tỉ lệ đó.
+
+### Điểm cần Scrum Master / Reviewer biết
+
+1. **Nguồn màu Android là `DOT_TODAY` (Kotlin), không phải `@color/dot_today`.**
+   §3a mô tả cơ chế là "vector drawable `dot_today_bolt` được tint bằng
+   `@color/dot_today`". Phase P11 §3.1 đã quyết định trước: giữ **đúng tên
+   vector drawable và đúng vai trò màu**, nhưng lấy giá trị từ `DOT_TODAY` đã
+   ship ở P4 (cũng là nguồn màu chữ nhãn-mí) để **tránh hai nguồn màu cho cùng
+   một vai trò** — và vì thêm một `DOT_*`/color resource thứ năm sẽ làm đỏ case
+   khoá tập bốn tên ở dòng 476-488. Đây là lựa chọn cơ chế đã ghi trong phase
+   file, không phải mở lại D-13: hình dạng, tên vai trò, ánh xạ `phase_id ->
+   vai trò` đều đúng §3a. Nếu muốn §3a nói đúng cơ chế đã ship thì đó là một
+   dòng patch `architecture/contract-summary.md`, **ngoài Write Scope của P11**
+   — chưa làm.
+2. **Chưa build native ở lượt này.** `boltBitmap` dùng
+   `androidx.core.content.ContextCompat`, vốn đến qua classpath bắc cầu của
+   Flutter embedding (module `app` không khai báo `androidx.core` tường minh
+   trong `build.gradle.kts`). `androidx.core:core` có mặt trong gradle cache của
+   máy này, nhưng lần biên dịch Kotlin thật đầu tiên là ở **P12** — nếu P12
+   báo thiếu symbol thì cách sửa tối thiểu là đổi sang
+   `AppCompatResources.getDrawable` hoặc thêm một dòng `implementation` vào
+   `app/build.gradle.kts` (file đó nằm ngoài Write Scope của P11).
+3. **Ô `ImageView` giữ `8dp`.** §3.1 cho phép nới nếu glyph đọc thành vệt mờ
+   trên thiết bị thật; điều đó chỉ quan sát được ở P12, nên P11 không đoán
+   trước. Bitmap đã rasterize ở `GLYPH_PX = 48` (gấp 2x `CIRCLE_PX`) chính là
+   để chừa biên độ cho khả năng đó mà không phải vẽ lại vector.
+
+### Next phase
+
+P12 (build native + chụp widget thật, đóng ô 7 của bảng đối chiếu) — dispatch
+tuần tự tiếp theo, chưa bắt đầu, ngoài phạm vi lượt này.

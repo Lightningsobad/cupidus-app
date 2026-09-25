@@ -16,6 +16,8 @@ const String _nativeRoot = 'android/app/src/main';
 const String _providerPath =
     '$_nativeRoot/kotlin/com/snapsofts/cupid/CupidPhaseWidgetProvider.kt';
 const String _layoutPath = '$_nativeRoot/res/layout/cupid_phase_widget.xml';
+const String _boltDrawablePath =
+    '$_nativeRoot/res/drawable/dot_today_bolt.xml';
 const String _infoPath = '$_nativeRoot/res/xml/cupid_phase_widget_info.xml';
 const String _manifestPath = '$_nativeRoot/AndroidManifest.xml';
 
@@ -511,6 +513,80 @@ void main() {
         expect(swift.contains(systemColour), isFalse, reason: systemColour);
       }
       expect(swift.contains('CupidWidgetPalette.dot(for: phaseId)'), isTrue);
+    });
+
+    test('the bolt drawable is one closed path and carries no copy (D-13)', () {
+      final File bolt = File(_boltDrawablePath);
+      expect(bolt.existsSync(), isTrue, reason: _boltDrawablePath);
+
+      final String source = _withoutComments(bolt.readAsStringSync());
+      expect(
+        RegExp(r'<path\b').allMatches(source).length,
+        1,
+        reason: 'contract-summary.md 3a fixes one shape for one role, and a '
+            'second path is a second shape nothing in the contract explains',
+      );
+      expect(source.contains('android:pathData='), isTrue);
+      expect(source.contains('gradient'), isFalse);
+      expect(source.contains('android:text='), isFalse);
+      expect(source.contains('@string/'), isFalse);
+    });
+
+    test('the provider draws the bolt for date_day and the dot for the rest',
+        () {
+      final String provider = _withoutComments(
+        File(_providerPath).readAsStringSync(),
+      );
+      expect(provider.contains('R.drawable.dot_today_bolt'), isTrue);
+      expect(
+        provider.contains('drawCircle'),
+        isTrue,
+        reason: 'the other three roles keep the solid dot (D-13), so both '
+            'shapes have to survive in the provider',
+      );
+
+      final RegExpMatch? call =
+          RegExp(r'setImageViewBitmap\(([\s\S]*?)\n\s*\)').firstMatch(provider);
+      expect(call, isNotNull);
+      expect(
+        call!.group(1)!.contains('PHASE_ID_DATE_DAY'),
+        isTrue,
+        reason: 'the shape is chosen from phase_id alone, never from the '
+            'payload or from a clock',
+      );
+    });
+
+    test('the provider borrows no system icon for the indicator', () {
+      final String provider = _withoutComments(
+        File(_providerPath).readAsStringSync(),
+      );
+      for (final String forbidden in <String>[
+        'systemName',
+        'android.R.drawable',
+        '?android:attr/',
+      ]) {
+        expect(provider.contains(forbidden), isFalse, reason: forbidden);
+      }
+    });
+
+    test('the extension draws the same bolt without an SF Symbol (D-13)', () {
+      final String swift = _withoutComments(
+        File(_widgetSwiftPath).readAsStringSync(),
+      );
+      expect(swift.contains('CupidPhaseBolt'), isTrue);
+      expect(
+        swift.contains('Circle()'),
+        isTrue,
+        reason: 'the other three roles keep the solid dot (D-13)',
+      );
+
+      final RegExpMatch? row =
+          RegExp(r'HStack\(spacing: 5\)\s*\{([\s\S]*?)\n\s{12}\}')
+              .firstMatch(swift);
+      expect(row, isNotNull);
+      expect(row!.group(1)!.contains('entry.isDateDay'), isTrue);
+
+      expect(swift.contains('Image(systemName:'), isFalse);
     });
   });
 

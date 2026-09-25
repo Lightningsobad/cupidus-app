@@ -205,6 +205,31 @@ private struct CupidPhaseBackground: View {
     }
 }
 
+// D-13: the shape half of the `--dot-today` role. The same polyline the
+// Android vector `dot_today_bolt` carries, normalised from its 24x24 viewport
+// onto `rect`, so both platforms draw one shape. Drawn here rather than taken
+// from a system symbol because the phase indicator is a design token, never an
+// OS default (contract-summary.md 3a/6).
+private struct CupidPhaseBolt: Shape {
+    func path(in rect: CGRect) -> Path {
+        let unitX = rect.width / 24
+        let unitY = rect.height / 24
+        func point(_ x: CGFloat, _ y: CGFloat) -> CGPoint {
+            CGPoint(x: rect.minX + x * unitX, y: rect.minY + y * unitY)
+        }
+
+        var path = Path()
+        path.move(to: point(13, 2))
+        path.addLine(to: point(4, 13))
+        path.addLine(to: point(10, 13))
+        path.addLine(to: point(9, 22))
+        path.addLine(to: point(18, 10))
+        path.addLine(to: point(12, 10))
+        path.closeSubpath()
+        return path
+    }
+}
+
 private struct CupidWidgetContainer: ViewModifier {
     let entry: CupidPhaseEntry
 
@@ -236,12 +261,20 @@ struct CupidPhaseWidgetView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            // D-10: the eyebrow row. The dot is the phase token, looked up from
-            // `phase_id`; the line itself is payload, never a literal.
+            // D-10: the eyebrow row. The indicator is the phase token, looked
+            // up from `phase_id`; the line itself is payload, never a literal.
+            // D-13: date_day draws the bolt, the other three keep the circle -
+            // both tinted by the same token colour.
             HStack(spacing: 5) {
-                Circle()
-                    .fill(entry.dotColor)
-                    .frame(width: 7, height: 7)
+                if entry.isDateDay {
+                    CupidPhaseBolt()
+                        .fill(entry.dotColor)
+                        .frame(width: 7, height: 9)
+                } else {
+                    Circle()
+                        .fill(entry.dotColor)
+                        .frame(width: 7, height: 7)
+                }
                 Text(entry.eyebrowLine)
                     .font(.system(size: 10, weight: .bold))
                     .tracking(0.8)
