@@ -42,7 +42,8 @@
 | `IOS-WIDGET-TARGET` | P5 |
 | `WIDGET-STALE` | P4 + P7 |
 | `REMIND-REPEAT` | P6 |
-| `VISUAL-FIDELITY` | P7, P8 |
+| `VISUAL-FIDELITY` | P7, P8, P12 (ô 7 — ảnh widget thật) |
+| `HARDCODED-COPY` (glyph là tài nguyên native, không phải nội dung) | P11 |
 
 ## 4. Lane Summary
 
@@ -51,6 +52,18 @@
     runtime registry `mobile-app.buildCommand` / `testCommand`
 
 ## 5. Phases Overview
+
+Ba phase còn lại (2026-09-25) chạy **tuần tự trong cùng lane Mobile**, theo
+đúng thứ tự P10 → P11 → P12, vì lane chỉ có một code-writer
+(`MAX_CODE_WRITERS_PER_STORY: 1`) và P12 phải chụp sau khi P11 đã đổi hình chỉ
+báo pha:
+
+- P10: cờ `journalAvailable` cho nhánh suy biến AC-18
+  (`../architecture/contract-summary.md` §7 — bản P10 cũ gate bằng
+  `openJournal` đã bị thay thế).
+- P11: chỉ báo pha `date_day` đổi từ chấm sang glyph tia chớp (D-13, §3a).
+- P12: build native + chụp `implemented-widget-*.png` thật để đóng ô 7 của
+  bảng đối chiếu hình ảnh (R-5).
 
 | Phase | Owner | Lane | Depends On | Parallelizable | Status |
 |-------|-------|------|------------|----------------|--------|
@@ -63,7 +76,9 @@
 | P7 | Mobile Developer | Mobile | P2 | NO | DONE |
 | P8 | Mobile Developer | Mobile | P3, P7 | NO | DONE |
 | P9 | Mobile Developer | Mobile | P4, P5 | YES | DONE |
-| P10 | Mobile Developer | Mobile | P6, P8 | YES | PENDING |
+| P10 | Mobile Developer | Mobile | P6, P8 | NO | PENDING |
+| P11 | Mobile Developer | Mobile | P4, P5, P9 | NO | PENDING |
+| P12 | Mobile Developer | Mobile | P11 | NO | PENDING |
 
 Phase file mapping:
 
@@ -79,6 +94,8 @@ Phase file mapping:
 | P8 | `phase-P8-counter-and-quiet-surfaces.md` |
 | P9 | `phase-P9-widget-phase-label-and-dot.md` |
 | P10 | `phase-P10-checkin-degrade-parity.md` |
+| P11 | `phase-P11-widget-date-day-bolt-glyph.md` |
+| P12 | `phase-P12-widget-native-capture.md` |
 
 Artifact hygiene:
 
