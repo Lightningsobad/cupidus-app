@@ -1,6 +1,6 @@
 # Story Master: STORY-012 Trạng thái theo pha, widget, và bộ đếm "của cải đang lớn"
 
-Status: TODO
+Status: IN_PROGRESS
 Complexity: complex
 Story-Class: standard
 Implementation Lane: shared (backend + mobile) — trên thực tế chỉ mobile-dev
@@ -22,9 +22,11 @@ Design-Screen: hub-waiting, hub-upcoming, hub-date_day, hub-quiet,
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
 - [x] Coding Plan (Tech Lead) — `coding-plan/master-plan.md`, `coding-plan/coding-agent-guide.md`, P1–P8
-- [x] Implementation (Development) — mobile-dev P1-P12 complete per
+- [ ] Implementation (Development) — mobile-dev P1-P12 complete per
   `coding-plan/master-plan.md` Phases Overview (all Status: DONE, BaseHead
-  `536d47cb92ff747505e7b6f1ac0469aac254cb55`). P6 blocker
+  `536d47cb92ff747505e7b6f1ac0469aac254cb55`), but full-story-review S8
+  (`review/review-report.md`) found AC9 FAIL with 6 blocking visual-fidelity
+  findings B-1..B-6 (unchecked pending rework). P6 blocker
   (AC_CONFLICT_CROSS_REQUIREMENT vs REQ-002/STORY-021 AC4) resolved
   2026-09-17 by user decision (Option 1: narrow the guard's
   `flutter_local_notifications` clause to an import boundary under
@@ -33,7 +35,9 @@ Design-Screen: hub-waiting, hub-upcoming, hub-date_day, hub-quiet,
   P9-P12 closed the widget-phase-label/glyph and R-5 visual-fidelity native
   capture gaps; see `coding-plan/phase-P9..P12-*.md` §7 and
   `visual-fidelity/visual-fidelity-report.md` "Lượt P12".
-- [ ] Review (Reviewer)
+- [ ] Review (Reviewer) — S8 `full-story-review` Outcome: PATCH_REQUIRED
+  (`review/review-report.md`). 6 blocking findings B-1..B-6 (AC9), 6 non-
+  blocking N-1..N-6. See checkpoint for routing.
 
 ## Depends On
 - STORY-001 — mọi pha đọc từ trạng thái thẻ trong kho chung.
