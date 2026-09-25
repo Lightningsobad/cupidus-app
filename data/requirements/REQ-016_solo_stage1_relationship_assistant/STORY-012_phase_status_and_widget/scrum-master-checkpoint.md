@@ -8,17 +8,16 @@ Scope:
 
 Current State:
 - Requirement Status: IN_PROGRESS
-- Story Status: IN_PROGRESS — Tech Lead architecture-solution run dispatched
-  to extend the widget payload contract for D-10 (phase-label + color dot)
-- Completed Checklist: Requirements [x] (D-10/D-6 ac-patch landed, commit
-  `84bdd6b2`), UX [x] (same commit), Architecture [ ] (contract-summary.md §2
-  extension in flight — see Last Delegation), Implementation [ ] (blocked on
-  contract + coding-plan phase, was previously WRITE_SCOPE_TOO_NARROW_FOR_C1),
-  Review [ ] (last committed review: final-synthesis Outcome: PATCH_REQUIRED,
-  commit `322c4276`, superseded by newer commits)
-- Current Phase: D-10 contract extension (architecture-solution), then a new
-  Mode: coding-plan phase for (a) mobile-dev D-10+D-11+D-12 and (b) D-6/C-1
-  rework with widened WriteScope
+- Story Status: IN_PROGRESS — Tech Lead `Mode: coding-plan` run dispatched to
+  add implementation phases for D-10+D-11+D-12 and D-6/C-1
+- Completed Checklist: Requirements [x] (D-10/D-6 ac-patch, commit
+  `84bdd6b2`), UX [x] (same commit), Architecture [x] (contract-summary.md
+  §2/§3/§3a/§4/§6 extended for D-10, TECH_LEAD_COMPLETE: YES, sealed commit
+  — see BaseHead below), Implementation [ ] (awaiting new coding-plan
+  phases, then mobile-dev), Review [ ] (last committed review:
+  final-synthesis Outcome: PATCH_REQUIRED, commit `322c4276`, superseded)
+- Current Phase: `Mode: coding-plan` (Tech Lead) adding phase group (a)
+  D-10+D-11+D-12 mobile-dev and (b) D-6/C-1 mobile-dev rework
 - Phase Statuses: see `coding-plan/master-plan.md` in this worktree (P1-P8
   existing; new phase(s) pending from the coding-plan run below)
 
@@ -29,25 +28,25 @@ Story Git Boundary:
 - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget
 - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget
 - MergeTarget: codex/REQ-016_solo_stage1_relationship_assistant-integration
-- BaseHead: 84bdd6b2451b44fa6a259f1ffe720308d8a6e9e9
+- BaseHead: f23c9cea30b326216967c05c3c813925cd82685c
 - BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget.json
-- Boundary status: COMMITTED. PO/UX ac-patch (D-10/D-6, routed via
-  brainstormer, requirements.md + ux/uiux-spec.md) committed `84bdd6b2`;
-  BaseHead refreshed to this commit via `handoff-build.sh spawn` (which calls
-  `git-story-boundary.sh start` internally). Corrected req_master.md:217
-  attribution separately in the control checkout (commit `4d900c35`): the
-  contract-summary.md/home_widget_bridge.dart patch is Tech Lead's, not PO's.
+- Boundary status: COMMITTED. PO/UX ac-patch committed `84bdd6b2`. Tech Lead
+  architecture-solution edit (contract-summary.md §2/§3/§3a/§4/§6, D-10)
+  sealed via `git-story-boundary.sh refresh-base` -> BaseHead now
+  `f23c9cea30b326216967c05c3c813925cd82685c`. req_master.md:217 attribution
+  fixed in control checkout (commit `4d900c35`): contract patch is Tech
+  Lead's, not PO's.
 
 Last Delegation:
 - Role: tech-lead (Alan-Techlead)
-- Mode: architecture-solution
+- Mode: coding-plan (2nd run in this worktree; 1st run was
+  architecture-solution, TECH_LEAD_COMPLETE: YES, sealed above)
 - RunId: RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-tech-lead
-- Scope of this run: extend ONLY `architecture/contract-summary.md` §2 with
-  the new phase-label payload key + 4 color-dot tokens (D-10, AC-37/BR-15).
-  Does NOT touch coding-plan/master-plan.md or implementation files in this
-  run — a follow-up `Mode: coding-plan` handoff is required next to add the
-  phase(s) covering (a) mobile-dev D-10+D-11+D-12 implementation and (b) D-6
-  check-in modal rework + C-1 3-photo-grid WriteScope widening.
+- Scope of this run: add phase group (a) mobile-dev D-10+D-11+D-12 and (b)
+  mobile-dev D-6 check-in modal + C-1 3-photo-grid (with widened WriteScope
+  and the D-3 ActivityCard/scheduledOn data-contract gap resolved) to
+  `coding-plan/master-plan.md` + new phase-Px-*.md files. Continued via
+  SendMessage (same agent, not a fresh spawn).
 - Result: DISPATCHED, awaiting TECH_LEAD_COMPLETE
 - Continuation AgentId: Alan-Techlead@session-e7df910a
 

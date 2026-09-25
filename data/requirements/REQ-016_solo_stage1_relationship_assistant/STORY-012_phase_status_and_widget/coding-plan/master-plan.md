@@ -62,6 +62,8 @@
 | P6 | Mobile Developer | Mobile | P1, P2 | YES | DONE |
 | P7 | Mobile Developer | Mobile | P2 | NO | DONE |
 | P8 | Mobile Developer | Mobile | P3, P7 | NO | DONE |
+| P9 | Mobile Developer | Mobile | P4, P5 | YES | PENDING |
+| P10 | Mobile Developer | Mobile | P6, P8 | YES | PENDING |
 
 Phase file mapping:
 
@@ -75,6 +77,8 @@ Phase file mapping:
 | P6 | `phase-P6-evening-check-in.md` |
 | P7 | `phase-P7-phase-line-and-countdown.md` |
 | P8 | `phase-P8-counter-and-quiet-surfaces.md` |
+| P9 | `phase-P9-widget-phase-label-and-dot.md` |
+| P10 | `phase-P10-checkin-degrade-parity.md` |
 
 Artifact hygiene:
 
@@ -100,3 +104,24 @@ Artifact hygiene:
   cấm thêm cột `Write Scope`/`Primary Inputs`/`Planned Outputs`/`Test Scope`.
   Chỗ này lệch với SKILL rule 14 (liệt kê 10 cột); template thắng vì nó là thứ
   phase file tham chiếu.
+- **P9/P10 (2026-09-25, coding-plan round 2) — lệch đã sửa so với handoff:**
+  handoff nói "9-column Phase Overview schema"; giữ nguyên 6 cột như trên,
+  đúng precedent đã ghi sẵn ở dòng trên — không có phiên bản 9 cột nào của
+  template hay SKILL tồn tại để đối chiếu.
+- **P9/P10 — khoảng trống thật đã xác minh trực tiếp trên mã, khác mô tả
+  trong checkpoint/handoff:** checkpoint trước round này mô tả một "D-3
+  data-contract gap: ActivityCard chỉ có `scheduledOn` không giờ, cần cho
+  khối ngữ cảnh check-in" làm lý do mở WriteScope sang
+  `activity_card_tile.dart`/`activity_card_hub_view.dart`. Không tìm được
+  ruling D-3 nào khớp mô tả đó ở `requirements.md`/`ux/uiux-spec.md`/
+  `req_master.md`. D-3 thật (đọc từ `coding-plan/test-results.md` lượt vá
+  2026-09-19 và `review/review-report.md` mục "Cổng quyết định
+  PATCH_REQUIRED") là **ngày ISO thô hiện ra thay vì định dạng vi** trên thẻ
+  — đã DONE, test PASS, không liên quan giờ hẹn hay `ActivityCard`. Khoảng
+  trống D-6/C-1 thật duy nhất còn lại, xác minh bằng cách đọc trực tiếp
+  `evening_check_in_sheet.dart` (dòng 121-280): khối "viết một câu" + hai chip
+  render vô điều kiện, chưa có nhánh ẩn khi thiếu STORY-003 mà AC-18 (vá hôm
+  nay, commit `84bdd6b2`) đòi. P10 đóng đúng khoảng trống này; WriteScope là
+  `evening_check_in_sheet.dart` + test của nó, không phải
+  `activity_card_tile.dart`/`activity_card_hub_view.dart`/`l10n/arb/` như
+  handoff giả định — hai file thẻ đó không sở hữu màn check-in.
