@@ -549,3 +549,139 @@ một chữ ký sai.
 | R-3 | Con số cỡ lớn trên widget Android (D-11) | Cần `SpannableString` trong `CupidPhaseWidgetProvider.kt`; P9 chỉ mở file này cho nhãn-mí + chấm màu, không cho cỡ chữ dòng chính | Tech Lead / Scrum Master |
 | R-5 | Ảnh bản dựng của widget (ô 7) | §6 của P9 vừa đòi chụp vừa cấm build native; xem mục trên | Scrum Master / Tech Lead |
 | D-13 | Lệch ngữ nghĩa "PHA n" và tương phản chấm `date_day` | §3a khoá bảng tra bốn vai trò; sửa là đổi hợp đồng | UI/UX + Tech Lead |
+
+## Lượt P12 (2026-09-25) — ảnh widget thật trên Android, ô 7
+
+### Cách chụp: ảnh hệ điều hành thật, không vẽ lại bằng Dart
+
+Bốn file `implemented-widget-*.png` lượt này là ảnh chụp màn hình chính thật của
+launcher Android, chụp từ `RemoteViews` do `CupidPhaseWidgetProvider.kt` dựng —
+không phải một cây widget Flutter vẽ lại cho giống:
+
+1. `flutter build apk --debug --flavor local --split-per-abi` (phải có
+   `--flavor` vì module khai báo hai flavor `local`/`prod`; lệnh trần trong
+   registry runtime không chạy được — xem mục "Lệch phát hiện ngoài phạm vi").
+2. `adb install -r app-arm64-v8a-local-debug.apk` lên `sdk_gphone64_arm64`,
+   Android 16, 1080×2400, density 420.
+3. Nạp payload vào đúng file prefs mà `home_widget` 0.9.4 đọc —
+   `HomeWidgetPreferences`, lấy từ hằng `HomeWidgetPlugin.PREFERENCES` trong
+   mã plugin chứ không đoán tên — qua `run-as`, đủ sáu khoá của
+   `../architecture/contract-summary.md` §2.
+4. Đặt widget lên màn hình chính **một lần** bằng thao tác UI thật: giữ vùng
+   trống → Widgets → `cupid_mobile` (3 × 1) → kéo thả.
+5. Mỗi pha sau đó: nạp lại payload rồi `adb install -r` chính APK đó, để hệ
+   thống tự phát `APPWIDGET_UPDATE` tới provider. Không dùng `am broadcast`
+   thủ công được: đó là protected broadcast, shell nhận
+   `SecurityException: not allowed to send broadcast ... from unknown caller`,
+   và ảnh máy ảo là build `ro.build.type=user` nên `adb root` bị từ chối
+   (`adbd cannot run as root in production builds`).
+6. `adb exec-out screencap -p`, cắt về vùng widget bằng `sips` nhưng chừa lại
+   nền tường hai phía để thấy widget đang nằm trên launcher thật.
+
+Mặt bằng so sánh: ảnh bản dựng là **Android**, canvas mốc là **iOS**. Vì vậy
+chỉ chấm hình dạng chỉ báo, màu theo vai trò token, tỉ lệ và thứ tự thông tin.
+Không chấm vỏ hệ điều hành, phông hệ thống, hay bo góc — Android 12+ tự cắt bo
+góc widget ở phía launcher, layout không khai báo.
+
+### Ô 7 — đối chiếu từng thuộc tính
+
+`implemented-widget-date-day.png` ↔ thẻ "PHA 4 · HÔM NAY, TRƯỚC GIỜ ĐI" của
+`design-reference-sb-84-widget-bon-pha-ios.png` (thẻ pha đúng-ngày-hẹn trên
+canvas).
+
+| Thuộc tính | Canvas (thẻ pha hôm nay) | Ảnh bản dựng | Kết |
+|---|---|---|---|
+| Hình chỉ báo pha | tia chớp, không phải chấm | tia chớp, rasterise từ `@drawable/dot_today_bolt` | **KHỚP** — D-13 đóng bằng ảnh |
+| Màu chỉ báo | tia chớp sáng gần trắng trên nền hồng | `#FF7FB6` (vai trò `--dot-today`) | LỆCH ĐÃ BIẾT — D-13, chủ sở hữu UI/UX + Tech Lead |
+| Nền thẻ | gradient hồng → tím **riêng** cho pha hôm nay | `#241B42` phẳng, y hệt ba pha kia | LỆCH MỚI — R-6 |
+| Nhãn-mí | chữ hoa, giãn chữ, cùng màu với chỉ báo | chữ hoa, `letterSpacing 0.08`, cùng màu chỉ báo | KHỚP |
+| Dòng chính | đậm, sáng, trên một–hai dòng | đậm `#F7EEFB`, `maxLines=2` | KHỚP |
+| Dòng phụ | mờ hơn, hiện đủ một dòng | `#B4A6CE`, `maxLines=1`, bị cắt "…" ở ô 3 × 1 | LỆCH MỚI — R-7 |
+| Con số cỡ lớn | canvas vẽ "4" cỡ lớn ở thẻ pha sắp hẹn | không có ở bất kỳ pha nào | R-3 vẫn mở, nay có ảnh chứng minh |
+| Biểu tượng ứng dụng trong thẻ | **không có** | ô vuông trắng đục `@mipmap/ic_launcher` 24dp bên trái | LỆCH MỚI — R-8 |
+| Bo góc, viền | bo lớn | bo lớn do launcher cắt | KHỚP |
+
+### Ba pha còn lại — kiểm chứng nhánh chỉ báo (D-10 + D-13)
+
+Ba ảnh kia không có thẻ tương ứng riêng trên canvas `sb-84` để chấm pixel; mục
+đích của chúng là chứng minh nhánh chọn hình + màu chỉ báo chạy đúng trên thiết
+bị thật, và là bằng chứng hai-pha cho bề mặt rủi ro `WIDGET-STALE`.
+
+| Ảnh | phase_id | Chỉ báo quan sát được | Vai trò token mong đợi | Kết |
+|---|---|---|---|---|
+| `implemented-widget-waiting.png` | `waiting` | chấm tròn, tím nhạt | `DOT_WAITING` `#B4A6CE` | KHỚP |
+| `implemented-widget-upcoming.png` | `upcoming` | chấm tròn, xanh ngọc | `DOT_UPCOMING` `#79E2CD` | KHỚP |
+| `implemented-widget-quiet.png` | `quiet` | chấm tròn, tím đậm | `DOT_QUIET` `#8E5FD6` | KHỚP |
+| `implemented-widget-date-day.png` | `date_day` | **tia chớp**, hồng | `DOT_TODAY` `#FF7FB6` + glyph D-13 | KHỚP về hình |
+
+Ba pha không-phải-`date_day` giữ chấm tròn: đó là nửa còn lại của D-13, và nó
+chỉ chứng minh được bằng ảnh thật như thế này.
+
+Chữ: mọi dấu tiếng Việt và ký tự phân cách `·` (U+00B7) hiện đúng trên cả bốn
+ảnh, không ô tofu nào. Nội dung hiện ra khớp từng chữ với gói
+`assets/data/req016/phase_content.v1.json` — tức là chuỗi đi từ gói nội dung
+qua payload tới `RemoteViews`, không có chuỗi nào sinh ở tầng native
+(AC-37/BR-15, khớp với 38 case xanh của `native_copy_scan_test.dart`).
+
+### Deep link (điểm vào, rule 13a)
+
+Chạm một lần vào widget khi đang hiển thị pha `quiet`:
+`dumpsys activity activities` trả `ResumedActivity: com.snapsofts.cupid/
+com.snapsofts.cupid_mobile.MainActivity`. Intent của widget tới được app.
+Chặng điều hướng trong app tới đúng thẻ `card_id` **chưa** kiểm chứng được ở
+lượt này vì API local không chạy — app dừng ở màn "Không thể kết nối máy chủ".
+Không mở rộng phạm vi để dựng backend; ghi nhận là giới hạn của lượt chụp.
+
+### Tồn dư mới phát hiện ở P12 (P12 không sửa mã sản phẩm)
+
+Ba khoản dưới đây là **phát hiện**, không phải việc bỏ dở: §4 của
+`phase-P12-widget-native-capture.md` cấm sửa mã sản phẩm trong phase này, nên
+chúng được ghi ra cho Scrum Master định tuyến.
+
+| Id | Tồn dư | Bằng chứng | Chủ sở hữu đề xuất |
+|---|---|---|---|
+| R-6 | Nền widget phẳng `#241B42` cho cả bốn pha; canvas cho pha hôm nay một gradient hồng → tím riêng | `cupid_phase_widget.xml:17` (`android:background` là màu đơn); so với thẻ pha 4 của canvas | Tech Lead — cần drawable gradient theo pha, ngoài WriteScope P12 |
+| R-7 | Dòng phụ bị cắt "…" ở ô mặc định 3 × 1 trên ba trong bốn pha | `cupid_phase_widget.xml:85` (`maxLines=1`) + bốn ảnh | UI/UX — chọn giữa nới `maxLines`, ô 4 × 1 mặc định, hay rút ngắn chuỗi trong gói nội dung |
+| R-8 | `@mipmap/ic_launcher` dựng thành một ô vuông **trắng đục** trên nền tối; canvas không vẽ biểu tượng ứng dụng nào trong thẻ | `cupid_phase_widget.xml:22-27` + bốn ảnh | UI/UX + Tech Lead — bỏ hẳn, hay thay bằng bản đơn sắc nền trong |
+
+### Lệch phát hiện ngoài phạm vi (không sửa ở P12)
+
+`data/devops/system/runtime-command-registry.json` ghi `mobile-app.buildCommand`
+là `flutter build apk --debug` (không flavor). Lệnh đó **không chạy được** trên
+module này: `mobile/android/app/build.gradle.kts` khai báo
+`flavorDimensions += "backend"` với hai flavor `local`/`prod`, nên Gradle đòi
+`--flavor`. Chủ sở hữu: DevOps.
+
+### Verdict sau lượt này
+
+| # | Ảnh implemented | Trước | Sau |
+|---|---|---|---|
+| 1 | `implemented-hub-waiting.png` | FAIL — R-1 | không đụng tới ở P12 |
+| 2..6 | các ảnh hub/sheet/quiet | PASS | không đụng tới ở P12 |
+| 7 | `implemented-widget-date-day.png` (+ `-waiting`, `-upcoming`, `-quiet`) | NOT_COMPARED | **FAIL — đã đối chiếu**: hình chỉ báo D-13 và bốn vai trò màu D-10 KHỚP; còn R-3, R-6, R-7, R-8 và lệch màu D-13 |
+
+R-5 (thiếu ảnh bản dựng của widget) **đóng**: ô 7 không còn là `NOT_COMPARED`,
+và câu hỏi "chụp thật hay ghi `NOT_APPLICABLE`" ở mục P9 đã có câu trả lời —
+chụp thật được, bằng chính đường build + thiết bị mà lượt này đi.
+
+`VISUAL_FIDELITY` giữ `FAIL`. Lý do **không** đổi: R-1 (hai chip hành động ở
+`hub-waiting`, chờ chuỗi hiển thị mới từ Product Owner) vẫn mở, và ô 7 vừa mở
+thêm R-6/R-7/R-8. Cổng `visual_fidelity.py --stage review --stack mobile` vì
+thế vẫn exit 1 với thông điệp "does not record 'VISUAL_FIDELITY: PASS'" — đó là
+trạng thái đúng của story lúc này, không phải lỗi bằng chứng.
+
+### Lệnh đã chạy ở P12
+
+```
+flutter build apk --debug --flavor local --split-per-abi
+adb shell cmd package uninstall -k com.snapsofts.cupid
+adb install -r .../flutter-apk/app-arm64-v8a-local-debug.apk
+adb shell "run-as com.snapsofts.cupid sh -c 'echo <b64> | base64 -d > /data/data/com.snapsofts.cupid/shared_prefs/HomeWidgetPreferences.xml'"
+adb shell input swipe 540 950 540 950 1200      # giữ vùng trống trên màn chính
+adb shell input motionevent DOWN/MOVE/UP ...    # kéo widget từ bộ chọn ra màn chính
+adb exec-out screencap -p > <ảnh gốc 1080x2400>
+sips -c 396 814 --cropOffset 362 12 <ảnh gốc> --out implemented-widget-<pha>.png
+adb shell dumpsys activity activities            # xác nhận MainActivity sau khi chạm widget
+flutter test test/features/phase_status/native_copy_scan_test.dart   # 38/38 xanh
+python3 .claude/hooks/lib/visual_fidelity.py --dir <thư mục này> --stage review --stack mobile
+```

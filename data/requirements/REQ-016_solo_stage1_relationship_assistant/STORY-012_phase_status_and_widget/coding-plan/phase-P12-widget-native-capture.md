@@ -237,5 +237,12 @@ Thứ tự dưới đây là thứ tự thực thi. Dừng và báo blocker ở 
 
 ## 7. Status
 
-- Status: PENDING
+- Status: DONE
+- Đóng bởi Scrum Master sau khi tự xác minh độc lập báo cáo hoàn tất của
+  Alex-Mobile-Dev (2026-09-25): run state `RUN-...-mobile-dev.json` có
+  `status: COMPLETED`, `completion_marker: MOBILE_COMPLETE: YES`; bốn PNG
+  `implemented-widget-*.png` tồn tại và đọc được (814×396 RGBA); ô 7 của
+  `visual-fidelity-report.md` không còn `NOT_COMPARED`; tự chạy
+  `python3 .claude/hooks/lib/visual_fidelity.py --stage review --stack mobile`
+  ra đúng exit 1 với lý do R-1 (không phải P12) — khớp báo cáo.
 - Last updated: 2026-09-25

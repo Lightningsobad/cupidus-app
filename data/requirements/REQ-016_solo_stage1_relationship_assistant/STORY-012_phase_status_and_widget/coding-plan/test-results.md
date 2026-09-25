@@ -2229,3 +2229,142 @@ story khác hay phase trước bị làm bẩn; `mobile/build/` là output bị 
 `BLOCKED` — chờ quyết định Scrum Master về việc sửa
 `mobile/android/app/src/main/res/drawable/dot_today_bolt.xml` (ngoài Write Scope
 của P12).
+
+## P12 – lượt khắc phục 2026-09-25: mở scope XML, build xanh, chụp xong
+
+Scrum Master đã xác minh độc lập blocker `ANDROID_RESOURCE_PARSE_FAILED` ở mục
+trên ("tôi đã tự đọc `dot_today_bolt.xml` và chú thích dòng 3 đúng là chứa chuỗi
+`--dot-today`") và mở Write Scope cho đúng hai file:
+`mobile/android/app/src/main/res/drawable/dot_today_bolt.xml` và
+`mobile/android/app/build.gradle.kts`.
+
+### 1 · Sửa chú thích XML (chỉ chú thích)
+
+Dòng 3 của `dot_today_bolt.xml` đổi từ `--dot-today` thành `dot_today`. XML 1.0
+§2.5 cấm chuỗi `--` bên trong chú thích, nên hai dấu gạch liền nhau làm
+`:app:parseLocalDebugLocalResources` đỏ và kéo theo **toàn bộ** app Android
+không dựng được, không riêng widget.
+
+Không đụng gì khác trong file: `<vector>`, `android:width/height`,
+`viewportWidth/Height`, `<path>`, `android:fillColor` và `android:pathData`
+(`M13,2 L4,13 h6 l-1,9 9,-12 h-6 z`) giữ nguyên từng ký tự. Hình tia chớp D-13
+không đổi.
+
+`mobile/android/app/build.gradle.kts` **không** bị sửa: xem mục 2.
+
+### 2 · Build lại — xanh, và `ContextCompat` tự giải quyết
+
+```
+flutter build apk --debug --flavor local --split-per-abi
+```
+
+Xanh. Sinh ra cả ba APK: `app-armeabi-v7a-local-debug.apk`,
+`app-arm64-v8a-local-debug.apk`, `app-x86_64-local-debug.apk`.
+
+Câu hỏi treo ở mục trước đã có câu trả lời: `:app:compileLocalDebugKotlin` chạy
+qua, `ContextCompat` trong `CupidPhaseWidgetProvider.kt:97` **phân giải bình
+thường** — `androidx.core` đã có mặt qua chuỗi phụ thuộc bắc cầu của Flutter
+embedding. Theo đúng bước 3 của dispatch ("nếu `ContextCompat` đã phân giải
+được thì để nguyên `build.gradle.kts`"), file gradle không bị chạm vào.
+
+Lệch ghi nhận, không sửa ở lượt này: lệnh trần
+`flutter build apk --debug` trong `mobile-app.buildCommand` của
+`data/devops/system/runtime-command-registry.json` không chạy được vì module
+khai báo hai flavor `local`/`prod`. Chủ sở hữu: DevOps.
+
+### 3 · Cài đặt và nạp payload (§3.2, §3.3)
+
+```
+adb shell cmd package uninstall -k com.snapsofts.cupid
+adb install -r .../flutter-apk/app-arm64-v8a-local-debug.apk
+```
+
+Cả hai trả `Success`. Dùng `-k` để giữ dữ liệu như §3.2 đòi, và dùng bản
+split-per-ABI vì bản gộp mọi ABI quá lớn để cài.
+
+Tên file prefs lấy từ mã plugin chứ không đoán: `home_widget` 0.9.4 ghi vào file
+có tên riêng `HomeWidgetPreferences` (hằng `HomeWidgetPlugin.PREFERENCES`),
+không phải prefs mặc định của app như §1 của `architecture/contract-summary.md`
+mô tả. Ghi chú lệch đó vào đây; không sửa file kiến trúc (ngoài Write Scope).
+
+Nạp qua `run-as` rồi đọc lại bằng `cat` để xác nhận: đủ sáu khoá của §2, dấu
+tiếng Việt và ký tự `·` (U+00B7) round-trip nguyên vẹn.
+
+### 4 · Đặt widget và chụp (§3.4)
+
+Provider đăng ký đúng (`dumpsys appwidget` → `[39] ... CupidPhaseWidgetProvider
+... zombie=false`). Đặt lên màn hình chính **một lần** bằng thao tác UI thật:
+giữ vùng trống → Widgets → `cupid_mobile` (3 × 1) → kéo thả bằng chuỗi
+`input motionevent DOWN/MOVE/UP`.
+
+Đổi pha mà không cần đặt lại: `am broadcast -a APPWIDGET_UPDATE` bị
+`SecurityException: not allowed to send broadcast ... from unknown caller`
+(protected broadcast), và `adb root` bị từ chối vì ảnh máy ảo là
+`ro.build.type=user`. Đường đi được: nạp payload mới rồi `adb install -r` chính
+APK đó, hệ thống tự phát update tới provider.
+
+Bốn ảnh đã ghi, mỗi ảnh đều đã mở ra soi bằng mắt (không khung splash, không ô
+tofu, không nội dung cũ):
+
+- `visual-fidelity/implemented-widget-date-day.png` — tia chớp hồng, đóng ô 7
+- `visual-fidelity/implemented-widget-waiting.png` — chấm tròn tím nhạt
+- `visual-fidelity/implemented-widget-upcoming.png` — chấm tròn xanh ngọc
+- `visual-fidelity/implemented-widget-quiet.png` — chấm tròn tím đậm
+
+`adb logcat` không có exception nào của `com.snapsofts.cupid` trong suốt lượt.
+
+Chạm widget một lần: `dumpsys activity activities` trả
+`ResumedActivity: com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`.
+Deep link tới được app; chặng điều hướng trong app chưa kiểm chứng được vì API
+local không chạy (app dừng ở màn "Không thể kết nối máy chủ").
+
+### 5 · §3.5 iOS
+
+Không chạy. §3.5 để tuỳ chọn, và nó cần một máy ảo iOS cùng một lượt dựng
+WidgetKit riêng — nằm ngoài chi phí "seed + broadcast + chụp" mà dispatch cho
+phép. Ô 7 đã đóng được bằng ảnh Android.
+
+### 6 · Test canh cho file vừa sửa
+
+```
+flutter test test/features/phase_status/native_copy_scan_test.dart
+```
+
+38/38 xanh, trong đó có `the bolt drawable is one closed path and carries no
+copy (D-13)` và `every .kt and .xml file is pure ASCII once comments are
+removed` — tức là chú thích mới không làm hỏng bất biến nào mà bộ test này canh.
+
+Đáng ghi lại: chính bộ test đó **không thể** bắt được khiếm khuyết gốc, vì nó
+tước chú thích **trước** khi quét. Khiếm khuyết nằm đúng chỗ bộ canh không nhìn
+tới. Đó là lý do nó sống sót qua review của P11.
+
+### 7 · git status trước khi đóng phase
+
+`git -C <worktree> status --short` chỉ có `visual-fidelity-report.md`,
+`coding-plan/test-results.md` và bốn `implemented-widget-*.png` mới. Không PNG
+visual-fidelity nào của story khác hay phase trước bị làm bẩn.
+`build.gradle.kts` không đổi. `dot_today_bolt.xml` đã được Scrum Master commit
+ở `4a52b37c` trước lượt này nên không còn nằm trong working tree.
+
+`coding-plan/phase-P12-widget-native-capture.md` §7 Status **chưa** đổi, và
+dòng P12 trong `coding-plan/master-plan.md` vẫn là `PENDING`: cả hai file nằm
+trong `output_paths` nhưng **không** nằm trong `write_scope` của run này. Việc
+lật hai ô đó thuộc Scrum Master.
+
+### 8 · Cổng visual fidelity
+
+```
+python3 .claude/hooks/lib/visual_fidelity.py --dir <visual-fidelity> --stage review --stack mobile
+```
+
+Exit 1, thông điệp: báo cáo không ghi `VISUAL_FIDELITY: PASS`. Đây là **trạng
+thái đúng**, không phải thiếu bằng chứng: verdict tổng vẫn `FAIL` vì R-1 (hai
+chip hành động ở `hub-waiting`, chờ chuỗi hiển thị từ Product Owner) còn mở, và
+ô 7 vừa mở thêm R-6/R-7/R-8. Dispatch ghi rõ: không lật verdict tổng khi R-1
+chưa đóng.
+
+### Status
+
+`DONE` — §3.1 → §3.4 và §3.6 đã chạy; §3.5 (iOS) `SKIPPED` theo diện tuỳ chọn.
+Ba tồn dư mới R-6/R-7/R-8 và lệch registry buildCommand chuyển về Scrum Master,
+không sửa mã ở P12.

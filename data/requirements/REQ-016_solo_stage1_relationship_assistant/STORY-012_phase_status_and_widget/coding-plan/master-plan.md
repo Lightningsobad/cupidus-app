@@ -76,9 +76,9 @@ báo pha:
 | P7 | Mobile Developer | Mobile | P2 | NO | DONE |
 | P8 | Mobile Developer | Mobile | P3, P7 | NO | DONE |
 | P9 | Mobile Developer | Mobile | P4, P5 | YES | DONE |
-| P10 | Mobile Developer | Mobile | P6, P8 | NO | PENDING |
-| P11 | Mobile Developer | Mobile | P4, P5, P9 | NO | PENDING |
-| P12 | Mobile Developer | Mobile | P11 | NO | PENDING |
+| P10 | Mobile Developer | Mobile | P6, P8 | NO | DONE |
+| P11 | Mobile Developer | Mobile | P4, P5, P9 | NO | DONE |
+| P12 | Mobile Developer | Mobile | P11 | NO | DONE |
 
 Phase file mapping:
 
