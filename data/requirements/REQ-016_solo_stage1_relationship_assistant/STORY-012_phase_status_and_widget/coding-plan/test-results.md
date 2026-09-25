@@ -13,6 +13,7 @@
 | P7 | Mobile Developer | DONE | 2026-09-17 |
 | P8 | Mobile Developer | DONE | 2026-09-17 |
 | P9 | Mobile Developer | DONE | 2026-09-25 |
+| P10 | Mobile Developer | DONE | 2026-09-25 |
 
 ## P1 – Ba gói nội dung preset + cổng nhập luật bất biến
 
@@ -1875,3 +1876,107 @@ bắt buộc) — đã sửa, ghi ở trên.
    `phase_content.dart`/`home_widget_bridge.dart`, đúng tên file test hiện có").
    Không file test nào bị nới lỏng: cả hai chỉ thêm case và thêm trường bắt
    buộc vào fixture.
+
+## P10 – Màn check-in 23h: ẩn cùng lúc khi thiếu STORY-003 (AC-18)
+
+### Files shipped
+
+| File | Thay đổi |
+|---|---|
+| `mobile/lib/features/phase_status/presentation/evening_check_in_sheet.dart` | thêm `bool journalAvailable = true` vào constructor + `show` (và truyền xuống trong thân `show`); gate `const SizedBox(height: CupidSpacing.md)` + `_Block` "viết một câu" (nhãn + `TextField` `eveningCheckInFieldKey` + hai `_Chip`) bằng một spread điều kiện `if (widget.journalAvailable) ...<Widget>[...]` |
+| `mobile/test/features/phase_status/evening_check_in_sheet_test.dart` | thêm đúng một case AC-18 mới trong nhóm "two steps, neither of them required (AC-16/AC-18)" |
+
+Không đụng `_openFromPayload`, `_save()`, helper `_sheet()`, hay bất kỳ
+assertion P6/P8 nào. Khối ảnh (`eveningCheckInAttachKey` + hai slot) và dòng
+trấn an (`eveningCheckInReassuranceKey`) vẫn nằm ngoài phần bị gate, render vô
+điều kiện — case AC-18 mới khẳng định lại cả hai.
+
+Gate dùng `widget.journalAvailable`, **không** `widget.openJournal`, theo
+`architecture/contract-summary.md` §7 (phương án (a), 2026-09-25). Field được
+tài liệu hoá ngay tại khai báo là cờ năng lực bản dựng, không phải seam test.
+
+### Commands run
+
+```
+$ cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter analyze \
+    lib/features/phase_status test/features/phase_status
+Analyzing 2 items...
+   info • prefer_initializing_formals • phase_status_cubit.dart:122:9
+   info • prefer_initializing_formals • phase_status_cubit.dart:124:9
+   info • prefer_initializing_formals • phase_status_cubit.dart:125:9
+   info • prefer_initializing_formals • phase_status_cubit.dart:126:9
+   info • prefer_initializing_formals • phase_status_cubit.dart:127:9
+5 issues found. (ran in 2.8s)
+```
+
+0 error, 0 warning. Cả 5 `info` là tồn dư sẵn có trong
+`phase_status_cubit.dart`, một file P10 không sửa (exit code 1 là do
+`--fatal-infos` mặc định, xem `project_flutter_analyze_baseline_nonzero`).
+
+```
+$ cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter test \
+    test/features/phase_status/evening_check_in_sheet_test.dart \
+    --reporter failures-only
++20 ~1: 1 skipped test.
++20 ~1: All other tests passed!
+```
+
+(1 skip = case chụp ảnh, chỉ chạy với `--dart-define=CAPTURE_VISUALS=true`.
+P8 để lại 19 case + 1 skip ở file này; P10 thêm đúng 1.)
+
+```
+$ cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter test \
+    test/features/phase_status --reporter failures-only
++246 ~6: 6 skipped tests.
++246 ~6: All other tests passed!
+```
+
+Không giảm case: `+245 ~6` ở P9 → `+246 ~6` ở P10, đúng bằng một case mới.
+
+Xác minh case mới thật sự chạy (reporter mặc định không in tên từng case):
+
+```
+$ cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter test \
+    test/features/phase_status/evening_check_in_sheet_test.dart \
+    --plain-name "a build without the journal drops the whole sentence step at once (AC-18)" \
+    --reporter expanded
+00:00 +0: two steps, neither of them required (AC-16/AC-18) a build without the
+journal drops the whole sentence step at once (AC-18)
+00:00 +1: All tests passed!
+```
+
+`git status --porcelain` trong worktree sau các lượt chạy: đúng hai file của
+Write Scope, không file PNG hay artifact nào bị các lượt test làm bẩn.
+
+### AC coverage
+
+| AC | Bằng chứng |
+|---|---|
+| AC-18 (ẩn cùng lúc) | case mới dựng sheet `journalAvailable: false`: `eveningCheckInFieldKey` `findsNothing`, `find.byType(TextField)` `findsNothing`, nhãn `evening_check_in_line_label` `findsNothing`, cả hai nhãn chip (`evening_check_in_journal_chip`, `evening_check_in_private_chip`) `findsNothing`; `eveningCheckInAttachKey` vẫn `findsOneWidget` |
+| AC-16 (không hồi quy) | mọi case cũ dựng qua `_sheet()` (mặc định `journalAvailable`, `openJournal == null`) vẫn gõ + lưu thành công, không assertion nào phải sửa |
+| AC-17/AC-19, D-6..D-9 | `+246 ~6` toàn `test/features/phase_status`, gồm case dòng trấn an (`REMIND-REPEAT`) và case "hai lối ra" — không sửa gì |
+
+### Visual fidelity
+
+`NOT_APPLICABLE`. Nhánh mặc định (`journalAvailable` không truyền) không đổi
+bố cục, nên `implemented-evening-check-in-sheet.png` **không** phải chụp lại —
+đã kiểm tra bằng chính bộ case bố cục P8 (`getSize` toàn màn, khối ngữ cảnh,
+lưới ba ô, hai lối ra) và cả sáu case đó vẫn xanh nguyên assertion. Nhánh
+`journalAvailable: false` không có canvas riêng trong bộ thiết kế đã neo, nên
+per-story capture cho nhánh đó là `NOT_APPLICABLE — bản vẽ chỉ có nhánh đủ dữ
+liệu`.
+
+### Điểm cần Scrum Master / Reviewer biết
+
+1. Không nơi gọi sản xuất nào truyền `journalAvailable`, nên giá trị ship là
+   `true` và hành vi bản phát hành y như trước P10. Nhánh `false` hiện chỉ có
+   test dựng — đó là đúng ý §7, vốn ghi rõ `openJournalComposer` là hàm
+   top-level vô điều kiện nên không có trạng thái vắng mặt nào dò được ở
+   runtime.
+2. Case AC-18 dựng `EveningCheckInSheet` trực tiếp qua `_host(...)` thay vì
+   thêm tham số vào helper `_sheet()`, để giữ helper nguyên byte đúng như §3
+   của phase file yêu cầu.
+
+### Next phase
+
+P11 (dispatch tuần tự tiếp theo, chưa bắt đầu — ngoài phạm vi lượt này).

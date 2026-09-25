@@ -71,6 +71,7 @@ class EveningCheckInSheet extends StatefulWidget {
     this.cardTitle,
     this.pickPhotos,
     this.openJournal,
+    this.journalAvailable = true,
   });
 
   /// Title and body of the `evening_check_in` item of `nudges.v1.json`, so the
@@ -90,6 +91,11 @@ class EveningCheckInSheet extends StatefulWidget {
   final EveningPhotoPicker? pickPhotos;
   final EveningJournalRoute? openJournal;
 
+  /// AC-18 build capability flag, not a test seam ([openJournal] is the test
+  /// seam): production is always `true` today because [openJournalComposer] is
+  /// an unconditional top-level function with no absent state to detect.
+  final bool journalAvailable;
+
   static Future<void> show(
     BuildContext context, {
     String? title,
@@ -98,6 +104,7 @@ class EveningCheckInSheet extends StatefulWidget {
     String? cardTitle,
     EveningPhotoPicker? pickPhotos,
     EveningJournalRoute? openJournal,
+    bool journalAvailable = true,
   }) {
     return Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
@@ -109,6 +116,7 @@ class EveningCheckInSheet extends StatefulWidget {
           cardTitle: cardTitle,
           pickPhotos: pickPhotos,
           openJournal: openJournal,
+          journalAvailable: journalAvailable,
         ),
       ),
     );
@@ -229,51 +237,53 @@ class _EveningCheckInSheetState extends State<EveningCheckInSheet> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: CupidSpacing.md),
-                      _Block(
-                        children: <Widget>[
-                          Text(
-                            l10n.evening_check_in_line_label,
-                            style: type.body.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: colors.colorText,
-                            ),
-                          ),
-                          const SizedBox(height: CupidSpacing.sm),
-                          TextField(
-                            key: eveningCheckInFieldKey,
-                            controller: _line,
-                            enabled: !_busy,
-                            minLines: 3,
-                            maxLines: 5,
-                            keyboardType: TextInputType.multiline,
-                            textInputAction: TextInputAction.newline,
-                            style: type.body.copyWith(color: colors.colorText),
-                            decoration: InputDecoration(
-                              hintText: l10n.evening_check_in_line_hint,
-                              hintStyle: type.body.copyWith(
-                                color: colors.colorTextMuted,
+                      if (widget.journalAvailable) ...<Widget>[
+                        const SizedBox(height: CupidSpacing.md),
+                        _Block(
+                          children: <Widget>[
+                            Text(
+                              l10n.evening_check_in_line_label,
+                              style: type.body.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: colors.colorText,
                               ),
-                              filled: true,
-                              fillColor: colors.colorSurface,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                  platform.radiusSmall,
+                            ),
+                            const SizedBox(height: CupidSpacing.sm),
+                            TextField(
+                              key: eveningCheckInFieldKey,
+                              controller: _line,
+                              enabled: !_busy,
+                              minLines: 3,
+                              maxLines: 5,
+                              keyboardType: TextInputType.multiline,
+                              textInputAction: TextInputAction.newline,
+                              style: type.body.copyWith(color: colors.colorText),
+                              decoration: InputDecoration(
+                                hintText: l10n.evening_check_in_line_hint,
+                                hintStyle: type.body.copyWith(
+                                  color: colors.colorTextMuted,
                                 ),
-                                borderSide: BorderSide.none,
+                                filled: true,
+                                fillColor: colors.colorSurface,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    platform.radiusSmall,
+                                  ),
+                                  borderSide: BorderSide.none,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: CupidSpacing.sm),
-                          Row(
-                            children: <Widget>[
-                              _Chip(label: l10n.evening_check_in_journal_chip),
-                              const SizedBox(width: CupidSpacing.sm),
-                              _Chip(label: l10n.evening_check_in_private_chip),
-                            ],
-                          ),
-                        ],
-                      ),
+                            const SizedBox(height: CupidSpacing.sm),
+                            Row(
+                              children: <Widget>[
+                                _Chip(label: l10n.evening_check_in_journal_chip),
+                                const SizedBox(width: CupidSpacing.sm),
+                                _Chip(label: l10n.evening_check_in_private_chip),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),

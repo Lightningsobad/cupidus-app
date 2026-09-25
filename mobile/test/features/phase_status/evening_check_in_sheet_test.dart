@@ -224,6 +224,31 @@ void main() {
       expect(saved.single.line, isNull);
       expect(saved.single.photoPaths, isEmpty);
     });
+
+    testWidgets('a build without the journal drops the whole sentence step at '
+        'once (AC-18)', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _host(
+          const EveningCheckInSheet(
+            title: _title,
+            body: _body,
+            cardId: _cardId,
+            journalAvailable: false,
+          ),
+        ),
+      );
+      final AppL10n l10n = AppL10n.of(
+        tester.element(find.byKey(eveningCheckInAttachKey)),
+      );
+
+      expect(find.byKey(eveningCheckInFieldKey), findsNothing);
+      expect(find.byType(TextField), findsNothing);
+      expect(find.text(l10n.evening_check_in_line_label), findsNothing);
+      expect(find.text(l10n.evening_check_in_journal_chip), findsNothing);
+      expect(find.text(l10n.evening_check_in_private_chip), findsNothing);
+      expect(find.byKey(eveningCheckInAttachKey), findsOneWidget);
+      expect(find.byKey(eveningCheckInReassuranceKey), findsOneWidget);
+    });
   });
 
   group('what saving hands to the journal (AC-19/BR-14)', () {

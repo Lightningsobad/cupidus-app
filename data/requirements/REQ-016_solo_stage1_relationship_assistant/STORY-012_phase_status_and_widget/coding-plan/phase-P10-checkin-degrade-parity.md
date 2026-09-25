@@ -189,5 +189,8 @@ bản dựng** tường minh, mặc định `true`. §3 dưới đây là bản 
 
 ## 7. Status
 
-- Status: PENDING
+- Status: DONE
 - Last updated: 2026-09-25
+- Evidence: `coding-plan/test-results.md` mục "P10 – Màn check-in 23h: ẩn cùng
+  lúc khi thiếu STORY-003 (AC-18)" (analyze 0 error; file test `+20 ~1`; toàn
+  `test/features/phase_status` `+246 ~6`, không giảm case so với P9 `+245 ~6`)
