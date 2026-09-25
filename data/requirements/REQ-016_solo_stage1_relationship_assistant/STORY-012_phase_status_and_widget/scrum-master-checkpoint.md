@@ -102,13 +102,15 @@ Current State:
   mobile-dev, cannot run concurrently: MAX_CODE_WRITERS_PER_STORY=1), Review
   [ ] (last committed review: final-synthesis Outcome: PATCH_REQUIRED,
   commit `322c4276`, superseded)
-- Current Phase: P10 DONE (`phase-P10-checkin-degrade-parity.md`, AC-18
-  `journalAvailable` gate in `evening_check_in_sheet.dart`, `flutter test
-  test/features/phase_status` `+246 ~6`, 0 regressions). P11
-  (`phase-P11-widget-date-day-bolt-glyph.md`, D-13 dot->bolt glyph) is the
-  next dispatch, fresh Alex-Mobile-Dev spawn.
-- Phase Statuses: see `coding-plan/master-plan.md` in this worktree — P1-P10
-  DONE, P11/P12 PENDING
+- Current Phase: P11 DONE (`phase-P11-widget-date-day-bolt-glyph.md`, D-13
+  dot->bolt glyph: Android `dot_today_bolt.xml` + `boltBitmap()` rasterize
+  using existing `DOT_TODAY` constant; iOS `CupidPhaseBolt: Shape` branched
+  on `entry.isDateDay`; `flutter test test/features/phase_status` `+250 ~6`,
+  0 regressions, `native_copy_scan_test.dart` 34->38). P12
+  (`phase-P12-widget-native-capture.md`, R-5 native build + device capture)
+  is the next dispatch, fresh Alex-Mobile-Dev spawn.
+- Phase Statuses: see `coding-plan/master-plan.md` in this worktree — P1-P11
+  DONE, P12 PENDING
 - Open decisions raised by Alex-Mobile-Dev's P9 report (recorded in
   `visual-fidelity/visual-fidelity-report.md` "Tồn dư cập nhật sau P9", not
   yet resolved, owner Scrum Master unless noted):
@@ -207,41 +209,46 @@ Story Git Boundary:
 - Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget
 - Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget
 - MergeTarget: codex/REQ-016_solo_stage1_relationship_assistant-integration
-- BaseHead: 721a6e570a810d30f2301685141084c8d1431eee
+- BaseHead: 3fabfde09ab9c0be8ac702c704166e79bc66bc5c
 - BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget.json
   (this is the authoritative live value; inline BaseHead text above may lag by
   one checkpoint-only commit — trust BoundaryState at spawn time)
-- Boundary status: COMMITTED. (Older history through Tech Lead coding-plan
-  round 2 collapsed — see git log if needed; last recorded commit before this
-  round was `9db07af1`/checkpoint `98b595f8`.) P10 implementation
-  (Alex-Mobile-Dev, `journalAvailable` gate) returned `MOBILE_COMPLETE: YES`,
-  verified (3-part protocol: run file COMPLETED, diff confined to declared
-  WriteScope + 2 OutputPaths, source diff read directly and matches spec),
-  committed `721a6e57`, resealed -> BaseHead
-  `721a6e570a810d30f2301685141084c8d1431eee`. Next dispatch: fresh
-  Alex-Mobile-Dev for P11 (D-13 glyph, Depends-On P10 — now satisfied).
+- Boundary status: COMMITTED. (Older history through P10 implementation
+  collapsed — see git log if needed; last recorded commit before this round
+  was `721a6e57`/checkpoint `34692db4`.) P11 implementation (Alex-Mobile-Dev,
+  D-13 dot->bolt glyph) returned `MOBILE_COMPLETE: YES`, verified (3-part
+  protocol: run file COMPLETED, diff confined to declared WriteScope + 2
+  OutputPaths across 7 files, source diff of all 5 changed/new
+  Android/iOS/test files read directly and matches
+  `phase-P11-widget-date-day-bolt-glyph.md` spec exactly), committed
+  `3fabfde`, resealed -> BaseHead `3fabfde09ab9c0be8ac702c704166e79bc66bc5c`.
+  Next dispatch: fresh Alex-Mobile-Dev for P12 (R-5 native build + device
+  capture, Depends-On P11 — now satisfied).
 
 Last Delegation:
-- Role: tech-lead (Alan-Techlead-2, fresh spawn — prior Alan-Techlead instance
-  already released after architecture-solution)
-- Mode: coding-plan (ONLY)
-- RunId: RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-tech-lead
-- Scope of this run: revise `phase-P10-checkin-degrade-parity.md` per §7
-  option (a); add new `phase-P11-widget-date-day-bolt-glyph.md` (D-13 glyph
-  implementation); add new `phase-P12-widget-native-capture.md` (R-5 native
-  build+capture); update `master-plan.md`. WriteScope: `coding-plan/` only.
-- Result: COMPLETED (`Alan-Techlead-2@session-e7df910a`), `TECH_LEAD_COMPLETE:
-  YES` — verified per 3-part protocol above (agent terminal, diff confined to
-  WriteScope, all 4 output files read directly and content confirmed).
-  Released (`TaskStop`) this round.
-- Next dispatch to build: fresh Alex-Mobile-Dev (prior P9/P10-blocker instance
-  already released), sequential P10 → P11 → P12 — see "Next Resume Action"
-  below.
+- Role: mobile-dev (Alex-Mobile-Dev, fresh spawn — prior P10 instance already
+  released after implementation)
+- Mode: mobile-implementation (Phase P11 ONLY)
+- RunId: RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-mobile-dev
+- Scope of this run: implement `phase-P11-widget-date-day-bolt-glyph.md`
+  (D-13 dot->bolt glyph) — Android `dot_today_bolt.xml` (new) +
+  `CupidPhaseWidgetProvider.kt` `boltBitmap()` + `cupid_phase_widget.xml`
+  comment update; iOS `CupidPhaseWidget.swift` `CupidPhaseBolt: Shape`; 4 new
+  cases in `native_copy_scan_test.dart`. WriteScope: the 5 files above.
+- Result: COMPLETED (`Alex-Mobile-Dev@session-e7df910a`), `MOBILE_COMPLETE:
+  YES` — verified per 3-part protocol above (run file COMPLETED, diff
+  confined to WriteScope + 2 OutputPaths across 7 files, all 5 source/test
+  files read directly and content confirmed against the phase spec).
+  Committed `3fabfde`, resealed. Released (`TaskStop`) — see Next Resume
+  Action step 3.
+- Next dispatch to build: fresh Alex-Mobile-Dev for P12 (R-5 native build +
+  device capture) — see "Next Resume Action" below.
 - Prior specialists (Andy-PO ac-patch, original Alan-Techlead
-  architecture-solution, Alex-Mobile-Dev P9/P10-blocker runs, Alan-Techlead-2
-  coding-plan): all COMPLETED/terminal, verified, sealed, and released via
-  `TaskStop` — every future dispatch for any of these roles needs a FRESH
-  spawn, not a continuation.
+  architecture-solution, Alex-Mobile-Dev P9/P10-blocker/P10-implementation
+  runs, Alan-Techlead-2 coding-plan, Alex-Mobile-Dev P11): all
+  COMPLETED/terminal, verified, sealed, and released via `TaskStop` — every
+  future dispatch for any of these roles needs a FRESH spawn, not a
+  continuation.
 
 Validation Result:
 - Gate: N/A (design-ruling-required guard satisfied this round: D-13 row
@@ -251,39 +258,36 @@ Validation Result:
 - Missing Exact Paths: N/A
 
 Waiting Reason:
-- Waiting on Alex-Mobile-Dev (fresh spawn, `Alex-Mobile-Dev@session-e7df910a`)
-  for Phase P11 (`phase-P11-widget-date-day-bolt-glyph.md`: D-13 glyph,
-  Android vector drawable + Kotlin rasterize + iOS `CupidPhaseBolt` Shape).
-  Dispatched this round via `Agent()` (RunId reused:
-  `RUN-...-mobile-dev`, BaseHead `34692db482e9f9e70b65c3bdcea8d72f5ea67ac1`).
-  Note: `handoff-build.sh spawn --depends-on "NONE (...)"` (a free-text
-  parenthetical) was rejected by `guard-parallel-spawn.sh` as `DEP_NOT_MERGED`
-  because it parsed the whole string as a story id; fixed by using a bare
-  `Depends-On: NONE` value and adding the P10-already-sealed context as prose
-  in the dispatch body instead.
-- P12 is PENDING, not in flight yet — dispatch only after P11 verifies and
-  seals (all three are `code-writer` phases in the single Mobile lane,
-  `MAX_CODE_WRITERS_PER_STORY: 1`).
+- None right now — P11 implementation verified and committed; next action is
+  Scrum-Master-owned: release Alex-Mobile-Dev (P11 instance), dispatch fresh
+  Alex-Mobile-Dev for P12.
+- P12 is PENDING, not in flight yet.
 - R-3 (Android countdown digit `SpannableString` sizing) still open,
   pre-existing, not part of P10/P11/P12 scope — tracked for the review gate,
   not blocking this dispatch.
+- Non-blocking note (Alex-Mobile-Dev's P11 report): P11 did not compile
+  native code — `ContextCompat` reaches the Kotlin file via Flutter's
+  transitive embedding classpath, since `app` doesn't declare `androidx.core`
+  explicitly. First real Kotlin compile is P12; if the symbol is missing
+  there, the minimal fix is `AppCompatResources` or one `implementation` line
+  in `app/build.gradle.kts`. Flag for P12's own dispatch prompt.
 
 Next Resume Action:
 1. DONE: Tech Lead coding-plan round 2 (P10 rewrite + P11/P12 new phases)
    verified, committed `9db07af1`/checkpoint `98b595f8`. P10 implementation
-   (`journalAvailable` gate) verified (3-part protocol) and committed
-   `721a6e57`, resealed -> BaseHead `721a6e570a810d30f2301685141084c8d1431eee`.
-2. DONE: `list-releasable-agents.sh` run, `TaskStop`-ed the now-terminal
-   Alex-Mobile-Dev P10 instance, then dispatched a FRESH Alex-Mobile-Dev for
-   P11 (`phase-P11-widget-date-day-bolt-glyph.md`: D-13 glyph, Android vector
-   drawable + Kotlin rasterize + iOS `CupidPhaseBolt` Shape). IN FLIGHT now
-   (`Alex-Mobile-Dev@session-e7df910a`, RunId
-   `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-mobile-dev`,
-   BaseHead `34692db482e9f9e70b65c3bdcea8d72f5ea67ac1`). On completion: verify
-   (3-part protocol), commit, reseal, release.
-3. Dispatch Alex-Mobile-Dev (fresh spawn) for P12
-   (`phase-P12-widget-native-capture.md`: R-5 native build + device capture,
-   Depends-On P11). Verify, commit, reseal.
+   (`journalAvailable` gate) verified and committed `721a6e57`, resealed.
+2. DONE: P11 implementation (`Alex-Mobile-Dev@session-e7df910a`, D-13
+   dot->bolt glyph) verified (3-part protocol) and committed `3fabfde`,
+   resealed -> BaseHead `3fabfde09ab9c0be8ac702c704166e79bc66bc5c`.
+   `guard-parallel-spawn.sh DEP_NOT_MERGED` note: `--depends-on` must be a
+   bare token (`NONE` or a story id), never a free-text parenthetical — that
+   string gets parsed as a literal story id.
+3. NEXT: `list-releasable-agents.sh`, `TaskStop` the now-terminal
+   Alex-Mobile-Dev P11 instance, then dispatch a FRESH Alex-Mobile-Dev for
+   P12 (`phase-P12-widget-native-capture.md`: R-5 native build + device
+   capture, Depends-On P11 — now satisfied). Include the P11 report's
+   `androidx.core` classpath note in the dispatch prompt. Verify (3-part
+   protocol), commit, reseal.
 4. Once all three phases are DONE and sealed, tick `story_master.md`
    Implementation checkbox, then route to Iris-QC (Story-Class `standard` —
    story owes rendered visual-fidelity evidence, review must assess R-1/R-5
@@ -306,6 +310,8 @@ Files Updated:
 - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/test-results.md (P9 evidence appended, sealed)
 - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/visual-fidelity/visual-fidelity-report.md (P9 patch round #3 appended, sealed)
 - mobile/lib/features/phase_status/domain/phase_content.dart, mobile/lib/features/phase_status/data/home_widget_bridge.dart, mobile/assets/data/req016/phase_content.v1.json, mobile/android/.../cupid_phase_widget.xml, mobile/android/.../CupidPhaseWidgetProvider.kt, mobile/ios/CupidPhaseWidget/CupidPhaseWidget.swift, and their tests (P9 implementation, sealed)
+- P10, sealed (commit `721a6e57`): mobile/lib/features/phase_status/presentation/evening_check_in_sheet.dart (`journalAvailable` flag/gate), mobile/test/features/phase_status/evening_check_in_sheet_test.dart (AC-18 case)
+- P11, sealed (commit `3fabfde`): mobile/android/app/src/main/res/drawable/dot_today_bolt.xml (NEW), mobile/android/app/src/main/kotlin/com/snapsofts/cupid/CupidPhaseWidgetProvider.kt (`boltBitmap()`/`GLYPH_PX`), mobile/android/app/src/main/res/layout/cupid_phase_widget.xml (comment only), mobile/ios/CupidPhaseWidget/CupidPhaseWidget.swift (`CupidPhaseBolt: Shape`), mobile/test/features/phase_status/native_copy_scan_test.dart (4 new cases), coding-plan/phase-P11-widget-date-day-bolt-glyph.md (§7 Status: DONE), coding-plan/test-results.md (P11 evidence appended)
 
 Test Evidence:
 - P9, sealed: `flutter test test/features/phase_status` -> `+245 ~6` (P8 was
@@ -321,15 +327,21 @@ Test Evidence:
   test/features/phase_status` -> 5 info-only issues (pre-existing, none in
   P10-touched files), 0 error/warning. Full text in
   `coding-plan/test-results.md` §P10.
-- P11, P12: none yet, not dispatched.
+- P11, sealed: `flutter test test/features/phase_status/native_copy_scan_test.dart`
+  -> `+38` (was `+34` after P9, +4 D-13 cases, 0 regressions); full suite
+  `test/features/phase_status` -> `+250 ~6` (P10 was `+246 ~6`, +4 cases, 0
+  regressions); `flutter analyze lib/features/phase_status
+  test/features/phase_status` -> 5 info-only issues (pre-existing, none in
+  P11-touched files), 0 error/warning. Full text in
+  `coding-plan/test-results.md` §P11.
+- P12: none yet, not dispatched.
 
 Next Valid Step:
-- Role: Alex-Mobile-Dev (fresh spawn, P11 next) -> Alex-Mobile-Dev (fresh
-  spawn, P12) -> Iris-QC
-- Mode: mobile-implementation (sequential, one phase at a time) ->
-  full/scoped review per Story-Class standard (visual-fidelity evidence owed)
-- Required Inputs: none outstanding — P10 DONE and sealed. P11/P12 phase
-  files are the required inputs for each corresponding mobile-dev dispatch.
+- Role: Alex-Mobile-Dev (fresh spawn, P12 next) -> Iris-QC
+- Mode: mobile-implementation (P12 only) -> full/scoped review per
+  Story-Class standard (visual-fidelity evidence owed)
+- Required Inputs: none outstanding — P10/P11 DONE and sealed. P12 phase file
+  is the required input for the next mobile-dev dispatch.
 - Output Paths:
   - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/master-plan.md
   - data/requirements/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget/coding-plan/test-results.md
