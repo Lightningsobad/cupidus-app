@@ -255,3 +255,111 @@ thuộc tính của `gradientHot` ở tầng design system — cặp này đang 
 mọi nút chính trong app và `test/design_system/contrast_test.dart` không đặt
 ngưỡng cho nó. Widget không được tự chọn đáp án khác phần còn lại của app; nếu
 cần siết, đó là quyết định UX/design-system ở mức yêu cầu.
+
+## 8. Bổ sung 2026-09-26 — B-7: một tên màn duy nhất cho cả hai cổng
+
+**Quyết định.** Ở REQ-016, **id canvas là id màn chuẩn duy nhất**. Nhãn bản dựng
+(`hub-waiting`, `widget-phases`, …) là **alias mô tả trạng thái**, không phải id
+màn, và chỉ được xuất hiện ở **hậu tố** của tên file. Hệ quả trực tiếp: phần dẫn
+đầu của tên file `implemented-*` phải **trùng từng byte** với phần dẫn đầu của
+tên file `design-reference-*` tương ứng. Không đổi tên ảnh design, không nhân bản
+ảnh design, không sửa cổng.
+
+Đề nghị Scrum Master ghi quyết định này vào Design Ruling Log của
+`req_master.md` như dòng D tiếp theo (file đó ngoài WriteScope của lượt này).
+
+### 8a. Cơ chế ghép cặp: suy từ tên file, không có config
+
+`visual_fidelity.py` ghép theo token đầu tiên sau tiền tố tên file. Ba nguồn độc
+lập, không nguồn nào là suy đoán:
+
+- Iris-QC tự chạy cổng ở S9 (`review/review-report.md:90-98`) và mobile-dev chạy
+  ở lượt patch #4 (`visual-fidelity/visual-fidelity-report.md:97-101`) — cùng
+  một thông điệp: `running-app renders exist for ['evening','hub','quiet',
+  'widget'] and design renders for ['23h','j12','man','ngan']`. Đó chính là các
+  token dẫn đầu của hai bộ tên file hiện có.
+- `data/devops/system/design-fidelity-config.json` là **config fidelity duy nhất**
+  trong `data/` (hai file còn lại của `data/devops/system/` là
+  `runtime-command-registry.json` và `devops_system_memory.md`). Nó **không có**
+  khoá alias/mapping/pairing nào — chỉ `design_source`/`design_sources`,
+  `ui_surface`, `app_render`. Vậy việc ghép cặp **không** config-driven; không có
+  file cấu hình nào để sửa.
+- Năm story DONE của cùng requirement đều đã qua đúng cổng này và đều đặt tên
+  `implemented-<id canvas>[-<trạng thái>].png`: STORY-001 (`man-goc-muon-lam`,
+  `phut-1-kho-trong`, `chi-tiet-the-moi-nghi-ra`), STORY-002 (`11-*`),
+  STORY-003 (`s1:diary`), STORY-004 (`2-so-tay-nguoi-yeu`, `3-*`, `5-*`),
+  STORY-006 (`sb-211-truoc-gio-di`). STORY-012 là story **duy nhất** khai
+  `Design-Screen` bằng nhãn bản dựng — đây là lệch quy ước của một story, không
+  phải xung đột giữa hai cổng.
+
+Không đọc và không chạy trực tiếp `visual_fidelity.py` ở lượt này: Bash bị tắt
+toàn session (`No such tool available: Bash`), và đọc `.claude/hooks/**` bị cấm
+theo giao ước vai. Kết luận trên dựa vào hai lần chạy cổng đã được ghi nguyên
+văn cộng năm tiền lệ đã qua cổng DONE.
+
+Hai tính chất được tiền lệ trả lời sẵn, nên phương án dưới không cần cổng đổi:
+
+- **Nhiều-một là hợp lệ.** STORY-001 ghép 4 ảnh implemented vào 1 ảnh design
+  (`-round2/-round3/-round4-emulator-5554`), STORY-004 ghép 3 vào 1.
+- **Ảnh implemented lẻ, không có cặp, không làm đỏ cổng.** STORY-003 DONE với
+  `implemented-me-tab-private-journal-row-emulator-5554.png` không có
+  `design-reference-me-*` nào. Cổng đòi **ít nhất một** màn có đủ hai bên, không
+  đòi mọi màn.
+
+### 8b. Bảng ghép tên — nhãn bản dựng → id canvas → tên file mới
+
+Cột "tên mới" là hành động phải làm; mọi tên `design-reference-*` **giữ nguyên**.
+
+| Nhãn bản dựng (alias) | Id canvas (chuẩn) | Tên hiện tại | Tên mới |
+|---|---|---|---|
+| `hub-waiting` | `ngan-da-hen-ngay-dang-doi` | `implemented-hub-waiting.png` | `implemented-ngan-da-hen-ngay-dang-doi-waiting.png` |
+| `hub-upcoming` | `ngan-da-hen-ngay-dang-doi` | `implemented-hub-upcoming.png` | `implemented-ngan-da-hen-ngay-dang-doi-upcoming.png` |
+| `hub-date_day` | `man-goc-muon-lam` | `implemented-hub-date_day.png` | `implemented-man-goc-muon-lam-date-day.png` |
+| `hub-quiet` | `man-goc-muon-lam` | `implemented-hub-quiet.png` | `implemented-man-goc-muon-lam-quiet.png` |
+| `evening-check-in-sheet` | `23h-vua-ve-j8` | `implemented-evening-check-in-sheet.png` | `implemented-23h-vua-ve-j8-check-in-sheet.png` |
+| `quiet-surfaces` | `j12-nhan-ra-cot-moc` | `implemented-quiet-surfaces.png` | `implemented-j12-nhan-ra-cot-moc-quiet-surfaces.png` |
+| `widget-phases` (pha `waiting`) | `sb-84-widget-bon-pha` | `implemented-widget-waiting.png` | `implemented-sb-84-widget-bon-pha-waiting.png` |
+| `widget-phases` (pha `upcoming`) | `sb-84-widget-bon-pha` | `implemented-widget-upcoming.png` | `implemented-sb-84-widget-bon-pha-upcoming.png` |
+| `widget-phases` (pha `date_day`) | `sb-84-widget-bon-pha` | `implemented-widget-date-day.png` | `implemented-sb-84-widget-bon-pha-date-day.png` |
+| `widget-phases` (pha `quiet`) | `sb-84-widget-bon-pha` | `implemented-widget-quiet.png` | `implemented-sb-84-widget-bon-pha-quiet.png` |
+
+Ràng buộc đặt tên, áp cho cả lượt chụp lại ô 1:
+
+- Chỉ dùng dấu gạch ngang. `date_day` là giá trị `phase_id` của payload (§2 của
+  `contract-summary.md`), **không** phải mã trong tên file; trong tên file nó là
+  `date-day`. Đây là lý do `implemented-hub-date_day.png` được đổi cả dấu.
+- Hậu tố trạng thái không được tạo token dẫn đầu mới: id canvas phải đứng ngay
+  sau `implemented-`.
+- Mười tên mới đôi một khác nhau (`-waiting`/`-upcoming`/`-quiet` xuất hiện hai
+  lần nhưng dưới hai id canvas khác nhau), nên không có va chạm tên khi chụp lại.
+- `runtime-smoke-ios-first-screen.png` không mang tiền tố `implemented-`, không
+  thuộc phạm vi đổi tên.
+
+### 8c. Tại sao rủi ro nằm ở phía implemented, không phía design
+
+`validate-dev-design-render.sh` tra **id màn lấy từ tên file `design-reference-*`**
+trên surface đã khai; chèn nhãn vào tên đó đã làm vỡ cổng một lần rồi và phải
+render lại 5 frame gốc (`visual-fidelity-report.md:77-83`). Đổi tên phía
+`implemented-*` không đi qua đường tra đó. Và sau khi đổi, phần dẫn đầu của tên
+file implemented lại **là** một id màn hợp lệ của `cupid-ch-ng-1` — an toàn kể cả
+nếu cổng có quét cả hai họ tên. Lựa chọn của lane mobile (không tự đổi tên ảnh
+design) là đúng và được giữ nguyên.
+
+### 8d. Việc còn lại và cách chứng minh
+
+- **mobile-dev (lượt rework B-1a, WriteScope `visual-fidelity/` đã mở):** đổi tên
+  10 file theo bảng §8b bằng `git mv`, cập nhật mọi ô tên file trong bảng "Đặt
+  cặp ảnh" (`visual-fidelity-report.md:85-93`) và mục §8 mới này nếu tên khác,
+  rồi chụp lại ô 1 **dưới tên mới**.
+- **Bằng chứng phải là bằng chứng đối chứng, không phải một lần xanh:** chạy
+  `python3 .claude/hooks/lib/visual_fidelity.py --dir <story dir> --project
+  <worktree root> --stage review --stack mobile --lane mobile`, rồi `cp -R` story
+  dir sang `/tmp`, phục hồi tên cũ ở bản copy và chạy lại. Tên cũ đỏ + tên mới
+  xanh mới là bằng chứng. Không dùng `verify-story-visual-fidelity-gate.sh`: gọi
+  tay nó trả exit 0 im lặng bất kể bằng chứng đúng hay sai.
+- **Scrum Master:** sửa `story_master.md:16-18` cho `Design-Screen:` khai **id
+  canvas** (`ngan-da-hen-ngay-dang-doi`, `man-goc-muon-lam`, `23h-vua-ve-j8`,
+  `j12-nhan-ra-cot-moc`, `sb-84-widget-bon-pha`) và ghi bảy nhãn bản dựng như
+  alias trạng thái. File đó ngoài WriteScope của lượt này.
+- **Không** mở WriteScope `mobile/` cho khoản B-7: không có dòng mã sản phẩm nào
+  thay đổi vì quyết định này.

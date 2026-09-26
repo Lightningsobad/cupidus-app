@@ -14,8 +14,14 @@ Không phải màn hình thứ 12.
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục A (J4, J5,
 J10, J12), B (Ngày 7, Ngày 30), F (SB-83/84/85, SB-87, SB-99)
 Design-Surface: cupid-ch-ng-1
-Design-Screen: hub-waiting, hub-upcoming, hub-date_day, hub-quiet,
-  evening-check-in-sheet, quiet-surfaces, widget-phases
+Design-Screen: ngan-da-hen-ngay-dang-doi (alias: hub-waiting, hub-upcoming),
+  man-goc-muon-lam (alias: hub-date_day, hub-quiet),
+  23h-vua-ve-j8 (alias: evening-check-in-sheet),
+  j12-nhan-ra-cot-moc (alias: quiet-surfaces),
+  sb-84-widget-bon-pha (alias: widget-phases, bốn pha waiting/upcoming/
+  date_day/quiet). Id canvas là id màn chuẩn duy nhất (Design Ruling Log
+  hàng B-7, `req_master.md`); nhãn bản dựng ở trên chỉ là alias mô tả trạng
+  thái, xem `architecture/solution.md` §8.
 
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
@@ -36,18 +42,20 @@ Design-Screen: hub-waiting, hub-upcoming, hub-date_day, hub-quiet,
   `visual-fidelity/visual-fidelity-report.md` "Lượt P12"/"Lượt patch #4".
 - [ ] Review (Reviewer) — S9 `full-story-review` (Iris-QC) Outcome:
   **PATCH_REQUIRED** (`review/review-report.md`, `review/scope-gate.md`). 2
-  blocking: **B-1a** (chip shape, see Implementation note above, routes to
-  mobile-dev after Tech Lead) and **B-7** (new — `visual_fidelity.py` DONE
-  gate fails: `story_master.md` screen ids vs canvas content-slug naming
-  convention mismatch; mobile-dev correctly did not rename canvas exports;
-  needs Tech Lead reconciliation before any review can return CLEAN, not a
-  product-code fix). 9 non-blocking, incl. **N-7** ("Lượt patch #4" missing
+  blocking: **B-1a** (chip shape, see Implementation note above) and **B-7**
+  — **SETTLED 2026-09-26 by Tech Lead** (`architecture/solution.md` §8, no
+  gate/config change, no product code): canvas id is the sole canonical
+  screen id; build labels are alias suffixes only. Remaining action is
+  mechanical: `git mv` 10 `implemented-*.png` files per §8b's table, update
+  the pairing table at `visual-fidelity-report.md:85-93`, recapture cell 1
+  under the new name. 9 non-blocking, incl. **N-7** ("Lượt patch #4" missing
   from `coding-plan/test-results.md`) and N-2 (DevOps buildCommand, deferred).
   The earlier B-3 `minWidth` routing item is stale/moot — already fixed in
-  `a8aa1ff4`. Next: Tech Lead settles B-7 (naming convention only, no product
-  code), then one mobile-dev pass for B-1a + N-7 + cell-1 recapture.
-  WriteScope for that pass: `phase_status_line.dart`,
-  `coding-plan/test-results.md`, `visual-fidelity/`.
+  `a8aa1ff4`. Next: one mobile-dev pass for B-1a + B-7 rename + N-7 +
+  cell-1 recapture, with old-name-vs-new-name control evidence from
+  `visual_fidelity.py` (see §8d). WriteScope for that pass:
+  `phase_status_line.dart`, `coding-plan/test-results.md`,
+  `visual-fidelity/`.
 
 ## Depends On
 - STORY-001 — mọi pha đọc từ trạng thái thẻ trong kho chung.
