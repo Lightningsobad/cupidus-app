@@ -387,6 +387,29 @@ be found, or (b) give different guidance.** Do not re-declare
 re-run `validate-done-gate.sh` again in this session expecting a different
 result until one of those two things happens.
 
+**Round 50 — further data gathered, still not root-caused, holding position.**
+The Stop hook re-fired twice more with the identical STORY-008 message (now
+"4x same block"). Before holding position, checked whether STORY-008's
+evidence is simply absent from a candidate file (a cheap, non-hook-source
+check): both `coding-plan/test-results.md` (heading present once as a real
+`## ` heading plus 2 prose mentions; `**Result: PASS.**` present once, inside
+the same section, after an earlier **stale `Status: BLOCKED`** sub-note that a
+later "Cập nhật 2026-09-24" update supersedes) and `review/review-report.md`
+(heading mentioned 3x, `Result: PASS` present once) both already contain the
+required strings, committed, no working-tree diff. STORY-006's own
+`test-results.md`, by contrast, has a single clean heading with `**Result:
+PASS.**` on the very next content line, no stale BLOCKED note — yet fails
+identically. So "stale BLOCKED note before the real PASS" cannot be the shared
+mechanism either; it fits STORY-008 but not STORY-006. No further hook-source-free
+theory remains untested that seems worth the turn cost. Holding position per
+Round 49: not touching STORY-008, not re-running the gate again, not
+re-declaring DONE. This requires either explicit user permission to read
+`validate-done-gate.sh`, or the user directly running/inspecting it
+themselves outside this session. Further identical Stop-hook re-fires from
+here on will get a short pointer to this checkpoint section instead of a full
+re-investigation, to avoid burning turns on an already-exhausted
+hook-source-free search space.
+
 ## Superseded history (Rounds 37-45, collapsed — all 13 stories DONE/merged, F-I1 rework landed, F-I2/F-I3 devops evidence closed, requirement-level mobile-visual-audit closed, F-M1 architecture decision sealed, F-M1 implementation shipped, Round 43 PATCH_REQUIRED on F-I4 evidence-only gap, Round 44 F-I4 seam-A re-capture sealed at `35723ed2`)
 
 Round 43 fresh `Iris-QC` review (RunId `...-reviewer-fm1review`) found all
