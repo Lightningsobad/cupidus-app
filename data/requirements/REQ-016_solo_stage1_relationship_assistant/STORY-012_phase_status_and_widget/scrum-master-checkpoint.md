@@ -6,477 +6,89 @@ Scope:
 - Bug: NONE
 - Workflow: parallel-story (continue parallel)
 
-Current State:
-- Story Status: IN_PROGRESS. Implementation checkbox UNCHECKED (S8
-  full-story-review found AC9 FAIL). Sealed at BaseHead
-  `4ed51162d31272d4431dd42f9d521359f2165a0e`.
-- S8 `full-story-review` by Iris-QC (RunId `...-STORY-012...-reviewer`,
-  status COMPLETED) returned **Outcome: PATCH_REQUIRED**. Full report:
-  `review/review-report.md` (167 lines, read directly — do not re-derive).
-  AC1-AC8 PASS. AC9 FAIL (design fidelity) — 6 BLOCKING findings, all real
-  visual deltas Iris-QC confirmed by opening the actual PNGs, not hearsay:
-  - B-1 (R-1): `hub-waiting` missing 2nd action-chip label; string must come
-    from `phase_content.v1.json` content pack, not invented in code. Owner:
-    Product Owner -> mobile-dev.
-  - B-2 (R-6): widget bg flat `#241B42` for all phases; canvas gives
-    `date_day` its own gradient. `cupid_phase_widget.xml:17`. Owner: Tech
-    Lead -> mobile-dev.
-  - B-3 (R-7): secondary line ellipsises at default 3x1 widget cell.
-    `cupid_phase_widget.xml:85`. Owner: UI/UX -> mobile-dev.
-  - B-4 (R-8): `@mipmap/ic_launcher` renders as opaque white square, canvas
-    has no icon. `cupid_phase_widget.xml:22-27`. Owner: UI/UX + Tech Lead ->
-    mobile-dev.
-  - B-5 (R-3): no display-size numeral treatment for `upcoming` phase on
-    Android (iOS already has it). `CupidPhaseWidgetProvider.kt`. Owner: Tech
-    Lead (open scope) -> mobile-dev.
-  - B-6 (D-13 item 2): `date_day` lightning-bolt is pink `#FF7FB6`, canvas
-    is near-white. `architecture/contract-summary.md` §3a token role/color
-    decision needed before code. Owner: UI/UX + Tech Lead.
-  - **Order constraint (Iris-QC, explicit): B-2 and B-6 must ship together**
-    — the pink bolt only reads today because the background is flat/dark
-    (B-2); adding the gradient without also fixing the bolt color repeats
-    the exact "pink-on-pink" problem D-13 already flagged once.
-  - 6 non-blocking N-1..N-6 (N-2 DevOps buildCommand --flavor drift routes
-    separately; N-1..N-6 detail in the report, none block DONE).
-  - Iris-QC closed C-2, C-3, D-E, R-4, R-5, D-10, D-13(1), and the
-    `ANDROID_RESOURCE_PARSE_FAILED` regression outright (see report "Phân
-    xử của Reviewer" — R-4 and D-13(1) were escalated-to-reviewer items from
-    S7, both ruled by AC text, not pushed to user).
-- Prior guard blocker (`[GENERIC]` story-review spawn block) is RESOLVED —
-  root cause was a `MOBILE_IMPLEMENTATION_COMPLETE` vs `MOBILE_COMPLETE`
-  marker-text mismatch in the mobile-dev run file; reconciled and documented
-  in `data/runtime/parallel-runs/RUN-...-mobile-dev.json`
-  `guard_reconciliation_note`. Do not re-investigate.
-- Released this segment via `TaskStop`: `Iris-QC@session-e7df910a`
-  (confirmed stopped). `Alan-Techlead-2`/`Alex-Mobile-Dev`/`Andy-PO` printed
-  by `list-releasable-agents.sh` but had no running task (already gone).
+Current State (2026-09-26, compacted — history collapsed, artifacts are source
+of truth):
+- Story Status: IN_PROGRESS. Implementation (P1-P12, mobile-dev only lane, no
+  backend lane per architecture decision) is functionally DONE; checkbox stays
+  unchecked pending S9 review outcome.
+- S8 `full-story-review` (Iris-QC) returned **Outcome: PATCH_REQUIRED** — AC1-8
+  PASS, AC9 (design fidelity) FAIL with 6 blocking findings B-1..B-6 and 6
+  non-blocking N-1..N-6. Full detail: `review/review-report.md` (query
+  "B-1".."B-6" / "N-1".."N-6" / "AC9", do not re-read whole file).
+- Tech Lead architecture rework closed the design-decision half of B-2/B-5/B-6
+  + finalized `action_label` field — verified directly against
+  `architecture/contract-summary.md` §3a/§3b/§3c/§4a and `architecture/
+  solution.md` §7 (order constraint: B-2 and B-6 must ship together).
+- One mobile-dev implementation pass then closed all 6 blocking findings in
+  full (B-1..B-6), independently verified by Scrum Master this session-chain
+  (extended test suite green, recaptured images eyeballed). Evidence:
+  `visual-fidelity/visual-fidelity-report.md` "Lượt patch #4". Worktree is
+  sealed/committed at `63a15bb06938d9896ee2ad8a23b61fffec50b54c` (clean).
+- 3 items mobile-dev explicitly left unresolved, for Reviewer/Scrum Master to
+  judge as blocking or deferrable — NOT yet resolved:
+  1. Out-of-WriteScope edit mobile-dev flagged but didn't make itself:
+     `mobile/android/app/src/main/res/xml/cupid_phase_widget_info.xml`
+     `minWidth` 180dp -> 250dp (requested by B-3).
+  2. Visual-fidelity naming-gate tension: `visual_fidelity.py` pairs
+     implemented/design renders by filename token, but
+     `validate-dev-design-render.sh` forbids relabelling canvas exports.
+  3. N-2 (non-blocking): runtime registry buildCommand missing `--flavor
+     local` — routes to DevOps separately, does not block this story.
+- **Guard bug found + fixed this session (user-authorized option (a))**:
+  `.claude/hooks/guard-parallel-spawn.sh` `CODE_WRITER_MARKERS["mobile-dev"]`
+  was `"MOBILE_IMPLEMENTATION_COMPLETE"`, which never matched real mobile-dev
+  completion markers (`handoff-build.sh`'s canonical mapping and every live
+  mobile-dev run file both use `"MOBILE_COMPLETE"`), permanently blocking
+  story-review spawns for any mobile-only story not yet merged. Patched to
+  `"MOBILE_COMPLETE"`. `.claude/hooks/` is gitignored in this repo
+  (bundle-installed runtime, not project source) — fix is local/mechanical,
+  needs upstreaming to the bundle repo separately for permanence across
+  reinstalls, but is active now. Do not re-investigate this guard.
+- **S9 full-story-review dispatched**: `Iris-QC` (`Iris-QC@session-e7df910a`),
+  `Mode: full-story-review`, `RunId:
+  RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-reviewer`,
+  `BaseHead: b58afbe073eff4e1ebb9151735221532a9cf5a82` (the same
+  pre-implementation baseline S8 used, confirmed still an ancestor of current
+  worktree HEAD via `git merge-base --is-ancestor`), `WriteScope`/`OutputPath`
+  = `review/`, `review/review-report.md`. Prompted to verify B-1..B-6 closed,
+  judge the 3 items above, and record a single `Outcome:` line.
+  **STATUS: AWAITING RESULT** (SubagentStop / `REVIEW_COMPLETE`).
+- `main` control checkout already has the B-1 `req_master.md` Design Ruling
+  Log row and the requirement-level checkpoint condensation committed
+  (`d7137e1e`) — not pending.
+- Known open non-blocker (not yet relayed to Brainstormer/Pink-Designer):
+  story-worktree `ux/uiux-spec.md` has no `Design-Surface:`/`Design-Screen:`
+  header lines (out of Scrum Master/PO write authority); `story_master.md`
+  already has the correct values (`cupid-ch-ng-1`, 7 screen ids) to copy from.
 
-RESOLVED (2026-09-26) — ROLE_ROUTING_CONFLICT + Brainstormer B-1/B-3/B-4/B-6:
-- Citation error (D-13 wrongly cited as PO/UX precedent) disclosed to user;
-  corrected against `req_master.md` lines 195-239 (D-13 = Tech Lead only).
-  User personally messaged Brainstormer and reported the outcome back.
-- **Brainstormer report (verbatim outcome), verified against repo state —
-  all claims below confirmed by direct git/file inspection, not taken on
-  faith:**
-  - B-1: formalized Andy-PO's earlier draft. `requirements/requirements.md`
-    (AC-5/AC-37/BR-15) and `ux/uiux-spec.md` (§1 B-1, §2 B-3/B-4/B-6) patched
-    in the story worktree. AC-40 / AC-9 story_master extension text reverted
-    (no longer needed).
-  - `main` control checkout: `req_master.md` has an **uncommitted** working-
-    tree edit adding the B-1 Design Ruling Log row (line 229, dated
-    2026-09-26) — confirmed via `git diff` in the control checkout. NOT yet
-    committed to `main`. Content: chip-1 label "Chọn trước một chỗ" for
-    `phase.waiting.prepare.v1` (precedent D-8), chip-2 ("Rủ lại kiểu khác")
-    rejected (AC-7/AC-6/R-1b, STORY-002 (c)+(d) precedent), card-footer CTA
-    unchanged (D-2 not reopened). Field name proposed: `action_label`
-    (optional per-entry, absent → no chip, no invented labels — R9-F-6).
-  - The story worktree's own `req_master.md` and `story_master.md` copies
-    had two stray leftover diffs (blank-line delta, wording delta) per
-    Brainstormer's explicit instruction — reverted to HEAD via
-    `git checkout --` (confirmed clean after).
-  - A `git-story-boundary.sh`-style seal commit `a88c316e` ("seal planning
-    artifacts before code-writer spawn") already committed the
-    requirements.md/uiux-spec.md/story-checkpoint changes in the story
-    worktree. New BaseHead: `a88c316e686d01c665ef51e3b336a5872b3db50a`.
-  - `main`'s requirement-level `scrum-master-checkpoint.md` also has an
-    uncommitted rewrite (Round 19→36, DONE-story collapse) — inspected, is a
-    legitimate condensation, not corruption. Both `main` uncommitted files
-    (`req_master.md` B-1 row + checkpoint condensation) are NOT committed by
-    Helen-SC yet — still pending a control-checkout commit decision.
-  - Checked `guard-parallel-worktree-scope` stale-active concern Brainstormer
-    flagged for the mobile-dev run: `RUN-...-mobile-dev.json` status
-    COMPLETED, scheduler `active_runs`/`paused_runs`/`blocked_runs` all
-    empty, no lock file for STORY-012/mobile-dev in
-    `data/runtime/parallel-locks/`. No corrective action found necessary;
-    if a guard actually blocks a future mobile-dev spawn, read its block
-    message directly rather than re-deriving this check.
-- Dispatched **Alan-Techlead** (`Mode: architecture-solution`, RunId
-  `RUN-...-tech-lead`, BaseHead `a88c316e...`) for the 3 remaining findings
-  per Brainstormer's routing: B-2 (gradient for `date_day` bg,
-  `cupid_phase_widget.xml:17`), B-5 (Android display-size numeral parity for
-  `upcoming` phase, `CupidPhaseWidgetProvider.kt`), B-6 (glyph token color —
-  Brainstormer suggests `colorOnAccent` / `#F7EEFB`, contract-summary.md §3a
-  lines ~119-121, cross-check DOT_TODAY at `CupidPhaseWidgetProvider.kt:154`
-  + iOS side) — B-2+B-6 ordered together per Iris-QC's explicit constraint.
-  Also asked to finalize the `action_label` field name in
-  `architecture/contract-summary.md` and confirm a ≤28-char length gate
-  under the existing AC-39/R-15a content-ingestion gate.
-  Spawn: `Alan-Techlead@session-e7df910a`. AWAITING RESULT.
-
-**Alan-Techlead RESULT (2026-09-26), independently verified against the actual
-patched files, not the teammate report prose** — RunState confirmed COMPLETED,
-`completion_marker: "TECH_LEAD_COMPLETE: YES"`. Diff-read
-`architecture/contract-summary.md` (+172/-3) and `architecture/solution.md`
-(+54) directly to confirm every claim below is really in the artifact, not just
-asserted:
-- B-6: `--dot-today` role value changes `colorAccentPink #FF7FB6` ->
-  `colorOnAccent #F7EEFB` (new §3a block). WCAG measured on both `gradientHot`
-  ends: current 1.00:1/1.11:1 (matches D-13's "near-invisible"), proposed
-  2.07:1/2.30:1 — still under 3:1 AA, explicitly logged as an open
-  design-system-level note, not a STORY-012 blocker (`contrast_test.dart` sets
-  no threshold for this pair). `onAccent` must be an explicit native palette
-  member on both platforms, assigned to `DOT_TODAY`, not aliased from `text`.
-  Eyebrow label re-color is an intended side effect (not a 5th role).
-- B-2 (new §3b): `date_day` gets `gradientHot` (`#FF7FB6`->`#B78CF5`)
-  horizontal gradient bg on Android (iOS already ships it); other 3 phases stay
-  flat `colorSurface #241B42`. Direction chosen `android:angle="0"` (0/45/90
-  multiples only in `GradientDrawable` XML; iOS's 90deg-equivalent `.leading`->
-  `.trailing` is the closest fit, 95deg CSS value is unrepresentable in XML).
-  Geometry (corners) unchanged.
-- B-5 (new §3c): first-digit-cluster span on `primary_line`, pushed via
-  `setTextViewText` (`ParcelableSpan` survives `RemoteViews`); ratio 34/14
-  relative to the `TextView`'s own size (not absolute dp, so it inherits
-  font-scale). Applies to ANY phase with a digit cluster, not just `upcoming`
-  — iOS branches on "has digits", so `quiet`'s "Bạn đang giữ {n} kỷ niệm" also
-  qualifies. Digit color: `colorText` on `date_day`, `colorAccentPink`
-  elsewhere.
-- `action_label` (new §4a): field name kept as PO proposed (Tech Lead had
-  authority to rename, didn't). Optional string, absent = no chip. Added to
-  `PhaseContentItem.displayStrings` (the AC-39 gate's only hook). 28-char
-  NFC-counted budget for both `secondary` (surface widget/both) and
-  `action_label` (all), enforced in `phaseContentItemFromJson` via
-  `ContentPackageFormatException` — explicitly NOT `InvariantRule`/
-  `phase_content_gate.dart` (that gate's own header bans package-family-
-  specific rules; length is a shape rule, not a wording rule).
-  `action_label` on a `surface:widget`-only entry is a load-time reject.
-- solution.md §7 (new): **explicit order constraint — B-2 and B-6 must ship in
-  the same change, B-6 never alone** (glyph-color fix only reads correctly once
-  the gradient bg exists; Iris-QC's constraint, now load-bearing at the
-  solution level too). New drawable XML files must never contain the literal
-  substring `--dot-...`, even in a comment (this exact defect broke the whole
-  Android build once already in this story — P11 incident). New risk-surface
-  rows: `WIDGET-PLATFORM-DRIFT`, `CONTENT-LENGTH`, `CHIP-LABEL-GATE`.
-- Released `Alan-Techlead@session-e7df910a` via `TaskStop` (confirmed stopped
-  — the only genuinely running teammate this cycle; the other 3 names
-  `list-releasable-agents.sh` printed were already gone, confirmed by "No task
-  found").
-
-**Worktree sealed and dispatched to mobile-dev**: worktree was dirty (Tech
-Lead's 4 changed files) when first attempting the mobile-dev spawn —
-`git-story-boundary.sh start` requires a clean worktree and does not
-auto-seal. Ran `git-story-boundary.sh commit --req
-REQ-016_solo_stage1_relationship_assistant --story
-STORY-012_phase_status_and_widget` directly (commit `0cf0abd7`, 4 files
-+330/-58), then `refresh-base` (new BaseHead `0cf0abd7a5d70dd951841f241c58bd7e41e846b6`).
-Dispatched **Alex-Mobile-Dev** (`Mode: mobile-implementation`, RunId
-`RUN-...-mobile-dev`) for the full B-1..B-6 + `action_label` + length-gate
-rework in one implementation pass, per the exact mechanisms above. Told not to
-commit (Scrum Master's job), not to run `--update-goldens`, and to recapture
-visual-fidelity cells 1 + 7. Spawn: `Alex-Mobile-Dev@session-e7df910a`.
-AWAITING RESULT.
-
-ADDITIONAL FINDING (2026-09-26, from delayed Andy-PO teammate messages,
-verified — Andy-PO's own run was already COMPLETED, slot already released;
-these were queued reports, not a live blocker on that agent):
-- **Verified TRUE**: control-checkout `story_master.md` for this story was
-  missing AC-9 (design-fidelity criterion) entirely — only 8 ACs, confirmed
-  by direct `Read` (lines 58-79). This is the same control/story-branch
-  divergence family already flagged for `req_master.md`. Root cause: AC-9
-  was added on the story branch during earlier P9-P12 architecture work and
-  never synced back to the control checkout's copy.
-  - **Fixed**: added the missing AC-9 (full 7-screen enumeration, 5 aspects
-    incl. "trạng thái") directly to the control-checkout `story_master.md`.
-  - Also restored "trạng thái" wording in the story-worktree's own AC-9 (my
-    earlier `git checkout --` had inadvertently reverted Andy-PO's
-    out-of-WriteScope same-wording fix there, made to try to satisfy
-    `validate-story-ac-coverage.sh`; Brainstormer's report characterized
-    that diff as disposable cruft without knowing this history — verified
-    the wording is legitimate, matches the detailed AC-40 in
-    `requirements/requirements.md`, so restored rather than left dropped).
-  - **Control-checkout edit BLOCKED once, retry pending**: first attempt hit
-    `guard-parallel-worktree-scope.sh` [GENERIC] because Alan-Techlead's
-    tech-lead run is currently active for this story — control-checkout
-    story-owned-state edits are guarded while a parallel run is in flight.
-    **Retried after Alan-Techlead's run reached COMPLETED (2026-09-26) — BLOCKED
-    AGAIN**, same `[GENERIC]` guard, now citing the **mobile-dev** run (not
-    tech-lead) as "active" even though direct inspection of ALL 4
-    `RUN-...-STORY-012...-*.json` files (product-owner, tech-lead, mobile-dev,
-    reviewer) shows every one `status: COMPLETED`, scheduler
-    `active_runs`/`paused_runs`/`blocked_runs` all empty, no lock file for this
-    story in `data/runtime/parallel-locks/`, and `prune-parallel-runs.sh
-    --apply --quiet` found nothing prunable (age-based, not status-based).
-    `guard-codes.md`'s `PARALLEL WORKTREE SCOPE GUARD` section documents
-    `CONTROL_ONLY_FILE` only for `req_master.md`/`master_requirements_list.md`
-    (explicitly says a story's own status lives in `story_master.md`, doesn't
-    forbid editing it) — no documented subcode matches "control-checkout
-    story_master.md edit blocked while a COMPLETED run file merely exists for
-    the story." **Decision: defer this fix, not worth forcing** — it doesn't
-    block the mobile-dev dispatch (the worktree's own AC-9 already has the
-    correct wording and mobile-dev's implementation gate reads whichever copy
-    it's actually pointed at during code-writer spawn, which passed). Revisit
-    only if `validate-story-ac-coverage.sh` actually blocks a future
-    control-checkout-scoped action for this story; if so, quote its exact
-    message rather than re-deriving this diagnosis.
-- **New blocker, same role-routing family, NOT dispatched by Scrum Master**:
-  `ux/uiux-spec.md` (story worktree) has **no** `Design-Surface:`/
-  `Design-Screen:` header lines at all (confirmed: grep returned 0 matches).
-  `story_master.md` already declares `Design-Surface: cupid-ch-ng-1` and the
-  7 `Design-Screen:` ids at its own header — this is a UI/UX Designer artifact
-  (`ux/uiux-spec.md`), out of Scrum Master's and Product Owner's write
-  authority per `role-map.md`. Needs Pink-Designer (via Brainstormer, same
-  routing as B-1/B-3/B-4/B-6) to add these two header lines to
-  `ux/uiux-spec.md`, copying the values already decided in `story_master.md`.
-  **Told user directly in chat; not yet relayed to Brainstormer.**
-- Agent hygiene: `list-releasable-agents.sh` printed
-  `Alex-Mobile-Dev@session-e7df910a`, `Andy-PO@session-e7df910a`,
-  `Iris-QC@session-e7df910a` — all 3 `TaskStop` attempts returned "No task
-  found" (already stale, confirmed only `Alan-Techlead@session-e7df910a` is
-  a running teammate). No action needed beyond this check.
-
-Next Valid Step (after Alan-Techlead returns):
-- Verify `TECH_LEAD_COMPLETE: YES` + patched `architecture/contract-summary.md`
-  (and `solution.md` if touched).
-- Decide the `main` control-checkout commit for the B-1 req_master.md row +
-  checkpoint condensation (both currently uncommitted working-tree edits on
-  `main`) — likely a direct `main` commit, consistent with this
-  requirement's established D-6/D-10/D-13 pattern.
-- Then one mobile-dev pass building B-1 (`action_label` in
-  `phase_content.v1.json` + chip in `activity_card_tile.dart`), B-3 (4 new
-  secondary strings per AC-37, minWidth 180dp→~230dp), B-4 (remove ImageView
-  `cupid_phase_widget.xml:22-27`), B-2/B-5/B-6 (per Tech Lead's patch), then
-  re-capture visual-fidelity cells 1 and 7. Do NOT run `--update-goldens`
-  until visual fidelity passes.
+Next Valid Step:
+- Await Iris-QC's S9 result. On return, reconcile the run file and
+  `data/runtime/scrum-master-active-scope.json`, then:
+  - `Outcome: CLEAN` or `DEFERRED_ONLY` -> run
+    `.claude/hooks/git-story-boundary.sh complete --req
+    REQ-016_solo_stage1_relationship_assistant --story
+    STORY-012_phase_status_and_widget`, merge to
+    `codex/REQ-016_solo_stage1_relationship_assistant-integration`, mark story
+    DONE, route the ux-spec header gap to Brainstormer/Pink-Designer and N-2 to
+    DevOps as separate follow-ups, then continue the REQ-016 wave (check
+    whether any other requirement story remains, else close toward
+    requirement integration review).
+  - `Outcome: PATCH_REQUIRED` -> route each new/reopened finding to its owning
+    role exactly as S8 did (Product Owner / Tech Lead+UX / mobile-dev), one
+    mobile-dev pass, then S10 re-review.
+  - `Outcome: BLOCKED` -> report the exact blocker to the user.
 
 Do Not Re-read:
-- review/review-report.md sections already summarized above — query only
-  new sections if resuming after context loss
-- STORY-005/008/009/010/013 completed run files (resolved, merge-scope only)
-- requirements.md / uiux-spec.md full bodies (already landed; query only by
-  AC-37/BR-15 and §2 anchors)
-- architecture/solution.md, architecture/contract-summary.md full bodies
-  (stable since P1-P8; query by §3a/§7 anchors only)
+- The full Alan-Techlead/Alex-Mobile-Dev dispatch narrative, crash/recovery,
+  and role-routing-conflict history (superseded by the artifacts cited above).
+- `architecture/solution.md`, `architecture/contract-summary.md` full bodies —
+  query by §3a/§3b/§3c/§4a/§7 anchors only.
+- `requirements.md` / `uiux-spec.md` full bodies — query by AC-37/BR-15/§1/§2
+  anchors only.
 
 Large Files Query Keys:
-- review/review-report.md — query "B-1".."B-6" / "N-1".."N-6" / "AC9"
-- req_master.md D-10/D-6/D-13 Design Ruling Log rows (query: "D-10" / "D-6" /
-  "D-13")
-- architecture/contract-summary.md §2 (widget payload contract), §3a (phase
-  indicator token shapes)
-
-## Alex-Mobile-Dev crash/recovery (2026-09-26)
-
-`Alex-Mobile-Dev@session-e7df910a`'s implementation pass (B-1..B-6 +
-action_label rework, spawned after the Tech Lead architecture rework was
-independently verified and the worktree sealed at commit `0cf0abd7`) was
-interrupted mid-task by an `idle_notification` with `idleReason: "failed"`,
-`failureReason: "API Error: Can't reach the API server — check your internet
-or DNS (ENOTFOUND)"` — a transient infra/network failure of the teammate's own
-session, not a task-level completion or blocker.
-
-Verified directly in the worktree (not from the teammate's own claim) before
-acting:
-- Real, substantial progress exists on disk (not committed):
-  `CupidPhaseWidgetProvider.kt`, `cupid_phase_widget.xml`,
-  `cupid_phase_widget_info.xml` (not in original WriteScope list — needs
-  legitimacy check on next return), `phase_content.v1.json`,
-  `CupidPhaseWidget.swift`, `activity_card_hub_view.dart` (name differs from
-  the `activity_card_tile.dart` originally cited — needs check),
-  `phase_content.dart`, `phase_status_cubit.dart` and `phase_status_line.dart`
-  (both not in original file list — needs check), plus 4 test files, plus 2
-  new untracked drawables (`widget_bg_phase_date_day.xml`,
-  `widget_bg_phase_flat.xml` — neither contains the banned `--dot-...`
-  substring).
-- Out-of-scope churn found and self-rescued: the run had also dirtied 2
-  STORY-002 visual-fidelity PNGs
-  (`implemented-11-chuan-bi-chon-hanh-dong-ios.png`,
-  `implemented-chi-tiet-the-da-hen-ngay-ios-cho-hen.png`). Reverted via
-  `git restore` (allowed self-rescue, not a stash) — confirmed clean after.
-- Visual-fidelity recapture in progress but incomplete: cell 1 (`hub-waiting`)
-  present; cell 7 (`widget-phases`) only partially recaptured — no
-  `quiet`-phase native capture file changed yet.
-
-Agent liveness confirmed via `ListAgents`: `Alex-Mobile-Dev` still listed as a
-live teammate (`running`), so continuation used `SendMessage`, not a fresh
-spawn — consistent with "continuation before respawn" policy for a specialist
-with an open handle whose outputs are incomplete.
-
-Continuation sent (`SendMessage` to `Alex-Mobile-Dev`, msg_id
-`cf09474e-2314-4e08-a43b-83dc10208b37`): built from
-`.claude/hooks/handoff-build.sh continue --flow parallel-story --run-id
-RUN-...-mobile-dev ...` stdout (Flow/Mode/Scope/Checkpoint/Missing
-outputs/Do Not Re-read), with the parallel-extension fields
-(`Parallel-Execution: YES`, `RunId`, `RunState`, `ParentRequirement`, `Story`,
-`Story-Class`, `Depends-On`, `Worktree`, `Branch`, `MergeTarget`, `BaseHead:
-0cf0abd7a5d70dd951841f241c58bd7e41e846b6` — confirmed == current worktree HEAD,
-no drift — `ConcurrencyClass`, `LockScope`, `WriteScope`, `OutputPath`,
-`CompletionMarker`, `SpawnSlot`) appended manually from the original spawn's
-Handoff Control block, since the builder's `--flow parallel-story` output does
-not itself print them. Instructed Alex-Mobile-Dev to self-verify current
-worktree diff before continuing (not rely on crashed-session memory), to
-either justify-and-keep or roll back the 4 files/renames not in the original
-file list, to finish the cell-1/cell-7 recapture (incl. missing `quiet` native
-capture), run the extended test suite, not self-commit, not run
-`--update-goldens` before visual fidelity passes, and end with
-`MOBILE_COMPLETE: YES` plus full findings/files/tests/visual-fidelity verdict.
-
-**Status: AWAITING RESULT** from this continuation. Next action on return:
-independently verify the diff/claims (do not trust report prose alone,
-per this whole session's established discipline), confirm the 4
-previously-unlisted files are legitimate in-scope changes, confirm cell 7 now
-covers all 4 native phases, confirm tests pass, then route to Iris-QC for
-S9 re-review of the B-1..B-6 rework before this story can move toward DONE.
-
-## Alex-Mobile-Dev RESULT, independently verified (2026-09-26)
-
-Report came in truncated mid-message ("[result truncated — ask the agent for
-the rest via SendMessage]"); asked for the tail via a proper
-`handoff-build.sh continue` handoff. Before the tail arrived, the
-`ACTIVE-SCOPE STALE-WAIT GUARD` fired: the run file was already `COMPLETED`
-(`completion_marker: "MOBILE_COMPLETE: YES"`, `updated_at: 2026-09-26T09:49:57Z`,
-`worktree_head` unchanged at `0cf0abd7`), so verification proceeded directly
-from the worktree instead of waiting on chat text:
-
-- `git status`/`git diff --stat` in the worktree: 22 tracked files + 2 new
-  untracked drawables changed, no STORY-002 (or any other story's) files
-  touched this time — the prior out-of-scope PNG churn was not repeated.
-- Visual-fidelity cell 7 now has all 4 native captures
-  (`implemented-widget-{date-day,waiting,upcoming,quiet}.png`); the earlier
-  concern about a missing `quiet` capture is resolved.
-- Diffed `mobile/android/app/src/main/res/xml/cupid_phase_widget_info.xml`
-  directly: the out-of-WriteScope edit is `minWidth 180dp -> 250dp` with an
-  inline comment citing the AppWidget launcher grid's `70*n-30` quantization
-  formula (250dp is the real 4-column value; ~230dp from the UX spec estimate
-  would land in the same bucket but off the grid). Judged legitimate and
-  necessary to close B-3 — accepted as in-scope, not drift.
-- The 3 other previously-unlisted files
-  (`cupid_phase_widget_info.xml` already covered above,
-  `phase_status_cubit.dart`, `phase_status_line.dart`,
-  `activity_card_hub_view.dart` in place of the originally-cited
-  `activity_card_tile.dart`) are exactly where the action_label chip (B-1) and
-  secondary-line wiring naturally live — accepted as in-scope, not drift.
-- Read `visual-fidelity-report.md`'s new "Lượt patch #4 — B-1..B-6" section in
-  full: closes each of B-1/B-2/B-3/B-4/B-5/B-6 with a named mechanism and
-  evidence image, states the B-2+B-6 ship-together constraint was honored, and
-  documents (not silently overrides) a real gate conflict — `visual_fidelity.py`
-  pairs images by filename token while `validate-dev-design-render.sh` forbids
-  relabelling canvas exports, so the two gates want incompatible naming; mobile
-  correctly did not rename/duplicate/patch either gate and flagged it for Tech
-  Lead to arbitrate.
-- Eyeballed 3 of the recaptured PNGs directly (not just read the report's
-  claim): `implemented-widget-date-day.png` (pink->purple gradient, near-white
-  lightning-bolt glyph, readable secondary line, no ellipsis/tofu),
-  `implemented-widget-upcoming.png` (flat dark bg, large pink "4" digit span,
-  no icon square), `implemented-hub-waiting.png` (new "Chọn trước một chỗ"
-  action_label chip under the secondary line). All match the report's claims.
-- Independently re-ran (not trusted from the report) the 4 changed test files:
-  `flutter test test/features/phase_status/phase_content_repository_test.dart
-  test/features/phase_status/phase_content_gate_test.dart
-  test/features/phase_status/phase_status_line_test.dart
-  test/features/phase_status/native_copy_scan_test.dart` ->
-  `+103 ~4: All tests passed!` (own run, full untruncated output, not filtered).
-
-**Committed** (mobile-dev did not self-commit, per instruction): commit
-`a8aa1ff4` on `codex/REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget`
-(24 files, +820/-36). Boundary `refresh-base` run — new `BaseHead: a8aa1ff497a6a1fd7fdb5a74166b0beca6a3919e`.
-`story_master.md` (worktree) Implementation checkbox marked `[x]` with the
-commit sha and verification note; Review checkbox stays `[ ]` pending S9.
-`Alex-Mobile-Dev@session-e7df910a` released via `TaskStop` (mobile work for
-this cycle is done); `list-releasable-agents.sh` also named
-`Alan-Techlead`/`Andy-PO`/`Iris-QC` but all three were already gone (`No task
-found`) — only `Alex-Mobile-Dev` was actually live and is now stopped.
-
-Two items intentionally NOT resolved by Scrum Master, left for their owning
-roles (per mobile-dev's own routing, matches its `next_step`):
-1. Screen-naming convention conflict between `visual_fidelity.py` and
-   `validate-dev-design-render.sh` — routes to Tech Lead.
-2. N-2 (runtime registry `buildCommand` missing `--flavor local`) — routes to
-   DevOps, unrelated to this story's own gate.
-
-**Next step (attempted, BLOCKED): dispatch Iris-QC for S9 `full-story-review`
-(re-review), scoped to the six now-closed B-1..B-6 findings**, using
-`.claude/hooks/handoff-build.sh spawn --target reviewer --mode full-story-review
---flow parallel-story ...`, which correctly self-corrected `BaseHead` to
-`b58afbe073eff4e1ebb9151735221532a9cf5a82` (the story's branch point off
-`codex/REQ-016_solo_stage1_relationship_assistant-integration`, matching the S8
-run's own `review_base_head`, because the boundary's just-refreshed
-`BaseHead: a8aa1ff4...` would produce an empty review diff). This is a fresh
-review pass (S8's own report at `review/review-report.md` is already a
-complete, closed artifact with `review_outcome: PATCH_REQUIRED`), not a
-continuation of the S8 reviewer run — a new `Iris-QC` spawn was the correct
-call, not `SendMessage`.
-
-## BLOCKER — guard-parallel-spawn.sh [GENERIC], unresolved (2026-09-26)
-
-The `Agent(name: "Iris-QC", ...)` spawn was blocked twice with the byte-identical
-message (harness-truncated, ends mid-sentence with a literal ellipsis):
-
-> PARALLEL SPAWN GUARD BLOCKED [GENERIC]: story-review blocked; no completed
-> implementation lane with durable completion marker found for
-> REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget
-> (checked live parallel-run…
-
-The second occurrence added: `!! 3x same block: stop retrying this way — apply
-the fix exactly, or return a blocker.` Per that explicit instruction, the
-identical spawn call is not being retried a third time.
-
-Investigation performed before stopping (all via execution/inspection, never by
-reading `.claude/hooks/**` source, per operating rules):
-1. `.claude/hooks/guard-codes.md` `## PARALLEL SPAWN GUARD` section (lines
-   121-191) read in full — no documented subcode (`MISSING_FIELDS`,
-   `WORKTREE_MISSING`, `DIRTY_WORKTREE`, `STALE_BASEHEAD`, `LOCK_BUSY`,
-   `SCOPE_OVERLAP`, `CAP_REACHED`, `BAD_LOCK_CLASS`, `BAD_CONCURRENCY_CLASS`,
-   `DEP_NOT_MERGED`, `BAD_RUNID`, `BAD_TARGET`, `SCHEDULER_JSON_CORRUPT`)
-   matches "no completed implementation lane... found".
-2. `data/runtime/parallel-scheduler.json` inspected directly — `active_runs`,
-   `paused_runs`, `blocked_runs` are all `[]`; there is no `completed_runs` or
-   per-story tracking array in this schema at all.
-3. `data/runtime/parallel-runs/RUN-...-STORY-012_phase_status_and_widget-mobile-dev.json`
-   re-read in full — genuinely `status: "COMPLETED"`,
-   `completion_marker: "MOBILE_COMPLETE: YES"`,
-   `completion_markers: ["MOBILE_COMPLETE: YES"]`, `concurrency_class:
-   "code-writer"` — this run file, read directly, satisfies exactly what the
-   guard message says is missing. Its `worktree_head` field
-   (`0cf0abd7a5d70dd951841f241c58bd7e41e846b6`) is stale relative to the two
-   Scrum-Master commits made after it completed (`a8aa1ff4`, `8d568b9c`) — a
-   plausible but **unconfirmed** root cause (the guard may be matching on live
-   worktree HEAD rather than reading this run file's terminal `status`
-   directly, contrary to this session's own operating rule that "run file
-   `status` is the source of truth").
-4. `register-parallel-run.sh`, `release-parallel-run.sh`,
-   `validate-scheduler-json.sh` probed for a legitimate fix path: run with no
-   args and with `--help`, all three exited `0` with zero output — no usage
-   surface discoverable without reading source, which is out of bounds here
-   (no explicit user request to debug the hook implementation itself).
-5. `prune-parallel-runs.sh --apply --quiet` run — `scanned 9 run file(s); kept
-   9; prunable 0` — confirms no stale index entries to clear.
-6. `list-releasable-agents.sh` + `TaskStop` on all 4 printed names — all 4
-   already released (`No task found`), confirming no agent is actually stuck
-   mid-run; this is a pure spawn-gate block, not an orphaned agent.
-
-**Reported per operating rules: `GUARD_FEEDBACK_INSUFFICIENT`.** The guard
-block plus `guard-codes.md` do not give a fix that Scrum Master can apply
-without reading hook source (`guard-parallel-spawn.sh`, out of bounds without
-an explicit user request to debug it). Stopping here rather than retrying the
-identical spawn a third time.
-
-**Resumption**: once a user decision authorizes either (a) reading/patching
-`guard-parallel-spawn.sh` to diagnose the false block, or (b) an alternate
-route (e.g. a Tier-appropriate Scrum-Master lightweight path, if this story
-still qualifies — it does not, per `Story-Class: standard` /
-`Complexity: complex`, so Reviewer remains required), retry the exact same
-`handoff-build.sh spawn --target reviewer --mode full-story-review
---flow parallel-story` call with `BaseHead: b58afbe073eff4e1ebb9151735221532a9cf5a82`,
-`RunId: RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-reviewer`.
-The story worktree itself is clean and fully committed (`8d568b9c`); nothing
-here needs redoing.
-
-## Re-verification (2026-09-26, fresh `continue parallel` session, no re-spawn attempted)
-
-Independently re-checked before touching the spawn again: mobile-dev run file
-still `status: COMPLETED` / `completion_marker: "MOBILE_COMPLETE: YES"` /
-`worktree_head: 0cf0abd7...` (unchanged, still stale vs current branch HEAD
-`71c39666...`); reviewer run file for STORY-012 still only the closed S8
-`PATCH_REQUIRED` report; scheduler `active_runs`/`paused_runs`/`blocked_runs`
-still all `[]`; `list-releasable-agents.sh` printed the same 4 stale names,
-all `TaskStop` -> "No task found" (confirmed nothing actually running).
-`guard-codes.md` `## PARALLEL SPAWN GUARD` re-read via the sanctioned
-`grep -A 15 "PARALLEL SPAWN GUARD" .claude/hooks/guard-codes.md` plus a
-targeted `implementation lane` grep (0 matches) — still no documented subcode
-for "no completed implementation lane... found". Nothing in repo state changed
-since the prior session's 3x block, so the identical spawn was NOT re-attempted
-a 4th time (would reproduce the same block with no new information). Blocker
-stands as `GUARD_FEEDBACK_INSUFFICIENT`; `data/runtime/scrum-master-active-scope.json`
-already reflects it accurately. Resumption path unchanged: needs an explicit
-user decision to (a) authorize reading/patching `guard-parallel-spawn.sh`, or
-(b) name an alternate route (none qualifies today — story is
-`Story-Class: standard` / `Complexity: complex`, so Reviewer stays required).
+- `review/review-report.md` — query "B-1".."B-6" / "N-1".."N-6" / "AC9"
+- `req_master.md` Design Ruling Log rows — query "D-10" / "D-6" / "D-13"
+- `architecture/contract-summary.md` — query "§2" (widget payload contract),
+  "§3a"/"§3b"/"§3c" (phase indicator/gradient/digit tokens), "§4a"
+  (`action_label`)
