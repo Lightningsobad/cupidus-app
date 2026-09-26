@@ -1,8 +1,11 @@
 # REQ-016 Configuration Guide — Phase Widget Host Configuration
 
 Scope: the native host configuration the phase widget (STORY-012) needs on both
-platforms. Application logic lives in Dart; nothing here is a runtime setting a
-user can change, and nothing here is read at runtime by the app.
+platforms, plus the local-notification setup this requirement introduced
+alongside it (`flutter_local_notifications`, `timezone` — see Local
+Notifications below). Application logic lives in Dart; nothing here is a
+runtime setting a user can change, and nothing here is read at runtime by the
+app.
 
 The identifier contract itself is authoritative in
 `../STORY-012_phase_status_and_widget/architecture/contract-summary.md` §1–§2.
@@ -121,14 +124,79 @@ The widget needs no configuration beyond the manifest `<receiver>` that P4
 added, and it deliberately adds **no** permission. The three
 `<uses-permission>` entries in `mobile/android/app/src/main/AndroidManifest.xml`
 (`READ_MEDIA_IMAGES`, `POST_NOTIFICATIONS`, `CAMERA`) all predate this
-requirement; `POST_NOTIFICATIONS` is the Android 13+ runtime permission the
-reminder surface uses, not the widget.
+requirement's Git history, but this requirement added a **second** runtime
+consumer of `POST_NOTIFICATIONS`: `features/phase_status/` (the evening
+check-in nudge, see Local Notifications below), alongside the pre-existing
+reminder surface. Not the widget itself — the widget host adds no permission
+of its own.
 
 `android:updatePeriodMillis="0"` in
 `mobile/android/app/src/main/res/xml/cupid_phase_widget_info.xml` is load-bearing:
 it tells the system never to poll the provider. The payload is pushed from Dart
 on mount, on resume, and on a card status change. Any non-zero value here
 reintroduces the `WIDGET-STALE` risk the phase was written to avoid.
+
+## Local Notifications (evening check-in nudge)
+
+Scope: this requirement's second new dependency alongside `home_widget` —
+`flutter_local_notifications` and `timezone` — used by
+`PluginLocalNotificationScheduler`
+(`mobile/lib/features/phase_status/data/local_notification_scheduler.dart`).
+Same as the widget host, none of this is a user-facing setting; it is
+initialization and permission wiring a build needs to have in place.
+
+### Init
+
+`PluginLocalNotificationScheduler._initialize()` (`:65-67`) calls
+`FlutterLocalNotificationsPlugin.initialize()` lazily, on first use
+(`_ensureReady()`), not at app startup — with
+`AndroidInitializationSettings('@mipmap/ic_launcher')` and
+`DarwinInitializationSettings(requestAlertPermission: false,
+requestBadgePermission: false, requestSoundPermission: false)` on iOS. The
+iOS flags being `false` here is deliberate: initialization must not itself
+trigger the OS permission prompt, so the app controls exactly when that
+prompt appears (see Permission request below). The call is wrapped in
+`try/on PlatformException/on MissingPluginException`, matching
+`home_widget_bridge.dart`'s precaution for the same reason — a test binding's
+platform channel never completes, and this file must not hang or throw under
+`flutter test`.
+
+### iOS permission request
+
+`requestPermission()` (`:95-124`) is invoked from
+`EveningCheckInScheduler`, at the moment of the first scheduled nudge — never
+at app startup or at init. On iOS it resolves
+`IOSFlutterLocalNotificationsPlugin` and calls `requestPermissions(alert:
+true, badge: false, sound: false)` (`:111-116`): alert-only. No badge (a
+badge would be the "one thing left to do" marker AC-17 forbids) and no sound
+(a sound would make this more than a gentle nudge, AC-31). On Android it
+resolves `AndroidFlutterLocalNotificationsPlugin.requestNotificationsPermission()`
+(`:98-103`), which is the runtime `POST_NOTIFICATIONS` prompt on API 33+ and
+a no-op returning granted on older APIs.
+
+### Timezone
+
+`_post()` (`:139-165`) schedules with
+`tz.TZDateTime.from(at.toUtc(), tz.UTC)` (`:153`) — always the built-in
+`tz.UTC` location, never a named zone. No `tz.initializeTimeZones()` call
+exists anywhere in `mobile/lib`, and none is needed: `timezone`'s `UTC`
+location is a static constant available without loading the IANA database:
+only named locations (e.g. `tz.getLocation('Asia/Ho_Chi_Minh')`) require that
+init call. Scheduling on the absolute UTC instant is what a one-shot nudge
+needs; reading the device's zone name would mean carrying a second plugin
+for nothing.
+
+### Why `inexactAllowWhileIdle`, not exact
+
+`eveningCheckInScheduleMode` (`:19-20`) is
+`AndroidScheduleMode.inexactAllowWhileIdle`, never `exact`/`exactAllowWhileIdle`.
+Two independent reasons, both load-bearing: Android 14 refuses the
+`SCHEDULE_EXACT_ALARM` permission for a reminder like this one, and ADR-002
+D1 forbids system alarms outright for this feature. Consequently the
+manifest declares no `SCHEDULE_EXACT_ALARM` (or
+`USE_EXACT_ALARM`) permission — its absence is intentional, not an
+oversight; a nudge landing a few minutes late is the accepted behavior, not
+a bug to fix by adding the exact-alarm permission back.
 
 ## Recovery After Regeneration
 
