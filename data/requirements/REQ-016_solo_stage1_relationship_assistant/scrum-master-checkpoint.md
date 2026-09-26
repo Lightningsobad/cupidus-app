@@ -71,6 +71,10 @@ collapsed to one line; full trail lives in each story's own
    (D-3), not an implementation detail. Not routed to Reviewer for a verdict
    first: the choice of AC-22 compliance scope must be settled before a fresh
    integration review can even know what to check.
+   **Correction (Tech Lead, Round 42):** no tab is named/mapped to `Hồ sơ kỹ
+   năng` — the 4 D-3-locked labels are `Muốn làm · Ý tưởng · Sổ tay · Nhật
+   ký`, and the real fix uses 2 tabs, not 3. See Current cursor below for the
+   full corrected decision.
 
 ## Still-open non-blocking items
 
@@ -97,6 +101,15 @@ collapsed to one line; full trail lives in each story's own
   `Outcome: DEFERRED_ONLY`). Not yet known to block anything post-merge; if any
   future gate scans STORY-013's own phase/plan files and rejects `COMPLETE`,
   this is the cause — fix is Scrum-Master-owned artifact wording, not rework.
+- **OQ-1 (Round 42, non-blocking, for PO):** solo stage-1 tab `Ý tưởng` maps to
+  no shipped screen. Its "sinh ý tưởng" content (Gợi ý quà/Mồi chuyện/trắc
+  nghiệm) already ships and is reachable via `Muốn làm`'s quick-entry rail
+  (audit seam B PASS); no story owns `Ý tưởng`'s own content. Per UX §1
+  lines 17-18/§6, keeping it a `sắp có` placeholder is correct spec, not an
+  F-M1 defect — full reasoning in
+  `architecture/fm1-solo-tabs-solution.md` §6. PO decides only whether to
+  assign it new content later or record an explicit deferral; out of scope
+  for this requirement's `DONE` gate.
 
 ## 3-part verification protocol (use before sealing any specialist's reported-complete work)
 
@@ -116,147 +129,76 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 - Round 1-35 narrative in git history of this file — superseded by the table
   and "Current cursor" sections above.
 
-## Current cursor (Round 42, `continue parallel`, 2026-09-26 — user decided F-M1, Tech Lead dispatched to design the tab-wiring)
+## Current cursor (Round 42 continued, `continue parallel`, 2026-09-26 — Tech Lead F-M1 decision sealed, mobile-dev dispatch next)
 
-- User answered the Open user decisions item 6 escalation (AskUserQuestion):
-  **wire the 3 tabs to the already-shipped screens**, not defer D-3. D-3
-  stands as originally written; do not reopen it again.
-- Dispatched `Alan-Techlead` (`Flow: parallel-requirement`, `Story: NONE`,
-  `Mode: architecture-solution`, RunId
-  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-tech-lead-fm1`,
-  `ConcurrencyClass: planning`, worktree = the existing integration worktree,
-  `BaseHead: c1c538ea67e642a0a9c8c3b9ac39debe9796fef1`) to decide the concrete
-  navigation approach for wiring `Sổ tay`/`Nhật ký`/`Hồ sơ kỹ năng` tabs
-  directly to `JournalScreen`/`NotebookScreen`/`SkillProfileScreen` without
-  going through the paired-only `MeScreen`/`AppShell` path, and to recommend
-  `coding-plan` vs. direct `mobile-implementation` for the follow-up. Output:
-  `architecture/fm1-solo-tabs-solution.md`. **In flight — awaiting
-  SubagentStop/mailbox notification, not polling.**
-- **Next resume action:** on `TECH_LEAD_COMPLETE: YES`, 3-part verify + seal +
-  commit, then dispatch `Alex-Mobile-Dev` per the Tech Lead's
-  `next_mode_recommendation` (either a `coding-plan` follow-up first, or
-  direct `mobile-implementation`) to implement the wiring against the SAME
-  integration worktree/branch. After that lands, dispatch a FRESH `Iris-QC`
-  requirement-integration-review (new RunId) scoped to the F-M1 fix PLUS the
-  Round 41 F-I2/F-I3 evidence (`stage1_wipe_registry.dart`, parity test,
-  configuration guide, build-runtime-evidence.md, mobile-visual-audit.md) —
-  the 9 previously-PASS cross-story contracts still do not need
-  re-verification. On `Outcome: CLEAN`/`DEFERRED_ONLY`: re-sync `main` if
-  moved, `cleanup-requirement`, `land-integration`, flip `req_master.md` +
-  `master_requirements_list.md` to `DONE`.
+- Tech Lead (`Alan-Techlead`) returned `TECH_LEAD_COMPLETE: YES`. 3-part
+  verification passed: agent releasable; worktree `git status --porcelain`
+  showed exactly the declared WriteScope (`architecture/` dir, one new file);
+  full file content read and eyeballed — matches the specialist's own report
+  exactly. Committed in the integration worktree as `9aadd52f`. `Alan-Techlead`
+  released via `TaskStop`.
+- **Corrects the Round 42/Open-user-decisions-item-6 premise**: no tab maps to
+  `Hồ sơ kỹ năng`. The 4 D-3-locked labels are `Muốn làm · Ý tưởng · Sổ tay ·
+  Nhật ký`. Fix uses **2 tabs**: `Sổ tay` → `openNotebookScreen` +
+  `openSkillProfileScreen` (req_master.md:131 groups these as one seed);
+  `Nhật ký` → `openJournalScreen`. `Ý tưởng` unaffected, correctly stays a
+  placeholder (see new OQ-1 in Still-open non-blocking items above).
+- Decision (full text in `architecture/fm1-solo-tabs-solution.md`, do not
+  re-derive): tab body → destination-list block (style of shipped
+  `_PrivateStorageBlock`, `me_screen.dart:539-579`); row tap pushes via the
+  existing 3 entry points. Mounting the screens as tab bodies is forbidden
+  (`journal_entry_point.dart:96-98`, `context_notebook_entry_point.dart:59-61`,
+  AC-17) plus 3 technical reasons (own Scaffold+back would pop
+  `PairGateShell`; `getIt`-in-`build` breaks the un-DI'd test host;
+  `IndexedStack` would eagerly open private screens on app entry). No
+  state/DI changes beyond 3 optional test seam-opener callbacks on
+  `_SoloStageOneShell` (same pattern as shipped
+  `resolvePairingStatus`/`createTimelineCubit`). Classification: `standard`,
+  direct on this integration worktree/branch (2 files, no story worktree).
+  `next_mode_recommendation: mobile-implementation-direct` — test scope fully
+  specified in the doc's §5.2, no coding-plan phase needed.
+- Two hard constraints for the mobile-dev dispatch (carry forward verbatim):
+  (1) `activity_card_hub_view_test.dart:852-907` will correctly go red and
+  must be rewritten, keeping the exact AC-21/SC-1' assertion
+  (`find.text('Đi biển')` → `findsNothing`) for all three tabs; (2) exactly 2
+  new imports allowed in `home_screen.dart` (the two entry-point files only),
+  per journal P5 §4's import boundary AC.
+- **Next resume action:** dispatch `Alex-Mobile-Dev` (fresh spawn — prior
+  visual-audit instance already released), `Mode: mobile-implementation`,
+  `Flow: parallel-requirement`, `Story: NONE`, `ConcurrencyClass:
+  code-writer`, worktree = the integration worktree, `BaseHead` = integration
+  HEAD after `9aadd52f` (resolve full sha at dispatch time),
+  `WriteScope`/`OutputPath` = `mobile/lib/features/home/presentation/home_screen.dart`
+  + `mobile/test/features/activity_cards/activity_card_hub_view_test.dart` +
+  optionally one new test file per §5.2. Handoff body must carry §5.1-§5.4 of
+  `architecture/fm1-solo-tabs-solution.md` verbatim (code changes, required
+  tests, gate-run constraints, screenshot note) — do not re-summarize from
+  memory. After `MOBILE_COMPLETE: YES` + 3-part verify + seal + commit:
+  dispatch a FRESH `Iris-QC` requirement-integration-review (new RunId — prior
+  terminal one is `PATCH_REQUIRED`) scoped to the F-M1 fix plus the
+  Round-41-closed F-I2/F-I3 evidence (`stage1_wipe_registry.dart`, parity
+  test, configuration guide, `build-runtime-evidence.md`,
+  `mobile-visual-audit.md`) — the 9 previously-PASS cross-story contracts do
+  not need re-verification. On `Outcome: CLEAN`/`DEFERRED_ONLY`: re-sync
+  `main` if moved, `cleanup-requirement`, `land-integration`, flip
+  `req_master.md` + `master_requirements_list.md` to `DONE`.
 
-## Superseded cursor (Round 41, `continue parallel`, 2026-09-26 — F-I2/F-I3 devops dispatched, mobile-visual-audit blocked on lock, patch1 run closed out)
+## Superseded history (Rounds 37-41, collapsed — all 13 stories DONE/merged, F-I1 rework landed, F-I2/F-I3 devops evidence closed, requirement-level mobile-visual-audit closed)
 
-- Resolved OPEN_RUNS Stop-hook guard re-trigger on
-  `RUN-...-STORY-013_graceful_exit_and_return-mobile-dev-patch1`: per
-  `.agent-contract/parallel-execution-policy.md` ("BLOCKED... must be
-  reported until Scrum Master routes rework... or intentionally parks
-  them"), adding only `waiting_reason`/`next_resume_action` while leaving
-  `status: BLOCKED` was NOT sufficient to stop the guard re-flagging it.
-  Rework was already routed and landed (patch2, `MOBILE_COMPLETE: YES`,
-  merged `753d2a86`), so the run file's own `status` field now reads
-  `COMPLETED` with `resolution: SUPERSEDED_BY_REWORK` and
-  `resolved_by_run_id` pointing at patch2 — matching the precedent set by
-  the terminal `...-NONE-reviewer` run file, where `status: COMPLETED` is
-  independent of business outcome (there: `review_outcome: PATCH_REQUIRED`;
-  here: superseded-without-completing). `waiting_reason`/`next_resume_action`
-  text kept as-is for audit trail.
-- Dispatched `Frank-Devops` (`Flow: parallel-requirement`, `Story: NONE`,
-  `Mode: devops-implementation`, RunId
-  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-devops-fi2fi3`,
-  `ConcurrencyClass: code-writer` — `integration-review` class is
-  reviewer-only per `BAD_CONCURRENCY_CLASS`, `LockScope:
-  requirement-state:REQ-016_solo_stage1_relationship_assistant`, worktree =
-  the existing integration worktree, `BaseHead: 753d2a86...`) for F-I2
-  action item 5 (`integration-review/build-runtime-evidence.md`: real build +
-  real app-launch smoke, `## Integration Build & Runtime`, plus a
-  confirm/deny on whether `BUG-20260923-001`'s 11 `test/core/database/` reds
-  are version-lag only) and F-I3 action item 7
-  (`deployment/configuration-guide.md`: add local-notification section, fix
-  the stale POST_NOTIFICATIONS single-consumer claim). **In flight — awaiting
-  SubagentStop/mailbox notification, not polling.**
-- Attempted to dispatch `Alex-Mobile-Dev` (same requirement-level pattern,
-  `Mode: requirement-mobile-visual-audit`, RunId
-  `...-NONE-mobile-dev-visualaudit`) for F-I2 action item 6
-  (`integration-review/mobile-visual-audit.md`) in the SAME batch. **Blocked
-  by `guard-parallel-spawn.sh` [GENERIC]: `requirement-state:
-  REQ-016_solo_stage1_relationship_assistant` lock already held** by the
-  just-spawned Frank-Devops run. Expected/correct serialization (no
-  finer-grained lock class exists for requirement-level integration-review
-  artifacts) — NOT a bug, not retried with a workaround lock. No orphaned run
-  file was created for this blocked attempt (confirmed via scheduler dump).
-- Frank-Devops returned `DEVOPS_COMPLETE: YES` (its own SubagentStop
-  transcript marker was missing — known failure mode — but the run file
-  itself carries the marker and full evidence directly). 3-part verification
-  passed: `list-releasable-agents.sh` showed it idle; worktree diff matched
-  WriteScope exactly (`build-runtime-evidence.md` new,
-  `configuration-guide.md` modified, nothing else); evidence content checked
-  by eye — real `flutter build apk --debug --split-per-abi` PASS (85.2s, 3
-  ABI split APKs), real `emulator-5554` app-launch smoke PASS (WARM launch,
-  `ResumedActivity` confirmed, clean `am force-stop`), D-I2 confirmed CLOSED
-  (`flutter test test/core/database/` now 104/104 passing —
-  `BUG-20260923-001`'s 11 tracked reds do not reproduce at this HEAD,
-  schemaVersion caught up by sibling merges), and `configuration-guide.md`
-  gained the requested Local Notifications section (init ~65-67, iOS
-  permission ~95-124, `tz.UTC` scheduling ~139-165,
-  `inexactAllowWhileIdle` rationale) plus the POST_NOTIFICATIONS
-  second-consumer correction. Committed in the integration worktree as
-  `0a8f4214`. `Frank-Devops` released via `TaskStop`.
-- Re-dispatched `Alex-Mobile-Dev` (FRESH spawn — prior patch1 instance
-  released) for F-I2 action item 6
-  (`integration-review/mobile-visual-audit.md`), RunId
-  `...-NONE-mobile-dev-visualaudit`, rebuilt with explicit
-  `--worktree/--branch/--merge-target/--base-head` (full-length sha
-  `0a8f421410e964ffec81033a7213adff35281858` — the integration worktree HEAD
-  after the devops commit; `handoff-build.sh`'s default `--req/--story`
-  derivation fails for `Story: NONE` requirement-level handoffs with
-  `BOUNDARY_WORKTREE_MISSING`, and a truncated short-sha `BaseHead` trips
-  `STALE_BASEHEAD` — always pass the full 40-char sha for these). **In
-  flight — awaiting SubagentStop/mailbox notification, not polling.**
-- `Alex-Mobile-Dev` returned genuine `MOBILE_COMPLETE: YES` (after one
-  mid-task `idle_notification interrupted` recovered via `SendMessage
-  Session-Recovery: YES` restating the full original parallel-handoff fields —
-  worktree confirmed clean of edits before resuming, so no fresh spawn was
-  needed; run file self-corrected from a transient `COMPLETION_INVALID` to
-  `status: COMPLETED` by the time it was re-read, no manual release-hook
-  workaround needed). 3-part verification passed: agent releasable; worktree
-  `git status --porcelain` showed exactly the one declared `WriteScope` file;
-  full file content read and eyeballed — real seam-by-seam evidence (device
-  cold-launch capture + 3 RepaintBoundary widget-test seams, 3 green
-  capture-suite runs, two apparent anomalies investigated and correctly
-  dismissed as harness artifacts). Committed in the integration worktree as
-  `c1c538ea`. Accepted markdown-only evidence for this cross-story audit type
-  (screenshots/scratch test suites intentionally left in
-  `/tmp/req016-visual-audit/`, outside WriteScope; ephemeral cleanup is fine)
-  — distinct from the per-story visual-fidelity gate's committed-PNG
-  requirement. `Alex-Mobile-Dev` released via `TaskStop`.
-- Audit raised **F-M1** (solo stage-1 tabs unreachable in solo mode,
-  contradicting decision D-3) plus NOTE-1 (blank `Bảng tra ăn khớp` body
-  during pack load, by AC-28 design, worth a PO glance) and NOTE-2 (a user who
-  denies the FCM-init `POST_NOTIFICATIONS` prompt silently gets no REQ-016
-  evening check-in). F-M1 escalated as **Open user decisions item 6** above —
-  BLOCKING, not routed to Reviewer first, since it is a product-scope reversal
-  of an already-explicit prior decision (D-3), not an implementation detail.
-- **Next resume action (STOPPED pending user decision):** F-I2 and F-I3 are
-  both now fully closed out. The ONLY remaining gate before a fresh `Iris-QC`
-  requirement-integration-review is Open user decisions item 6 (F-M1) — the
-  answer changes what that review checks: (a) wire-the-tabs needs new
-  implementation work before AC-22 can even be reviewed; (b) explicit deferral
-  needs the deferral recorded (Design Ruling Log / `req_master.md`) BEFORE the
-  review runs, so the reviewer checks the updated AC-22 scope, not stale D-3
-  wording. Once decided: (i) apply it (implementation dispatch, or a recorded
-  deferral — Scrum Master cannot spawn Product Owner directly per role-map,
-  only `brainstormer` does, so a wording-only AC patch may need that path, or
-  a direct Scrum-Master-owned `req_master.md`/Design Ruling Log status entry
-  if it's an annotation, not an AC rewrite); (ii) dispatch a FRESH `Iris-QC`
-  requirement-integration-review (new RunId — prior one terminal
-  `PATCH_REQUIRED`) scoped to `stage1_wipe_registry.dart`, the parity test
-  result, the configuration guide section, both new integration-review
-  evidence files, and the F-M1/AC-22 disposition (9 previously-PASS
-  cross-story contracts do not need re-verification); (iii) on `Outcome:
-  CLEAN`/`DEFERRED_ONLY`: re-sync `main` if moved, `cleanup-requirement`,
-  `land-integration`, flip `req_master.md` + `master_requirements_list.md` to
-  `DONE`.
+Round 41: `Frank-Devops` closed F-I2 action item 5
+(`integration-review/build-runtime-evidence.md`: real build + app-launch
+smoke; `BUG-20260923-001`'s 11 `test/core/database/` reds confirmed
+version-lag-only, now 104/104 passing) and F-I3 action item 7
+(`deployment/configuration-guide.md`: added Local Notifications section, fixed
+stale POST_NOTIFICATIONS claim); committed `0a8f4214`. `Alex-Mobile-Dev`
+closed F-I2 action item 6 (`integration-review/mobile-visual-audit.md`,
+seam-by-seam PASS except F-M1, plus non-blocking NOTE-1/NOTE-2); committed
+`c1c538ea`. F-M1 (solo stage-1 tabs unreachable in solo mode, contradicting
+D-3) escalated to the user as Open user decisions item 6 — resolved 2026-09-26
+(wire the tabs; see Current cursor above for the corrected 2-tab decision).
+Full narrative, exact commands, and root-cause detail for these rounds live in
+this file's own prior git history if ever needed — not reproduced here per
+checkpoint budget.
 
 ## Superseded history (Rounds 37-40, collapsed — all 13 stories DONE/merged, F-I1 rework landed)
 
