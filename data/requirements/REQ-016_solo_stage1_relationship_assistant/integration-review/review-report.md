@@ -1,14 +1,208 @@
 # REQ-016 Requirement Integration Review
 
-Review type: requirement-integration-review
+This file holds two reviews. The **Round 43 scoped re-review** below is the
+current one and carries the single live `Outcome:` line. The **Round 39 review**
+is preserved verbatim underneath it as history; its verdict is restated inline
+so only one literal verdict line exists in this file.
+
+---
+
+# Round 43 scoped re-review
+
+Review type: requirement-integration-review (scoped re-review)
 Requirement: REQ-016_solo_stage1_relationship_assistant
 Scope gate: `data/requirements/REQ-016_solo_stage1_relationship_assistant/integration-review/scope-gate.md`
+Branch: `codex/REQ-016_solo_stage1_relationship_assistant-integration`
+HEAD reviewed: `3b51172f2494241b01f96c2378d89fceb9ef9bf9`
+Diff baseline: `753d2a863b630ec3629cb1cba898bac1f0e075f8`
+Reviewed: 2026-09-27
+RunId: `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-reviewer-fm1review`
+
+Outcome: PATCH_REQUIRED
+
+## Round 43 — what was in scope
+
+Only the span `753d2a86..3b51172f` (4 commits: `0a8f4214`, `c1c538ea`,
+`9aadd52f`, `3b51172f`) — 2 source/test files and 4 artifacts. The 9 cross-story
+contracts this report already recorded PASS in Round 39 were **not** re-verified;
+they stand by reference. F-I1 closed before this baseline and is out of span.
+
+## Round 43 — verdict rationale
+
+Everything that was routed for this round landed, and the code is right. F-I2
+items 5 and 6 and F-I3 item 7 are substantively closed; the F-M1 architecture
+decision is sound and its implementation is correct, tested, and green. The
+patch is required for **evidence only, not for a code change**: the requirement's
+blocking cross-screen gate (`mobile-visual-audit.md`) still records seam A as
+`FAIL on content`, and the remediation that clears it was never looked at. See
+F-I4.
+
+## Round 43 — verification results
+
+| # | Item | Verdict | Evidence |
+|---|---|---|---|
+| 1 | F-I2 action item 5 — integration build + runtime | **PASS** | `build-runtime-evidence.md` carries `- Build: PASS — …` and `- Runtime/Smoke: PASS — …` in one file under `## Integration Build & Runtime`, satisfying reviewer rule 12g3. Real `assembleLocalDebug` (85.2s, 3 split-ABI APKs) and a real `am start -W` on `emulator-5554` polled to `ResumedActivity`, zero `FATAL EXCEPTION`, clean `force-stop`. `Runtime: NOT_APPLICABLE` was correctly not used. |
+| 2 | D-I2 — migration-ladder test evidence | **PASS (closes D-I2)** | `flutter test test/core/database/` = 104/104 at `753d2a86`. `BUG-20260923-001`'s 11 reds do not reproduce; the gap D-I2 recorded is closed by a real green run, not by re-classification. |
+| 3 | F-I2 action item 6 — requirement-level mobile visual audit | **PASS as an artifact** | `mobile-visual-audit.md` exists and is substantive: seams 0/A/B/C/D, each with a named capture and a reasoned verdict, plus two run-down false positives (the `Bảng tra ăn khớp` empty body = AC-28 `SizedBox.shrink()`; the `Icons.info_outline` empty square = an unloaded framework font). Not taken on trust — I opened `seamA3-solo-tab-soTay.png` and `seamC1-me-hub-private-storage.png`: seamA3 shows the real `Sổ tay — sắp có` dead end with a persistent tab bar and clean diacritics, seamC1 shows the three `_PrivateStorageBlock` rows with the exact labels the fix reuses. The verdicts match the pixels. |
+| 4 | F-M1 was the audit's only new blocking finding | **CONFIRMED** | The audit's other outputs are NOTE-0 (device cold launch hits `_NetworkErrorView`, no local backend — environmental), NOTE-1 (AC-28 blank load window, PO glance), NOTE-2 (a `POST_NOTIFICATIONS` denial at FCM init silently disables the REQ-016 nudge). None is blocking; all three carry forward as deferred. |
+| 5 | F-I3 action item 7 — configuration guide | **PASS** | The new `## Local Notifications (evening check-in nudge)` section covers all four items the action item named — init (`:65-67`, lazy, iOS request flags `false` on purpose), iOS permission request (`:95-124`, alert-only), timezone (`:139-165`, `tz.UTC` only, with the reason no `initializeTimeZones()` is needed), and `inexactAllowWhileIdle` with the deliberate absence of `SCHEDULE_EXACT_ALARM`. The stale claim at the old `:120-125` is corrected to name `features/phase_status/` as a second `POST_NOTIFICATIONS` consumer added by this requirement. Reviewer rule 12a satisfied. |
+| 6 | F-M1 architecture decision vs AC-17 | **PASS** | `fm1-solo-tabs-solution.md` §1 quotes the two shipped entry-point contracts (`journal_entry_point.dart:96-98`, `context_notebook_entry_point.dart:59-61`) that forbid these screens being a tab or sub-tab, and §2 keeps them route-pushed from a menu block that sits *outside* both screens — the `_PrivateStorageBlock` shape AC-17 already permits. No switcher between the two listed surfaces. The decision also corrects the handoff's own premise (no `Hồ sơ kỹ năng` tab exists) rather than implementing a wrong mapping. |
+| 7 | F-M1 architecture decision vs D-3 | **PASS** | The four D-3-locked labels are untouched: `SoloStageOneTab` and `_label` (`home_screen.dart:351-363`) are not in the diff. D-3 required the four-tab bar *and its routes*; this restores the routes without reopening D-3. |
+| 8 | Implementation — `Sổ tay`/`Nhật ký` push, never mount | **PASS** | `_tabBody` (`home_screen.dart:368-419`) returns `_SoloDestinationBlock`, whose rows call `openNotebookScreen`/`openSkillProfileScreen`/`openJournalScreen`. No screen is mounted as a tab body. Proven at runtime by the new seam-B test: with the real opener and a registered `ContextNotebookRepository`, the observer records a second pushed route and `solo_stage_one_tab_bar` is `findsNothing` on it. |
+| 9 | Implementation — `Muốn làm`, `Ý tưởng`, paired path unchanged | **PASS** | `muonLam` still returns `widget.muonLamBuilder(context)`; `yTuong` still returns `_SoloTabPlaceholder` (the widget is kept, not deleted); `coupleBuilder: _buildCoupleHome` is untouched. The paired-session test passes unchanged. |
+| 10 | Implementation — AC-21/SC-1' preserved verbatim for all 4 tabs | **PASS** | `find.text('Đi biển')` → `findsNothing` is asserted for `yTuong`, `soTay` and `nhatKy`, and `findsOneWidget` for `muonLam`. The rewrite unrolled the old loop into four explicit blocks and kept the assertion in every one — coverage is equal to before, not reduced. The destination block is also structurally incapable of listing cards (header + rows only, no counts, no preview, no CTA). |
+| 11 | Accepted deviation — 3 new imports, not 2 | **ACCEPTED, independently confirmed** | The three are `context_notebook_entry_point.dart`, `journal_entry_point.dart`, and `lib/l10n/generated/app_l10n.dart`. I checked the third against the constraint's stated purpose rather than the count: the import-boundary rule bans journal/notebook **internals** (`presentation/screens/...`, repository, dao, cubit). A generated app-wide l10n resource is none of those, and it is what lets the block reuse the existing `me_menu_*` keys the architecture doc itself mandated instead of inventing new ones. Not a boundary violation. |
+| 12 | Targeted test reruns | **PASS (one accepted exclusion)** | `flutter test test/features/activity_cards/activity_card_hub_view_test.dart --no-pub --reporter compact` → **28/28 `All tests passed!`**, including all three new F-M1 tests. `flutter test test/features/context_notebook/` → one red only, `context_content_gate_test.dart:159` (BR-16). I also ran `test/features/home/ test/features/pairing/presentation/pair_gate_cubit_test.dart` → **58 pass, 1 skipped, 0 failures** (see deferred D-I8 for why). |
+| 13 | BR-16 red is pre-existing | **CONFIRMED — not a new finding** | Filed as `BUG-20260927-001_context_content_gate_zodiac_pack_phrase_leak`. Verified independently rather than taken from the handoff: `git log -S"Cà phê sáng" -- …/zodiac_shell_resolver.dart` attributes the string to `27700367` (STORY-011 P2), and `git merge-base --is-ancestor 27700367 753d2a86` is true — it predates this review's own baseline. Accepted non-blocking exclusion under reviewer rule 7. |
+| 14 | Worktree hygiene | **PASS** | `git status --porcelain` after all test runs shows only this review's own `scope-gate.md`. No other story's `visual-fidelity/` PNGs were rewritten by the mobile test runs. |
+
+## Round 43 — blocking finding
+
+### F-I4 — BLOCKING (evidence, not code): the cross-screen gate still records seam A as FAIL, and the fix was never looked at
+
+`mobile-visual-audit.md` is the requirement-level gate reviewer rule 12g2 keeps
+separately blocking before closure. Its seam A line reads, at HEAD:
+
+> `| A | Solo stage-1 shell, all four tabs | widget-test PNG | PASS on shell/consistency; **FAIL on content — see F-M1** |`
+
+That FAIL is the recorded state of the blocking gate. F-M1 has now been fixed in
+code, but nothing in the repository re-runs seam A or updates that verdict, so
+whether the gate is cleared is currently a code-reading inference rather than an
+observation. The governing architecture document asked for exactly this capture
+and it was not produced: `fm1-solo-tabs-solution.md` §5.4 specifies capturing
+`Sổ tay` and `Nhật ký` with `RepaintBoundary` in the widget test, explicitly "để
+đóng lại seam A". No post-fix PNG exists anywhere — `/tmp/req016-visual-audit/`
+still holds only the 18 pre-fix captures, and `3b51172f` adds no image.
+
+Why the passing widget tests do not substitute: they assert that keys resolve and
+labels are found, which is presence, not appearance. `_SoloDestinationBlock` is a
+**new composition** that has never been rendered anywhere — a `SafeArea` +
+`Column(mainAxisSize: min)` placed inside the shell's `IndexedStack` beside a
+full-height `ActivityCardHubView`. Its placement and sizing in that stack are the
+one property no assertion in this diff covers, and seam A is the surface that was
+already found broken once.
+
+Scoped honestly: the residual risk is narrow, because the glyph risk is already
+retired — `seamC1` shows the same three Vietnamese labels in the same fonts
+rendering cleanly, and the row geometry is transcribed from the
+`_PrivateStorageBlock` that capture depicts. This is a small, cheap gap, not a
+suspicion of breakage. It is blocking only because it is the primary proof of the
+changed behaviour on a gate that currently says FAIL, which reviewer rule 12c
+does not allow to be recorded as deferred.
+
+Action items:
+
+8. **[mobile-dev]** Capture the `Sổ tay` and `Nhật ký` tab bodies at HEAD
+   `3b51172f` with the existing harness
+   (`/tmp/req016-visual-audit/solo_shell_seam_capture_test.dart`, already written
+   and already run once), **look at them**, and update `mobile-visual-audit.md`
+   seam A from `FAIL on content` to its post-fix verdict. Per
+   `fm1-solo-tabs-solution.md` §5.4 these are seam-closure images, **not**
+   fidelity-gate artifacts: there is no design canvas id for these blocks, so do
+   not name them `implemented-*.png` and do not attempt fidelity pairing.
+9. **[scrum-master, WriteScope decision]** Decide whether the audit's evidence
+   should persist in the repository. All 18 seam PNGs live in
+   `/tmp/req016-visual-audit/`, which is machine-local and purgeable; the audit
+   flagged this itself and asked for a WriteScope extension it did not have. The
+   requirement would close with its blocking visual gate backed by evidence that
+   no future reader can open.
+
+## Round 43 — deferred findings and residual risks
+
+- **D-I5 — OQ-1, the `Ý tưởng` tab, is for PO and does not block.** Verified as
+  described: no shipped screen maps to `Ý tưởng`, and the idea-generating screens
+  (`Gợi ý quà`, `Mồi chuyện`, `trắc nghiệm`) are already solo-reachable through
+  the `Muốn làm` quick-entry strip (audit seam B PASS). Keeping `sắp có` there is
+  what UX §1/§6 specify for a surface whose owning story has not shipped, so it
+  is correct-as-specified rather than a residual piece of F-M1. PO should either
+  assign the tab's content to a stage-1 story or record an explicit deferral.
+- **D-I6 — BR-16 / `BUG-20260927-001`** stays open and non-blocking; see row 13.
+- **D-I7 — audit NOTE-1 and NOTE-2 carry forward.** NOTE-1: `Bảng tra ăn khớp`
+  shows a fully blank body while its packs load (AC-28 forbids a spinner) — worth
+  a PO glance on a cold read. NOTE-2: if the user denied `POST_NOTIFICATIONS` at
+  FCM init, the REQ-016 evening check-in silently writes `markReminded` and stays
+  off with no explanation surface.
+- **D-I8 — the solo shell's host contract quietly widened; verified safe today.**
+  `_tabBody` calls `AppL10n.of(context)` unconditionally, for the `Muốn làm` tab
+  too. The architecture doc §3 justified this as "Localizations already used by
+  `_label`", but `_label` (`home_screen.dart:352`) uses only
+  `Localizations.localeOf`, which any bare `MaterialApp` satisfies, whereas
+  `AppL10n.of` needs the app's own delegates registered. So any future test host
+  that pumps an unpaired `HomeScreen` without `AppL10n.localizationsDelegates`
+  will now throw where it previously rendered. I checked all nine test files that
+  construct `HomeScreen` by running the affected suites: `test/features/home/`
+  plus `pair_gate_cubit_test.dart` are 58 pass / 1 skipped / 0 failures, so
+  nothing is broken now. Recorded so the next host to be added knows the
+  requirement exists.
+- **D-I9 — the destination-row geometry is duplicated, by choice.** The six
+  `_destination*` constants in `home_screen.dart:88-94` are transcribed from
+  `me_screen.dart`'s `_PrivateStorageBlock` rather than shared, so the two menu
+  surfaces can now drift apart visually. The code says so in a comment and the
+  duplication is two call sites, which is the cheaper trade today; noted as the
+  thing to revisit if a third menu surface appears.
+- **D-I1 (from Round 39) is unchanged and still applies.** The integration branch
+  is behind `main`, and the registry table in this branch's `req_master.md` is
+  still stale. New corroboration: `BUG-20260927-001` exists in the control
+  checkout's `data/bugs/` but not in this worktree's, which is the same drift.
+  Sync `main` into the integration branch before the final merge.
+- **D-I3 and D-I4 (from Round 39)** are untouched by this span and stay as
+  recorded.
+
+## Round 43 — touched risk surfaces and critical gates
+
+| Risk surface | Critical gate | Status |
+|---|---|---|
+| mobile navigation / discoverability | the four solo tabs reach their shipped screens | **PASS** — 28/28, incl. real-opener seam-B push test |
+| mobile interaction | each destination row calls its own opener exactly once | **PASS** — dedicated test asserts the ordered call list |
+| requirement closure — build + runtime | `## Integration Build & Runtime` (rule 12g3) | **PASS** — both lines present in one file |
+| requirement closure — cross-screen visual | `mobile-visual-audit.md` (rule 12g2) | **FAIL — F-I4**: artifact present and substantive, but seam A still records `FAIL on content` with no post-fix capture |
+| persistence / migration ladder | green `test/core/database/` at integration HEAD | **PASS** — 104/104, closes D-I2 |
+| setup / configuration documentation | guide matches delivered scope (rule 12a) | **PASS** — F-I3 closed |
+| regression — paired path | paired session keeps the couple dashboard | **PASS** — unchanged code, test green |
+| import boundary | no journal/notebook internal imported into `home_screen.dart` | **PASS** — all three new imports are public surfaces or generated l10n |
+
+## Round 43 — traceability
+
+- Decision D-3 (`req_master.md:155`) — four-tab bar **and its routes** for the
+  solo stage-1 surface: restored, labels untouched.
+- AC-17 — the two entry-point contracts quoted in
+  `fm1-solo-tabs-solution.md` §1: honoured; nothing mounted as a tab body, no
+  switcher between the notebook and skill surfaces.
+- AC-21 / SC-1' — single card store on `Muốn làm`: asserted verbatim for all four
+  tabs.
+- AC-22 positioning intent (D-3 Outcome column) — the destination block is light
+  (header + rows), carries no counts, preview, large card or floating CTA.
+- Seed scope (`req_master.md:131`) — `Sổ tay người yêu` + `Hồ sơ kỹ năng` are one
+  seed, which is why they are two rows of one tab rather than two tabs.
+- Prior review (`55ade421`): F-I1 closed pre-baseline; F-I2 items 5/6 and F-I3
+  item 7 closed here; the 9 cross-story contracts stand PASS by reference.
+
+## Round 43 — requirement state recommendation
+
+- Requirement status: **`IN_PROGRESS`** — do not mark `DONE` yet.
+- Leave `Review (Reviewer)` unchecked.
+- Route **action item 8** to mobile-dev. It is a capture-and-update pass with no
+  code change; the harness already exists and has been run once before.
+- Route **action item 9** to Scrum Master as a WriteScope decision.
+- Everything else routed into this round is closed. After item 8 lands, the
+  remaining path to closure is a short re-check of seam A only, not another full
+  integration review.
+
+---
+
+# Round 39 review (history — superseded by Round 43 above)
+
+Round 39 verdict: **PATCH_REQUIRED**. Its action items 1-4 (F-I1) closed before
+this review's baseline; items 5-6 (F-I2) and item 7 (F-I3) are verified closed in
+Round 43 above. Retained below for the record.
+
+Review type: requirement-integration-review
+Requirement: REQ-016_solo_stage1_relationship_assistant
+Scope gate: superseded by the Round 43 scope gate at the same path
 Branch: `codex/REQ-016_solo_stage1_relationship_assistant-integration`
 HEAD reviewed: `e9519243047baa59a2703496b37912a8b71a5848`
 Diff baseline: `eb4898c61427bf78572915ee80459e48ed6b30e3`
 Reviewed: 2026-09-26
-
-Outcome: PATCH_REQUIRED
 
 ## Verdict rationale
 
