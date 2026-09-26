@@ -1,6 +1,6 @@
 # Review Report: STORY-012 Trạng thái theo pha, widget, và bộ đếm "của cải đang lớn"
 
-Outcome: DEFERRED_ONLY
+Outcome: PATCH_REQUIRED
 
 Lượt S10 · `full-story-review` · tái review sau `PATCH_REQUIRED` của S9
 Scope gate: `review/scope-gate.md` (`SCOPE_GATE_COMPLETE: YES`)
@@ -10,13 +10,27 @@ Mốc diff dùng thật: `802b3fa6..HEAD` (`6ee190eb`) — lượt sửa đúng 
 
 ## Lý do outcome, trong một đoạn
 
-Hai khoản chặn của S9 đóng thật, và tôi kiểm bằng phép đo của chính mình chứ
-không đọc lại lời khai: B-1a kiểm bằng diff + **mở ảnh chụp lại ra soi**, B-7
-kiểm bằng **tự dựng lại lượt đối chứng** tên cũ/tên mới. N-7 đóng, và đóng theo
-cách đáng ghi nhận — mục ghi bù tự khai mình là dựng lại từ hiện vật, không
-giả vờ là một lượt đo mới. AC9 nay `PASS` đủ bảy ô. Không finding chặn mới.
-`DEFERRED_ONLY` thay vì `CLEAN` chỉ vì tập hoãn kế thừa còn nguyên (N-1..N-6,
-N-8, N-9, N-2 của DevOps, R-2/D-\* của S7) và lượt này thêm **N-10**.
+Phần thực chất của lượt sửa đạt, và tôi kiểm bằng phép đo của chính mình chứ
+không đọc lại lời khai: B-1a kiểm bằng diff + **mở ảnh chụp lại ra soi** — đóng.
+N-7 đóng, và đóng theo cách đáng ghi nhận — mục ghi bù tự khai mình là dựng lại
+từ hiện vật, không giả vờ là một lượt đo mới. Chất lượng hình khối của ô 1 nay
+khớp canvas.
+
+Nhưng B-7 chỉ **đóng một nửa**, và nửa còn lại là một khoản chặn mới: **B-8**.
+Lượt sửa đã lật được nửa *ghép cặp ảnh* của cổng (tôi tự dựng đối chứng tên
+cũ/tên mới và xác nhận), nhưng nửa *giải id màn* thì đỏ — và nửa này chưa từng
+bị đụng tới ở S9 nên không ai thấy. Dòng `Design-Screen:` của
+`story_master.md:17-24`, do chính commit `802b3fa6` của lượt sửa viết ra, đã
+biến một trường máy đọc thành văn xuôi: ngoặc `(alias: …)`, một câu tiếng Việt,
+và một tham chiếu markdown nằm ngay trong giá trị. Cổng
+`verify-story-visual-fidelity-gate.sh` cắt theo dấu phẩy nên nhận id đầu tiên là
+`ngan-da-hen-ngay-dang-doi (alias: hub-waiting, hub-upcoming)` — một chuỗi không
+nguồn design nào có, và nó **chặn story ở cổng DONE**.
+
+Sửa là một dòng, nhưng ở `story_master.md` — ngoài WriteScope của tôi (`review`)
+và bị reviewer SKILL rule 7 cấm. Nên tôi không tự sửa: `PATCH_REQUIRED`, một
+khoản chặn, chủ là Scrum Master. Tập hoãn kế thừa vẫn còn nguyên (N-1..N-6, N-8,
+N-9, N-2 của DevOps, R-2/D-\* của S7) và lượt này thêm **N-10**, **N-11**.
 
 ## Ba khoản của S9 — kiểm chứng độc lập
 
@@ -47,7 +61,7 @@ Hai điều chỉnh kèm theo đều có căn cứ viết tại chỗ và tôi c
 `colorText` (canvas dùng `--tx`; hồng ở cỡ caption dưới ngưỡng AA theo ADR-004b).
 Chip vẫn đứng dưới CTA `Hẹn ngày` một bậc — D-2 không bị phá.
 
-### B-7 · Cổng `visual_fidelity.py` — **ĐÓNG**
+### B-7 · Cổng thị giác — **ĐÓNG NỬA GHÉP CẶP, ĐỎ NỬA GIẢI ID (→ B-8)**
 
 Tôi tự chạy hai lượt, không đọc bảng của lane mobile:
 
@@ -74,6 +88,73 @@ báo cáo thị giác đã cập nhật, và các mục lịch sử "Lượt pat
 chú rõ là giữ tên tại thời điểm chạy, không phải đường dẫn còn sống — đúng cách
 xử lý biên bản cũ.
 
+**Nửa còn lại của cổng thì đỏ.** `visual_fidelity.py` chỉ trả lời câu hỏi "mỗi
+màn có đủ hai phía ảnh và ghép được cặp không". Cổng đầy đủ còn hỏi thêm một câu
+thứ hai: "những id màn story khai có thật trên bề mặt design không". Câu thứ hai
+đỏ — chi tiết ở **B-8** dưới đây. Ở S9 câu này chưa từng được chạy (S8 chấm AC9
+`FAIL`, S9 chấm `PATCH_REQUIRED`, nên cổng chỉ kích hoạt khi outcome đạt), vì
+vậy đây không phải hồi quy do lượt sửa làm hỏng một thứ đang xanh — nó là một
+nửa cổng lần đầu được soi tới.
+
+### B-8 · `Design-Screen:` không giải được id — **MỞ, CHẶN** (mới)
+
+Đây là khoản chặn duy nhất của lượt này. Cổng stop
+`verify-story-visual-fidelity-gate.sh` trả `BLOCKED [GENERIC]` với nguyên văn:
+id `ngan-da-hen-ngay-dang-doi (alias: hub-waiting, hub-upcoming)` "which this
+design source `cupid-ch-ng-1` does not have — an invented or stale id means the
+comparison targeted nothing real".
+
+Nguyên nhân là dạng của trường, không phải id. `story_master.md:17-24` hiện là:
+
+```
+Design-Screen: ngan-da-hen-ngay-dang-doi (alias: hub-waiting, hub-upcoming),
+  man-goc-muon-lam (alias: hub-date_day, hub-quiet),
+  … Id canvas là id màn chuẩn duy nhất (Design Ruling Log hàng B-7,
+  `req_master.md`); nhãn bản dựng ở trên chỉ là alias mô tả trạng thái, xem
+  `architecture/solution.md` §8.
+```
+
+`Design-Screen:` là trường **máy đọc**, cắt theo dấu phẩy. Ba thứ vừa được nhồi
+vào trong giá trị đều làm nó không giải được: ngoặc `(alias: …)` — mà bản thân
+nó lại chứa dấu phẩy nên còn tự cắt mình thành nhiều mảnh giả, một câu tiếng
+Việt, và một tham chiếu markdown. Mảnh đầu tiên vì thế thành
+`ngan-da-hen-ngay-dang-doi (alias: hub-waiting, hub-upcoming)`.
+
+`git log -L 16,24` chỉ rõ dạng này do commit `802b3fa6`
+("Tech Lead B-7 naming-convention ruling + Design-Screen id fix") của **chính
+lượt sửa này** đưa vào; trước đó trường là danh sách nhãn bản dựng trần
+(`hub-waiting, hub-upcoming, …`) — cũng không phải id canvas, tức trường này
+chưa bao giờ giải được, chỉ là chưa bao giờ bị hỏi.
+
+Nội dung ngữ nghĩa mà lượt sửa muốn diễn đạt **là đúng** theo phân xử §8 (id
+canvas là id chuẩn duy nhất, nhãn bản dựng chỉ là alias). Lỗi chỉ là đặt phần
+diễn giải vào trong một trường máy đọc. Bản đồ alias đã có nguyên vẹn ở
+`architecture/solution.md` §8/§8b và Design Ruling Log hàng B-7 của
+`req_master.md`, nên rút nó khỏi trường **không mất thông tin nào**.
+
+**Sửa đề nghị** (một dòng, chủ: Scrum Master — `story_master.md` ngoài WriteScope
+`review` của tôi và bị reviewer SKILL rule 7 cấm reviewer sửa):
+
+```
+Design-Screen: ngan-da-hen-ngay-dang-doi, man-goc-muon-lam, 23h-vua-ve-j8,
+  j12-nhan-ra-cot-moc, sb-84-widget-bon-pha
+```
+
+rồi để câu diễn giải alias thành một dòng văn xuôi **riêng, ngoài trường**.
+
+**Giới hạn của kiểm chứng này, nói thẳng:** tôi **không** xác nhận được cả năm
+id bare đều hợp lệ. Tập id hợp lệ do `.claude/hooks/**` tính ra (tôi bị cấm đọc);
+cả hai entrypoint `.sh` (`verify-story-visual-fidelity-gate.sh`,
+`validate-dev-design-render.sh`) đều trả exit 0 im lặng khi tôi gọi tay nên không
+liệt kê được; và các id là slug không xuất hiện nguyên văn trong
+`cupid-app-design-system/Cupid Chặng 1.dc.html` (tôi đã thử cả năm, đều 0 khớp).
+Danh sách hợp lệ mà cổng tự in ra thì **bị cắt** ở `chi-tiet-th…` theo thứ tự
+chữ cái, nên nó chỉ chứng thực `23h-vua-ve-j8`; bốn id còn lại bắt đầu bằng
+j/m/n/s, tức nằm sau chỗ cắt. Cổng cũng chỉ báo id sai **đầu tiên**. Vậy lượt vá
+phải **chạy lại cổng** sau khi sửa dòng, và nếu còn id bị từ chối thì đối chiếu
+với danh sách hợp lệ cổng in ra. Tôi khẳng định chắc chắn một điều: dạng hiện tại
+sai và chặn; tôi **không** khẳng định rằng chỉ cần bỏ ngoặc là cổng sẽ xanh.
+
 ### N-7 · Mục "Lượt patch #4" — **ĐÓNG**
 
 `coding-plan/test-results.md` +134 dòng, có `## Lượt patch #4` với sáu khoản
@@ -96,8 +177,9 @@ cũng được sửa thành `+225/−2` theo `--numstat`; tôi xác nhận phép
 | Cổng | Kết | Bằng chứng |
 |---|---|---|
 | **Design fidelity (12e2/12e3)** | **PASS** | Bảy ô. Ô 1 chụp lại và tôi tự soi; ô 2–7 là rename byte-y-hệt của ảnh S9 đã soi. `VISUAL_FIDELITY: PASS` ở `visual-fidelity-report.md:3`, kèm bảng thuộc-tính-theo-thuộc-tính, không phải token trần |
-| **Script cổng `visual_fidelity.py`** | **PASS (exit 0)** | Tự chạy + đối chứng tên cũ exit 1 — xem B-7 |
-| Design-Screen đã giải, đúng màn | **PASS** | `story_master.md:29` và `visual-fidelity-report.md:29-30` đều khai bằng id canvas (`ngan-da-hen-ngay-dang-doi`, `man-goc-muon-lam`, `23h-vua-ve-j8`, `j12-nhan-ra-cot-moc`, `sb-84-widget-bon-pha`), nhãn bản dựng lùi về alias. Reference tôi mở đúng là màn của story |
+| **Script ghép cặp `visual_fidelity.py`** | **PASS (exit 0)** | Tự chạy + đối chứng tên cũ exit 1 — xem B-7 |
+| **Cổng stop `verify-story-visual-fidelity-gate.sh`** | **FAIL (BLOCKED [GENERIC])** | **B-8**. Cổng từ chối `Design-Screen:` của `story_master.md:17-24`: mảnh id đầu tiên thành `ngan-da-hen-ngay-dang-doi (alias: hub-waiting, hub-upcoming)`, không nguồn design nào có. Tôi tự gặp nguyên văn thông điệp này ở cổng stop của chính lượt review |
+| Design-Screen đã giải, đúng màn | **FAIL** | **Sửa lại khẳng định tôi đã viết ở bản nháp đầu của báo cáo này.** Tôi đã ghi dòng này `PASS` vì thấy `visual-fidelity-report.md:29-30` và trường đều mang id canvas đúng — đó là đọc **ngữ nghĩa**. Máy đọc trường thì không giải được vì ngoặc alias nằm trong giá trị: xem **B-8**. Reference tôi mở bằng mắt vẫn đúng là màn của story, nhưng việc đó **không** thay được truy vết máy kiểm được |
 | Test widget (hồi quy có mục tiêu) | **PASS** | Tôi tự chạy `flutter test test/features/phase_status/phase_status_line_test.dart` → **+17 ~4**, trùng đúng con số lane mobile khai |
 | Suite liền kề | **PASS** | `test/features/activity_cards` → +213 ~2 |
 | Static analysis mobile | **PASS** | Tôi tự chạy `flutter analyze lib/features/phase_status` → 6 issue, **toàn bộ mức `info`, 0 error / 0 warning**, và cả 6 nằm ở `phase_content.dart`/`phase_status_cubit.dart` — hai tệp lượt này **không** chạm. `phase_status_line.dart` sạch. Khai "0 error/0 warning" của lane mobile đúng |
@@ -114,7 +196,7 @@ cũng được sửa thành `+225/−2` theo `--numstat`; tôi xác nhận phép
 | AC | Kết | Căn cứ |
 |---|---|---|
 | AC1–AC8 | **PASS** | Không đổi so với S8. Delta không chạm hành vi nào |
-| **AC9** bảy design screen khớp canvas `cupid-ch-ng-1` | **PASS** | Ô 1 `hub-waiting` lật `FAIL` → `PASS`: hình khối chip đã đúng canvas, tôi tự soi ảnh. Ô 2–7 giữ `PASS` của S9 (ảnh byte y hệt). Cả năm id canvas đều có đủ hai phía và cổng ghép cặp được |
+| **AC9** bảy design screen khớp canvas `cupid-ch-ng-1` | **PASS phần hình, CHƯA CHỨNG NHẬN** | Phần nội dung đạt: ô 1 `hub-waiting` lật `FAIL` → `PASS` (hình khối chip đã đúng canvas, tôi tự soi ảnh), ô 2–7 giữ `PASS` của S9 (ảnh byte y hệt), cả bảy ô đủ hai phía và ghép cặp được. Nhưng AC9 nói "khớp canvas `cupid-ch-ng-1`", và trường khai story trỏ vào canvas nào thì máy không giải được (**B-8**). Nên tôi **không** chứng nhận AC9 ở lượt này: mắt tôi thấy khớp, còn truy vết tự động thì chưa tồn tại. Chứng nhận AC9 treo đến khi B-8 được vá và cổng chạy lại xanh |
 
 ## Finding không chặn
 
@@ -151,10 +233,21 @@ Ba điểm đáng giữ lại vì chúng nên lặp lại:
 
 ## Khuyến nghị trạng thái
 
-- Giữ tick `Implementation (Development)` (`[x]` hiện tại là đúng).
-- Tick `Review (Reviewer)`.
-- Story status: **`DONE`**. Story branch đủ điều kiện gộp vào
+- Giữ tick `Implementation (Development)` (`[x]` hiện tại là đúng). Phần mã của
+  lượt sửa đạt; B-8 là khoản artefact, không phải khoản mã.
+- **Chưa** tick `Review (Reviewer)`.
+- Story status: **`PATCH_REQUIRED`**. Chưa đủ điều kiện gộp vào
   `codex/REQ-016_solo_stage1_relationship_assistant-integration`.
+- **B-8 là việc của Scrum Master, một dòng.** Sửa `Design-Screen:` ở
+  `story_master.md:17-24` thành danh sách id canvas trần (xem dạng đề nghị ở mục
+  B-8), đưa câu diễn giải alias ra ngoài trường, rồi **chạy lại cổng**. Tôi
+  không tự sửa: tệp nằm ngoài WriteScope `review` của tôi và reviewer SKILL
+  rule 7 cấm reviewer sửa `story_master.md`. Đây là lượt vá artefact thuần, không
+  cần mở lại lane mobile và không cần chụp lại ảnh nào.
+- Sau khi cổng xanh, khoản chặn duy nhất hết hiệu lực và lượt review kế tiếp có
+  thể là một lượt **cực hẹp**: chỉ xác nhận dòng `Design-Screen:` và kết quả
+  cổng. Mọi kết luận thực chất khác của S10 (B-1a, N-7, không hồi quy, các cổng
+  test/analyze/smoke) giữ nguyên hiệu lực, không cần dựng lại.
 - **N-10 phải được xếp hàng, không được đóng theo story.** Đề nghị Scrum Master
   mở một lượt độc lập WriteScope `mobile/test/**` sửa hằng tên trong hai harness
   chụp. Nếu nó không được xếp hàng, lượt bật `CAPTURE_VISUALS` kế tiếp của bất
@@ -168,7 +261,8 @@ Ba điểm đáng giữ lại vì chúng nên lặp lại:
 
 ## Đếm finding
 
-- Chặn: **0**
-- Đóng ở lượt này: **3** (B-1a, B-7, N-7)
+- Chặn: **1** (B-8 — `Design-Screen:` không giải được id, chủ: Scrum Master)
+- Đóng ở lượt này: **2** (B-1a, N-7)
+- Đóng một nửa: **1** (B-7 — nửa ghép cặp đóng, nửa giải id chuyển thành B-8)
 - Không chặn mới: **2** (N-10, N-11)
 - Không chặn kế thừa, vẫn mở: **8** (N-1..N-6, N-8, N-9) + 13 khoản R-2/D-\*
