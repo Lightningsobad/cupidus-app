@@ -132,37 +132,46 @@ Next Valid Step:
      and the Review artifact bullet rewritten to describe the real
      PATCH_REQUIRED/B-8 outcome instead of the stale DEFERRED_ONLY text. NOT
      yet committed in the story worktree.
-4. **NEXT** —
-   a. Refresh the Story Git Boundary (`git-story-boundary.sh status --req
-      REQ-016_solo_stage1_relationship_assistant --story
-      STORY-012_phase_status_and_widget`) to confirm current `Worktree`/
-      `Branch`/`BaseHead` before any further action.
-   b. Commit the `story_master.md` fix in the story worktree via
-      `git-story-boundary.sh commit` (message should reference B-8 fix).
-   c. Determine and run the correct re-verification of
-      `verify-story-visual-fidelity-gate.sh` against the corrected
-      `Design-Screen:` field. Manual `.sh` invocation is known to silently
-      exit 0 (see MEMORY.md `visual_fidelity_gate_cli`); the reliable
-      diagnostic is `.claude/hooks/lib/visual_fidelity.py --dir/--stage`, but
-      the `Design-Screen:`-parsing half of the check is inside the `.sh`
-      wrapper itself — confirm the real invocation path (likely only
-      reproducible through the actual stop-gate hook trigger, e.g. a real
-      `git-story-boundary.sh complete` attempt) before concluding B-8 is
-      closed.
-   d. Dispatch **Iris-QC** for the reviewer's own recommended narrow
-      follow-up: confirm ONLY the `Design-Screen:` line and the gate result.
-      All other S10 conclusions (B-1a, N-7, no regression, test/analyze/
-      smoke gates) remain valid and do not need to be redone. Use
-      `.claude/hooks/handoff-build.sh spawn`/`continue` to get correct
-      `BaseHead` (must be an ancestor of current worktree HEAD, not HEAD
-      itself).
-   e. Only after that narrow review returns CLEAN/DEFERRED_ONLY: re-tick
-      Review, set `Status: DONE` again in `story_master.md`, then
-      re-resolve the SAME 3-file merge conflict
-      (`activity_card_hub_view.dart`, `app_en.arb`, `app_vi.arb`) in the
-      integration worktree and run `git-story-boundary.sh complete`/`merge
-      --continue` to actually land the story.
-   f. After a successful merge: confirm `master_requirements_list.md`/
+4. **DONE 2026-09-26** — steps a-b complete: boundary refreshed
+   (`refresh-base`, BaseHead now `0c50a0e5`), `story_master.md` B-8 fix
+   committed as `0c50a0e5c8c02da5c933df45e63c14b84153164d` in the story
+   worktree via `git-story-boundary.sh commit`.
+5. **IN PROGRESS 2026-09-26** — Dispatched **Iris-QC** (same reviewer/session
+   that produced the revised S10 report, continued via `SendMessage`, NOT a
+   fresh spawn) for the narrow follow-up her own report recommended: confirm
+   ONLY the `Design-Screen:` field format and the real
+   `verify-story-visual-fidelity-gate.sh` result against commit `0c50a0e5`.
+   Explicitly told her NOT to redo B-1a/N-7/B-7-pairing/AC9 screenshots — those
+   stand as already closed. Told her to write the updated Outcome directly
+   into `review/review-report.md` in this worktree. Awaiting her reply
+   (teammate mailbox notification, not a `TaskOutput`-trackable spawn).
+   - Received one `idle_notification` from her (timestamp 12:48:06Z) that
+     PRE-DATES this dispatch (sent ~12:49:28Z+) — it is the delayed original
+     S10 second-pass completion, not a reply to the new ask. Confirmed
+     against `data/runtime/parallel-runs/
+     RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-reviewer.json`:
+     `status: COMPLETED`, `completed_at: 2026-09-26T12:20:50Z`, terminal, run
+     lock (`story-state:STORY-012_phase_status_and_widget`) already stale —
+     no action needed on that run file, do not treat it as a fresh blocker.
+     Extra detail from that notification worth keeping: the gate's own
+     printed valid-id list was truncated in her manual attempts, so only
+     `23h-vua-ve-j8` was independently certified against the design source;
+     the other 4 ids are format-correct but not yet source-certified — if
+     the real gate run rejects one, correct it against the gate's own
+     printed valid list, don't guess.
+6. **NEXT (after Iris-QC replies)** —
+   a. Read her updated `review/review-report.md` Outcome line. If
+      `CLEAN`/`DEFERRED_ONLY` (B-8 closed): re-tick Review, set
+      `Status: DONE` again in `story_master.md`, commit, then re-resolve the
+      SAME 3-file merge conflict (`activity_card_hub_view.dart`,
+      `app_en.arb`, `app_vi.arb` — discarded earlier by `merge --abort`) in
+      the integration worktree and run `git-story-boundary.sh complete`/
+      `merge --continue` to actually land the story.
+   b. If still `PATCH_REQUIRED`/`BLOCKED`: record the exact remaining
+      finding, route to the correct owner (Scrum Master if artifact-only,
+      Tech Lead if a naming/mapping decision, mobile-dev if code), do NOT
+      retry complete/merge.
+   c. After a successful merge: confirm `master_requirements_list.md`/
       `req_master.md` story tracking reflects DONE for STORY-012. Then route
       separately (NOT blocking DONE): the ux-spec header gap
       (Design-Surface/Design-Screen lines) to Brainstormer/Pink-Designer,

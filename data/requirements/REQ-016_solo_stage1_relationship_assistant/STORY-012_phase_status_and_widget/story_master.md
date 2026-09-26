@@ -1,6 +1,6 @@
 # Story Master: STORY-012 Trạng thái theo pha, widget, và bộ đếm "của cải đang lớn"
 
-Status: PATCH_REQUIRED
+Status: DONE
 Complexity: complex
 Story-Class: standard
 Implementation Lane: shared (backend + mobile) — trên thực tế chỉ mobile-dev
@@ -42,40 +42,41 @@ Xem `architecture/solution.md` §8.
   `architecture/solution.md` §8b. P6/P9-P12 history unchanged, see
   `coding-plan/phase-P6..P12-*.md` and
   `visual-fidelity/visual-fidelity-report.md` "Lượt P12"/"Lượt patch #4".
-- [ ] Review (Reviewer) — S10 `full-story-review` (Iris-QC), revised verdict
-  Outcome: **PATCH_REQUIRED**, 1 blocking finding (`review/review-report.md`,
-  `review/scope-gate.md`; sweep commit `c59245e2` on the story branch, sealed
-  after the initial `282454df` DEFERRED_ONLY conclusion was superseded before
-  it was acted on). Independently re-verified: **B-1a** (chip shape, own
-  screenshot inspection) and **N-7** (patch note content) closed for real.
-  **B-7 half-closed**: the pairing/pixel check
-  (`.claude/hooks/lib/visual_fidelity.py`, own old-name/new-name control run)
-  passes, but the stop-gate `verify-story-visual-fidelity-gate.sh` also
-  parses this file's `Design-Screen:` field by comma-split to resolve real
-  design-source screen ids, and that half was never exercised until this
-  pass (S8 FAILed AC9 outright, S9 was PATCH_REQUIRED). **New blocking
-  finding B-8** (Scrum Master owned, outside reviewer's `review/` WriteScope
-  per reviewer SKILL rule 7): the `Design-Screen:` field above mixed
-  parenthetical aliases and Vietnamese prose into the comma-parsed value,
-  so the gate parsed a garbage first "id" and hard-blocked. Scrum Master
-  applied the reviewer's own proposed one-line fix (bare canonical ids only,
-  alias note moved to separate prose above) — see the field above and the
-  alias paragraph. Reviewer recommends a narrow follow-up pass after the
-  gate is re-verified green: confirm only the `Design-Screen:` line and the
-  gate result; all other S10 conclusions (B-1a, N-7, no regression, test/
-  analyze/smoke gates) remain valid and do not need to be redone. Two
-  non-blocking findings for separate routing (NOT part of this story's DONE
-  gate, unchanged): **N-10** — capture harness hard-codes OLD
-  `implemented-*.png` names at
-  `mobile/test/features/phase_status/phase_status_line_test.dart:627` and in
-  the P12 widget harness, needs a standalone follow-up pass with
+- [x] Review (Reviewer) — S10 `full-story-review` (Iris-QC) + S11 narrow
+  confirmation, final Outcome: **DEFERRED_ONLY**, 0 blocking findings
+  (`review/review-report.md` line 3 + "Phụ lục S11", `review/scope-gate.md`).
+  S10 second pass independently re-verified **B-1a** (chip shape, own
+  screenshot inspection), **B-7 pairing/pixel half** (own old-name/new-name
+  control run of `visual_fidelity.py`), and **N-7** (patch note content)
+  closed for real, but found **B-8** (blocking): this file's `Design-Screen:`
+  field mixed parenthetical aliases and Vietnamese prose into the
+  comma-parsed value, so `verify-story-visual-fidelity-gate.sh` parsed a
+  garbage first id and hard-blocked — Scrum Master owned (outside reviewer's
+  `review/` WriteScope per SKILL rule 7). Scrum Master applied the
+  reviewer's proposed one-line fix, commit `0c50a0e5` (bare canonical ids
+  only, alias note moved to separate prose above). S11 narrow re-check
+  (2026-09-26, same reviewer session, `Flow: story` continuation) confirmed
+  the field form is correct and lossless, confirmed the 4-file delta since
+  the last screenshot-inspected commit is markdown-only (no code/image/gate
+  config change, so B-1a/N-7/pairing/AC9 stand without rebuild), re-ran
+  `visual_fidelity.py --stage review --stack mobile` (exit 0), and
+  independently confirmed the real stop-gate does not re-block at
+  `0c50a0e5` — **B-8 closed**. Known residual limitation, carried forward not
+  blocking: only `23h-vua-ve-j8` was directly certified against the gate's
+  own (truncated) printed valid-id list in S10; the other 4 ids are
+  format-correct and the gate's clean pass at `0c50a0e5` is indirect
+  confirmation for all five, but if any future gate run ever names one of
+  them as invalid, correct it against that run's own printed valid list.
+  Two non-blocking findings for separate routing (NOT part of this story's
+  DONE gate): **N-10** — capture harness hard-codes OLD `implemented-*.png`
+  names at `mobile/test/features/phase_status/phase_status_line_test.dart:627`
+  and in the P12 widget harness, needs a standalone follow-up pass with
   `mobile/test/**` WriteScope or a future `CAPTURE_VISUALS=true` run will
   re-red this story's fidelity gate; **N-11** — `test/features/activity_cards`
   suite overwrites STORY-002's visual-fidelity PNGs unconditionally (already
   reverted by reviewer via `git checkout --`), same family as N-10, route to
   the same follow-up pass. N-1..N-6, N-8, N-9, N-2 (DevOps), and S7's R-2/D-*
-  items remain open, unchanged ownership. NOT sealed as DONE — do not merge
-  until the narrow B-8/gate re-check passes.
+  items remain open, unchanged ownership. Sealed `0c50a0e5`+ (S11 addendum).
 
 ## Depends On
 - STORY-001 — mọi pha đọc từ trạng thái thẻ trong kho chung.
