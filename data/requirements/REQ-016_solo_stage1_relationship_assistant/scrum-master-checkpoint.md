@@ -44,7 +44,8 @@ collapsed to one line; full trail lives in each story's own
 
 6. **RESOLVED by user 2026-09-26 (Round 42): wire the 3 tabs to their
    already-shipped screens** (not deferred; D-3 stands as originally written).
-   Implementation now in flight — see Round 42 cursor below. Was: F-I2 action item 6
+   **Implementation complete and sealed (Round 43, commit `3b51172f`)** — see
+   Current cursor below. Was: F-I2 action item 6
    (`integration-review/mobile-visual-audit.md`, Round 41, committed `c1c538ea`)
    found **F-M1**: in solo/unpaired mode — REQ-016's own premise — 3 of the 4
    solo stage-1 tabs (`Sổ tay`, `Nhật ký`, and the Me-hub path to `Hồ sơ kỹ
@@ -89,7 +90,11 @@ collapsed to one line; full trail lives in each story's own
   reds, root cause STORY-005 P6/P7 rework — but see STORY-005 row above, may
   already be resolved on integration branch), `BUG-20260924-001` (3
   pre-existing `test/design_system/` reds, confirmed pre-existing at STORY-007
-  P3's own BaseHead). Closed: `BUG-20260907-002`, `BUG-20260910-001`.
+  P3's own BaseHead), `BUG-20260927-001` (`context_content_gate_test.dart:159`
+  BR-16 pack-phrase leak in `zodiac_shell_resolver.dart:157`, root cause
+  STORY-011 P2, surfaced by the F-M1 mobile-dev run, confirmed pre-existing at
+  that run's BaseHead `9aadd52f`). Closed: `BUG-20260907-002`,
+  `BUG-20260910-001`.
 - Integration branch re-verification owed: re-run integration build/runtime
   verification and record under
   `REQ-016_solo_stage1_relationship_assistant/integration-review/` BEFORE any
@@ -129,87 +134,77 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 - Round 1-35 narrative in git history of this file — superseded by the table
   and "Current cursor" sections above.
 
-## Current cursor (Round 42 continued, `continue parallel`, 2026-09-26 — Tech Lead F-M1 decision sealed, mobile-dev dispatch next)
+## Current cursor (Round 43, F-M1 implemented, verified, sealed — fresh Iris-QC review next)
 
-- Tech Lead (`Alan-Techlead`) returned `TECH_LEAD_COMPLETE: YES`. 3-part
-  verification passed: agent releasable; worktree `git status --porcelain`
-  showed exactly the declared WriteScope (`architecture/` dir, one new file);
-  full file content read and eyeballed — matches the specialist's own report
-  exactly. Committed in the integration worktree as `9aadd52f`. `Alan-Techlead`
-  released via `TaskStop`.
-- **Corrects the Round 42/Open-user-decisions-item-6 premise**: no tab maps to
-  `Hồ sơ kỹ năng`. The 4 D-3-locked labels are `Muốn làm · Ý tưởng · Sổ tay ·
-  Nhật ký`. Fix uses **2 tabs**: `Sổ tay` → `openNotebookScreen` +
-  `openSkillProfileScreen` (req_master.md:131 groups these as one seed);
-  `Nhật ký` → `openJournalScreen`. `Ý tưởng` unaffected, correctly stays a
-  placeholder (see new OQ-1 in Still-open non-blocking items above).
-- Decision (full text in `architecture/fm1-solo-tabs-solution.md`, do not
-  re-derive): tab body → destination-list block (style of shipped
-  `_PrivateStorageBlock`, `me_screen.dart:539-579`); row tap pushes via the
-  existing 3 entry points. Mounting the screens as tab bodies is forbidden
-  (`journal_entry_point.dart:96-98`, `context_notebook_entry_point.dart:59-61`,
-  AC-17) plus 3 technical reasons (own Scaffold+back would pop
-  `PairGateShell`; `getIt`-in-`build` breaks the un-DI'd test host;
-  `IndexedStack` would eagerly open private screens on app entry). No
-  state/DI changes beyond 3 optional test seam-opener callbacks on
-  `_SoloStageOneShell` (same pattern as shipped
-  `resolvePairingStatus`/`createTimelineCubit`). Classification: `standard`,
-  direct on this integration worktree/branch (2 files, no story worktree).
-  `next_mode_recommendation: mobile-implementation-direct` — test scope fully
-  specified in the doc's §5.2, no coding-plan phase needed.
-- Two hard constraints for the mobile-dev dispatch (carry forward verbatim):
-  (1) `activity_card_hub_view_test.dart:852-907` will correctly go red and
-  must be rewritten, keeping the exact AC-21/SC-1' assertion
-  (`find.text('Đi biển')` → `findsNothing`) for all three tabs; (2) exactly 2
-  new imports allowed in `home_screen.dart` (the two entry-point files only),
-  per journal P5 §4's import boundary AC.
-- **Next resume action:** dispatch `Alex-Mobile-Dev` (fresh spawn — prior
-  visual-audit instance already released), `Mode: mobile-implementation`,
-  `Flow: parallel-requirement`, `Story: NONE`, `ConcurrencyClass:
-  code-writer`, worktree = the integration worktree, `BaseHead` = integration
-  HEAD after `9aadd52f` (resolve full sha at dispatch time),
-  `WriteScope`/`OutputPath` = `mobile/lib/features/home/presentation/home_screen.dart`
-  + `mobile/test/features/activity_cards/activity_card_hub_view_test.dart` +
-  optionally one new test file per §5.2. Handoff body must carry §5.1-§5.4 of
-  `architecture/fm1-solo-tabs-solution.md` verbatim (code changes, required
-  tests, gate-run constraints, screenshot note) — do not re-summarize from
-  memory. After `MOBILE_COMPLETE: YES` + 3-part verify + seal + commit:
-  dispatch a FRESH `Iris-QC` requirement-integration-review (new RunId — prior
-  terminal one is `PATCH_REQUIRED`) scoped to the F-M1 fix plus the
-  Round-41-closed F-I2/F-I3 evidence (`stage1_wipe_registry.dart`, parity
-  test, configuration guide, `build-runtime-evidence.md`,
-  `mobile-visual-audit.md`) — the 9 previously-PASS cross-story contracts do
-  not need re-verification. On `Outcome: CLEAN`/`DEFERRED_ONLY`: re-sync
-  `main` if moved, `cleanup-requirement`, `land-integration`, flip
-  `req_master.md` + `master_requirements_list.md` to `DONE`.
+- `Alex-Mobile-Dev` (`Mode: mobile-implementation`, RunId
+  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-mobile-dev-fm1wiring`)
+  returned `MOBILE_COMPLETE: NO` with a structured `PREEXISTING_TEST_FAILURE`
+  blocker (pre-existing, out-of-scope — see below) but the F-M1 implementation
+  itself is complete. 3-part verification passed: agent releasable
+  (`list-releasable-agents.sh`); worktree `git diff --stat` against BaseHead
+  `9aadd52f` showed exactly the declared WriteScope (`home_screen.dart` +
+  `activity_card_hub_view_test.dart`, 447+/37-, HEAD unchanged — no
+  self-commit); full diff content of both files read and eyeballed — genuine,
+  well-documented, spec-compliant (destination-list-block widgets per
+  `fm1-solo-tabs-solution.md` §2-§3, 3 optional seam callbacks, correct l10n
+  key reuse, `Muốn làm`/`Ý tưởng`/paired-mode code untouched, AC-21/SC-1'
+  assertion preserved verbatim for every tab).
+- **3rd-import deviation accepted.** The doc's "exactly 2 imports" line was
+  scoped to preventing journal/notebook *internal* imports into
+  `home_screen.dart` (AC-17 boundary), not an absolute new-import cap.
+  Grep-verified: the file's pre-existing `_label` helper only ever used
+  framework `Localizations.localeOf`, never `AppL10n.of` — reusing the
+  existing l10n keys as the doc itself required genuinely needs the 3rd import
+  (`lib/l10n/generated/app_l10n.dart`, a shared app-wide resource, not a
+  journal/notebook internal). No other new import was added. Decision recorded
+  in the commit message; not to be re-litigated by a later reviewer as a
+  boundary violation.
+- **Blocker 1 (non-blocking to REQ-016) filed as a bug, not re-dispatched.**
+  `context_content_gate_test.dart:159` (BR-16) fails on a banned pack-phrase
+  doc comment in `zodiac_shell_resolver.dart:157`; proven pre-existing at the
+  run's own BaseHead `9aadd52f` (both files byte-identical); root cause
+  STORY-011 P2 (commit `27700367`), outside this run's WriteScope. Filed as
+  `BUG-20260927-001_context_content_gate_zodiac_pack_phrase_leak`
+  (`data/bugs/master_bugs_list.md` + `bug_master.md`). No bug-fixer dispatch
+  needed to unblock REQ-016; no mobile-dev re-dispatch needed either — the
+  F-M1 implementation itself is finished and its own required tests are green
+  apart from this one pre-existing, out-of-scope case.
+- Committed in the integration worktree as `3b51172f` (parent `9aadd52f`).
+  `Alex-Mobile-Dev` released via `TaskStop`.
+- **Next resume action:** dispatch a FRESH `Iris-QC`
+  requirement-integration-review (new RunId — prior terminal one is
+  `PATCH_REQUIRED`) scoped to: the F-M1 wiring fix
+  (`home_screen.dart` + `activity_card_hub_view_test.dart`, diff against
+  `753d2a86`..`3b51172f`), the accepted 3rd-import deviation (cite this
+  cursor's reasoning, do not re-litigate as a boundary violation), the new
+  `BUG-20260927-001` citation as an accepted non-blocking pre-existing
+  exclusion, plus the already-Round-41-closed F-I2/F-I3 evidence
+  (`stage1_wipe_registry.dart`, parity test, configuration guide,
+  `build-runtime-evidence.md`, `mobile-visual-audit.md`) — the 9
+  previously-PASS cross-story contracts do not need re-verification. On
+  `Outcome: CLEAN`/`DEFERRED_ONLY`: re-sync `main` if moved,
+  `cleanup-requirement`, `git-story-boundary.sh land-integration --req
+  REQ-016_solo_stage1_relationship_assistant`, flip `req_master.md` +
+  `master_requirements_list.md` to `DONE`.
 
-## Superseded history (Rounds 37-41, collapsed — all 13 stories DONE/merged, F-I1 rework landed, F-I2/F-I3 devops evidence closed, requirement-level mobile-visual-audit closed)
-
-Round 41: `Frank-Devops` closed F-I2 action item 5
-(`integration-review/build-runtime-evidence.md`: real build + app-launch
-smoke; `BUG-20260923-001`'s 11 `test/core/database/` reds confirmed
-version-lag-only, now 104/104 passing) and F-I3 action item 7
-(`deployment/configuration-guide.md`: added Local Notifications section, fixed
-stale POST_NOTIFICATIONS claim); committed `0a8f4214`. `Alex-Mobile-Dev`
-closed F-I2 action item 6 (`integration-review/mobile-visual-audit.md`,
-seam-by-seam PASS except F-M1, plus non-blocking NOTE-1/NOTE-2); committed
-`c1c538ea`. F-M1 (solo stage-1 tabs unreachable in solo mode, contradicting
-D-3) escalated to the user as Open user decisions item 6 — resolved 2026-09-26
-(wire the tabs; see Current cursor above for the corrected 2-tab decision).
-Full narrative, exact commands, and root-cause detail for these rounds live in
-this file's own prior git history if ever needed — not reproduced here per
-checkpoint budget.
-
-## Superseded history (Rounds 37-40, collapsed — all 13 stories DONE/merged, F-I1 rework landed)
+## Superseded history (Rounds 37-42, collapsed — all 13 stories DONE/merged, F-I1 rework landed, F-I2/F-I3 devops evidence closed, requirement-level mobile-visual-audit closed, F-M1 architecture decision sealed)
 
 All 13 REQ-016 stories DONE/merged by Round 38 (integration HEAD `e9519243`).
 Round 39 `Iris-QC` integration review → `Outcome: PATCH_REQUIRED` (F-I1/F-I2/
 F-I3; 9 cross-story contracts PASS; report committed `55ade421`). Round 40
-resolved F-I1: Tech Lead decided `calendar_event_state_decision: REGISTER`
-(`STORY-013/architecture/solution.md` §7 Addendum); mobile-dev patch1 BLOCKED
-on stale BaseHead + phase-status wording (both Scrum-Master-fixed directly:
-`sync-target`, `Status: COMPLETE`->`DONE` relabel `b08bd4be`); patch2
-`MOBILE_COMPLETE: YES`, committed `91542e4b`, merged into integration
-`753d2a86`. Full narrative, exact commands, and root-cause detail for these
+resolved F-I1 (Tech Lead `calendar_event_state_decision: REGISTER`;
+mobile-dev patch2 `MOBILE_COMPLETE: YES`, merged `753d2a86`). Round 41:
+`Frank-Devops` closed F-I2/F-I3 action items 5/7 (build+smoke evidence,
+`BUG-20260923-001` reconfirmed version-lag-only now 104/104 passing;
+configuration-guide fix), committed `0a8f4214`; `Alex-Mobile-Dev` closed F-I2
+action item 6 (`mobile-visual-audit.md`, seam-by-seam PASS except F-M1),
+committed `c1c538ea`. F-M1 (solo stage-1 tabs unreachable in solo mode,
+contradicting D-3) escalated as Open user decisions item 6 — resolved
+2026-09-26 (wire the tabs). Round 42: Tech Lead (`Alan-Techlead`) produced and
+sealed `architecture/fm1-solo-tabs-solution.md` (committed `9aadd52f`) —
+corrected premise (2 tabs, not 3: `Sổ tay`→2 rows, `Nhật ký`→1 row via
+destination-list blocks), 2 hard constraints (AC-21/SC-1' assertion
+preservation; import-boundary discipline), `mobile-implementation-direct`
+mode. Full narrative, exact commands, and root-cause detail for all these
 rounds live in this file's own prior git history if ever needed — not
 reproduced here per checkpoint budget.
