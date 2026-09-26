@@ -169,7 +169,7 @@ dải lọc của màn (1) chứ không phải một danh sách thứ hai, và h
 
 ## 7. Status
 
-- Status: COMPLETE
+- Status: DONE
 - Last updated: 2026-09-17
 - Evidence: `coding-plan/test-results.md` mục "Phase P5" — `+292 ~4: All other
   tests passed!` trên `test/features/activity_cards/` +

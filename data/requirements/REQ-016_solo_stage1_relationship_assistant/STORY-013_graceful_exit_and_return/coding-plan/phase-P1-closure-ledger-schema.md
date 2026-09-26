@@ -153,6 +153,6 @@ chưa có màn hình nào đổi; thứ phải đúng là schema và tính bất
 
 ## 7. Status
 
-- Status: COMPLETE
+- Status: DONE
 - Last updated: 2026-09-12
 - Evidence: `coding-plan/test-results.md` §"Phase P1 — Closure ledger schema"

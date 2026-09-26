@@ -49,12 +49,12 @@
 
 | Phase | Owner | Lane | Depends On | Parallelizable | Status |
 |-------|-------|------|------------|----------------|--------|
-| P1 | Mobile Developer | Mobile | None | NO | COMPLETE |
-| P2 | Mobile Developer | Mobile | P1 | NO | COMPLETE |
-| P3 | Mobile Developer | Mobile | P2 | NO | COMPLETE |
-| P4 | Mobile Developer | Mobile | P2 | NO | COMPLETE |
-| P5 | Mobile Developer | Mobile | P3, P4 | NO | COMPLETE |
-| P6 | Mobile Developer | Mobile | P3 | NO | COMPLETE |
+| P1 | Mobile Developer | Mobile | None | NO | DONE |
+| P2 | Mobile Developer | Mobile | P1 | NO | DONE |
+| P3 | Mobile Developer | Mobile | P2 | NO | DONE |
+| P4 | Mobile Developer | Mobile | P2 | NO | DONE |
+| P5 | Mobile Developer | Mobile | P3, P4 | NO | DONE |
+| P6 | Mobile Developer | Mobile | P3 | NO | DONE |
 
 Phase file mapping:
 
