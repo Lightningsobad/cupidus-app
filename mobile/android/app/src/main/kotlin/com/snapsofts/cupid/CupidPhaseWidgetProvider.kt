@@ -7,6 +7,10 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.net.Uri
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
@@ -41,6 +45,15 @@ class CupidPhaseWidgetProvider : HomeWidgetProvider() {
         for (widgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.cupid_phase_widget)
 
+            // B-2: set unconditionally, both phases of the table. A launcher
+            // reapplies onto the view it already inflated, so skipping the flat
+            // case would leave the date_day gradient on the next phase.
+            views.setInt(
+                R.id.cupid_phase_widget_root,
+                METHOD_SET_BACKGROUND_RESOURCE,
+                CupidWidgetPalette.backgroundFor(phaseId),
+            )
+
             views.setTextViewText(R.id.cupid_phase_widget_eyebrow, eyebrow ?: EMPTY)
             views.setTextColor(R.id.cupid_phase_widget_eyebrow, dotColor)
             views.setImageViewBitmap(
@@ -56,13 +69,23 @@ class CupidPhaseWidgetProvider : HomeWidgetProvider() {
                 if (hasEyebrow) View.VISIBLE else View.GONE,
             )
 
-            views.setTextViewText(R.id.cupid_phase_widget_primary, primary ?: EMPTY)
+            views.setTextViewText(
+                R.id.cupid_phase_widget_primary,
+                displaySizedNumeral(primary ?: EMPTY, CupidWidgetPalette.numeralFor(phaseId)),
+            )
             views.setViewVisibility(
                 R.id.cupid_phase_widget_primary,
                 if (hasPrimary) View.VISIBLE else View.GONE,
             )
 
             views.setTextViewText(R.id.cupid_phase_widget_secondary, secondary ?: EMPTY)
+            // Pushed for the same reason as the background: the muted token the
+            // layout carries is unreadable once this phase draws its gradient,
+            // and iOS already switches here (`secondaryColor`, B-2 parity).
+            views.setTextColor(
+                R.id.cupid_phase_widget_secondary,
+                CupidWidgetPalette.secondaryFor(phaseId),
+            )
             views.setViewVisibility(
                 R.id.cupid_phase_widget_secondary,
                 if (hasSecondary) View.VISIBLE else View.GONE,
@@ -74,6 +97,41 @@ class CupidPhaseWidgetProvider : HomeWidgetProvider() {
             )
 
             appWidgetManager.updateAppWidget(widgetId, views)
+        }
+    }
+
+    // B-5 (architecture/contract-summary.md 3c): the first run of digits in the
+    // payload line is drawn at display size, the same rule CupidPhaseSplit
+    // applies on iOS - "has a digit cluster", never a branch on phase_id. Not a
+    // character is dropped, reordered or rewritten: this re-sizes a substring of
+    // the payload, so it adds no payload key and no content item.
+    //
+    // One TextView with spans rather than three views, so the line breaks where
+    // iOS breaks it. RelativeSizeSpan and ForegroundColorSpan are both
+    // ParcelableSpan and survive the RemoteViews trip; a size ratio rather than
+    // an absolute dp so the numeral inherits the user's font scale.
+    private fun displaySizedNumeral(line: String, numeralColor: Int): CharSequence {
+        val start = line.indexOfFirst(Char::isDigit)
+        if (start < 0) {
+            return line
+        }
+        var stop = start
+        while (stop < line.length && line[stop].isDigit()) {
+            stop++
+        }
+        return SpannableString(line).apply {
+            setSpan(
+                RelativeSizeSpan(DISPLAY_SIZE_RATIO),
+                start,
+                stop,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+            )
+            setSpan(
+                ForegroundColorSpan(numeralColor),
+                start,
+                stop,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
+            )
         }
     }
 
@@ -121,6 +179,15 @@ class CupidPhaseWidgetProvider : HomeWidgetProvider() {
         const val DEEP_LINK_CARD_HOST = "card"
         const val DEEP_LINK_HOME_HOST = "home"
 
+        // View.setBackgroundResource, reached by name because RemoteViews has no
+        // typed setter for it. A @RemotableViewMethod identifier, not copy.
+        const val METHOD_SET_BACKGROUND_RESOURCE = "setBackgroundResource"
+
+        // 34sp over the 14sp cupid_phase_widget_primary carries in the layout,
+        // matching the 34 iOS uses. A ratio, so the body size stays defined in
+        // exactly one place and the numeral scales with the rest of the layout.
+        const val DISPLAY_SIZE_RATIO = 34f / 14f
+
         const val EMPTY = ""
         const val CIRCLE_PX = 24
 
@@ -146,12 +213,29 @@ private object CupidWidgetPalette {
     const val PHASE_ID_DATE_DAY = "date_day"
     const val PHASE_ID_QUIET = "quiet"
 
+    // colorText #F7EEFB, body copy on a flat surface
+    val TEXT = 0xFFF7EEFB.toInt()
+    // colorOnAccent #F7EEFB, the glyph-on-gradientHot role. Declared in its own
+    // right rather than aliased onto TEXT: the two happen to share a value in
+    // the dark theme, and the role is what the contract fixes (3a, B-6).
+    val ON_ACCENT = 0xFFF7EEFB.toInt()
+    // colorAccentPink #FF7FB6
+    val ACCENT_PINK = 0xFFFF7FB6.toInt()
+
     // colorTextMuted #B4A6CE, the neutral role
-    val DOT_WAITING = 0xFFB4A6CE.toInt()
+    val TEXT_MUTED = 0xFFB4A6CE.toInt()
+    // colorText at 85%, the supporting-copy role on the gradient. The alpha is
+    // the token iOS applies to the same line, carried here as one value because
+    // RemoteViews has no opacity call of its own.
+    val TEXT_ON_GRADIENT = 0xD9F7EEFB.toInt()
+
+    val DOT_WAITING = TEXT_MUTED
     // colorMint #79E2CD, the confirmed role
     val DOT_UPCOMING = 0xFF79E2CD.toInt()
-    // colorAccentPink #FF7FB6, the primary-action role
-    val DOT_TODAY = 0xFFFF7FB6.toInt()
+    // B-6: the primary-action role now resolves to the on-accent token, because
+    // the bolt sits on the gradientHot background B-2 gives this phase and the
+    // pink it used to carry had no contrast against its own backdrop.
+    val DOT_TODAY = ON_ACCENT
     // colorAccentPurpleDark #8E5FD6, the desaturated role
     val DOT_QUIET = 0xFF8E5FD6.toInt()
 
@@ -160,5 +244,24 @@ private object CupidWidgetPalette {
         PHASE_ID_DATE_DAY -> DOT_TODAY
         PHASE_ID_QUIET -> DOT_QUIET
         else -> DOT_WAITING
+    }
+
+    // B-2 (contract-summary.md 3b): two rows, looked up from phase_id exactly
+    // like the dot role. No third background and no launcher default.
+    fun backgroundFor(phaseId: String?): Int = when (phaseId) {
+        PHASE_ID_DATE_DAY -> R.drawable.widget_bg_phase_date_day
+        else -> R.drawable.widget_bg_phase_flat
+    }
+
+    // B-5 (contract-summary.md 3c): the digit cluster's colour, matching what
+    // iOS already ships - text on the gradient, accent pink on the flat surface.
+    fun numeralFor(phaseId: String?): Int = when (phaseId) {
+        PHASE_ID_DATE_DAY -> TEXT
+        else -> ACCENT_PINK
+    }
+
+    fun secondaryFor(phaseId: String?): Int = when (phaseId) {
+        PHASE_ID_DATE_DAY -> TEXT_ON_GRADIENT
+        else -> TEXT_MUTED
     }
 }

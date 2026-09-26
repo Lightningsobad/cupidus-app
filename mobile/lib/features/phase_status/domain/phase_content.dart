@@ -1,3 +1,5 @@
+import 'package:characters/characters.dart';
+
 import '../../../core/content/content_package.dart';
 
 /// The three package families this story ships
@@ -19,6 +21,20 @@ const String milestoneThresholdsKey = 'thresholds';
 /// replacement; outside `{n}` there is no template syntax
 /// (`architecture/contract-summary.md` §4).
 const String phaseContentNumberPlaceholder = '{n}';
+
+/// The longest a short phase string may be, in user-perceived characters.
+///
+/// It exists because the smallest widget cell truncates a longer line and an
+/// author cannot see that happen (R-7). 28 is what fits that cell, so it is the
+/// budget for every string drawn there: a `secondary` on a widget surface, and
+/// every `action_label`. The four `surface: screen` secondaries are exempt --
+/// a screen wraps.
+///
+/// Counted in grapheme clusters, so a combining-mark spelling measures what a
+/// reader sees rather than what UTF-16 stores. Decomposed input measures longer
+/// than its composed form and is rejected, which is the safe direction: the
+/// widget draws the bytes the package carries.
+const int phaseContentShortStringBudget = 28;
 
 /// The four phases, as the closed ASCII set the native widget reads
 /// (`architecture/contract-summary.md` §2). Append-only: renaming a value
@@ -108,6 +124,7 @@ class PhaseContentItem implements ContentItem {
     required this.secondary,
     required this.eyebrow,
     required this.surface,
+    this.actionLabel,
   });
 
   @override
@@ -128,8 +145,18 @@ class PhaseContentItem implements ContentItem {
 
   final PhaseSurface surface;
 
+  /// The label of the one action offered alongside this line, when the phase
+  /// offers one (R-1).
+  ///
+  /// Absent means no action is drawn. There is deliberately no fallback label:
+  /// a default would put a sentence no author wrote in front of a reader, which
+  /// is what BR-15 forbids. The destination is the consumer's, not the
+  /// package's -- this field carries the words and nothing else.
+  final String? actionLabel;
+
   /// Every string a reader can see, which is exactly what the gate measures.
-  Iterable<String> get displayStrings => <String>[primary, ?secondary, eyebrow];
+  Iterable<String> get displayStrings =>
+      <String>[primary, ?secondary, eyebrow, ?actionLabel];
 }
 
 /// One drip line for the quiet stretch between dates.
@@ -193,14 +220,56 @@ PhaseContentItem phaseContentItemFromJson(
     );
   }
 
+  final String? secondary = optionalContentString(json, 'secondary', source);
+  if (secondary != null && surface.allowsWidget) {
+    _requireShortString(secondary, 'secondary', id, source);
+  }
+
+  final String? actionLabel = optionalContentString(
+    json,
+    'action_label',
+    source,
+  );
+  if (actionLabel != null) {
+    // A widget-only line has no action to offer: the native widget draws no
+    // control, and its whole surface already opens the card. An action_label
+    // here is an author expecting a chip that will never be drawn, so it is
+    // reported rather than dropped in silence.
+    if (!surface.allowsScreen) {
+      throw ContentPackageFormatException(
+        source,
+        'phase line "$id" declares action_label on surface "$rawSurface", '
+        'which has no place to draw it',
+      );
+    }
+    _requireShortString(actionLabel, 'action_label', id, source);
+  }
+
   return PhaseContentItem(
     id: id,
     phaseId: phaseId,
     primary: requireContentString(json, 'primary', source),
-    secondary: optionalContentString(json, 'secondary', source),
+    secondary: secondary,
     eyebrow: requireContentString(json, 'eyebrow', source),
     surface: surface,
+    actionLabel: actionLabel,
   );
+}
+
+void _requireShortString(
+  String value,
+  String field,
+  String id,
+  String source,
+) {
+  final int length = value.characters.length;
+  if (length > phaseContentShortStringBudget) {
+    throw ContentPackageFormatException(
+      source,
+      'phase line "$id" has a $field of $length characters, over the '
+      '$phaseContentShortStringBudget the smallest surface can draw',
+    );
+  }
 }
 
 DripItem dripItemFromJson(Map<String, Object?> json, String source) =>

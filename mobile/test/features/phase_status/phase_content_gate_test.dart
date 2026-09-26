@@ -24,7 +24,10 @@ RegExp _standaloneTerm(String term) => RegExp(
 /// A clean line for each family, so a test only has to describe the one string
 /// it breaks.
 const String _cleanPhasePrimary = 'Chuẩn bị dần cho buổi tới';
-const String _cleanPhaseSecondary = 'Bạn có thể chọn trước một chỗ';
+/// Clean in both senses the parser cares about: it carries no denied term, and
+/// it is inside [phaseContentShortStringBudget], so a test that breaks another
+/// field is reported against that field rather than against this one.
+const String _cleanPhaseSecondary = 'Bạn có thể chọn một chỗ';
 const String _cleanPhaseEyebrow = 'PHA 1 · ĐANG ĐỢI';
 const String _cleanDripBody = 'Kho của bạn dày thêm khi bạn cất thêm.';
 const String _cleanNudgeTitle = 'Về tới nhà chưa?';
@@ -67,6 +70,7 @@ String _phaseContentPack({
   String primary = _cleanPhasePrimary,
   String? secondary = _cleanPhaseSecondary,
   String? eyebrow = _cleanPhaseEyebrow,
+  String? actionLabel,
 }) =>
     jsonEncode(<String, Object?>{
       'id': 'phase_content.fixture',
@@ -81,6 +85,7 @@ String _phaseContentPack({
           'secondary': ?secondary,
           'eyebrow': ?eyebrow,
           'surface': 'both',
+          'action_label': ?actionLabel,
         },
       ],
     });
@@ -120,6 +125,7 @@ List<PhaseContentViolation> _violations({
   String phasePrimary = _cleanPhasePrimary,
   String? phaseSecondary = _cleanPhaseSecondary,
   String phaseEyebrow = _cleanPhaseEyebrow,
+  String? phaseActionLabel,
   String dripBody = _cleanDripBody,
   String? nudgeTitle = _cleanNudgeTitle,
   String nudgeBody = _cleanNudgeBody,
@@ -130,6 +136,7 @@ List<PhaseContentViolation> _violations({
           primary: phasePrimary,
           secondary: phaseSecondary,
           eyebrow: phaseEyebrow,
+          actionLabel: phaseActionLabel,
         ),
       ),
       drip: _parseDrip(_dripPack(body: dripBody)),
@@ -364,6 +371,23 @@ void main() {
       }
       expect(
         _rulesFrom(_violations(phaseEyebrow: 'PHA 1 · 40% ĐANG ĐỢI')),
+        contains(InvariantRule.percentDisplay),
+      );
+    });
+
+    test('the action label is scanned like any other display string', () {
+      for (final MapEntry<InvariantRule, List<String>> entry
+          in invariantDeniedTerms.entries) {
+        for (final String term in entry.value) {
+          expect(
+            _rulesFrom(_violations(phaseActionLabel: 'Xem $term')),
+            contains(entry.key),
+            reason: '${entry.key.wireValue}: $term',
+          );
+        }
+      }
+      expect(
+        _rulesFrom(_violations(phaseActionLabel: 'Xem 40% còn lại')),
         contains(InvariantRule.percentDisplay),
       );
     });

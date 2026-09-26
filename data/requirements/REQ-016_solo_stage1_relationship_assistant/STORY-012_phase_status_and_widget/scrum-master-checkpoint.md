@@ -103,6 +103,68 @@ RESOLVED (2026-09-26) — ROLE_ROUTING_CONFLICT + Brainstormer B-1/B-3/B-4/B-6:
   under the existing AC-39/R-15a content-ingestion gate.
   Spawn: `Alan-Techlead@session-e7df910a`. AWAITING RESULT.
 
+**Alan-Techlead RESULT (2026-09-26), independently verified against the actual
+patched files, not the teammate report prose** — RunState confirmed COMPLETED,
+`completion_marker: "TECH_LEAD_COMPLETE: YES"`. Diff-read
+`architecture/contract-summary.md` (+172/-3) and `architecture/solution.md`
+(+54) directly to confirm every claim below is really in the artifact, not just
+asserted:
+- B-6: `--dot-today` role value changes `colorAccentPink #FF7FB6` ->
+  `colorOnAccent #F7EEFB` (new §3a block). WCAG measured on both `gradientHot`
+  ends: current 1.00:1/1.11:1 (matches D-13's "near-invisible"), proposed
+  2.07:1/2.30:1 — still under 3:1 AA, explicitly logged as an open
+  design-system-level note, not a STORY-012 blocker (`contrast_test.dart` sets
+  no threshold for this pair). `onAccent` must be an explicit native palette
+  member on both platforms, assigned to `DOT_TODAY`, not aliased from `text`.
+  Eyebrow label re-color is an intended side effect (not a 5th role).
+- B-2 (new §3b): `date_day` gets `gradientHot` (`#FF7FB6`->`#B78CF5`)
+  horizontal gradient bg on Android (iOS already ships it); other 3 phases stay
+  flat `colorSurface #241B42`. Direction chosen `android:angle="0"` (0/45/90
+  multiples only in `GradientDrawable` XML; iOS's 90deg-equivalent `.leading`->
+  `.trailing` is the closest fit, 95deg CSS value is unrepresentable in XML).
+  Geometry (corners) unchanged.
+- B-5 (new §3c): first-digit-cluster span on `primary_line`, pushed via
+  `setTextViewText` (`ParcelableSpan` survives `RemoteViews`); ratio 34/14
+  relative to the `TextView`'s own size (not absolute dp, so it inherits
+  font-scale). Applies to ANY phase with a digit cluster, not just `upcoming`
+  — iOS branches on "has digits", so `quiet`'s "Bạn đang giữ {n} kỷ niệm" also
+  qualifies. Digit color: `colorText` on `date_day`, `colorAccentPink`
+  elsewhere.
+- `action_label` (new §4a): field name kept as PO proposed (Tech Lead had
+  authority to rename, didn't). Optional string, absent = no chip. Added to
+  `PhaseContentItem.displayStrings` (the AC-39 gate's only hook). 28-char
+  NFC-counted budget for both `secondary` (surface widget/both) and
+  `action_label` (all), enforced in `phaseContentItemFromJson` via
+  `ContentPackageFormatException` — explicitly NOT `InvariantRule`/
+  `phase_content_gate.dart` (that gate's own header bans package-family-
+  specific rules; length is a shape rule, not a wording rule).
+  `action_label` on a `surface:widget`-only entry is a load-time reject.
+- solution.md §7 (new): **explicit order constraint — B-2 and B-6 must ship in
+  the same change, B-6 never alone** (glyph-color fix only reads correctly once
+  the gradient bg exists; Iris-QC's constraint, now load-bearing at the
+  solution level too). New drawable XML files must never contain the literal
+  substring `--dot-...`, even in a comment (this exact defect broke the whole
+  Android build once already in this story — P11 incident). New risk-surface
+  rows: `WIDGET-PLATFORM-DRIFT`, `CONTENT-LENGTH`, `CHIP-LABEL-GATE`.
+- Released `Alan-Techlead@session-e7df910a` via `TaskStop` (confirmed stopped
+  — the only genuinely running teammate this cycle; the other 3 names
+  `list-releasable-agents.sh` printed were already gone, confirmed by "No task
+  found").
+
+**Worktree sealed and dispatched to mobile-dev**: worktree was dirty (Tech
+Lead's 4 changed files) when first attempting the mobile-dev spawn —
+`git-story-boundary.sh start` requires a clean worktree and does not
+auto-seal. Ran `git-story-boundary.sh commit --req
+REQ-016_solo_stage1_relationship_assistant --story
+STORY-012_phase_status_and_widget` directly (commit `0cf0abd7`, 4 files
++330/-58), then `refresh-base` (new BaseHead `0cf0abd7a5d70dd951841f241c58bd7e41e846b6`).
+Dispatched **Alex-Mobile-Dev** (`Mode: mobile-implementation`, RunId
+`RUN-...-mobile-dev`) for the full B-1..B-6 + `action_label` + length-gate
+rework in one implementation pass, per the exact mechanisms above. Told not to
+commit (Scrum Master's job), not to run `--update-goldens`, and to recapture
+visual-fidelity cells 1 + 7. Spawn: `Alex-Mobile-Dev@session-e7df910a`.
+AWAITING RESULT.
+
 ADDITIONAL FINDING (2026-09-26, from delayed Andy-PO teammate messages,
 verified — Andy-PO's own run was already COMPLETED, slot already released;
 these were queued reports, not a live blocker on that agent):
@@ -125,10 +187,26 @@ these were queued reports, not a live blocker on that agent):
     `guard-parallel-worktree-scope.sh` [GENERIC] because Alan-Techlead's
     tech-lead run is currently active for this story — control-checkout
     story-owned-state edits are guarded while a parallel run is in flight.
-    **RETRY the control-checkout `story_master.md` AC-9 insertion once
-    Alan-Techlead's run reaches a terminal state.** Content to insert (verify
-    still absent before writing): AC-9 text is byte-identical to the
-    worktree's own AC-9 (lines 102-107 in the worktree copy).
+    **Retried after Alan-Techlead's run reached COMPLETED (2026-09-26) — BLOCKED
+    AGAIN**, same `[GENERIC]` guard, now citing the **mobile-dev** run (not
+    tech-lead) as "active" even though direct inspection of ALL 4
+    `RUN-...-STORY-012...-*.json` files (product-owner, tech-lead, mobile-dev,
+    reviewer) shows every one `status: COMPLETED`, scheduler
+    `active_runs`/`paused_runs`/`blocked_runs` all empty, no lock file for this
+    story in `data/runtime/parallel-locks/`, and `prune-parallel-runs.sh
+    --apply --quiet` found nothing prunable (age-based, not status-based).
+    `guard-codes.md`'s `PARALLEL WORKTREE SCOPE GUARD` section documents
+    `CONTROL_ONLY_FILE` only for `req_master.md`/`master_requirements_list.md`
+    (explicitly says a story's own status lives in `story_master.md`, doesn't
+    forbid editing it) — no documented subcode matches "control-checkout
+    story_master.md edit blocked while a COMPLETED run file merely exists for
+    the story." **Decision: defer this fix, not worth forcing** — it doesn't
+    block the mobile-dev dispatch (the worktree's own AC-9 already has the
+    correct wording and mobile-dev's implementation gate reads whichever copy
+    it's actually pointed at during code-writer spawn, which passed). Revisit
+    only if `validate-story-ac-coverage.sh` actually blocks a future
+    control-checkout-scoped action for this story; if so, quote its exact
+    message rather than re-deriving this diagnosis.
 - **New blocker, same role-routing family, NOT dispatched by Scrum Master**:
   `ux/uiux-spec.md` (story worktree) has **no** `Design-Surface:`/
   `Design-Screen:` header lines at all (confirmed: grep returned 0 matches).
@@ -174,3 +252,66 @@ Large Files Query Keys:
   "D-13")
 - architecture/contract-summary.md §2 (widget payload contract), §3a (phase
   indicator token shapes)
+
+## Alex-Mobile-Dev crash/recovery (2026-09-26)
+
+`Alex-Mobile-Dev@session-e7df910a`'s implementation pass (B-1..B-6 +
+action_label rework, spawned after the Tech Lead architecture rework was
+independently verified and the worktree sealed at commit `0cf0abd7`) was
+interrupted mid-task by an `idle_notification` with `idleReason: "failed"`,
+`failureReason: "API Error: Can't reach the API server — check your internet
+or DNS (ENOTFOUND)"` — a transient infra/network failure of the teammate's own
+session, not a task-level completion or blocker.
+
+Verified directly in the worktree (not from the teammate's own claim) before
+acting:
+- Real, substantial progress exists on disk (not committed):
+  `CupidPhaseWidgetProvider.kt`, `cupid_phase_widget.xml`,
+  `cupid_phase_widget_info.xml` (not in original WriteScope list — needs
+  legitimacy check on next return), `phase_content.v1.json`,
+  `CupidPhaseWidget.swift`, `activity_card_hub_view.dart` (name differs from
+  the `activity_card_tile.dart` originally cited — needs check),
+  `phase_content.dart`, `phase_status_cubit.dart` and `phase_status_line.dart`
+  (both not in original file list — needs check), plus 4 test files, plus 2
+  new untracked drawables (`widget_bg_phase_date_day.xml`,
+  `widget_bg_phase_flat.xml` — neither contains the banned `--dot-...`
+  substring).
+- Out-of-scope churn found and self-rescued: the run had also dirtied 2
+  STORY-002 visual-fidelity PNGs
+  (`implemented-11-chuan-bi-chon-hanh-dong-ios.png`,
+  `implemented-chi-tiet-the-da-hen-ngay-ios-cho-hen.png`). Reverted via
+  `git restore` (allowed self-rescue, not a stash) — confirmed clean after.
+- Visual-fidelity recapture in progress but incomplete: cell 1 (`hub-waiting`)
+  present; cell 7 (`widget-phases`) only partially recaptured — no
+  `quiet`-phase native capture file changed yet.
+
+Agent liveness confirmed via `ListAgents`: `Alex-Mobile-Dev` still listed as a
+live teammate (`running`), so continuation used `SendMessage`, not a fresh
+spawn — consistent with "continuation before respawn" policy for a specialist
+with an open handle whose outputs are incomplete.
+
+Continuation sent (`SendMessage` to `Alex-Mobile-Dev`, msg_id
+`cf09474e-2314-4e08-a43b-83dc10208b37`): built from
+`.claude/hooks/handoff-build.sh continue --flow parallel-story --run-id
+RUN-...-mobile-dev ...` stdout (Flow/Mode/Scope/Checkpoint/Missing
+outputs/Do Not Re-read), with the parallel-extension fields
+(`Parallel-Execution: YES`, `RunId`, `RunState`, `ParentRequirement`, `Story`,
+`Story-Class`, `Depends-On`, `Worktree`, `Branch`, `MergeTarget`, `BaseHead:
+0cf0abd7a5d70dd951841f241c58bd7e41e846b6` — confirmed == current worktree HEAD,
+no drift — `ConcurrencyClass`, `LockScope`, `WriteScope`, `OutputPath`,
+`CompletionMarker`, `SpawnSlot`) appended manually from the original spawn's
+Handoff Control block, since the builder's `--flow parallel-story` output does
+not itself print them. Instructed Alex-Mobile-Dev to self-verify current
+worktree diff before continuing (not rely on crashed-session memory), to
+either justify-and-keep or roll back the 4 files/renames not in the original
+file list, to finish the cell-1/cell-7 recapture (incl. missing `quiet` native
+capture), run the extended test suite, not self-commit, not run
+`--update-goldens` before visual fidelity passes, and end with
+`MOBILE_COMPLETE: YES` plus full findings/files/tests/visual-fidelity verdict.
+
+**Status: AWAITING RESULT** from this continuation. Next action on return:
+independently verify the diff/claims (do not trust report prose alone,
+per this whole session's established discipline), confirm the 4
+previously-unlisted files are legitimate in-scope changes, confirm cell 7 now
+covers all 4 native phases, confirm tests pass, then route to Iris-QC for
+S9 re-review of the B-1..B-6 rework before this story can move toward DONE.

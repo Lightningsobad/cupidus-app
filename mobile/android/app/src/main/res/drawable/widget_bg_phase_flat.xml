@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- B-2 (architecture/contract-summary.md 3b): the waiting/upcoming/quiet row
+     of the phase background table, flat colorSurface #241B42 - the same value
+     cupid_phase_widget.xml carries as its no-payload default.
+
+     It exists as a drawable rather than being left to the layout default
+     because a launcher reuses the inflated view through RemoteViews.reapply:
+     the provider has to set a background on every update, or the date_day
+     gradient would survive into the next phase. Same shape and geometry as
+     widget_bg_phase_date_day so only the fill differs. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <solid android:color="#241B42" />
+</shape>

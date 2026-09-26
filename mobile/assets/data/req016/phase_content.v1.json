@@ -8,9 +8,10 @@
       "id": "phase.waiting.prepare.v1",
       "phase_id": "waiting",
       "primary": "Chuẩn bị dần cho buổi tới",
-      "secondary": "Bạn có thể chọn trước một chỗ mà bạn thấy hay",
+      "secondary": "Chọn trước một chỗ bạn thích",
       "eyebrow": "PHA 1 · ĐANG ĐỢI",
-      "surface": "both"
+      "surface": "both",
+      "action_label": "Chọn trước một chỗ"
     },
     {
       "id": "phase.waiting.notebook.v1",
@@ -31,7 +32,7 @@
       "id": "phase.upcoming.countdown.v1",
       "phase_id": "upcoming",
       "primary": "Còn {n} ngày tới buổi đã hẹn",
-      "secondary": "Buổi này đã nằm trong lịch của bạn",
+      "secondary": "Đã nằm trong lịch của bạn",
       "eyebrow": "PHA 2 · SẮP HẸN",
       "surface": "both"
     },
@@ -47,7 +48,7 @@
       "id": "phase.date_day.today.v1",
       "phase_id": "date_day",
       "primary": "Hôm nay là ngày đã hẹn",
-      "secondary": "Mang theo máy ảnh nếu bạn muốn cất lại một tấm",
+      "secondary": "Mang máy ảnh nếu bạn muốn",
       "eyebrow": "PHA 3 · ĐÚNG NGÀY HẸN",
       "surface": "both"
     },
@@ -63,7 +64,7 @@
       "id": "phase.quiet.gathering.v1",
       "phase_id": "quiet",
       "primary": "Bạn đang giữ {n} kỷ niệm",
-      "secondary": "Kho của bạn dày thêm mỗi lần bạn cất một điều",
+      "secondary": "Kho dày thêm mỗi lần bạn cất",
       "eyebrow": "PHA 4 · KHOẢNG LẶNG",
       "surface": "both"
     },

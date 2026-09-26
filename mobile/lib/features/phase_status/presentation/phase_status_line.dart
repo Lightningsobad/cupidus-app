@@ -8,6 +8,7 @@ import '../../../design_system/tokens/cupid_typography_tokens.dart';
 
 const Key phaseStatusLineKey = Key('phase_status_line');
 const Key phaseStatusLineSecondaryKey = Key('phase_status_line_secondary');
+const Key phaseStatusLineActionKey = Key('phase_status_line_action');
 
 /// Whole civil days from [today] to [scheduledOnIso], negative when the date
 /// has already passed and `null` when the string is not a civil date.
@@ -28,10 +29,12 @@ int? civilDaysUntil({required String scheduledOnIso, required DateTime today}) {
 
 /// The phase status line on screen (1) (`ux/uiux-spec.md` §1).
 ///
-/// Every readable string arrives through [primary]/[secondary], already
-/// selected and already substituted by `PhaseStatusCubit` from the content
-/// package (AC-37/BR-15). This file deliberately holds no display copy at all:
-/// swapping the package changes what this widget says without a Dart edit.
+/// Every readable string arrives through [primary]/[secondary]/[actionLabel],
+/// already selected and already substituted by `PhaseStatusCubit` from the
+/// content package (AC-37/BR-15). This file deliberately holds no display copy
+/// at all: swapping the package changes what this widget says without a Dart
+/// edit, and a phase with no [actionLabel] draws no action rather than a
+/// default one.
 ///
 /// Nothing to say renders as [SizedBox.shrink] rather than as an empty box,
 /// blank row or placeholder — the quiet phase has no screen line of its own at
@@ -41,10 +44,21 @@ int? civilDaysUntil({required String scheduledOnIso, required DateTime today}) {
 /// it is about, rather than as bare text heading the whole list: the block
 /// explains one card, so it is bounded like one.
 class PhaseStatusLine extends StatelessWidget {
-  const PhaseStatusLine({super.key, this.primary, this.secondary});
+  const PhaseStatusLine({
+    super.key,
+    this.primary,
+    this.secondary,
+    this.actionLabel,
+    this.onActionTap,
+  });
 
   final String? primary;
   final String? secondary;
+
+  /// The secondary action's words, or `null` for a phase that offers none.
+  final String? actionLabel;
+
+  final VoidCallback? onActionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +70,7 @@ class PhaseStatusLine extends StatelessWidget {
     final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
     final String? support = secondary;
+    final String? action = actionLabel;
 
     return Container(
       padding: const EdgeInsets.all(CupidSpacing.md),
@@ -84,7 +99,54 @@ class PhaseStatusLine extends StatelessWidget {
               style: type.caption.copyWith(color: colors.colorTextMuted),
             ),
           ],
+          if (action != null && action.isNotEmpty)
+            _PhaseStatusAction(label: action, onTap: onActionTap),
         ],
+      ),
+    );
+  }
+}
+
+/// The secondary action of the waiting phase (AC-5/SB-83), drawn from the
+/// `hành động phụ` column of the action-tier table
+/// (`ux/requirement-ux-survey.md` §4): a text button, no solid fill, caption at
+/// regular weight, indented `md` from the block edge, and still a full tap
+/// target. It is deliberately not the card's own pill — the card action stays
+/// one visual tier above anything nested inside this block.
+class _PhaseStatusAction extends StatelessWidget {
+  const _PhaseStatusAction({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidPlatformTokens platform = context.cupidPlatform;
+    final CupidTypographyTokens type = context.cupidType;
+
+    return Padding(
+      padding: const EdgeInsets.only(left: CupidSpacing.md),
+      child: Semantics(
+        button: true,
+        child: GestureDetector(
+          key: phaseStatusLineActionKey,
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: platform.tapTarget),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                label,
+                style: type.caption.copyWith(
+                  color: colors.colorAccentPink,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

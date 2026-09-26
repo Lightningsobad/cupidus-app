@@ -6,11 +6,17 @@
 
      No android:label and no android:description: the widget picker falls back
      to the application label, which keeps every author-written sentence in the
-     content packages (AC-37/BR-15). -->
+     content packages (AC-37/BR-15).
+
+     B-3: minWidth is 250dp, not the ~230dp uiux-spec 2 estimated. The launcher
+     grid quantises a declared size with 70*n-30, so the four-column cell the
+     spec asked for is exactly 250dp; 230dp lands in the same bucket while
+     reading as a number off the grid. resizeMode stays horizontal so the user
+     can still shrink it, and ellipsize remains the safety net for that case. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:initialLayout="@layout/cupid_phase_widget"
     android:minHeight="40dp"
-    android:minWidth="180dp"
+    android:minWidth="250dp"
     android:previewLayout="@layout/cupid_phase_widget"
     android:resizeMode="horizontal"
     android:updatePeriodMillis="0"

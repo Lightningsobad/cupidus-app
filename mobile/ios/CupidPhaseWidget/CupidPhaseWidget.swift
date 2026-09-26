@@ -31,6 +31,10 @@ enum CupidWidgetPalette {
     static let surface = Color(red: 0.141, green: 0.106, blue: 0.259)
     // colorText #F7EEFB
     static let text = Color(red: 0.969, green: 0.933, blue: 0.984)
+    // colorOnAccent #F7EEFB, the glyph-on-gradientHot role. Spelled out rather
+    // than aliased onto `text`: the two share a value in the dark theme by
+    // coincidence, and it is the role the contract fixes (3a, B-6).
+    static let onAccent = Color(red: 0.969, green: 0.933, blue: 0.984)
     // colorTextMuted #B4A6CE
     static let textMuted = Color(red: 0.706, green: 0.651, blue: 0.808)
     // colorAccentPink #FF7FB6
@@ -47,7 +51,10 @@ enum CupidWidgetPalette {
     // unknown or missing phase_id draws the neutral waiting role.
     static let dotWaiting = textMuted
     static let dotUpcoming = mint
-    static let dotToday = accentPink
+    // B-6: the primary-action role resolves to the on-accent token. The bolt
+    // draws on this phase's gradientHot background, where the pink it used to
+    // carry had no contrast against its own backdrop.
+    static let dotToday = onAccent
     static let dotQuiet = accentPurpleDark
 
     static func dot(for phaseId: String) -> Color {

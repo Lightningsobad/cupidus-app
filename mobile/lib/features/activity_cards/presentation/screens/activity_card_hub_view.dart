@@ -290,6 +290,13 @@ class _ActivityCardHubBodyState extends State<_ActivityCardHubBody>
                             ? PhaseStatusLine(
                                 primary: phase.primary,
                                 secondary: phase.secondary,
+                                actionLabel: phase.actionLabel,
+                                // The preparation area lives inside the card
+                                // detail (survey 4 note 5): the action names
+                                // the intent, it does not open a route of its
+                                // own.
+                                onActionTap: () =>
+                                    _openDetail(context, cubit, card),
                               )
                             : null,
                         onPrimaryAction: () => _openDetail(context, cubit, card),

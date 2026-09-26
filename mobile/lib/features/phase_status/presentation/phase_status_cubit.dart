@@ -37,6 +37,7 @@ class PhaseStatusState {
     this.anchorCardId,
     this.primary,
     this.secondary,
+    this.actionLabel,
     this.counterValue = 0,
     this.counterLabel,
     this.milestone,
@@ -50,6 +51,11 @@ class PhaseStatusState {
 
   final String? primary;
   final String? secondary;
+
+  /// The secondary action's label, straight from the phase line, or `null` when
+  /// the phase offers no action. Absent here means the line draws none: there is
+  /// no default label anywhere between the package and the screen.
+  final String? actionLabel;
 
   /// Cardinality of the kept-memory set, and only that: no term of this value
   /// comes from a clock, a day count, or an activity rate (BR-5/AC-25).
@@ -67,6 +73,7 @@ class PhaseStatusState {
         anchorCardId: anchorCardId,
         primary: primary,
         secondary: secondary,
+        actionLabel: actionLabel,
         counterValue: counterValue,
         counterLabel: counterLabel,
         milestone: milestone ?? this.milestone,
@@ -80,6 +87,7 @@ class PhaseStatusState {
       other.anchorCardId == anchorCardId &&
       other.primary == primary &&
       other.secondary == secondary &&
+      other.actionLabel == actionLabel &&
       other.counterValue == counterValue &&
       other.counterLabel == counterLabel &&
       other.milestone == milestone &&
@@ -91,6 +99,7 @@ class PhaseStatusState {
         anchorCardId,
         primary,
         secondary,
+        actionLabel,
         counterValue,
         counterLabel,
         milestone,
@@ -205,6 +214,9 @@ class PhaseStatusCubit extends Cubit<PhaseStatusState> {
       anchorCardId: item == null ? null : resolution.cardId,
       primary: item == null ? null : _fill(item.primary, days),
       secondary: item?.secondary == null ? null : _fill(item!.secondary!, days),
+      actionLabel: item?.actionLabel == null
+          ? null
+          : _fill(item!.actionLabel!, days),
       counterValue: counterValue,
       counterLabel: _nudgeBody(
         catalogue.nudges,

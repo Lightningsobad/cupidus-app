@@ -9,7 +9,16 @@
      lib/design_system/tokens/cupid_color_tokens.dart, written as literals
      rather than as ?android:attr/... so the widget reads as part of this app
      on any device theme. They are literals rather than @color/ references
-     because res/values is outside this story's write scope. -->
+     because res/values is outside this story's write scope.
+
+     B-4: no app-icon ImageView here. The canvas sb-84-widget-bon-pha draws
+     none, and @mipmap/ic_launcher rendered as an opaque white square; the
+     ~36dp it held goes back to the text column, which is what B-3 needed.
+
+     B-2: the flat background below is the no-payload default only. The
+     provider pushes a per-phase background drawable on every update, because
+     a launcher reuses the inflated view via RemoteViews.reapply and an
+     unset background would keep the previous phase's gradient. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/cupid_phase_widget_root"
     android:layout_width="match_parent"
@@ -18,13 +27,6 @@
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:padding="12dp">
-
-    <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginEnd="12dp"
-        android:importantForAccessibility="no"
-        android:src="@mipmap/ic_launcher" />
 
     <LinearLayout
         android:layout_width="0dp"

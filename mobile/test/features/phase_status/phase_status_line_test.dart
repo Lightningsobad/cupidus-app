@@ -289,6 +289,56 @@ void main() {
       expect(find.text(item.secondary!), findsOneWidget);
     });
 
+    testWidgets('waiting draws the action the pack names (R-1)',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(_hub(_storeFor[SoloPhase.waiting]!));
+      await tester.pumpAndSettle();
+
+      final PhaseContentItem item = await _screenItem(SoloPhase.waiting);
+      expect(item.actionLabel, isNotNull);
+      expect(
+        tester
+            .widget<Text>(
+              find.descendant(
+                of: find.byKey(phaseStatusLineActionKey),
+                matching: find.byType(Text),
+              ),
+            )
+            .data,
+        item.actionLabel,
+      );
+      // The action is a full tap target even though it reads a tier below the
+      // card's own action (`ux/requirement-ux-survey.md` §4).
+      expect(
+        tester.getSize(find.byKey(phaseStatusLineActionKey)).height,
+        greaterThanOrEqualTo(44),
+      );
+    });
+
+    testWidgets('a phase whose line names no action draws none',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(_hub(_storeFor[SoloPhase.upcoming]!));
+      await tester.pumpAndSettle();
+
+      final PhaseContentItem item = await _screenItem(SoloPhase.upcoming);
+      expect(item.actionLabel, isNull);
+      // Absent means absent: no chip, and no invented default label either.
+      expect(find.byKey(phaseStatusLineActionKey), findsNothing);
+      expect(find.byKey(phaseStatusLineKey), findsOneWidget);
+    });
+
+    testWidgets('the action opens the card detail rather than a route of its '
+        'own', (WidgetTester tester) async {
+      await tester.pumpWidget(_hub(_storeFor[SoloPhase.waiting]!));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(phaseStatusLineActionKey));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(phaseStatusLineActionKey), findsNothing);
+      expect(find.text('Đi xem phim'), findsWidgets);
+    });
+
     testWidgets('upcoming counts the days down to the date (AC-14)',
         (WidgetTester tester) async {
       await tester.pumpWidget(_hub(_storeFor[SoloPhase.upcoming]!));

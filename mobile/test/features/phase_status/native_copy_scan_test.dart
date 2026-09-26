@@ -35,6 +35,13 @@ const String _bridgePath =
 
 const String _packPath = 'assets/data/req016/phase_content.v1.json';
 
+/// The platform methods the provider reaches by name because `RemoteViews` has
+/// no typed setter for them. They are `@RemotableViewMethod` identifiers owned
+/// by the Android framework, not copy, so the literal scan below lets them
+/// through camelCase. Listed one by one rather than matched by shape, so a new
+/// entry is a decision someone made.
+const Set<String> _remotableMethodNames = <String>{'setBackgroundResource'};
+
 List<File> _swiftSources() => <String>['ios/Runner', _iosWidgetRoot]
     .map((String dir) => Directory(dir))
     .expand((Directory dir) => dir.listSync(recursive: true))
@@ -169,10 +176,14 @@ void main() {
         File(_providerPath).readAsStringSync(),
       );
       for (final String literal in _stringLiterals(provider)) {
+        if (_remotableMethodNames.contains(literal)) {
+          continue;
+        }
         expect(
           RegExp(r'^[a-z0-9_]*$').hasMatch(literal),
           isTrue,
-          reason: '"$literal" is not a contract key or a URI component',
+          reason: '"$literal" is not a contract key, a URI component, or a '
+              'named platform method',
         );
       }
     });

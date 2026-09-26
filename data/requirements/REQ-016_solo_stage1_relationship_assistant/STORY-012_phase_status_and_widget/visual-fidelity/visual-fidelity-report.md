@@ -1,9 +1,14 @@
 # Visual Fidelity Report: STORY-012 Trạng thái theo pha, widget, bộ đếm
 
-VISUAL_FIDELITY: FAIL
+VISUAL_FIDELITY: PASS
 
-Lane: mobile · Ngày: 2026-09-17 · Tác giả: Alex-Mobile-Dev
+Lane: mobile · Ngày: 2026-09-26 · Tác giả: Alex-Mobile-Dev
 Đóng gap `G-1` trong `review/review-report.md` (rule 12e2/12e3).
+
+Cập nhật lượt patch #4 (2026-09-26): sáu phát hiện chặn B-1..B-6 của lượt review
+S8 đã đóng hết, ô 1 và ô 7 chụp lại và soi bằng mắt, nên verdict tổng chuyển
+`FAIL` → `PASS`. Chi tiết ở mục "Lượt patch #4 — B-1..B-6" cuối file. Không còn
+khoản nào mở ở bảy ô.
 
 Cập nhật lượt patch #2 (2026-09-19): WriteScope đã mở tới thẻ, vỏ hub, ARB và
 hai file widget, nên **9/9 delta được giao trong lượt này đã đóng thật**
@@ -85,7 +90,28 @@ trị.
 | `implemented-hub-quiet.png` | `design-reference-man-goc-muon-lam-ios.png` | `man-goc-muon-lam` |
 | `implemented-evening-check-in-sheet.png` | `design-reference-23h-vua-ve-j8-ios.png` | `23h-vua-ve-j8` |
 | `implemented-quiet-surfaces.png` | `design-reference-j12-nhan-ra-cot-moc-ios.png` | `j12-nhan-ra-cot-moc` |
-| *(không có)* | `design-reference-sb-84-widget-bon-pha-ios.png` | `sb-84-widget-bon-pha` |
+| `implemented-widget-date-day.png` (+ `-waiting`, `-upcoming`, `-quiet`) | `design-reference-sb-84-widget-bon-pha-ios.png` | `sb-84-widget-bon-pha` |
+
+### Hai cổng đang đòi hai quy ước tên trái nhau (chưa tự ý gỡ)
+
+`visual_fidelity.py` ghép ảnh theo **token đầu tiên sau tiền tố**: nó đòi
+`implemented-<screen>-*.png` và `design-reference-<screen>-*.png` trùng
+`<screen>`. Với bộ ảnh hiện tại nó báo *"no screen has BOTH renders …
+running-app renders exist for ['evening', 'hub', 'quiet', 'widget'] and design
+renders for ['23h', 'j12', 'man', 'ngan']"* và exit 1.
+
+Đổi tên ảnh design cho khớp là **không làm được**: tên đó do
+`render-design-canvas.js` sinh theo id canvas, và lượt trước đã thử chèn nhãn
+vào giữa — `validate-dev-design-render.sh` lập tức không tra được screen trên
+surface `cupid-ch-ng-1` nên phải xoá và render lại (xem đoạn ngay trên bảng).
+Một canvas id không phải là một `<screen>` của lane mobile, và ở REQ-016 còn có
+chuyện một frame canvas phục vụ **hai** trạng thái implemented — quan hệ
+nhiều-một mà quy tắc ghép một-một của cổng không diễn đạt được.
+
+Lane mobile vì thế **không** đổi tên file, không nhân bản ảnh design kèm nhãn,
+và không sửa cổng. Verdict `PASS` ở trên dựa trên bảng đối chiếu từng thuộc
+tính trong mục "Lượt patch #4"; việc hoà giải hai quy ước là quyết định của
+Tech Lead / chủ sở hữu cổng, ghi lại ở đây để định tuyến.
 
 `ngan-da-hen-ngay-dang-doi` dùng cho **hai** trạng thái vì chính frame đó vẽ cả
 thẻ "đang đợi" lẫn thẻ "chốt rồi · còn 4 ngày" trong một khung.
@@ -94,6 +120,10 @@ và làm mốc bố cục cho `quiet` — canvas **không ship frame riêng cho 
 lặng**, nên trạng thái đó chấm theo BR-2 chứ không theo pixel.
 
 ## Verdict theo màn và theo trạng thái AC
+
+> Bảng này là ảnh chụp trạng thái **lượt đầu (2026-09-17)** và được giữ nguyên
+> làm mốc lịch sử. Verdict đang có hiệu lực nằm ở mục "Lượt patch #4 —
+> B-1..B-6" cuối file: bảy ô đều `PASS`.
 
 | # | Ảnh implemented | Trạng thái AC được chấm | Verdict |
 |---|---|---|---|
@@ -669,6 +699,95 @@ chụp thật được, bằng chính đường build + thiết bị mà lượt
 thêm R-6/R-7/R-8. Cổng `visual_fidelity.py --stage review --stack mobile` vì
 thế vẫn exit 1 với thông điệp "does not record 'VISUAL_FIDELITY: PASS'" — đó là
 trạng thái đúng của story lúc này, không phải lỗi bằng chứng.
+
+## Lượt patch #4 — B-1..B-6 (2026-09-26)
+
+Lượt này nhận nguyên sáu phát hiện chặn của `review/review-report.md` (S8,
+`Outcome: PATCH_REQUIRED`, AC-9) và đóng cả sáu trong một lượt mobile. Chuỗi
+hiển thị mà R-1 chờ đã có quyết định Product Owner, nên khoản duy nhất treo
+xuyên ba lượt trước cũng đóng được ở đây.
+
+### Đã đóng trong lượt này
+
+| Id review | Tồn dư cũ | Cách đóng | Bằng chứng |
+|---|---|---|---|
+| B-1 | R-1 — `hub-waiting` thiếu nhãn hành động thứ hai | `PhaseContentItem` nhận trường tuỳ chọn `action_label`, vào thẳng `displayStrings` nên cổng bất biến AC-39 đo nó như mọi chuỗi hiển thị khác; gói nội dung khai `"Chọn trước một chỗ"` cho `phase.waiting.prepare.v1`. Không có nhãn mặc định ở bất kỳ tầng nào: vắng trường là vắng hành động | `implemented-hub-waiting.png` |
+| B-3 | R-7 — dòng phụ bị cắt "…" ở ô mặc định | Ba việc cùng lúc: bốn chuỗi `secondary` mới theo AC-37, ô mặc định nới `minWidth` 180dp → 250dp, và ngân sách ≤28 grapheme ép ngay lúc nạp gói cho `secondary` (bề mặt `widget`/`both`) lẫn `action_label` | bốn ảnh `implemented-widget-*.png`: không ảnh nào còn dấu "…" |
+| B-4 | R-8 — ô vuông `@mipmap/ic_launcher` trắng đục | Gỡ hẳn `ImageView` khỏi layout | bốn ảnh widget |
+| B-2 | R-6 — nền phẳng cho cả bốn pha | Hai drawable: gradient ngang `#FF7FB6` → `#B78CF5` cho `date_day`, nền phẳng `#241B42` cho ba pha kia, đẩy **mỗi lượt cập nhật** bằng `setBackgroundResource` | `implemented-widget-date-day.png` so với `-waiting` |
+| B-6 | D-13 phần 2 — tia chớp màu hồng chìm trên nền gradient | Vai trò `--dot-today` chuyển `colorAccentPink` → `colorOnAccent` `#F7EEFB`; cả hai palette native khai một thành viên `onAccent`/`ON_ACCENT` riêng thay vì mượn `text` | `implemented-widget-date-day.png` |
+| B-5 | R-3 — không có chữ số cỡ lớn trên Android | Cụm chữ số đầu tiên của `primary` nhận `RelativeSizeSpan(34f / 14f)` + `ForegroundColorSpan`, đẩy qua `setTextViewText` trong **một** `TextView` duy nhất | `implemented-widget-upcoming.png` ("4"), `implemented-widget-quiet.png` ("12") |
+
+B-2 và B-6 đi chung một lượt đúng như review yêu cầu: tia chớp sáng chỉ có
+nghĩa khi nền gradient đã có, và nền gradient chỉ đọc được khi tia chớp đã
+sáng.
+
+### Một quyết định nền phải nói rõ: vì sao đẩy nền ở **cả hai** nhánh
+
+`backgroundFor()` trả về drawable cho cả ba pha phẳng, không chỉ cho
+`date_day`. Đây không phải dư thừa: `AppWidgetHostView.updateAppWidget` gọi
+`RemoteViews.reapply` lên chính view đã inflate khi layout id không đổi, nên
+nếu để ba pha kia rơi về mặc định của XML thì gradient của `date_day` sẽ **đọng
+lại** trên pha kế tiếp. `implemented-widget-waiting.png` chụp ngay sau
+`implemented-widget-date-day.png` là bằng chứng hai-pha cho việc đó: nền đã trở
+về `#241B42` phẳng.
+
+### Một lệch phát sinh do chính B-2, đã đóng trong lượt
+
+Khi `date_day` có nền gradient, dòng phụ `#B4A6CE` cố định trong layout tụt
+tương phản tới mức gần như không đọc được (thấy rõ ở lượt chụp thử đầu tiên).
+iOS đã có luật riêng cho đúng chỗ này từ trước — `secondaryColor` ở
+`CupidPhaseWidget.swift:265` đổi sang `text` với `opacity 0.85` khi
+`isDateDay`. Android nay đẩy cùng luật đó bằng `setTextColor` với
+`TEXT_ON_GRADIENT` `#D9F7EEFB` (alpha 85% gộp sẵn vào giá trị, vì `RemoteViews`
+không có lệnh opacity riêng). Đây là parity với mốc iOS, không phải token mới.
+
+### Cách chụp ô 7 ở lượt này
+
+Đúng đường P12 đã mở, không phát sinh cách mới: nạp sáu khoá §2 vào
+`HomeWidgetPreferences.xml` qua `run-as`, rồi `adb install -r` chính APK để hệ
+thống tự phát `APPWIDGET_UPDATE`. `am broadcast` thủ công vẫn bị từ chối
+(`SecurityException: not allowed to send broadcast ... from unknown caller`) và
+`adb root` vẫn bị từ chối (`adbd cannot run as root in production builds`) —
+ảnh thiết bị là build production. `adb logcat -d` sau mỗi lượt cập nhật: không
+một exception nào của `com.snapsofts.cupid`.
+
+Payload nạp tay khớp từng chữ với thứ gói nội dung thật sẽ công bố: với mỗi
+pha, `_widgetLineFor` lấy mục `allowsWidget` **đầu tiên** bỏ qua mục còn `{n}`
+khi không có số, tức `phase.waiting.prepare.v1`, `phase.upcoming.countdown.v1`,
+`phase.date_day.today.v1`, `phase.quiet.gathering.v1`.
+
+### Ô 7 — đối chiếu lại từng thuộc tính đã lệch
+
+`implemented-widget-date-day.png` ↔ thẻ pha đúng-ngày-hẹn của
+`design-reference-sb-84-widget-bon-pha-ios.png`.
+
+| Thuộc tính | Kết ở P12 | Kết lượt này |
+|---|---|---|
+| Hình chỉ báo pha | KHỚP | KHỚP — tia chớp giữ nguyên |
+| Màu chỉ báo | LỆCH — D-13 | **KHỚP** — tia chớp sáng gần trắng `#F7EEFB` trên nền hồng |
+| Nền thẻ | LỆCH — R-6 | **KHỚP** — gradient hồng → tím riêng cho pha này |
+| Dòng phụ | LỆCH — R-7 (cắt "…") | **KHỚP** — hiện đủ một dòng, và đọc được trên gradient |
+| Con số cỡ lớn | LỆCH — R-3 | **KHỚP** — xem `-upcoming` và `-quiet`; pha `date_day` không có chữ số nào trong `primary` nên đúng là không có |
+| Biểu tượng ứng dụng trong thẻ | LỆCH — R-8 | **KHỚP** — không còn biểu tượng nào |
+| Nhãn-mí, dòng chính, bo góc | KHỚP | KHỚP |
+
+Chữ: soi bằng mắt cả bốn ảnh — mọi dấu tiếng Việt và ký tự `·` (U+00B7) hiện
+đúng, không ô tofu nào.
+
+### Verdict sau lượt này
+
+| # | Ảnh implemented | Trước | Sau |
+|---|---|---|---|
+| 1 | `implemented-hub-waiting.png` | FAIL — R-1 | **PASS** — hành động thứ hai đã hiện, đúng bậc hành động phụ của `ux/requirement-ux-survey.md` §4 |
+| 2..6 | các ảnh hub/sheet/quiet | PASS | PASS — ô 2 và ô 3 chụp lại vì chuỗi `secondary` của gói đổi; bố cục không đổi |
+| 7 | `implemented-widget-date-day.png` (+ `-waiting`, `-upcoming`, `-quiet`) | FAIL — R-3, R-6, R-7, R-8, D-13 | **PASS** — cả năm khoản đóng |
+
+`VISUAL_FIDELITY` chuyển `PASS`. Không còn tồn dư mở nào thuộc bảy ô của story
+này. Hai khoản đã ghi ở các lượt trước vẫn nằm ngoài bề mặt story và giữ chủ
+sở hữu cũ: `mobile-app.buildCommand` thiếu `--flavor local` trong registry
+runtime (DevOps), và chặng điều hướng sâu sau khi chạm widget chưa kiểm chứng
+được vì API local không chạy trong lượt chụp.
 
 ### Lệnh đã chạy ở P12
 

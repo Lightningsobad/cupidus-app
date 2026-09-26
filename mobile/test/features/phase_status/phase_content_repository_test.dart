@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:cupid_mobile/core/content/content_package.dart';
 import 'package:cupid_mobile/features/phase_status/data/phase_content_repository.dart';
 import 'package:cupid_mobile/features/phase_status/domain/phase_content.dart';
+import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart' show FlutterError;
 import 'package:flutter/services.dart' show CachingAssetBundle;
 import 'package:flutter_test/flutter_test.dart';
@@ -103,6 +104,44 @@ void main() {
         catalogue.nudges.items.any((NudgeItem i) => i.title == null),
         isTrue,
       );
+    });
+
+    test('the waiting line carries the action it offers (R-1/AC-5)', () {
+      final PhaseContentItem prepare = catalogue.phaseContent.itemById(
+        'phase.waiting.prepare.v1',
+      )!;
+
+      expect(prepare.actionLabel, isNotNull);
+      expect(prepare.actionLabel, isNotEmpty);
+      expect(prepare.displayStrings, contains(prepare.actionLabel));
+    });
+
+    test('an absent action label is a valid shipped state', () {
+      final PhaseContentItem notebook = catalogue.phaseContent.itemById(
+        'phase.waiting.notebook.v1',
+      )!;
+
+      expect(notebook.actionLabel, isNull);
+      expect(notebook.displayStrings, isNot(contains(null)));
+    });
+
+    test('every string the widget can draw fits its smallest cell (R-7)', () {
+      for (final PhaseContentItem line in catalogue.phaseContent.items) {
+        if (line.surface.allowsWidget && line.secondary != null) {
+          expect(
+            line.secondary!.characters.length,
+            lessThanOrEqualTo(phaseContentShortStringBudget),
+            reason: line.id,
+          );
+        }
+        if (line.actionLabel != null) {
+          expect(
+            line.actionLabel!.characters.length,
+            lessThanOrEqualTo(phaseContentShortStringBudget),
+            reason: line.id,
+          );
+        }
+      }
     });
 
     test('only "{n}" is used as a substitution site', () {
@@ -238,6 +277,105 @@ void main() {
           '<fixture>',
         ),
         throwsA(isA<ContentPackageFormatException>()),
+      );
+    });
+  });
+
+  group('a short string over budget is rejected at load (R-7)', () {
+    // 28 readable characters, and the same sentence with one more.
+    const String atBudget = 'Chọn trước một chỗ bạn thích';
+    const String overBudget = 'Chọn trước một chỗ bạn thích.';
+
+    Map<String, Object?> line({
+      String surface = 'both',
+      String? secondary,
+      String? actionLabel,
+    }) =>
+        <String, Object?>{
+          'id': 'phase.fixture.v1',
+          'phase_id': 'waiting',
+          'primary': 'Một dòng',
+          'eyebrow': 'PHA 1',
+          'surface': surface,
+          'secondary': ?secondary,
+          'action_label': ?actionLabel,
+        };
+
+    test('the budget is the boundary, not a rounding', () {
+      expect(atBudget.characters.length, phaseContentShortStringBudget);
+      expect(
+        overBudget.characters.length,
+        phaseContentShortStringBudget + 1,
+      );
+      expect(
+        phaseContentItemFromJson(
+          line(secondary: atBudget, actionLabel: atBudget),
+          '<fixture>',
+        ).secondary,
+        atBudget,
+      );
+    });
+
+    test('an over-budget secondary on a widget surface throws', () {
+      for (final String surface in <String>['widget', 'both']) {
+        expect(
+          () => phaseContentItemFromJson(
+            line(surface: surface, secondary: overBudget),
+            '<fixture>',
+          ),
+          throwsA(isA<ContentPackageFormatException>()),
+          reason: surface,
+        );
+      }
+    });
+
+    test('a screen-only secondary is exempt, because a screen wraps', () {
+      expect(
+        phaseContentItemFromJson(
+          line(surface: 'screen', secondary: overBudget),
+          '<fixture>',
+        ).secondary,
+        overBudget,
+      );
+    });
+
+    test('an over-budget action label throws on every surface', () {
+      for (final String surface in <String>['screen', 'both']) {
+        expect(
+          () => phaseContentItemFromJson(
+            line(surface: surface, actionLabel: overBudget),
+            '<fixture>',
+          ),
+          throwsA(isA<ContentPackageFormatException>()),
+          reason: surface,
+        );
+      }
+    });
+
+    test('an action label on a widget-only line throws', () {
+      expect(
+        () => phaseContentItemFromJson(
+          line(surface: 'widget', actionLabel: atBudget),
+          '<fixture>',
+        ),
+        throwsA(isA<ContentPackageFormatException>()),
+      );
+    });
+
+    test('the budget counts what a reader sees, not code units', () {
+      // 28 readable characters spelled with combining marks rather than
+      // precomposed ones. A UTF-16 count reads 56 here and would reject a line
+      // that fits the cell, so the budget has to be measured in graphemes.
+      final String decomposed = 'ẹ' * phaseContentShortStringBudget;
+
+      expect(decomposed.length, greaterThan(phaseContentShortStringBudget));
+      expect(decomposed.characters.length, phaseContentShortStringBudget);
+      expect(
+        phaseContentItemFromJson(
+          line(secondary: decomposed),
+          '<fixture>',
+        ).secondary,
+        decomposed,
       );
     });
   });

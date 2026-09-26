@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- B-2 (architecture/contract-summary.md 3b): the date_day row of the phase
+     background table, gradientHot #FF7FB6 to #B78CF5. angle 0 is Android's
+     left-to-right, matching the .leading to .trailing the iOS extension
+     already ships, so both platforms draw one shape.
+
+     No corners and no inset: 3b keeps the geometry of the flat background it
+     replaces, because the launcher clips the widget's own radius. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <gradient
+        android:angle="0"
+        android:endColor="#B78CF5"
+        android:startColor="#FF7FB6"
+        android:type="linear" />
+</shape>
