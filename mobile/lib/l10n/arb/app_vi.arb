@@ -1209,6 +1209,39 @@
       }
     }
   },
+  "gift_ideas_guess_coming_soon": "Chân dung và bảng tra ăn khớp sẽ có ở bước sau.",
+  "@gift_ideas_guess_coming_soon": {
+    "description": "Answer when the bottom row is tapped before STORY-009/010 ship. Tapping says so rather than doing nothing, so the row is not a dead end (SC-5)."
+  },
+  "notifs_row_evening_check_in_title": "Nhắc về tới nhà chưa?",
+  "@notifs_row_evening_check_in_title": {
+    "description": "STORY-012 uiux-spec section 7 row 1 (SB-85). Turns the single 23h nudge of the date day on or off, independently of every other row (AC-32)."
+  },
+  "notifs_row_evening_check_in_sub": "Một lời nhắc nhẹ vào tối ngày hẹn.",
+  "@notifs_row_evening_check_in_sub": {
+    "description": "Says what the row controls: one gentle nudge, on the date day only. No repeat and no escalation (BR-10)."
+  },
+  "notifs_row_quiet_drip_title": "Nội dung nhỏ giọt khoảng lặng",
+  "@notifs_row_quiet_drip_title": {
+    "description": "STORY-012 uiux-spec section 7 row 2 (SB-99). Turns the quiet-phase drip line on or off, independently of row 1 (AC-32)."
+  },
+  "notifs_row_quiet_drip_sub": "Tối đa một lần mỗi tuần.",
+  "@notifs_row_quiet_drip_sub": {
+    "description": "States the cadence ceiling the drip policy enforces (BR-9), so the row is not read as a stream of notifications."
+  },
+  "evening_check_in_attach": "Đính ảnh",
+  "@evening_check_in_attach": {
+    "description": "Step (1) of the 23h check-in sheet: opens the OS photo picker (STORY-012 uiux-spec section 4). Chrome for the sheet, not story content - the question the sheet asks comes from nudges.v1.json."
+  },
+  "evening_check_in_photos_attached": "Đã chọn {count} ảnh",
+  "@evening_check_in_photos_attached": {
+    "description": "Replaces the attach label once photos are picked. A count of what the user chose, never a completion score.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "portrait_skip_action": "Bỏ qua",
   "@portrait_skip_action": {
     "description": "Sits on the same row as the next action, at equal reach, because declining a question is an ordinary outcome and carries no consequence (AC-25, AC-27)."
@@ -1361,5 +1394,37 @@
   "zodiac_shell_positioning_note": "Cung chỉ là cái vỏ cho vui, không phải phán quyết. Đọc xong chỉ nên thấy muốn hỏi người kia nhiều hơn.",
   "@zodiac_shell_positioning_note": {
     "description": "Closing note of the result surface, from the design canvas. It says in words what R-10/AC-16/AC-17 say in code: this is an excuse to start a conversation, not a prophecy, and nothing here rates the other person."
+  },
+  "evening_check_in_line_hint": "Viết một câu cho hôm nay",
+  "@evening_check_in_line_hint": {
+    "description": "Placeholder of step (2), the single-sentence field. Asks about the user's own day and never about the other person (BR-14)."
+  },
+  "evening_check_in_save": "Lưu vào nhật ký",
+  "@evening_check_in_save": {
+    "description": "Hands the photos and the sentence to the journal composer (STORY-003). Leaving either blank still works - the two steps do not lock each other."
+  },
+  "evening_check_in_later": "Để sau",
+  "@evening_check_in_later": {
+    "description": "Closes the sheet. A valid ending: nothing is stored, nothing is marked incomplete, and the reminder does not come back (AC-17)."
+  },
+  "evening_check_in_context_label": "TỐI NAY CỦA HAI NGƯỜI",
+  "@evening_check_in_context_label": {
+    "description": "Eyebrow of the context block (D-8). Names which evening the screen is about; the card title itself is user data and is drawn under it."
+  },
+  "evening_check_in_line_label": "Một câu để giữ tối nay",
+  "@evening_check_in_line_label": {
+    "description": "Label above the sentence field on the full-screen check-in (D-6). The field stays optional."
+  },
+  "evening_check_in_journal_chip": "+ ghi vào sổ tay",
+  "@evening_check_in_journal_chip": {
+    "description": "States where a saved sentence lands, so saving is not a guess. Not a button - the destination is fixed."
+  },
+  "evening_check_in_private_chip": "chỉ mình đọc",
+  "@evening_check_in_private_chip": {
+    "description": "States that the entry is private (BR-14). Not a toggle - there is no sharing path in stage 1."
+  },
+  "evening_check_in_reassurance": "Không viết cũng chẳng sao. Mai app sẽ không nhắc lại chuyện này.",
+  "@evening_check_in_reassurance": {
+    "description": "Footer of the full-screen check-in (D-9). Carries the AC-4 half that says skipping is not followed up."
   }
 }

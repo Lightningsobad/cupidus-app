@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../l10n/generated/app_l10n.dart';
+import '../../../phase_status/data/local_notification_scheduler.dart';
+import '../../../phase_status/data/phase_status_prefs.dart';
+import '../../../phase_status/domain/evening_check_in_scheduler.dart';
 import '../../data/notification_preferences_store.dart';
 import '../notification_settings_cubit.dart';
 
@@ -17,21 +20,88 @@ const double _sectionGap = 13;
 /// override v1 does not implement, so STORY-031 AC3 drops it permanently
 /// rather than deferring it — do not restore it from the design source.
 class NotificationSettingsScreen extends StatelessWidget {
-  const NotificationSettingsScreen({super.key, required this.store});
+  const NotificationSettingsScreen({
+    super.key,
+    required this.store,
+    this.phaseStatusPrefs,
+    this.eveningCheckIn,
+  });
 
   final NotificationPreferencesStore store;
+
+  /// REQ-016 STORY-012 P6. The two rows this story adds keep their state in
+  /// `phase_status_prefs.dart` rather than in [NotificationPreferencesStore],
+  /// because `EveningCheckInScheduler` reads those same keys before it queues
+  /// anything: a second copy of the state would be a reminder that still fires
+  /// after the switch is off.
+  final PhaseStatusPrefs? phaseStatusPrefs;
+  final EveningCheckInScheduler? eveningCheckIn;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<NotificationSettingsCubit>(
       create: (_) => NotificationSettingsCubit(store: store),
-      child: const _NotificationSettingsView(),
+      child: _NotificationSettingsView(
+        phaseStatusPrefs: phaseStatusPrefs,
+        eveningCheckIn: eveningCheckIn,
+      ),
     );
   }
 }
 
-class _NotificationSettingsView extends StatelessWidget {
-  const _NotificationSettingsView();
+class _NotificationSettingsView extends StatefulWidget {
+  const _NotificationSettingsView({this.phaseStatusPrefs, this.eveningCheckIn});
+
+  final PhaseStatusPrefs? phaseStatusPrefs;
+  final EveningCheckInScheduler? eveningCheckIn;
+
+  @override
+  State<_NotificationSettingsView> createState() =>
+      _NotificationSettingsViewState();
+}
+
+class _NotificationSettingsViewState extends State<_NotificationSettingsView> {
+  late final PhaseStatusPrefs _phaseStatusPrefs =
+      widget.phaseStatusPrefs ?? PhaseStatusPrefs();
+  late final EveningCheckInScheduler _eveningCheckIn =
+      widget.eveningCheckIn ??
+          EveningCheckInScheduler(
+            notifications: PluginLocalNotificationScheduler(),
+            prefs: _phaseStatusPrefs,
+          );
+
+  /// Both keys read `true` when absent, so the rows start where a fresh
+  /// install actually is rather than blank.
+  bool _eveningCheckInEnabled = true;
+  bool _quietDripEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPhaseStatusPrefs();
+  }
+
+  Future<void> _loadPhaseStatusPrefs() async {
+    final bool evening = await _eveningCheckIn.isEnabled();
+    final bool drip = await _phaseStatusPrefs.quietDripEnabled();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _eveningCheckInEnabled = evening;
+      _quietDripEnabled = drip;
+    });
+  }
+
+  Future<void> _setEveningCheckIn(bool enabled) async {
+    setState(() => _eveningCheckInEnabled = enabled);
+    await _eveningCheckIn.setEnabled(enabled);
+  }
+
+  Future<void> _setQuietDrip(bool enabled) async {
+    setState(() => _quietDripEnabled = enabled);
+    await _phaseStatusPrefs.setQuietDripEnabled(enabled);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +149,29 @@ class _NotificationSettingsView extends StatelessWidget {
                     _NotifGroup(
                       dotColor: colors.colorAccentPink,
                       label: l10n.notifs_group_engagement,
-                      rows: _engagementRows(l10n),
+                      rows: <_NotifRow>[
+                        ..._engagementRows(l10n),
+                        // Exactly two rows, and they belong to the group that
+                        // already holds the app's other nudges rather than to
+                        // a settings screen of their own
+                        // (`ux/uiux-spec.md` §7).
+                        _NotifRow(
+                          prefKey: 'eveningCheckIn',
+                          icon: Icons.nightlight_round,
+                          title: l10n.notifs_row_evening_check_in_title,
+                          sub: l10n.notifs_row_evening_check_in_sub,
+                          value: _eveningCheckInEnabled,
+                          onChanged: _setEveningCheckIn,
+                        ),
+                        _NotifRow(
+                          prefKey: 'quietDrip',
+                          icon: Icons.local_florist_outlined,
+                          title: l10n.notifs_row_quiet_drip_title,
+                          sub: l10n.notifs_row_quiet_drip_sub,
+                          value: _quietDripEnabled,
+                          onChanged: _setQuietDrip,
+                        ),
+                      ],
                       preferences: preferences,
                       colors: colors,
                       type: type,
@@ -164,12 +256,21 @@ class _NotifRow {
     required this.icon,
     required this.title,
     required this.sub,
+    this.value,
+    this.onChanged,
   });
 
   final String prefKey;
   final IconData icon;
   final String title;
   final String sub;
+
+  /// Set only by rows whose state lives outside [NotificationPreferencesStore].
+  /// The REQ-016 switches read and write the same `PhaseStatusPrefs` keys the
+  /// scheduler itself checks, because a second copy of that state would let a
+  /// reminder fire after the switch is off.
+  final bool? value;
+  final ValueChanged<bool>? onChanged;
 }
 
 class _CapBanner extends StatelessWidget {
@@ -308,11 +409,12 @@ class _NotifGroup extends StatelessWidget {
                   ),
                   _TogglePill(
                     key: Key('notif-toggle-${row.prefKey}'),
-                    value: preferences[row.prefKey] ?? false,
+                    value: row.value ?? preferences[row.prefKey] ?? false,
                     colors: colors,
-                    onChanged: (bool value) => context
-                        .read<NotificationSettingsCubit>()
-                        .setEnabled(row.prefKey, value),
+                    onChanged: row.onChanged ??
+                        (bool value) => context
+                            .read<NotificationSettingsCubit>()
+                            .setEnabled(row.prefKey, value),
                   ),
                 ],
               ),

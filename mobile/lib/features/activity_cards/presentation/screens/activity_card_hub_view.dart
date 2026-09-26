@@ -13,6 +13,16 @@ import '../../../chapter_closure/presentation/widgets/close_chapter_dialog.dart'
 import '../../../chapter_closure/presentation/widgets/closed_archive_actions.dart';
 import '../../../conversation_starters/conversation_starters_entry_point.dart';
 import '../../../gift_ideas/gift_ideas_entry_point.dart';
+import '../../../phase_status/data/home_widget_bridge.dart';
+import '../../../phase_status/data/phase_content_repository.dart';
+import '../../../phase_status/data/phase_status_prefs.dart';
+import '../../../phase_status/domain/drip_cadence_policy.dart';
+import '../../../phase_status/domain/milestone_resolver.dart';
+import '../../../phase_status/presentation/evening_check_in_sheet.dart';
+import '../../../phase_status/presentation/gift_progress_block.dart';
+import '../../../phase_status/presentation/phase_status_cubit.dart';
+import '../../../phase_status/presentation/phase_status_line.dart';
+import '../../../phase_status/presentation/wealth_counter_line.dart';
 import '../../../zodiac_shell/zodiac_shell_entry_point.dart';
 import '../../domain/activity_card.dart';
 import '../../domain/activity_card_repository.dart';
@@ -35,6 +45,10 @@ class ActivityCardHubView extends StatelessWidget {
     this.chapterClosureService,
     this.closedArchive,
     this.stage1WipeService,
+    this.phaseContent,
+    this.phaseWidgetPublisher,
+    this.phaseStatusPrefs,
+    this.today,
   });
 
   /// Test/preview seam. Left null in production so the hub resolves the same
@@ -51,35 +65,105 @@ class ActivityCardHubView extends StatelessWidget {
   final ClosedArchiveReader? closedArchive;
   final Stage1WipeService? stage1WipeService;
 
+  /// Test/preview seam for the content packages the phase line reads.
+  final PhaseContentRepository? phaseContent;
+
+  /// Test/preview seam. Left null in production so the hub publishes through
+  /// the real bridge, on the same pass it draws the line.
+  final PhaseWidgetPublisher? phaseWidgetPublisher;
+
+  /// Test/preview seam for the milestone and drip cursors, which are the only
+  /// two device-local stores screen (1) reads.
+  final PhaseStatusPrefs? phaseStatusPrefs;
+
+  /// Clock seam shared by the phase line and the per-card countdown, so both
+  /// read the same day and a test can pin it.
+  final DateTime? today;
+
   @override
   Widget build(BuildContext context) {
+    final ActivityCardRepository resolved =
+        repository ?? getIt<ActivityCardRepository>();
     return BlocProvider<ActivityCardListCubit>(
       create: (_) => ActivityCardListCubit(
-        repository: repository ?? getIt<ActivityCardRepository>(),
+        repository: resolved,
         closedArchive: closedArchive ??
             (getIt.isRegistered<ClosedArchiveReader>()
                 ? getIt<ClosedArchiveReader>()
                 : null),
       )..load(),
-      child: _ActivityCardHubBody(
-        repository: repository,
-        chapterClosureService: chapterClosureService,
-        stage1WipeService: stage1WipeService,
+      child: BlocProvider<PhaseStatusCubit>(
+        create: (_) => PhaseStatusCubit(
+          repository: resolved,
+          content: phaseContent,
+          widgetPublisher: phaseWidgetPublisher ??
+              HomeWidgetPhasePublisher(
+                resolved,
+                content: phaseContent,
+                clock: today == null ? null : () => today!,
+              ),
+          eveningCheckIn: buildEveningCheckInScheduler(
+            content: phaseContent,
+            cards: resolved,
+          ),
+          milestone: MilestoneResolver(phaseStatusPrefs ?? PhaseStatusPrefs()),
+          drip: DripCadencePolicy(phaseStatusPrefs ?? PhaseStatusPrefs()),
+          clock: today == null ? null : () => today!,
+        ),
+        child: _ActivityCardHubBody(
+          repository: repository,
+          chapterClosureService: chapterClosureService,
+          stage1WipeService: stage1WipeService,
+          today: today,
+        ),
       ),
     );
   }
 }
 
-class _ActivityCardHubBody extends StatelessWidget {
+/// Stateful only to own the refresh loop: the phase line reloads when the hub
+/// mounts and when the app comes back to the foreground, and nowhere else
+/// (`WIDGET-STALE`). Keeping that in the body rather than in the list item
+/// builder means the lazy sliver may build and discard the line as often as it
+/// likes without re-running a resolution.
+class _ActivityCardHubBody extends StatefulWidget {
   const _ActivityCardHubBody({
     this.repository,
     this.chapterClosureService,
     this.stage1WipeService,
+    this.today,
   });
 
   final ActivityCardRepository? repository;
   final ChapterClosureService? chapterClosureService;
   final Stage1WipeService? stage1WipeService;
+  final DateTime? today;
+
+  @override
+  State<_ActivityCardHubBody> createState() => _ActivityCardHubBodyState();
+}
+
+class _ActivityCardHubBodyState extends State<_ActivityCardHubBody>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    context.read<PhaseStatusCubit>().refresh();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      context.read<PhaseStatusCubit>().refresh();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,12 +205,34 @@ class _ActivityCardHubBody extends StatelessWidget {
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: _CloseChapterOverflow(
-                        chapterClosureService: chapterClosureService,
+                        chapterClosureService: widget.chapterClosureService,
                         onClosed: cubit.load,
                       ),
                     ),
                   ),
                   if (!minuteOne) ...<Widget>[
+                    // Above the quick-entry strip and outside the sticky
+                    // header, which is where `ux/uiux-spec.md` §6 puts the
+                    // counter: a static line under the screen title, not a
+                    // chrome element that follows the user down the list.
+                    SliverToBoxAdapter(
+                      child: BlocBuilder<PhaseStatusCubit, PhaseStatusState>(
+                        builder: (BuildContext context, PhaseStatusState phase) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              WealthCounterLine(
+                                label: phase.counterLabel,
+                                milestone: phase.milestone,
+                              ),
+                              GiftProgressBlock(line: phase.giftProgress),
+                              DripCaptionLine(line: phase.drip),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.only(top: CupidSpacing.md),
@@ -185,7 +291,7 @@ class _ActivityCardHubBody extends StatelessWidget {
   /// child, so the capture flows and the detail screen write to the store this
   /// list is reading from.
   ActivityCardRepository _repositoryOf(BuildContext context) =>
-      repository ?? getIt<ActivityCardRepository>();
+      widget.repository ?? getIt<ActivityCardRepository>();
 
   List<Widget> _contentSlivers(
     BuildContext context,
@@ -198,8 +304,8 @@ class _ActivityCardHubBody extends StatelessWidget {
       if (state.pane.isClosedArchive && !state.loading)
         SliverToBoxAdapter(
           child: ClosedArchiveActions(
-            closureService: chapterClosureService,
-            wipeService: stage1WipeService,
+            closureService: widget.chapterClosureService,
+            wipeService: widget.stage1WipeService,
             onChanged: cubit.load,
           ),
         ),
@@ -237,28 +343,52 @@ class _ActivityCardHubBody extends StatelessWidget {
           delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) {
               final ActivityCard card = state.cards[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: CupidSpacing.md),
-                child: GestureDetector(
-                  key: Key('activity_card_open_${card.id}'),
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => _openDetail(context, cubit, card),
-                  child: ActivityCardTile(
-                    card: card,
-                    replyState: state.replyStateOf(card),
-                    onPrimaryAction: () => _openDetail(context, cubit, card),
-                    onToggleReply: () => cubit.toggleReplyState(card.id),
-                    onOverflowAction: (ActivityCardOverflowAction action) {
-                      if (action == ActivityCardOverflowAction.delete) {
-                        cubit.deleteCard(card.id);
-                        return;
-                      }
-                      // "Chuyển trạng thái" and "Sửa" are both modes of the
-                      // detail screen (AC-13), not two destinations.
-                      _openDetail(context, cubit, card);
-                    },
-                  ),
-                ),
+              return BlocBuilder<PhaseStatusCubit, PhaseStatusState>(
+                builder: (BuildContext context, PhaseStatusState phase) {
+                  // D-1: the phase block belongs to the card it is about, so
+                  // the anchor card is handed the block and draws it inside
+                  // itself. Every other card is handed `null` and is built
+                  // exactly as it was.
+                  final bool anchored =
+                      index == _anchorIndex(state.cards, phase);
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: CupidSpacing.md),
+                    child: GestureDetector(
+                      key: Key('activity_card_open_${card.id}'),
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => _openDetail(context, cubit, card),
+                      child: ActivityCardTile(
+                        card: card,
+                        replyState: state.replyStateOf(card),
+                        today: widget.today,
+                        phaseBlock: anchored
+                            ? PhaseStatusLine(
+                                primary: phase.primary,
+                                secondary: phase.secondary,
+                                actionLabel: phase.actionLabel,
+                                // The preparation area lives inside the card
+                                // detail (survey 4 note 5): the action names
+                                // the intent, it does not open a route of its
+                                // own.
+                                onActionTap: () =>
+                                    _openDetail(context, cubit, card),
+                              )
+                            : null,
+                        onPrimaryAction: () => _openDetail(context, cubit, card),
+                        onToggleReply: () => cubit.toggleReplyState(card.id),
+                        onOverflowAction: (ActivityCardOverflowAction action) {
+                          if (action == ActivityCardOverflowAction.delete) {
+                            cubit.deleteCard(card.id);
+                            return;
+                          }
+                          // "Chuyển trạng thái" and "Sửa" are both modes of
+                          // the detail screen (AC-13), not two destinations.
+                          _openDetail(context, cubit, card);
+                        },
+                      ),
+                    ),
+                  );
+                },
               );
             },
             childCount: state.cards.length,
@@ -266,6 +396,25 @@ class _ActivityCardHubBody extends StatelessWidget {
         ),
       ),
     ];
+  }
+
+  /// Which card the phase line sits above (`ux/uiux-spec.md` §1: the line
+  /// introduces the card it is about). The anchor card is not always in the
+  /// selected pane, in which case the line stays at the top of the list rather
+  /// than disappearing — it describes the phase, not the pane.
+  ///
+  /// `-1` when there is no line, so no index ever matches and the list is built
+  /// exactly as it was before this phase.
+  int _anchorIndex(List<ActivityCard> cards, PhaseStatusState phase) {
+    if (!phase.hasLine) {
+      return -1;
+    }
+    final String? anchor = phase.anchorCardId;
+    if (anchor == null) {
+      return 0;
+    }
+    final int found = cards.indexWhere((ActivityCard c) => c.id == anchor);
+    return found < 0 ? 0 : found;
   }
 
   /// Every affordance on a tile lands on the same screen, so a card is never a
@@ -289,6 +438,12 @@ class _ActivityCardHubBody extends StatelessWidget {
       return;
     }
     await cubit.load();
+    if (context.mounted) {
+      // The detail screen is the only place a card changes status, and a
+      // status change is the third and last moment the widget payload may move
+      // (`WIDGET-STALE`) — there is no watcher and no background job behind it.
+      await context.read<PhaseStatusCubit>().refresh();
+    }
   }
 }
 

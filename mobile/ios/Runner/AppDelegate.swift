@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import UserNotifications
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -7,6 +8,12 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // REQ-016 STORY-012 P6. flutter_local_notifications needs the notification
+    // center delegate set before the app finishes launching, otherwise a tap
+    // that cold-starts the app is delivered to nobody and the reminder leads
+    // nowhere. FlutterAppDelegate already implements the delegate protocol and
+    // forwards to the registered plugins.
+    UNUserNotificationCenter.current().delegate = self
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 

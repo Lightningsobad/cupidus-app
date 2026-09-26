@@ -24,9 +24,16 @@ kế tiếp không hiện cho tới khi dữ liệu thật đổi.
 
 Tại màn (1): mỗi pha hiện thành đúng **một dòng trạng thái** ngay trên thẻ
 gần nhất liên quan — icon (Material Symbols, biến thể `line`) + nhãn ngắn +
-(riêng pha "Đang đợi") một CTA hành động phụ dẫn tới việc chuẩn bị cụ thể
-(AC-5, SB-83) — dùng đúng cột "hành động phụ" ở bảng action-tier (survey mục
-4): text button, không nền đặc, `caption 13pt`.
+(riêng pha "Đang đợi") tối đa một chip hành động phụ dẫn tới việc chuẩn bị cụ
+thể (AC-5, SB-83). Vá 2026-09-26 (B-1): chip nằm **trong** khối
+hướng-chuẩn-bị của thẻ, hình khối theo canvas `cupid-ch-ng-1` màn `hub-waiting`
+(chip bo tròn, không phải text button trần); nhãn lấy từ trường nhãn hành động
+của mục nội dung đang hiển thị (AC-37, tên đề xuất `action_label`), vắng trường
+thì không vẽ chip; chạm chip mở màn chi tiết A4 của chính thẻ đang đợi. Chip
+không phải CTA chính thứ hai; CTA `Hẹn ngày` và ô tràn `…` ở chân thẻ giữ
+nguyên (D-2). Canvas vẽ hai chip — chip `Rủ lại kiểu khác` bị bác (AC-6/AC-7),
+chữ `Chọn quán dự phòng` là nội dung mẫu (D-8); xem `req_master.md` →
+`## Design Ruling Log` hàng B-1.
 
 ## 2. Widget hệ điều hành — bề mặt công cộng (BR-11)
 
@@ -40,8 +47,90 @@ app:
   định) — không lắp chuỗi tự do người dùng đã nhập vào widget, kể cả khi
   chuỗi đó vô hại; dùng nhãn khái quát ("Một ý tưởng quà đang được chuẩn bị")
   thay vì tên quà thật.
-- Bố cục 1 khối: icon pha (leading) + 1 dòng nhãn pha (`body`, đậm vừa) +
-  tối đa 1 dòng phụ (`caption`). Không carousel, không danh sách nhiều dòng.
+- Bố cục 1 khối, thêm nhãn-mí + chấm màu theo pha (D-10, canvas
+  `widget-phases`): trên cùng là **nhãn-mí pha** — chuỗi ngắn, khái quát,
+  theo đúng phong cách canvas ("PHA n · <tên pha>", chuỗi hiển thị chính xác
+  do content pack quyết định) — kèm một **chỉ báo pha** ngay cạnh
+  nhãn-mí; dưới đó vẫn là icon pha (leading) + 1 dòng nhãn pha (`body`, đậm
+  vừa) + tối đa 1 dòng phụ (`caption`). Không carousel, không danh sách nhiều
+  dòng.
+- Nhãn-mí là chuỗi hiển thị **thứ ba** của widget (cạnh `primary_line`,
+  `secondary_line`) — lấy từ một **trường mới, ổn định theo id, trong content
+  pack đã ship kèm app** (AC-37/BR-15: mở rộng đúng năm-khoá hợp đồng payload
+  hiện có thêm một khoá nhãn-mí, không hard-code chuỗi hiển thị trong
+  `cupid_phase_widget.xml`/`CupidPhaseWidget.swift`). Nội dung nhãn-mí chỉ là
+  **tên pha khái quát** (dùng lại đúng bốn tên ở mục 1: "Đang đợi" / "Sắp
+  hẹn" / "Đúng ngày hẹn" / "Khoảng lặng", hoặc tương đương) — **không** thời
+  gian, **không** số ngày, **không** tên thẻ/hoạt động cụ thể, **không** bất
+  kỳ điều gì về người kia (AC-9, AC-11, AC-12, BR-11).
+- Chỉ báo pha là **design token**, không phải nội dung và không phải
+  điểm số: bốn vai trò token riêng cho bốn pha, nhất quán với bảng màu
+  thương hiệu tối của D-12 (không dùng màu mặc định của hệ điều hành) —
+  `--dot-waiting` (Đang đợi, trung tính), `--dot-upcoming` (Sắp hẹn, cùng
+  nhóm "đã xác nhận" với `--mint`/`--green` ở mục 5 survey), `--dot-today`
+  (Đúng ngày hẹn, nhóm `--pink`/`--grad` hành động chính), `--dot-quiet`
+  (Khoảng lặng, biến thể tối/desaturated cùng bảng). Đây là bốn vai trò ngữ
+  nghĩa; giá trị màu cụ thể do D-12 (System UX Memory + mobile-dev) định,
+  không lặp lại ở đây.
+- **Hình dạng** của chỉ báo pha không đồng nhất trên bốn pha: `--dot-waiting`,
+  `--dot-upcoming`, `--dot-quiet` vẽ **chấm màu đặc**; riêng pha *Đúng ngày hẹn*
+  (`--dot-today`) vẽ một **glyph tia chớp** khớp canvas `sb-84-widget-bon-pha`,
+  vì nền gradient hồng→tím của D-12 làm chấm hồng đặc gần như mất tương phản.
+  Đây là vai trò ngữ nghĩa/UX; định nghĩa kỹ thuật của hình dạng token nằm ở
+  `architecture/contract-summary.md` §3a, không lặp lại ở đây.
+- Vá 2026-09-26 (B-6): màu tô (tint) của glyph tia chớp **không** dùng lại giá
+  trị hồng đặc `--pink` (`#FF7FB6`) của nhóm ngữ nghĩa "hành động chính" —
+  glyph nằm đè lên chính nền gradient hồng→tím đó (mục "Nền theo pha" bên
+  dưới), nên phải dùng token **chữ/glyph-trên-gradient** gần trắng đã có sẵn
+  trong hệ thống (`colorOnAccent` = `#F7EEFB`, đã định nghĩa cho đúng mục đích
+  "glyph rendered on top of gradientHot" —
+  `mobile/lib/design_system/tokens/cupid_color_tokens.dart:230-233`), khớp
+  tia chớp gần-trắng của canvas `sb-84-widget-bon-pha`. Vai trò ngữ nghĩa
+  `--dot-today` ("hành động chính") không đổi — chỉ hex nó tra ra cho **hình
+  bolt** đổi từ hồng sang gần-trắng; không thêm resource màu thứ năm. **Ràng
+  buộc thứ tự (Iris-QC, review-report.md dòng 95-98):** B-6 và B-2 (nền
+  gradient `gradientHot`/hồng→tím cho thẻ pha hôm nay, phạm vi Tech Lead) phải
+  ship **cùng một lượt** — tách riêng B-6 (đổi màu glyph) mà chưa có B-2 (nền
+  vẫn phẳng `#241B42`) sẽ dựng lại đúng lỗi "hồng-trên-hồng" D-13 từng chặn
+  ở hướng ngược lại: gần-trắng trên nền tím đặc `#241B42` cũng sai tương phản
+  ngữ nghĩa dù không sai contrast-ratio kỹ thuật. `architecture/contract-summary.md`
+  §3a dòng 119-121 hiện khoá "glyph lấy màu từ chính `dot_today`" — câu đó
+  không còn đúng sau quyết định này (giá trị `dot_today` cho hình bolt đổi
+  thành gần-trắng, không còn là màu hồng của nhóm) và cần Tech Lead sửa lại
+  cho khớp; không tự sửa `contract-summary.md` ở đây (ngoài WriteScope UX).
+- Vá 2026-09-26 (B-4): thẻ widget **không** vẽ biểu tượng ứng dụng bên trong —
+  bỏ hẳn `ImageView` `@mipmap/ic_launcher` (`cupid_phase_widget.xml:22-27`),
+  khớp đúng canvas `sb-84-widget-bon-pha` (không màn nào trong bốn thẻ canvas
+  có icon app riêng — thẻ đã tự nhận diện thương hiệu qua bảng màu D-12 và
+  widget picker của hệ điều hành). Cột nội dung (nhãn-mí/dòng chính/dòng phụ)
+  bắt đầu sát lề trái của phần đệm (`padding`) thẻ, không còn slot icon phía
+  trước — đóng finding B-4. Không dựng bản đơn sắc thay thế: canvas không có
+  chỗ nào cho một icon dạng đó, thêm vào là bịa thêm một phần tử canvas không
+  vẽ. Phần rộng ~36dp (24dp icon + 12dp margin) được trả lại cho cột chữ, hỗ
+  trực tiếp cho B-3 bên dưới.
+- Vá 2026-09-26 (B-3): dòng phụ (`caption`) bị cắt "…" giữa từ ở ô widget
+  Android mặc định — `android:minHeight="40dp"` cố định trong
+  `cupid_phase_widget_info.xml:12` (chỉ `resizeMode="horizontal"`, không có
+  chiều dọc), nên **không** nới `maxLines` của dòng phụ
+  (`cupid_phase_widget.xml:86`) lên 2: 40dp một hàng không đủ chỗ cho thêm một
+  dòng, kết quả sẽ là chữ bị cắt cứng ở đáy thẻ — còn xấu hơn dấu "…" hiện tại.
+  Chốt hai lớp thay cho nhau:
+  1. Nới cỡ ô mặc định của widget từ ~3×1 lên ~4×1 — tăng `android:minWidth`
+     trong `cupid_phase_widget_info.xml:13` từ `180dp` lên khoảng `230dp` (mobile-
+     dev chọn giá trị đúng theo lưới 4 cột chuẩn của tài liệu widget Android).
+     `resizeMode="horizontal"` vẫn giữ nguyên nên người dùng vẫn co giãn được.
+  2. Đặt ngân sách độ dài cho `secondary_line` trong gói nội dung sao cho vừa
+     một dòng ở cỡ 4×1 mới (ước lượng ~28-32 ký tự tiếng Việt kể cả dấu cách,
+     mobile-dev/PO đo lại bằng chuỗi thật) — **đây là ràng buộc nội dung
+     (AC-37/BR-15), không sửa ở đây**; ghi thành yêu cầu gửi Product Owner
+     trong báo cáo bàn giao.
+  `ellipsize="end" maxLines="1"` (`cupid_phase_widget.xml:86`) giữ nguyên
+  không đổi — vẫn là lưới an toàn cho thiết bị có lưới hẹp hơn hoặc chuỗi vượt
+  ngân sách, không phải cách hiển thị mặc định kỳ vọng.
+- Vá 2026-09-17: thêm nhãn-mí + chấm màu cho bốn pha; thiết kế là mốc chuẩn;
+  đóng D-10. Vá 2026-09-25: đổi hình dạng chỉ báo pha *Đúng ngày hẹn* từ chấm
+  màu đặc sang glyph tia chớp; ba pha còn lại giữ nguyên chấm; thiết kế là mốc
+  chuẩn; đóng D-13.
 - Nội dung theo pha (copy chính xác do đội nội dung soạn theo R-15 — đây là khung):
 
   | Pha | Dòng chính | Dòng phụ |
@@ -75,14 +164,34 @@ app:
 
 - Thông báo hệ thống thời điểm ~23h ngày hẹn, nội dung hỏi **về người dùng**,
   không hỏi về người kia và không yêu cầu đánh giá buổi hẹn (AC-19).
-- Chạm vào thông báo → mở thẳng luồng 2 bước gộp trong một sheet nhỏ: (1) tuỳ
-  chọn đính ảnh (mở OS picker), (2) một ô nhập 1 câu → lưu vào nhật ký
-  (STORY-003). Không ép cả hai bước — bỏ trống vẫn lưu được (đồng nhất "cất
-  ảnh và viết một câu" nhưng không khoá nhau).
-- Nếu STORY-003 chưa giao (AC-18): bỏ bước (2), chỉ giữ (1) cất ảnh; sheet co
-  lại còn đúng phần dùng được, không hiện ô nhập bị vô hiệu hoá xám.
+- Chạm vào thông báo → mở thẳng một **màn hình đầy đủ dạng modal** (không
+  phải sheet nhỏ), khớp canvas `23h-vua-ve-j8`. Chỉ vào được từ thông báo
+  23h — **không** phải một đích điều hướng mới, **không** có URL trực tiếp,
+  **không** phải "màn thứ 12" (tổng vẫn 11 màn, cùng luật ở đầu file này):
+  - Tiêu đề lớn **hai dòng**.
+  - Một **khối ngữ cảnh** ngay dưới tiêu đề, nhắc lại buổi hẹn đang nói tới —
+    chỉ đọc tên/ngày buổi hẹn từ trường có sẵn của thẻ STORY-001 (BR-12);
+    không đọc được thì bỏ khối này, không chặn màn hình hiển thị.
+  - Một **lưới ba ô ảnh**, mỗi ô tuỳ chọn độc lập (mở OS picker riêng từng
+    ô) — không ép đủ ba ô.
+  - Một **ô nhập nhiều dòng** → lưu vào nhật ký (STORY-003).
+  - Hai **chip mô tả, không chạm được**: một chip nói câu vừa viết sẽ vào
+    **nhật ký**; một chip nói **chỉ người dùng đọc được**. Chữ "+ ghi vào sổ
+    tay" trên canvas **không** được áp dụng — AC-16 chỉ lưu vào nhật ký; sổ
+    tay (STORY-004) nằm ngoài phạm vi theo R-1f. Một hành động "thêm vào sổ
+    tay" thật sẽ là một requirement riêng, cần người dùng xác nhận trước,
+    không suy diễn từ canvas ở đây.
+  - Một **CTA chính cỡ lớn** ở cuối màn.
+  - Không ép cả hai bước (ảnh + câu viết) — bỏ trống hoặc rời màn không làm
+    gì vẫn lưu được phần đã có (giữ nguyên luật "không ép cả hai bước").
+  - Một dòng **trấn an ở chân màn**, chỉ hứa đúng một điều: thông báo này sẽ
+    **không nhắc lại** (AC-17/BR-10) — không hứa badge/tồn đọng nào khác.
+- Nếu STORY-003 chưa giao (AC-18): ẩn cùng lúc ô nhập, chip nhật ký, và lối
+  thoát "viết một câu" — màn chỉ còn lưới ảnh tuỳ chọn, không hiện ô/khối nào
+  ở trạng thái xám vô hiệu hoá.
 - Bỏ qua thông báo (AC-17): không nhắc lại thông báo đó nữa. Không icon/badge
   "còn 1 việc chưa làm" tồn đọng trên app icon hay trong app sau đó.
+- Vá 2026-09-17: màn đầy đủ; thiết kế là mốc chuẩn; đóng D-6 (gồm D-7/D-8/D-9).
 
 ## 5. "Món quà đang lớn" và nhỏ giọt (SB-87/SB-99, khoảng lặng)
 

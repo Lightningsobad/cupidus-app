@@ -294,5 +294,20 @@
   "zodiac_shell_card_created_undo": "Undo",
   "zodiac_shell_leave_round_action": "Another time",
   "zodiac_shell_back_to_picker_action": "Pick another one",
-  "zodiac_shell_positioning_note": "A sign is a light excuse, not a verdict. Reading it should only leave you wanting to ask them more."
+  "zodiac_shell_positioning_note": "A sign is a light excuse, not a verdict. Reading it should only leave you wanting to ask them more.",
+  "gift_ideas_guess_coming_soon": "The portrait and the compatibility table are coming in a later step.",
+  "notifs_row_evening_check_in_title": "Ask if you got home",
+  "notifs_row_evening_check_in_sub": "One gentle nudge on the evening of the date.",
+  "notifs_row_quiet_drip_title": "Quiet-phase drip",
+  "notifs_row_quiet_drip_sub": "Once a week at most.",
+  "evening_check_in_attach": "Attach a photo",
+  "evening_check_in_photos_attached": "{count} photos picked",
+  "evening_check_in_line_hint": "Write one line about today",
+  "evening_check_in_save": "Save to the journal",
+  "evening_check_in_later": "Later",
+  "evening_check_in_context_label": "TONIGHT, THE TWO OF YOU",
+  "evening_check_in_line_label": "One line to keep tonight",
+  "evening_check_in_journal_chip": "+ into your notebook",
+  "evening_check_in_private_chip": "only you can read it",
+  "evening_check_in_reassurance": "Not writing is fine too. The app will not bring this up again."
 }

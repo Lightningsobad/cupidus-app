@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Carries no android:text, android:hint or android:contentDescription on
+     purpose: every readable character is pushed from Dart at runtime, so
+     swapping the content source never touches this file (AC-37/BR-15). With no
+     payload the two text views stay GONE and this inflates as a textless
+     frame.
+
+     D-12: colours are the brand dark palette from
+     lib/design_system/tokens/cupid_color_tokens.dart, written as literals
+     rather than as ?android:attr/... so the widget reads as part of this app
+     on any device theme. They are literals rather than @color/ references
+     because res/values is outside this story's write scope.
+
+     B-4: no app-icon ImageView here. The canvas sb-84-widget-bon-pha draws
+     none, and @mipmap/ic_launcher rendered as an opaque white square; the
+     ~36dp it held goes back to the text column, which is what B-3 needed.
+
+     B-2: the flat background below is the no-payload default only. The
+     provider pushes a per-phase background drawable on every update, because
+     a launcher reuses the inflated view via RemoteViews.reapply and an
+     unset background would keep the previous phase's gradient. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cupid_phase_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#241B42"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="12dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- D-10: the eyebrow row. The indicator is an ImageView with no src:
+             the provider paints the phase's own token colour into a bitmap and
+             pushes that, so the layout never has to know which phase is
+             showing. D-13: date_day gets the lightning-bolt glyph rasterised
+             from @drawable/dot_today_bolt; the other three phases keep the
+             solid circle. Both the indicator and the eyebrow text stay GONE
+             until a payload carries eyebrow_line. -->
+        <LinearLayout
+            android:id="@+id/cupid_phase_widget_eyebrow_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/cupid_phase_widget_dot"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_marginEnd="6dp"
+                android:importantForAccessibility="no" />
+
+            <TextView
+                android:id="@+id/cupid_phase_widget_eyebrow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:letterSpacing="0.08"
+                android:maxLines="1"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/cupid_phase_widget_primary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="#F7EEFB"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/cupid_phase_widget_secondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#B4A6CE"
+            android:textSize="12sp"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>
