@@ -86,7 +86,70 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 - Round 1-35 narrative in git history of this file — superseded by the table
   and "Current cursor" sections above.
 
-## Current cursor (Round 38, `continue parallel`, 2026-09-26 — all 13 stories merged, integration review not yet run)
+## Current cursor (Round 39, `continue parallel`, 2026-09-26 — integration review ran, PATCH_REQUIRED, rework in flight)
+
+- `Iris-QC` ran `Mode: requirement-integration-review` (RunId
+  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-reviewer`) on the
+  integration branch, HEAD `e9519243`. Report:
+  `data/requirements/REQ-016_solo_stage1_relationship_assistant/integration-review/review-report.md`
+  (in the integration worktree, now committed there as `55ade421`).
+  **`Outcome: PATCH_REQUIRED`.** 9 cross-story contracts PASS (Drift v10
+  ladder, generated client parity, DI, nav shell, Android widget host,
+  `dot_today_bolt.xml` valid, notification permission surface, content pack
+  assets).
+- **F-I1 (blocking, NEW)** — `Stage1WipeRegistry.tables`
+  (`mobile/lib/features/chapter_closure/data/stage1_wipe_registry.dart:67-137`)
+  registers 11 of 14 REQ-016 tables. Missing `portrait_answers` (STORY-009)
+  and `relationship_labels` (STORY-010) are confirmed STORY-013 AC-26 FAILs
+  (exact AC wording controls — not a design question); `calendar_event_state`
+  is genuinely undecided (AC-26's "trạng thái bộ đếm" wording is ambiguous).
+  Action items 1/3/4 (mobile-dev: register the two tables, rerun
+  `stage1_wipe_registry_parity_test.dart`, relabel
+  `STORY-013/coding-plan/test-results.md`) and item 2 (tech-lead/PO: decide
+  `calendar_event_state`) — **dispatched `Alan-Techlead` this round** (RunId
+  `...-tech-lead-patch1`) for item 2 only; mobile-dev fix (items 1/3/4)
+  follows once that decision returns.
+- **F-I2 (blocking)** — no `## Integration Build & Runtime` evidence and no
+  `integration-review/mobile-visual-audit.md` yet. Expected at this point in
+  the sequence (this review was read-only by instruction); still recorded
+  blocking because the DONE gate enforces both independently. **Not yet
+  dispatched** — do this via `devops`/`mobile-dev` AFTER the F-I1 mobile
+  patch merges back into integration, on the final patched HEAD (no point
+  running it twice).
+- **F-I3 (blocking, low severity)** — `deployment/configuration-guide.md`
+  covers `home_widget` but not `flutter_local_notifications`/`timezone`
+  (added by this requirement), and its POST_NOTIFICATIONS note is now
+  inaccurate (`features/phase_status/` is a second consumer). **Not yet
+  dispatched** — bundle with the F-I2 devops pass.
+- **D-I1 (Git orchestration, done)** — integration branch was 20+ commits
+  behind `main` (missing `323f4666`/`b9827099`/`0d824386`/`4882303b`), which
+  is why its own `req_master.md` copy still showed 6 `TODO` rows despite all
+  13 being `MERGE_COMPLETE`. Fixed via
+  `git-story-boundary.sh sync-integration --req
+  REQ-016_solo_stage1_relationship_assistant` — clean merge, no conflict.
+  **The integration build/runtime verification (F-I2) MUST be re-run on this
+  post-sync HEAD** (and again after the F-I1 patch merges) — pre-sync
+  evidence would not describe what ships.
+- Alan-Techlead-3's late/duplicate teammate message this round (already
+  fully reconciled last round, agent already released) additionally flagged:
+  STORY-013's `coding-plan/master-plan.md`, 6 phase files, and
+  `test-results.md` use literal `Status: COMPLETE` not the gate-recognized
+  `DONE|SKIPPED|DEFERRED|WAIVED|N/A` — logged as a non-blocking watch item
+  above; re-check if any future gate rejects STORY-013 on this.
+- **Next resume action:** wait for `Alan-Techlead`'s
+  `Calendar-Event-State-Decision:` line, then dispatch `Alex-Mobile-Dev` on
+  the SAME STORY-013 worktree/branch (`Session-Recovery: YES`, rework mode,
+  canonical `mobile-implementation`/`MOBILE_COMPLETE`) to: apply the decision
+  + register `portrait_answers`/`relationship_labels`, rerun the parity
+  test, update `test-results.md`. Then `git-story-boundary.sh merge` STORY-013
+  back into the integration branch. Then dispatch `devops` for F-I2 (build +
+  runtime smoke, recorded as `## Integration Build & Runtime`) and F-I3
+  (configuration-guide.md fix), plus `Alex-Mobile-Dev` for
+  `integration-review/mobile-visual-audit.md`. Then a FRESH `Iris-QC`
+  requirement-integration-review (not a continuation — scope changed) before
+  `land-integration`. Do NOT skip the post-sync/post-patch re-verification.
+
+## Superseded cursor (Round 38, `continue parallel`, 2026-09-26 — all 13 stories merged, integration review not yet run)
 
 - **All 13 REQ-016 stories are now DONE and merged into
   `codex/REQ-016_solo_stage1_relationship_assistant-integration`.**
