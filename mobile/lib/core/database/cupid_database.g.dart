@@ -6372,6 +6372,1354 @@ class AskPromptStateCompanion extends UpdateCompanion<AskPromptStateRow> {
   }
 }
 
+class $CalendarEventStateTable extends CalendarEventState
+    with TableInfo<$CalendarEventStateTable, CalendarEventStateRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CalendarEventStateTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _ownerKeyMeta = const VerificationMeta(
+    'ownerKey',
+  );
+  @override
+  late final GeneratedColumn<String> ownerKey = GeneratedColumn<String>(
+    'owner_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _eventIdMeta = const VerificationMeta(
+    'eventId',
+  );
+  @override
+  late final GeneratedColumn<String> eventId = GeneratedColumn<String>(
+    'event_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [ownerKey, eventId, state, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'calendar_event_state';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CalendarEventStateRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('owner_key')) {
+      context.handle(
+        _ownerKeyMeta,
+        ownerKey.isAcceptableOrUnknown(data['owner_key']!, _ownerKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerKeyMeta);
+    }
+    if (data.containsKey('event_id')) {
+      context.handle(
+        _eventIdMeta,
+        eventId.isAcceptableOrUnknown(data['event_id']!, _eventIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_eventIdMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {ownerKey, eventId};
+  @override
+  CalendarEventStateRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CalendarEventStateRow(
+      ownerKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_key'],
+      )!,
+      eventId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}event_id'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CalendarEventStateTable createAlias(String alias) {
+    return $CalendarEventStateTable(attachedDatabase, alias);
+  }
+}
+
+class CalendarEventStateRow extends DataClass
+    implements Insertable<CalendarEventStateRow> {
+  final String ownerKey;
+  final String eventId;
+
+  /// `converted` | `dismissed`.
+  final String state;
+  final DateTime updatedAt;
+  const CalendarEventStateRow({
+    required this.ownerKey,
+    required this.eventId,
+    required this.state,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['owner_key'] = Variable<String>(ownerKey);
+    map['event_id'] = Variable<String>(eventId);
+    map['state'] = Variable<String>(state);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  CalendarEventStateCompanion toCompanion(bool nullToAbsent) {
+    return CalendarEventStateCompanion(
+      ownerKey: Value(ownerKey),
+      eventId: Value(eventId),
+      state: Value(state),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory CalendarEventStateRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CalendarEventStateRow(
+      ownerKey: serializer.fromJson<String>(json['ownerKey']),
+      eventId: serializer.fromJson<String>(json['eventId']),
+      state: serializer.fromJson<String>(json['state']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'ownerKey': serializer.toJson<String>(ownerKey),
+      'eventId': serializer.toJson<String>(eventId),
+      'state': serializer.toJson<String>(state),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  CalendarEventStateRow copyWith({
+    String? ownerKey,
+    String? eventId,
+    String? state,
+    DateTime? updatedAt,
+  }) => CalendarEventStateRow(
+    ownerKey: ownerKey ?? this.ownerKey,
+    eventId: eventId ?? this.eventId,
+    state: state ?? this.state,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  CalendarEventStateRow copyWithCompanion(CalendarEventStateCompanion data) {
+    return CalendarEventStateRow(
+      ownerKey: data.ownerKey.present ? data.ownerKey.value : this.ownerKey,
+      eventId: data.eventId.present ? data.eventId.value : this.eventId,
+      state: data.state.present ? data.state.value : this.state,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CalendarEventStateRow(')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('eventId: $eventId, ')
+          ..write('state: $state, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(ownerKey, eventId, state, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CalendarEventStateRow &&
+          other.ownerKey == this.ownerKey &&
+          other.eventId == this.eventId &&
+          other.state == this.state &&
+          other.updatedAt == this.updatedAt);
+}
+
+class CalendarEventStateCompanion
+    extends UpdateCompanion<CalendarEventStateRow> {
+  final Value<String> ownerKey;
+  final Value<String> eventId;
+  final Value<String> state;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const CalendarEventStateCompanion({
+    this.ownerKey = const Value.absent(),
+    this.eventId = const Value.absent(),
+    this.state = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CalendarEventStateCompanion.insert({
+    required String ownerKey,
+    required String eventId,
+    required String state,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : ownerKey = Value(ownerKey),
+       eventId = Value(eventId),
+       state = Value(state),
+       updatedAt = Value(updatedAt);
+  static Insertable<CalendarEventStateRow> custom({
+    Expression<String>? ownerKey,
+    Expression<String>? eventId,
+    Expression<String>? state,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (ownerKey != null) 'owner_key': ownerKey,
+      if (eventId != null) 'event_id': eventId,
+      if (state != null) 'state': state,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CalendarEventStateCompanion copyWith({
+    Value<String>? ownerKey,
+    Value<String>? eventId,
+    Value<String>? state,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return CalendarEventStateCompanion(
+      ownerKey: ownerKey ?? this.ownerKey,
+      eventId: eventId ?? this.eventId,
+      state: state ?? this.state,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (ownerKey.present) {
+      map['owner_key'] = Variable<String>(ownerKey.value);
+    }
+    if (eventId.present) {
+      map['event_id'] = Variable<String>(eventId.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CalendarEventStateCompanion(')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('eventId: $eventId, ')
+          ..write('state: $state, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PortraitAnswersTable extends PortraitAnswers
+    with TableInfo<$PortraitAnswersTable, PortraitAnswerRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PortraitAnswersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _ownerKeyMeta = const VerificationMeta(
+    'ownerKey',
+  );
+  @override
+  late final GeneratedColumn<String> ownerKey = GeneratedColumn<String>(
+    'owner_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _questionIdMeta = const VerificationMeta(
+    'questionId',
+  );
+  @override
+  late final GeneratedColumn<String> questionId = GeneratedColumn<String>(
+    'question_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _optionIdMeta = const VerificationMeta(
+    'optionId',
+  );
+  @override
+  late final GeneratedColumn<String> optionId = GeneratedColumn<String>(
+    'option_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _answerValueMeta = const VerificationMeta(
+    'answerValue',
+  );
+  @override
+  late final GeneratedColumn<String> answerValue = GeneratedColumn<String>(
+    'answer_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notebookEntryIdMeta = const VerificationMeta(
+    'notebookEntryId',
+  );
+  @override
+  late final GeneratedColumn<String> notebookEntryId = GeneratedColumn<String>(
+    'notebook_entry_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    ownerKey,
+    questionId,
+    state,
+    optionId,
+    answerValue,
+    notebookEntryId,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'portrait_answers';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PortraitAnswerRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('owner_key')) {
+      context.handle(
+        _ownerKeyMeta,
+        ownerKey.isAcceptableOrUnknown(data['owner_key']!, _ownerKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerKeyMeta);
+    }
+    if (data.containsKey('question_id')) {
+      context.handle(
+        _questionIdMeta,
+        questionId.isAcceptableOrUnknown(data['question_id']!, _questionIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_questionIdMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('option_id')) {
+      context.handle(
+        _optionIdMeta,
+        optionId.isAcceptableOrUnknown(data['option_id']!, _optionIdMeta),
+      );
+    }
+    if (data.containsKey('answer_value')) {
+      context.handle(
+        _answerValueMeta,
+        answerValue.isAcceptableOrUnknown(
+          data['answer_value']!,
+          _answerValueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('notebook_entry_id')) {
+      context.handle(
+        _notebookEntryIdMeta,
+        notebookEntryId.isAcceptableOrUnknown(
+          data['notebook_entry_id']!,
+          _notebookEntryIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {ownerKey, questionId};
+  @override
+  PortraitAnswerRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PortraitAnswerRow(
+      ownerKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_key'],
+      )!,
+      questionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}question_id'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      optionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}option_id'],
+      ),
+      answerValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}answer_value'],
+      ),
+      notebookEntryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notebook_entry_id'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PortraitAnswersTable createAlias(String alias) {
+    return $PortraitAnswersTable(attachedDatabase, alias);
+  }
+}
+
+class PortraitAnswerRow extends DataClass
+    implements Insertable<PortraitAnswerRow> {
+  /// Backend `User.id`; every query filters on this column.
+  final String ownerKey;
+
+  /// Stable `items[].id` from `req016.portrait_questions.v1`.
+  final String questionId;
+
+  /// `answered` | `skipped` (§2). `skipped` is a first-class outcome, not a
+  /// failure (AC-27).
+  final String state;
+
+  /// Stable id of the chip the user picked, or NULL for free text and for a
+  /// skip.
+  final String? optionId;
+
+  /// The answer itself, stored here **only** when the question's target is
+  /// `portrait.guess`. A `notebook.*` answer lives in the notebook and is read
+  /// back from there, so editing or deleting the notebook entry thins the
+  /// portrait instead of leaving two copies that disagree (§4, AC-22).
+  final String? answerValue;
+
+  /// `notebook_entries.id` produced by `recordAnsweredQuestion`, set **only**
+  /// for a `notebook.*` target.
+  final String? notebookEntryId;
+  final DateTime updatedAt;
+  const PortraitAnswerRow({
+    required this.ownerKey,
+    required this.questionId,
+    required this.state,
+    this.optionId,
+    this.answerValue,
+    this.notebookEntryId,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['owner_key'] = Variable<String>(ownerKey);
+    map['question_id'] = Variable<String>(questionId);
+    map['state'] = Variable<String>(state);
+    if (!nullToAbsent || optionId != null) {
+      map['option_id'] = Variable<String>(optionId);
+    }
+    if (!nullToAbsent || answerValue != null) {
+      map['answer_value'] = Variable<String>(answerValue);
+    }
+    if (!nullToAbsent || notebookEntryId != null) {
+      map['notebook_entry_id'] = Variable<String>(notebookEntryId);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  PortraitAnswersCompanion toCompanion(bool nullToAbsent) {
+    return PortraitAnswersCompanion(
+      ownerKey: Value(ownerKey),
+      questionId: Value(questionId),
+      state: Value(state),
+      optionId: optionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(optionId),
+      answerValue: answerValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(answerValue),
+      notebookEntryId: notebookEntryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notebookEntryId),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory PortraitAnswerRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PortraitAnswerRow(
+      ownerKey: serializer.fromJson<String>(json['ownerKey']),
+      questionId: serializer.fromJson<String>(json['questionId']),
+      state: serializer.fromJson<String>(json['state']),
+      optionId: serializer.fromJson<String?>(json['optionId']),
+      answerValue: serializer.fromJson<String?>(json['answerValue']),
+      notebookEntryId: serializer.fromJson<String?>(json['notebookEntryId']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'ownerKey': serializer.toJson<String>(ownerKey),
+      'questionId': serializer.toJson<String>(questionId),
+      'state': serializer.toJson<String>(state),
+      'optionId': serializer.toJson<String?>(optionId),
+      'answerValue': serializer.toJson<String?>(answerValue),
+      'notebookEntryId': serializer.toJson<String?>(notebookEntryId),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  PortraitAnswerRow copyWith({
+    String? ownerKey,
+    String? questionId,
+    String? state,
+    Value<String?> optionId = const Value.absent(),
+    Value<String?> answerValue = const Value.absent(),
+    Value<String?> notebookEntryId = const Value.absent(),
+    DateTime? updatedAt,
+  }) => PortraitAnswerRow(
+    ownerKey: ownerKey ?? this.ownerKey,
+    questionId: questionId ?? this.questionId,
+    state: state ?? this.state,
+    optionId: optionId.present ? optionId.value : this.optionId,
+    answerValue: answerValue.present ? answerValue.value : this.answerValue,
+    notebookEntryId: notebookEntryId.present
+        ? notebookEntryId.value
+        : this.notebookEntryId,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  PortraitAnswerRow copyWithCompanion(PortraitAnswersCompanion data) {
+    return PortraitAnswerRow(
+      ownerKey: data.ownerKey.present ? data.ownerKey.value : this.ownerKey,
+      questionId: data.questionId.present
+          ? data.questionId.value
+          : this.questionId,
+      state: data.state.present ? data.state.value : this.state,
+      optionId: data.optionId.present ? data.optionId.value : this.optionId,
+      answerValue: data.answerValue.present
+          ? data.answerValue.value
+          : this.answerValue,
+      notebookEntryId: data.notebookEntryId.present
+          ? data.notebookEntryId.value
+          : this.notebookEntryId,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PortraitAnswerRow(')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('questionId: $questionId, ')
+          ..write('state: $state, ')
+          ..write('optionId: $optionId, ')
+          ..write('answerValue: $answerValue, ')
+          ..write('notebookEntryId: $notebookEntryId, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    ownerKey,
+    questionId,
+    state,
+    optionId,
+    answerValue,
+    notebookEntryId,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PortraitAnswerRow &&
+          other.ownerKey == this.ownerKey &&
+          other.questionId == this.questionId &&
+          other.state == this.state &&
+          other.optionId == this.optionId &&
+          other.answerValue == this.answerValue &&
+          other.notebookEntryId == this.notebookEntryId &&
+          other.updatedAt == this.updatedAt);
+}
+
+class PortraitAnswersCompanion extends UpdateCompanion<PortraitAnswerRow> {
+  final Value<String> ownerKey;
+  final Value<String> questionId;
+  final Value<String> state;
+  final Value<String?> optionId;
+  final Value<String?> answerValue;
+  final Value<String?> notebookEntryId;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const PortraitAnswersCompanion({
+    this.ownerKey = const Value.absent(),
+    this.questionId = const Value.absent(),
+    this.state = const Value.absent(),
+    this.optionId = const Value.absent(),
+    this.answerValue = const Value.absent(),
+    this.notebookEntryId = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PortraitAnswersCompanion.insert({
+    required String ownerKey,
+    required String questionId,
+    required String state,
+    this.optionId = const Value.absent(),
+    this.answerValue = const Value.absent(),
+    this.notebookEntryId = const Value.absent(),
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : ownerKey = Value(ownerKey),
+       questionId = Value(questionId),
+       state = Value(state),
+       updatedAt = Value(updatedAt);
+  static Insertable<PortraitAnswerRow> custom({
+    Expression<String>? ownerKey,
+    Expression<String>? questionId,
+    Expression<String>? state,
+    Expression<String>? optionId,
+    Expression<String>? answerValue,
+    Expression<String>? notebookEntryId,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (ownerKey != null) 'owner_key': ownerKey,
+      if (questionId != null) 'question_id': questionId,
+      if (state != null) 'state': state,
+      if (optionId != null) 'option_id': optionId,
+      if (answerValue != null) 'answer_value': answerValue,
+      if (notebookEntryId != null) 'notebook_entry_id': notebookEntryId,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PortraitAnswersCompanion copyWith({
+    Value<String>? ownerKey,
+    Value<String>? questionId,
+    Value<String>? state,
+    Value<String?>? optionId,
+    Value<String?>? answerValue,
+    Value<String?>? notebookEntryId,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return PortraitAnswersCompanion(
+      ownerKey: ownerKey ?? this.ownerKey,
+      questionId: questionId ?? this.questionId,
+      state: state ?? this.state,
+      optionId: optionId ?? this.optionId,
+      answerValue: answerValue ?? this.answerValue,
+      notebookEntryId: notebookEntryId ?? this.notebookEntryId,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (ownerKey.present) {
+      map['owner_key'] = Variable<String>(ownerKey.value);
+    }
+    if (questionId.present) {
+      map['question_id'] = Variable<String>(questionId.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (optionId.present) {
+      map['option_id'] = Variable<String>(optionId.value);
+    }
+    if (answerValue.present) {
+      map['answer_value'] = Variable<String>(answerValue.value);
+    }
+    if (notebookEntryId.present) {
+      map['notebook_entry_id'] = Variable<String>(notebookEntryId.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PortraitAnswersCompanion(')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('questionId: $questionId, ')
+          ..write('state: $state, ')
+          ..write('optionId: $optionId, ')
+          ..write('answerValue: $answerValue, ')
+          ..write('notebookEntryId: $notebookEntryId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $RelationshipLabelsTable extends RelationshipLabels
+    with TableInfo<$RelationshipLabelsTable, RelationshipLabelRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RelationshipLabelsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerKeyMeta = const VerificationMeta(
+    'ownerKey',
+  );
+  @override
+  late final GeneratedColumn<String> ownerKey = GeneratedColumn<String>(
+    'owner_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _subjectMeta = const VerificationMeta(
+    'subject',
+  );
+  @override
+  late final GeneratedColumn<String> subject = GeneratedColumn<String>(
+    'subject',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _systemMeta = const VerificationMeta('system');
+  @override
+  late final GeneratedColumn<String> system = GeneratedColumn<String>(
+    'system',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _certaintyMeta = const VerificationMeta(
+    'certainty',
+  );
+  @override
+  late final GeneratedColumn<String> certainty = GeneratedColumn<String>(
+    'certainty',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ownerKey,
+    subject,
+    system,
+    value,
+    certainty,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'relationship_labels';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RelationshipLabelRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('owner_key')) {
+      context.handle(
+        _ownerKeyMeta,
+        ownerKey.isAcceptableOrUnknown(data['owner_key']!, _ownerKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerKeyMeta);
+    }
+    if (data.containsKey('subject')) {
+      context.handle(
+        _subjectMeta,
+        subject.isAcceptableOrUnknown(data['subject']!, _subjectMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_subjectMeta);
+    }
+    if (data.containsKey('system')) {
+      context.handle(
+        _systemMeta,
+        system.isAcceptableOrUnknown(data['system']!, _systemMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_systemMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    if (data.containsKey('certainty')) {
+      context.handle(
+        _certaintyMeta,
+        certainty.isAcceptableOrUnknown(data['certainty']!, _certaintyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_certaintyMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {ownerKey, subject, system},
+  ];
+  @override
+  RelationshipLabelRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RelationshipLabelRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ownerKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_key'],
+      )!,
+      subject: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subject'],
+      )!,
+      system: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}system'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
+      certainty: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}certainty'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $RelationshipLabelsTable createAlias(String alias) {
+    return $RelationshipLabelsTable(attachedDatabase, alias);
+  }
+}
+
+class RelationshipLabelRow extends DataClass
+    implements Insertable<RelationshipLabelRow> {
+  /// Client-generated UUID v4, permanently stable — never a rowid/autoincrement.
+  final String id;
+
+  /// Backend `User.id`; every query filters on this column, which is what keeps
+  /// two users sharing one device from reading each other's labels.
+  final String ownerKey;
+
+  /// `self` | `partner`. Stored as text with Dart constants rather than an enum
+  /// index, because an index silently changes meaning the day someone inserts a
+  /// value into the middle of the enum.
+  final String subject;
+
+  /// `zodiac` | `mbti`.
+  final String system;
+
+  /// An `axis_value.id` from the matching `req016.compat_*` pack.
+  final String value;
+
+  /// `known` | `guess`. A guess stays visibly the *user's* guess wherever it is
+  /// rendered; the app never promotes it to a fact it confirms (AC-8).
+  final String certainty;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const RelationshipLabelRow({
+    required this.id,
+    required this.ownerKey,
+    required this.subject,
+    required this.system,
+    required this.value,
+    required this.certainty,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['owner_key'] = Variable<String>(ownerKey);
+    map['subject'] = Variable<String>(subject);
+    map['system'] = Variable<String>(system);
+    map['value'] = Variable<String>(value);
+    map['certainty'] = Variable<String>(certainty);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  RelationshipLabelsCompanion toCompanion(bool nullToAbsent) {
+    return RelationshipLabelsCompanion(
+      id: Value(id),
+      ownerKey: Value(ownerKey),
+      subject: Value(subject),
+      system: Value(system),
+      value: Value(value),
+      certainty: Value(certainty),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory RelationshipLabelRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RelationshipLabelRow(
+      id: serializer.fromJson<String>(json['id']),
+      ownerKey: serializer.fromJson<String>(json['ownerKey']),
+      subject: serializer.fromJson<String>(json['subject']),
+      system: serializer.fromJson<String>(json['system']),
+      value: serializer.fromJson<String>(json['value']),
+      certainty: serializer.fromJson<String>(json['certainty']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ownerKey': serializer.toJson<String>(ownerKey),
+      'subject': serializer.toJson<String>(subject),
+      'system': serializer.toJson<String>(system),
+      'value': serializer.toJson<String>(value),
+      'certainty': serializer.toJson<String>(certainty),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  RelationshipLabelRow copyWith({
+    String? id,
+    String? ownerKey,
+    String? subject,
+    String? system,
+    String? value,
+    String? certainty,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => RelationshipLabelRow(
+    id: id ?? this.id,
+    ownerKey: ownerKey ?? this.ownerKey,
+    subject: subject ?? this.subject,
+    system: system ?? this.system,
+    value: value ?? this.value,
+    certainty: certainty ?? this.certainty,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  RelationshipLabelRow copyWithCompanion(RelationshipLabelsCompanion data) {
+    return RelationshipLabelRow(
+      id: data.id.present ? data.id.value : this.id,
+      ownerKey: data.ownerKey.present ? data.ownerKey.value : this.ownerKey,
+      subject: data.subject.present ? data.subject.value : this.subject,
+      system: data.system.present ? data.system.value : this.system,
+      value: data.value.present ? data.value.value : this.value,
+      certainty: data.certainty.present ? data.certainty.value : this.certainty,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RelationshipLabelRow(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('subject: $subject, ')
+          ..write('system: $system, ')
+          ..write('value: $value, ')
+          ..write('certainty: $certainty, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ownerKey,
+    subject,
+    system,
+    value,
+    certainty,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RelationshipLabelRow &&
+          other.id == this.id &&
+          other.ownerKey == this.ownerKey &&
+          other.subject == this.subject &&
+          other.system == this.system &&
+          other.value == this.value &&
+          other.certainty == this.certainty &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class RelationshipLabelsCompanion
+    extends UpdateCompanion<RelationshipLabelRow> {
+  final Value<String> id;
+  final Value<String> ownerKey;
+  final Value<String> subject;
+  final Value<String> system;
+  final Value<String> value;
+  final Value<String> certainty;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const RelationshipLabelsCompanion({
+    this.id = const Value.absent(),
+    this.ownerKey = const Value.absent(),
+    this.subject = const Value.absent(),
+    this.system = const Value.absent(),
+    this.value = const Value.absent(),
+    this.certainty = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RelationshipLabelsCompanion.insert({
+    required String id,
+    required String ownerKey,
+    required String subject,
+    required String system,
+    required String value,
+    required String certainty,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       ownerKey = Value(ownerKey),
+       subject = Value(subject),
+       system = Value(system),
+       value = Value(value),
+       certainty = Value(certainty),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<RelationshipLabelRow> custom({
+    Expression<String>? id,
+    Expression<String>? ownerKey,
+    Expression<String>? subject,
+    Expression<String>? system,
+    Expression<String>? value,
+    Expression<String>? certainty,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownerKey != null) 'owner_key': ownerKey,
+      if (subject != null) 'subject': subject,
+      if (system != null) 'system': system,
+      if (value != null) 'value': value,
+      if (certainty != null) 'certainty': certainty,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RelationshipLabelsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerKey,
+    Value<String>? subject,
+    Value<String>? system,
+    Value<String>? value,
+    Value<String>? certainty,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return RelationshipLabelsCompanion(
+      id: id ?? this.id,
+      ownerKey: ownerKey ?? this.ownerKey,
+      subject: subject ?? this.subject,
+      system: system ?? this.system,
+      value: value ?? this.value,
+      certainty: certainty ?? this.certainty,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ownerKey.present) {
+      map['owner_key'] = Variable<String>(ownerKey.value);
+    }
+    if (subject.present) {
+      map['subject'] = Variable<String>(subject.value);
+    }
+    if (system.present) {
+      map['system'] = Variable<String>(system.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<String>(value.value);
+    }
+    if (certainty.present) {
+      map['certainty'] = Variable<String>(certainty.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RelationshipLabelsCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerKey: $ownerKey, ')
+          ..write('subject: $subject, ')
+          ..write('system: $system, ')
+          ..write('value: $value, ')
+          ..write('certainty: $certainty, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ChapterClosuresTable extends ChapterClosures
     with TableInfo<$ChapterClosuresTable, ChapterClosureRow> {
   @override
@@ -6920,6 +8268,335 @@ class ChapterClosureItemsCompanion
   }
 }
 
+class $ThankYouActivationsTable extends ThankYouActivations
+    with TableInfo<$ThankYouActivationsTable, ThankYouActivationRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ThankYouActivationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _cardIdMeta = const VerificationMeta('cardId');
+  @override
+  late final GeneratedColumn<String> cardId = GeneratedColumn<String>(
+    'card_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES activity_cards (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _armedOnMeta = const VerificationMeta(
+    'armedOn',
+  );
+  @override
+  late final GeneratedColumn<String> armedOn = GeneratedColumn<String>(
+    'armed_on',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _consumedAtMeta = const VerificationMeta(
+    'consumedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> consumedAt = GeneratedColumn<DateTime>(
+    'consumed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [cardId, status, armedOn, consumedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'thank_you_activations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ThankYouActivationRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('card_id')) {
+      context.handle(
+        _cardIdMeta,
+        cardId.isAcceptableOrUnknown(data['card_id']!, _cardIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_cardIdMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('armed_on')) {
+      context.handle(
+        _armedOnMeta,
+        armedOn.isAcceptableOrUnknown(data['armed_on']!, _armedOnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_armedOnMeta);
+    }
+    if (data.containsKey('consumed_at')) {
+      context.handle(
+        _consumedAtMeta,
+        consumedAt.isAcceptableOrUnknown(data['consumed_at']!, _consumedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {cardId};
+  @override
+  ThankYouActivationRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ThankYouActivationRow(
+      cardId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}card_id'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      armedOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}armed_on'],
+      )!,
+      consumedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}consumed_at'],
+      ),
+    );
+  }
+
+  @override
+  $ThankYouActivationsTable createAlias(String alias) {
+    return $ThankYouActivationsTable(attachedDatabase, alias);
+  }
+}
+
+class ThankYouActivationRow extends DataClass
+    implements Insertable<ThankYouActivationRow> {
+  final String cardId;
+
+  /// `armed` | `consumed` | `cancelled`.
+  final String status;
+
+  /// Civil date `YYYY-MM-DD` in the device calendar on the day the card entered
+  /// *Đã đi rồi*. Deliberately not a DateTime/instant: AC-1 and AC-2 compare
+  /// calendar days, so storing an instant would make the answer depend on the
+  /// host's UTC offset rather than on the user's own date.
+  final String armedOn;
+
+  /// Internal ordering only, never rendered and never compared against a
+  /// deadline (BR-3).
+  final DateTime? consumedAt;
+  const ThankYouActivationRow({
+    required this.cardId,
+    required this.status,
+    required this.armedOn,
+    this.consumedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['card_id'] = Variable<String>(cardId);
+    map['status'] = Variable<String>(status);
+    map['armed_on'] = Variable<String>(armedOn);
+    if (!nullToAbsent || consumedAt != null) {
+      map['consumed_at'] = Variable<DateTime>(consumedAt);
+    }
+    return map;
+  }
+
+  ThankYouActivationsCompanion toCompanion(bool nullToAbsent) {
+    return ThankYouActivationsCompanion(
+      cardId: Value(cardId),
+      status: Value(status),
+      armedOn: Value(armedOn),
+      consumedAt: consumedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(consumedAt),
+    );
+  }
+
+  factory ThankYouActivationRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ThankYouActivationRow(
+      cardId: serializer.fromJson<String>(json['cardId']),
+      status: serializer.fromJson<String>(json['status']),
+      armedOn: serializer.fromJson<String>(json['armedOn']),
+      consumedAt: serializer.fromJson<DateTime?>(json['consumedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'cardId': serializer.toJson<String>(cardId),
+      'status': serializer.toJson<String>(status),
+      'armedOn': serializer.toJson<String>(armedOn),
+      'consumedAt': serializer.toJson<DateTime?>(consumedAt),
+    };
+  }
+
+  ThankYouActivationRow copyWith({
+    String? cardId,
+    String? status,
+    String? armedOn,
+    Value<DateTime?> consumedAt = const Value.absent(),
+  }) => ThankYouActivationRow(
+    cardId: cardId ?? this.cardId,
+    status: status ?? this.status,
+    armedOn: armedOn ?? this.armedOn,
+    consumedAt: consumedAt.present ? consumedAt.value : this.consumedAt,
+  );
+  ThankYouActivationRow copyWithCompanion(ThankYouActivationsCompanion data) {
+    return ThankYouActivationRow(
+      cardId: data.cardId.present ? data.cardId.value : this.cardId,
+      status: data.status.present ? data.status.value : this.status,
+      armedOn: data.armedOn.present ? data.armedOn.value : this.armedOn,
+      consumedAt: data.consumedAt.present
+          ? data.consumedAt.value
+          : this.consumedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ThankYouActivationRow(')
+          ..write('cardId: $cardId, ')
+          ..write('status: $status, ')
+          ..write('armedOn: $armedOn, ')
+          ..write('consumedAt: $consumedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(cardId, status, armedOn, consumedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ThankYouActivationRow &&
+          other.cardId == this.cardId &&
+          other.status == this.status &&
+          other.armedOn == this.armedOn &&
+          other.consumedAt == this.consumedAt);
+}
+
+class ThankYouActivationsCompanion
+    extends UpdateCompanion<ThankYouActivationRow> {
+  final Value<String> cardId;
+  final Value<String> status;
+  final Value<String> armedOn;
+  final Value<DateTime?> consumedAt;
+  final Value<int> rowid;
+  const ThankYouActivationsCompanion({
+    this.cardId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.armedOn = const Value.absent(),
+    this.consumedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ThankYouActivationsCompanion.insert({
+    required String cardId,
+    required String status,
+    required String armedOn,
+    this.consumedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : cardId = Value(cardId),
+       status = Value(status),
+       armedOn = Value(armedOn);
+  static Insertable<ThankYouActivationRow> custom({
+    Expression<String>? cardId,
+    Expression<String>? status,
+    Expression<String>? armedOn,
+    Expression<DateTime>? consumedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (cardId != null) 'card_id': cardId,
+      if (status != null) 'status': status,
+      if (armedOn != null) 'armed_on': armedOn,
+      if (consumedAt != null) 'consumed_at': consumedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ThankYouActivationsCompanion copyWith({
+    Value<String>? cardId,
+    Value<String>? status,
+    Value<String>? armedOn,
+    Value<DateTime?>? consumedAt,
+    Value<int>? rowid,
+  }) {
+    return ThankYouActivationsCompanion(
+      cardId: cardId ?? this.cardId,
+      status: status ?? this.status,
+      armedOn: armedOn ?? this.armedOn,
+      consumedAt: consumedAt ?? this.consumedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (cardId.present) {
+      map['card_id'] = Variable<String>(cardId.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (armedOn.present) {
+      map['armed_on'] = Variable<String>(armedOn.value);
+    }
+    if (consumedAt.present) {
+      map['consumed_at'] = Variable<DateTime>(consumedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ThankYouActivationsCompanion(')
+          ..write('cardId: $cardId, ')
+          ..write('status: $status, ')
+          ..write('armedOn: $armedOn, ')
+          ..write('consumedAt: $consumedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$CupidDatabase extends GeneratedDatabase {
   _$CupidDatabase(QueryExecutor e) : super(e);
   $CupidDatabaseManager get managers => $CupidDatabaseManager(this);
@@ -6944,11 +8621,20 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
   late final $SkillProfileEntriesTable skillProfileEntries =
       $SkillProfileEntriesTable(this);
   late final $AskPromptStateTable askPromptState = $AskPromptStateTable(this);
+  late final $CalendarEventStateTable calendarEventState =
+      $CalendarEventStateTable(this);
+  late final $PortraitAnswersTable portraitAnswers = $PortraitAnswersTable(
+    this,
+  );
+  late final $RelationshipLabelsTable relationshipLabels =
+      $RelationshipLabelsTable(this);
   late final $ChapterClosuresTable chapterClosures = $ChapterClosuresTable(
     this,
   );
   late final $ChapterClosureItemsTable chapterClosureItems =
       $ChapterClosureItemsTable(this);
+  late final $ThankYouActivationsTable thankYouActivations =
+      $ThankYouActivationsTable(this);
   late final Index activityCardsOwnerStatus = Index(
     'activity_cards_owner_status',
     'CREATE INDEX activity_cards_owner_status ON activity_cards (owner_key, status)',
@@ -6967,6 +8653,8 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
   late final InviteMessageDao inviteMessageDao = InviteMessageDao(
     this as CupidDatabase,
   );
+  late final RelationshipLabelsDao relationshipLabelsDao =
+      RelationshipLabelsDao(this as CupidDatabase);
   late final ChapterClosureDao chapterClosureDao = ChapterClosureDao(
     this as CupidDatabase,
   );
@@ -6988,8 +8676,12 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
     notebookEntries,
     skillProfileEntries,
     askPromptState,
+    calendarEventState,
+    portraitAnswers,
+    relationshipLabels,
     chapterClosures,
     chapterClosureItems,
+    thankYouActivations,
     activityCardsOwnerStatus,
     chapterClosureItemsKindItem,
   ];
@@ -7022,6 +8714,13 @@ abstract class _$CupidDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('chapter_closure_items', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'activity_cards',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('thank_you_activations', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -8196,6 +9895,30 @@ final class $$ActivityCardsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<
+    $ThankYouActivationsTable,
+    List<ThankYouActivationRow>
+  >
+  _thankYouActivationsRefsTable(_$CupidDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.thankYouActivations,
+        aliasName: 'activity_cards__id__thank_you_activations__card_id',
+      );
+
+  $$ThankYouActivationsTableProcessedTableManager get thankYouActivationsRefs {
+    final manager = $$ThankYouActivationsTableTableManager(
+      $_db,
+      $_db.thankYouActivations,
+    ).filter((f) => f.cardId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _thankYouActivationsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ActivityCardsTableFilterComposer
@@ -8365,6 +10088,31 @@ class $$ActivityCardsTableFilterComposer
           }) => $$InviteMessagesTableFilterComposer(
             $db: $db,
             $table: $db.inviteMessages,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> thankYouActivationsRefs(
+    Expression<bool> Function($$ThankYouActivationsTableFilterComposer f) f,
+  ) {
+    final $$ThankYouActivationsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.thankYouActivations,
+      getReferencedColumn: (t) => t.cardId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ThankYouActivationsTableFilterComposer(
+            $db: $db,
+            $table: $db.thankYouActivations,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -8654,6 +10402,32 @@ class $$ActivityCardsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> thankYouActivationsRefs<T extends Object>(
+    Expression<T> Function($$ThankYouActivationsTableAnnotationComposer a) f,
+  ) {
+    final $$ThankYouActivationsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.thankYouActivations,
+          getReferencedColumn: (t) => t.cardId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ThankYouActivationsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.thankYouActivations,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$ActivityCardsTableTableManager
@@ -8672,6 +10446,7 @@ class $$ActivityCardsTableTableManager
           PrefetchHooks Function({
             bool activityCardPhotosRefs,
             bool inviteMessagesRefs,
+            bool thankYouActivationsRefs,
           })
         > {
   $$ActivityCardsTableTableManager(
@@ -8800,12 +10575,17 @@ class $$ActivityCardsTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({activityCardPhotosRefs = false, inviteMessagesRefs = false}) {
+              ({
+                activityCardPhotosRefs = false,
+                inviteMessagesRefs = false,
+                thankYouActivationsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (activityCardPhotosRefs) db.activityCardPhotos,
                     if (inviteMessagesRefs) db.inviteMessages,
+                    if (thankYouActivationsRefs) db.thankYouActivations,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -8852,6 +10632,27 @@ class $$ActivityCardsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (thankYouActivationsRefs)
+                        await $_getPrefetchedData<
+                          ActivityCardRow,
+                          $ActivityCardsTable,
+                          ThankYouActivationRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ActivityCardsTableReferences
+                              ._thankYouActivationsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ActivityCardsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).thankYouActivationsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.cardId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -8875,6 +10676,7 @@ typedef $$ActivityCardsTableProcessedTableManager =
       PrefetchHooks Function({
         bool activityCardPhotosRefs,
         bool inviteMessagesRefs,
+        bool thankYouActivationsRefs,
       })
     >;
 typedef $$ActivityCardPhotosTableCreateCompanionBuilder =
@@ -11017,6 +12819,724 @@ typedef $$AskPromptStateTableProcessedTableManager =
       AskPromptStateRow,
       PrefetchHooks Function()
     >;
+typedef $$CalendarEventStateTableCreateCompanionBuilder =
+    CalendarEventStateCompanion Function({
+      required String ownerKey,
+      required String eventId,
+      required String state,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$CalendarEventStateTableUpdateCompanionBuilder =
+    CalendarEventStateCompanion Function({
+      Value<String> ownerKey,
+      Value<String> eventId,
+      Value<String> state,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$CalendarEventStateTableFilterComposer
+    extends Composer<_$CupidDatabase, $CalendarEventStateTable> {
+  $$CalendarEventStateTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get eventId => $composableBuilder(
+    column: $table.eventId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CalendarEventStateTableOrderingComposer
+    extends Composer<_$CupidDatabase, $CalendarEventStateTable> {
+  $$CalendarEventStateTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get eventId => $composableBuilder(
+    column: $table.eventId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CalendarEventStateTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $CalendarEventStateTable> {
+  $$CalendarEventStateTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get ownerKey =>
+      $composableBuilder(column: $table.ownerKey, builder: (column) => column);
+
+  GeneratedColumn<String> get eventId =>
+      $composableBuilder(column: $table.eventId, builder: (column) => column);
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$CalendarEventStateTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $CalendarEventStateTable,
+          CalendarEventStateRow,
+          $$CalendarEventStateTableFilterComposer,
+          $$CalendarEventStateTableOrderingComposer,
+          $$CalendarEventStateTableAnnotationComposer,
+          $$CalendarEventStateTableCreateCompanionBuilder,
+          $$CalendarEventStateTableUpdateCompanionBuilder,
+          (
+            CalendarEventStateRow,
+            BaseReferences<
+              _$CupidDatabase,
+              $CalendarEventStateTable,
+              CalendarEventStateRow
+            >,
+          ),
+          CalendarEventStateRow,
+          PrefetchHooks Function()
+        > {
+  $$CalendarEventStateTableTableManager(
+    _$CupidDatabase db,
+    $CalendarEventStateTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CalendarEventStateTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CalendarEventStateTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CalendarEventStateTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> ownerKey = const Value.absent(),
+                Value<String> eventId = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CalendarEventStateCompanion(
+                ownerKey: ownerKey,
+                eventId: eventId,
+                state: state,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String ownerKey,
+                required String eventId,
+                required String state,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => CalendarEventStateCompanion.insert(
+                ownerKey: ownerKey,
+                eventId: eventId,
+                state: state,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CalendarEventStateTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $CalendarEventStateTable,
+      CalendarEventStateRow,
+      $$CalendarEventStateTableFilterComposer,
+      $$CalendarEventStateTableOrderingComposer,
+      $$CalendarEventStateTableAnnotationComposer,
+      $$CalendarEventStateTableCreateCompanionBuilder,
+      $$CalendarEventStateTableUpdateCompanionBuilder,
+      (
+        CalendarEventStateRow,
+        BaseReferences<
+          _$CupidDatabase,
+          $CalendarEventStateTable,
+          CalendarEventStateRow
+        >,
+      ),
+      CalendarEventStateRow,
+      PrefetchHooks Function()
+    >;
+typedef $$PortraitAnswersTableCreateCompanionBuilder =
+    PortraitAnswersCompanion Function({
+      required String ownerKey,
+      required String questionId,
+      required String state,
+      Value<String?> optionId,
+      Value<String?> answerValue,
+      Value<String?> notebookEntryId,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$PortraitAnswersTableUpdateCompanionBuilder =
+    PortraitAnswersCompanion Function({
+      Value<String> ownerKey,
+      Value<String> questionId,
+      Value<String> state,
+      Value<String?> optionId,
+      Value<String?> answerValue,
+      Value<String?> notebookEntryId,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$PortraitAnswersTableFilterComposer
+    extends Composer<_$CupidDatabase, $PortraitAnswersTable> {
+  $$PortraitAnswersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get questionId => $composableBuilder(
+    column: $table.questionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get optionId => $composableBuilder(
+    column: $table.optionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get answerValue => $composableBuilder(
+    column: $table.answerValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notebookEntryId => $composableBuilder(
+    column: $table.notebookEntryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PortraitAnswersTableOrderingComposer
+    extends Composer<_$CupidDatabase, $PortraitAnswersTable> {
+  $$PortraitAnswersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get questionId => $composableBuilder(
+    column: $table.questionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get optionId => $composableBuilder(
+    column: $table.optionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get answerValue => $composableBuilder(
+    column: $table.answerValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notebookEntryId => $composableBuilder(
+    column: $table.notebookEntryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PortraitAnswersTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $PortraitAnswersTable> {
+  $$PortraitAnswersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get ownerKey =>
+      $composableBuilder(column: $table.ownerKey, builder: (column) => column);
+
+  GeneratedColumn<String> get questionId => $composableBuilder(
+    column: $table.questionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<String> get optionId =>
+      $composableBuilder(column: $table.optionId, builder: (column) => column);
+
+  GeneratedColumn<String> get answerValue => $composableBuilder(
+    column: $table.answerValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notebookEntryId => $composableBuilder(
+    column: $table.notebookEntryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$PortraitAnswersTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $PortraitAnswersTable,
+          PortraitAnswerRow,
+          $$PortraitAnswersTableFilterComposer,
+          $$PortraitAnswersTableOrderingComposer,
+          $$PortraitAnswersTableAnnotationComposer,
+          $$PortraitAnswersTableCreateCompanionBuilder,
+          $$PortraitAnswersTableUpdateCompanionBuilder,
+          (
+            PortraitAnswerRow,
+            BaseReferences<
+              _$CupidDatabase,
+              $PortraitAnswersTable,
+              PortraitAnswerRow
+            >,
+          ),
+          PortraitAnswerRow,
+          PrefetchHooks Function()
+        > {
+  $$PortraitAnswersTableTableManager(
+    _$CupidDatabase db,
+    $PortraitAnswersTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PortraitAnswersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PortraitAnswersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PortraitAnswersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> ownerKey = const Value.absent(),
+                Value<String> questionId = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<String?> optionId = const Value.absent(),
+                Value<String?> answerValue = const Value.absent(),
+                Value<String?> notebookEntryId = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PortraitAnswersCompanion(
+                ownerKey: ownerKey,
+                questionId: questionId,
+                state: state,
+                optionId: optionId,
+                answerValue: answerValue,
+                notebookEntryId: notebookEntryId,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String ownerKey,
+                required String questionId,
+                required String state,
+                Value<String?> optionId = const Value.absent(),
+                Value<String?> answerValue = const Value.absent(),
+                Value<String?> notebookEntryId = const Value.absent(),
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => PortraitAnswersCompanion.insert(
+                ownerKey: ownerKey,
+                questionId: questionId,
+                state: state,
+                optionId: optionId,
+                answerValue: answerValue,
+                notebookEntryId: notebookEntryId,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PortraitAnswersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $PortraitAnswersTable,
+      PortraitAnswerRow,
+      $$PortraitAnswersTableFilterComposer,
+      $$PortraitAnswersTableOrderingComposer,
+      $$PortraitAnswersTableAnnotationComposer,
+      $$PortraitAnswersTableCreateCompanionBuilder,
+      $$PortraitAnswersTableUpdateCompanionBuilder,
+      (
+        PortraitAnswerRow,
+        BaseReferences<
+          _$CupidDatabase,
+          $PortraitAnswersTable,
+          PortraitAnswerRow
+        >,
+      ),
+      PortraitAnswerRow,
+      PrefetchHooks Function()
+    >;
+typedef $$RelationshipLabelsTableCreateCompanionBuilder =
+    RelationshipLabelsCompanion Function({
+      required String id,
+      required String ownerKey,
+      required String subject,
+      required String system,
+      required String value,
+      required String certainty,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$RelationshipLabelsTableUpdateCompanionBuilder =
+    RelationshipLabelsCompanion Function({
+      Value<String> id,
+      Value<String> ownerKey,
+      Value<String> subject,
+      Value<String> system,
+      Value<String> value,
+      Value<String> certainty,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$RelationshipLabelsTableFilterComposer
+    extends Composer<_$CupidDatabase, $RelationshipLabelsTable> {
+  $$RelationshipLabelsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subject => $composableBuilder(
+    column: $table.subject,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get system => $composableBuilder(
+    column: $table.system,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get certainty => $composableBuilder(
+    column: $table.certainty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$RelationshipLabelsTableOrderingComposer
+    extends Composer<_$CupidDatabase, $RelationshipLabelsTable> {
+  $$RelationshipLabelsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerKey => $composableBuilder(
+    column: $table.ownerKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subject => $composableBuilder(
+    column: $table.subject,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get system => $composableBuilder(
+    column: $table.system,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get certainty => $composableBuilder(
+    column: $table.certainty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$RelationshipLabelsTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $RelationshipLabelsTable> {
+  $$RelationshipLabelsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerKey =>
+      $composableBuilder(column: $table.ownerKey, builder: (column) => column);
+
+  GeneratedColumn<String> get subject =>
+      $composableBuilder(column: $table.subject, builder: (column) => column);
+
+  GeneratedColumn<String> get system =>
+      $composableBuilder(column: $table.system, builder: (column) => column);
+
+  GeneratedColumn<String> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+
+  GeneratedColumn<String> get certainty =>
+      $composableBuilder(column: $table.certainty, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$RelationshipLabelsTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $RelationshipLabelsTable,
+          RelationshipLabelRow,
+          $$RelationshipLabelsTableFilterComposer,
+          $$RelationshipLabelsTableOrderingComposer,
+          $$RelationshipLabelsTableAnnotationComposer,
+          $$RelationshipLabelsTableCreateCompanionBuilder,
+          $$RelationshipLabelsTableUpdateCompanionBuilder,
+          (
+            RelationshipLabelRow,
+            BaseReferences<
+              _$CupidDatabase,
+              $RelationshipLabelsTable,
+              RelationshipLabelRow
+            >,
+          ),
+          RelationshipLabelRow,
+          PrefetchHooks Function()
+        > {
+  $$RelationshipLabelsTableTableManager(
+    _$CupidDatabase db,
+    $RelationshipLabelsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RelationshipLabelsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RelationshipLabelsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RelationshipLabelsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ownerKey = const Value.absent(),
+                Value<String> subject = const Value.absent(),
+                Value<String> system = const Value.absent(),
+                Value<String> value = const Value.absent(),
+                Value<String> certainty = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RelationshipLabelsCompanion(
+                id: id,
+                ownerKey: ownerKey,
+                subject: subject,
+                system: system,
+                value: value,
+                certainty: certainty,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String ownerKey,
+                required String subject,
+                required String system,
+                required String value,
+                required String certainty,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => RelationshipLabelsCompanion.insert(
+                id: id,
+                ownerKey: ownerKey,
+                subject: subject,
+                system: system,
+                value: value,
+                certainty: certainty,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$RelationshipLabelsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $RelationshipLabelsTable,
+      RelationshipLabelRow,
+      $$RelationshipLabelsTableFilterComposer,
+      $$RelationshipLabelsTableOrderingComposer,
+      $$RelationshipLabelsTableAnnotationComposer,
+      $$RelationshipLabelsTableCreateCompanionBuilder,
+      $$RelationshipLabelsTableUpdateCompanionBuilder,
+      (
+        RelationshipLabelRow,
+        BaseReferences<
+          _$CupidDatabase,
+          $RelationshipLabelsTable,
+          RelationshipLabelRow
+        >,
+      ),
+      RelationshipLabelRow,
+      PrefetchHooks Function()
+    >;
 typedef $$ChapterClosuresTableCreateCompanionBuilder =
     ChapterClosuresCompanion Function({
       required String id,
@@ -11599,6 +14119,326 @@ typedef $$ChapterClosureItemsTableProcessedTableManager =
       ChapterClosureItemRow,
       PrefetchHooks Function({bool closureId})
     >;
+typedef $$ThankYouActivationsTableCreateCompanionBuilder =
+    ThankYouActivationsCompanion Function({
+      required String cardId,
+      required String status,
+      required String armedOn,
+      Value<DateTime?> consumedAt,
+      Value<int> rowid,
+    });
+typedef $$ThankYouActivationsTableUpdateCompanionBuilder =
+    ThankYouActivationsCompanion Function({
+      Value<String> cardId,
+      Value<String> status,
+      Value<String> armedOn,
+      Value<DateTime?> consumedAt,
+      Value<int> rowid,
+    });
+
+final class $$ThankYouActivationsTableReferences
+    extends
+        BaseReferences<
+          _$CupidDatabase,
+          $ThankYouActivationsTable,
+          ThankYouActivationRow
+        > {
+  $$ThankYouActivationsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ActivityCardsTable _cardIdTable(_$CupidDatabase db) => db
+      .activityCards
+      .createAlias('thank_you_activations__card_id__activity_cards__id');
+
+  $$ActivityCardsTableProcessedTableManager get cardId {
+    final $_column = $_itemColumn<String>('card_id')!;
+
+    final manager = $$ActivityCardsTableTableManager(
+      $_db,
+      $_db.activityCards,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_cardIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ThankYouActivationsTableFilterComposer
+    extends Composer<_$CupidDatabase, $ThankYouActivationsTable> {
+  $$ThankYouActivationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get armedOn => $composableBuilder(
+    column: $table.armedOn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get consumedAt => $composableBuilder(
+    column: $table.consumedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ActivityCardsTableFilterComposer get cardId {
+    final $$ActivityCardsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cardId,
+      referencedTable: $db.activityCards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityCardsTableFilterComposer(
+            $db: $db,
+            $table: $db.activityCards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ThankYouActivationsTableOrderingComposer
+    extends Composer<_$CupidDatabase, $ThankYouActivationsTable> {
+  $$ThankYouActivationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get armedOn => $composableBuilder(
+    column: $table.armedOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get consumedAt => $composableBuilder(
+    column: $table.consumedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ActivityCardsTableOrderingComposer get cardId {
+    final $$ActivityCardsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cardId,
+      referencedTable: $db.activityCards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityCardsTableOrderingComposer(
+            $db: $db,
+            $table: $db.activityCards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ThankYouActivationsTableAnnotationComposer
+    extends Composer<_$CupidDatabase, $ThankYouActivationsTable> {
+  $$ThankYouActivationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get armedOn =>
+      $composableBuilder(column: $table.armedOn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get consumedAt => $composableBuilder(
+    column: $table.consumedAt,
+    builder: (column) => column,
+  );
+
+  $$ActivityCardsTableAnnotationComposer get cardId {
+    final $$ActivityCardsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cardId,
+      referencedTable: $db.activityCards,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ActivityCardsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.activityCards,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ThankYouActivationsTableTableManager
+    extends
+        RootTableManager<
+          _$CupidDatabase,
+          $ThankYouActivationsTable,
+          ThankYouActivationRow,
+          $$ThankYouActivationsTableFilterComposer,
+          $$ThankYouActivationsTableOrderingComposer,
+          $$ThankYouActivationsTableAnnotationComposer,
+          $$ThankYouActivationsTableCreateCompanionBuilder,
+          $$ThankYouActivationsTableUpdateCompanionBuilder,
+          (ThankYouActivationRow, $$ThankYouActivationsTableReferences),
+          ThankYouActivationRow,
+          PrefetchHooks Function({bool cardId})
+        > {
+  $$ThankYouActivationsTableTableManager(
+    _$CupidDatabase db,
+    $ThankYouActivationsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ThankYouActivationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ThankYouActivationsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ThankYouActivationsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> cardId = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> armedOn = const Value.absent(),
+                Value<DateTime?> consumedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ThankYouActivationsCompanion(
+                cardId: cardId,
+                status: status,
+                armedOn: armedOn,
+                consumedAt: consumedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String cardId,
+                required String status,
+                required String armedOn,
+                Value<DateTime?> consumedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ThankYouActivationsCompanion.insert(
+                cardId: cardId,
+                status: status,
+                armedOn: armedOn,
+                consumedAt: consumedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ThankYouActivationsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({cardId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (cardId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.cardId,
+                                referencedTable:
+                                    $$ThankYouActivationsTableReferences
+                                        ._cardIdTable(db),
+                                referencedColumn:
+                                    $$ThankYouActivationsTableReferences
+                                        ._cardIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ThankYouActivationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$CupidDatabase,
+      $ThankYouActivationsTable,
+      ThankYouActivationRow,
+      $$ThankYouActivationsTableFilterComposer,
+      $$ThankYouActivationsTableOrderingComposer,
+      $$ThankYouActivationsTableAnnotationComposer,
+      $$ThankYouActivationsTableCreateCompanionBuilder,
+      $$ThankYouActivationsTableUpdateCompanionBuilder,
+      (ThankYouActivationRow, $$ThankYouActivationsTableReferences),
+      ThankYouActivationRow,
+      PrefetchHooks Function({bool cardId})
+    >;
 
 class $CupidDatabaseManager {
   final _$CupidDatabase _db;
@@ -11629,8 +14469,16 @@ class $CupidDatabaseManager {
       $$SkillProfileEntriesTableTableManager(_db, _db.skillProfileEntries);
   $$AskPromptStateTableTableManager get askPromptState =>
       $$AskPromptStateTableTableManager(_db, _db.askPromptState);
+  $$CalendarEventStateTableTableManager get calendarEventState =>
+      $$CalendarEventStateTableTableManager(_db, _db.calendarEventState);
+  $$PortraitAnswersTableTableManager get portraitAnswers =>
+      $$PortraitAnswersTableTableManager(_db, _db.portraitAnswers);
+  $$RelationshipLabelsTableTableManager get relationshipLabels =>
+      $$RelationshipLabelsTableTableManager(_db, _db.relationshipLabels);
   $$ChapterClosuresTableTableManager get chapterClosures =>
       $$ChapterClosuresTableTableManager(_db, _db.chapterClosures);
   $$ChapterClosureItemsTableTableManager get chapterClosureItems =>
       $$ChapterClosureItemsTableTableManager(_db, _db.chapterClosureItems);
+  $$ThankYouActivationsTableTableManager get thankYouActivations =>
+      $$ThankYouActivationsTableTableManager(_db, _db.thankYouActivations);
 }

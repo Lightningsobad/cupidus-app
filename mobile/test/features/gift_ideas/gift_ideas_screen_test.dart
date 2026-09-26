@@ -12,6 +12,9 @@ import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/screens/activity_card_hub_view.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/widgets/minute_one_empty_state.dart';
+import 'package:cupid_mobile/features/compatibility_lookup/compatibility_lookup_entry_point.dart';
+import 'package:cupid_mobile/features/compatibility_lookup/data/relationship_label_repository.dart';
+import 'package:cupid_mobile/features/compatibility_lookup/presentation/cubit/compatibility_lookup_cubit.dart';
 import 'package:cupid_mobile/features/context_notebook/context_notebook_entry_point.dart';
 import 'package:cupid_mobile/features/context_notebook/data/context_notebook_dao.dart';
 import 'package:cupid_mobile/features/context_notebook/data/context_notebook_repository.dart';
@@ -216,6 +219,11 @@ void main() {
       dao: ActivityCardDao(database),
       ownerKeyStore: owner,
     );
+    // The guess row's door resolves its own storage from the composition root
+    // (STORY-009 P5), so screen (5) cannot be pumped without these two.
+    getIt
+      ..registerSingleton<CupidDatabase>(database)
+      ..registerSingleton<BackendUserIdStore>(owner);
   });
 
   tearDown(() async {
@@ -604,7 +612,9 @@ void main() {
         findsNothing,
       );
       expect(find.byIcon(CupidIcons.help), findsOneWidget);
-      expect(find.byIcon(CupidIcons.chevronRight), findsOneWidget);
+      // Two entry rows share this shape now (portrait + compatibility table),
+      // so the chevron glyph renders once per row.
+      expect(find.byIcon(CupidIcons.chevronRight), findsNWidgets(2));
 
       // Below every suggestion, not above them.
       final double lastCard =
@@ -612,7 +622,7 @@ void main() {
       expect(tester.getTopLeft(row).dy, greaterThanOrEqualTo(lastCard));
     });
 
-    testWidgets('tapping the guess row answers instead of doing nothing (SC-5)',
+    testWidgets('tapping the guess row opens the portrait (SC-5, AC-2)',
         (WidgetTester tester) async {
       await pumpGiftScreen(tester);
 
@@ -622,13 +632,44 @@ void main() {
       await tester.tap(row);
       await tester.pumpAndSettle();
 
+      // The provenance label is the portrait's own chrome and renders in both
+      // of its states, so it identifies the destination without waiting on the
+      // content packs.
+      expect(find.byKey(const Key('portrait-provenance')), findsOneWidget);
+      // Pushed, not replaced: screen (5) is still underneath (AC-4). The route
+      // below a completed push is offstage, which the default finder skips.
       expect(
-        find.byKey(const Key('gift-ideas-guess-coming-soon')),
+        find.byType(GiftIdeasScreen, skipOffstage: false),
         findsOneWidget,
       );
-      // Still screen (5): the placeholder never pushes a route that does not
-      // exist yet.
-      expect(find.byType(GiftIdeasScreen), findsOneWidget);
+    });
+
+    testWidgets('tapping the compatibility row opens the compatibility table (SC-5)',
+        (WidgetTester tester) async {
+      final BackendUserIdStore owner = BackendUserIdStore()
+        ..updateUserId('user-1');
+      getIt.registerFactory<CompatibilityLookupCubit>(
+        () => CompatibilityLookupCubit(
+          labels: RelationshipLabelRepository(
+            dao: database.relationshipLabelsDao,
+            ownerKeyStore: owner,
+          ),
+          cards: cards,
+          loader: diskLoader,
+        ),
+      );
+
+      await pumpGiftScreen(tester);
+
+      final Finder row = find.byKey(const Key('gift-ideas-compat-row'));
+      await tester.ensureVisible(row);
+      await tester.pumpAndSettle();
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+
+      // The row is screen (10)'s only door, and it opens it by calling the
+      // entry point directly — there is no route name to push (AC-2/AC-3).
+      expect(find.byType(CompatibilityLookupScreen), findsOneWidget);
     });
 
     testWidgets('the lead card is full, every following card is compact',
@@ -1119,62 +1160,13 @@ void main() {
       );
     });
 
-    testWidgets('the other two Minute-1 cells keep the neutral message',
-        (WidgetTester tester) async {
-      await registerCompositionRoot();
-      tester.view.physicalSize = _tallTestViewport;
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-      await tester.pumpWidget(_host(ActivityCardHubView(repository: cards)));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(MinuteOneEmptyState), findsOneWidget);
-
-      for (final String slot in <String>['1', '2']) {
-        await tester.tap(find.byKey(Key('activity_quick_entry_slot_$slot')));
-        await tester.pump();
-
-        expect(
-          find.byKey(const Key('activity_quick_entry_coming_soon')),
-          findsOneWidget,
-        );
-        expect(find.byType(GiftIdeasScreen), findsNothing);
-
-        await tester.pumpAndSettle(const Duration(seconds: 5));
-      }
-    });
-
-    testWidgets('the other two cells still answer with the neutral message',
-        (WidgetTester tester) async {
-      await registerCompositionRoot();
-      await cards.createCard(
-        const NewActivityCard(
-          title: 'Thẻ đã có',
-          origin: ActivityCardOrigin.manual,
-        ),
-      );
-
-      tester.view.physicalSize = _tallTestViewport;
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-      await tester.pumpWidget(_host(ActivityCardHubView(repository: cards)));
-      await tester.pumpAndSettle();
-
-      for (final String slot in <String>['1', '2']) {
-        await tester.tap(
-          find.byKey(Key('activity_quick_entry_slot_$slot')),
-        );
-        await tester.pump();
-
-        expect(
-          find.byKey(const Key('activity_quick_entry_coming_soon')),
-          findsOneWidget,
-        );
-        expect(find.byType(GiftIdeasScreen), findsNothing);
-
-        await tester.pumpAndSettle(const Duration(seconds: 5));
-      }
-    });
+    // Slot 1 ("mồi chuyện") left this list when STORY-005 shipped screen (6),
+    // and slot 2 ("vỏ hoàng đạo") when STORY-011 shipped screen (7). Each
+    // keeps its navigation regression in its own suite:
+    // `test/features/conversation_starters/conversation_starters_screen_test.dart`
+    // and `test/features/zodiac_shell/zodiac_shell_entry_point_test.dart`.
+    // No cell answers with the neutral "sắp có" message any more, so this file
+    // asserts only that slot 0 reaches this feature's own screen.
   });
 
   testWidgets('captures 5-goi-y-qua-thang-cong-suc',

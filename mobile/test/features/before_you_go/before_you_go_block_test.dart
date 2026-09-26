@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:cupid_mobile/core/database/cupid_database.dart';
+import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
@@ -11,6 +13,7 @@ import 'package:cupid_mobile/features/before_you_go/domain/before_you_go_content
 import 'package:cupid_mobile/features/before_you_go/domain/before_you_go_content_gate.dart';
 import 'package:cupid_mobile/features/before_you_go/presentation/widgets/before_you_go_block.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -304,8 +307,21 @@ Future<void> _capture(
 }
 
 void main() {
+  // A *Đã đi rồi* card reaches STORY-007's activation ledger through the
+  // composition root. Nothing here is ever armed, so the empty in-memory
+  // database keeps those cards rendering nothing, which is what the
+  // "block does not apply" group asserts.
+  late CupidDatabase database;
+
   setUp(() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
+    database = CupidDatabase(NativeDatabase.memory());
+    getIt.registerSingleton<CupidDatabase>(database);
+  });
+
+  tearDown(() async {
+    await getIt.reset();
+    await database.close();
   });
 
   group('when the block applies', () {

@@ -1,373 +1,235 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-## CURRENT (read this first)
+## Current state (as of Round 38, 2026-09-26)
 
-STORY-002_invite_message_composer is **DONE, merged**. Final-synthesis review
-(fresh spawn Iris-QC-2, `review/review-report.md`) returned `Outcome:
-DEFERRED_ONLY`, 0 blocking, 16 deferred (all accepted, none require code
-changes; carry D-A2/D-B2/D-C1 into STORY-007/008 planning). Scrum Master
-independently read the full 138-line report before accepting. D-3 (duplicate
-`VISUAL_FIDELITY:` token) and D-1 (missing `Design-Surface:`) fixed directly
-by Scrum Master as artifact hygiene (`visual-fidelity-report.md`,
-`story_master.md`). `story_master.md`: `Status: DONE`, Implementation +
-Review checked, `Design-Surface: cupid-ch-ng-1` recorded. Committed
-`c65cda482fa6950f93fb53186278cf5c5f1c6aef` (story branch), merged into
-`codex/REQ-016_solo_stage1_relationship_assistant-integration` at
-`844487bc2c5c29609c531575c43af74b3fdf2502` via `git-story-boundary.sh merge`
-(boundary confirmed `MERGE_COMPLETE: true`). `BUG-20260910-001` closed
-`Status: DONE` in both `bug_master.md` and `master_bugs_list.md`, citing
-commit `b99d3ac` (fix) and merge `844487bc`.
+Ground truth = integration-worktree `story_master.md` copies +
+`git-story-boundary.sh status`, not narrative history. DONE stories are
+collapsed to one line; full trail lives in each story's own
+`story_master.md` / `review/review-report.md`, not here.
 
-Control-checkout housekeeping committed to `main` first (`ec186ea`: STORY-002/
-BUG-20260910-001 closure + req_master.md Design Ruling Log rows +
-BUG-20260908-001 widened scope), then synced into the integration branch
-(`sync-integration`, merge commit on
-`codex/REQ-016_solo_stage1_relationship_assistant-integration`). Note:
-`sync-integration` flagged that integration's verified base changed —
-re-verify integration build/runtime before any future `land-integration`.
-
-**Active story**: STORY-004_relationship_notebook_and_gift_ideas (complex,
-shared-foundation, Depends-On NONE — PO/UX already done, only STORY-001 is a
-runtime dependency for AC-6's push-to-hub). Selected as the next
-shared-foundation story to unblock the most downstream work (STORY-005/008/
-009/010 read its notebook/skill-profile data later).
-
-Git boundary started + repaired to target the integration branch (standard
-`main`-default repair sequence applied): `Worktree
-.../story-REQ-016_solo_stage1_relationship_assistant-STORY-004_relationship_notebook_and_gift_ideas`,
-`Branch codex/REQ-016_solo_stage1_relationship_assistant-STORY-004_relationship_notebook_and_gift_ideas`,
-`MergeTarget codex/REQ-016_solo_stage1_relationship_assistant-integration`,
-`BaseHead c1ad3e80b7ac75f7df517fd1f830484cf96ec5e3` (confirmed = worktree HEAD
-after `sync-target` pulled in STORY-001/002/003's merged commits, clean, no
-conflict). `BoundaryState:
-.git/ai-team-story-boundaries/REQ-016_solo_stage1_relationship_assistant/STORY-004_relationship_notebook_and_gift_ideas.json`.
-
-**Tech Lead architecture-solution: DONE.** Alan-Techlead delivered
-`architecture/solution.md` + `contract-summary.md` (two new Flutter modules
-`context_notebook/` + `gift_ideas/` on Drift + `ContentPackage`; gift output
-writes via STORY-001's `createCard`; key decision: extract
-`preset_content_gate.dart`'s denied-terms invariant into shared
-`core/content/invariant_terms.dart` so all future content packages share one
-rule tier, per D-15/R-15c). Scrum Master committed it in the story worktree
-(`bddbe75` artifacts, `58ab398` story_master.md Architecture checkbox) —
-Tech Lead does not self-commit. Boundary `BaseHead` refreshed to `58ab398`
-via `refresh-base`.
-
-**Tech Lead coding-plan: DONE.** Alan-Techlead delivered `coding-plan/master-plan.md`
-+ `coding-agent-guide.md` + 7 phase files (P1-P7), all single-lane
-`Owner: Mobile Developer`/`Lane: Mobile`. Critical path P1→P3→P4 and
-P2→P5→P6→P7; P1∥P2, then P3∥P5, then P4∥P6, P7 closes serially. Scrum Master
-verified structure (6-column Phases Overview schema, correct) and committed
-in the story worktree: `4b4ff02` (9 files). Boundary `BaseHead` refreshed to
-`4b4ff0258e8a143a7ff760cc48d77f891712e323` via `refresh-base`. Alan-Techlead
-released (`TaskStop`) — Tech Lead's role for this story is complete; spawn
-fresh if a later phase needs an architecture clarification.
-
-STORY-002's `preset_content_gate.dart` cross-touch (P2 relocates
-`_deniedTerms` into new `core/content/invariant_terms.dart`, mechanical
-source-of-list change only, `PresetGateRule`/`PresetViolation`/
-`validatePresetPack` signature+behavior unchanged, STORY-002's own
-`preset_content_gate_test.dart` must stay green unmodified): confirmed safe —
-STORY-002 is DONE/merged, its story worktree/branch boundary is closed, no
-active exclusive claim on that file. P2's dispatch below carries this
-constraint explicitly.
-
-**Phase P1: DONE.** Alex-Mobile-Dev delivered three Drift tables
-(`notebook_entries`/`skill_profile_entries`/`ask_prompt_state`) +
-`ContextNotebookRepository` + DI registration. `schemaVersion` 5->6
-(live-read off branch, confirmed via `git show`, additive `CREATE TABLE`
-only). 99 targeted tests + full activity_cards/journal/invite_composer
-regression green. Two declared deviations verified safe by Scrum Master
-direct diff before commit: (1) `cupid_database.g.dart` regenerated
-(build_runner output, unavoidable), (2) 7 existing test files patched for
-the hard-coded schemaVersion constant only (5->6, one comment update) — `git
-diff` confirmed zero logic changes. Committed in story worktree: `ca111f7`
-(18 files). Boundary `BaseHead` refreshed to
-`ca111f749d77150cdef39120b38589fc58cd9074`. Alex-Mobile-Dev released
-(`TaskStop`).
-
-**Phase P2: DONE.** Alex-Mobile-Dev relocated STORY-002's `_deniedTerms`
-denylist into shared `core/content/invariant_terms.dart` — Scrum Master
-independently diffed `preset_content_gate.dart` before commit: byte-identical
-detail strings, enums paired by `wireValue`, `PresetGateRule`/
-`PresetViolation`/`validatePresetPack` signature unchanged.
-`preset_content_gate_test.dart` confirmed untouched (absent from `git
-status`) and green. Added `ask_questions.v1`/`skill_seeds.v1` content packs +
-`context_content_gate.dart` disk-loaded validator (proven red-able). 181
-tests green. Committed in story worktree: `070b600` (9 files). Boundary
-`BaseHead` refreshed to `070b600439b9fc82b6e8114a89d6ee12e2c82173`.
-Alex-Mobile-Dev released (`TaskStop`).
-
-**Phase P3: DONE.** Alex-Mobile-Dev delivered `AskCadencePolicy` +
-`AskOnTheSpotSlot` inline card + `context_notebook_entry_point.dart` sole
-facade (`AskOnTheSpotSlot`, `ContextNotebookReader`, `openNotebookScreen`,
-`openSkillProfileScreen` — the shared contract STORY-005/008/009/010 consume
-later; `openNotebookScreen`/`openSkillProfileScreen` bodies deliberately
-`throw UnimplementedError` pointing at P4, which replaces the bodies with the
-real push). Self-found-and-fixed defect, independently verified by Scrum
-Master: the import-boundary test's matcher only looked for the literal
-absolute substring `features/context_notebook/(data|domain|presentation)/`,
-but `lib/` uses relative imports with no `features/` segment, so it always
-vacuously passed; Alex-Mobile-Dev proved this by injecting a real violation
-into `journal_entry_point.dart`, observing the test still green, fixed the
-matcher to resolve `../`/`package:cupid_mobile/` import/export URIs to
-canonical `lib/...` paths before comparing, re-verified the injected
-violation now failed, then reverted the injection — Scrum Master confirmed
-`git status --porcelain` showed no trace of the injection before committing.
-Two-slots-on-one-route and no-toast tests present and green. Committed in
-story worktree: `a897796` (8 files, 1396 insertions/1 deletion). Boundary
-`BaseHead` refreshed to `a89779626e34996a2bc714f85238d59bf7cb4059`.
-Alex-Mobile-Dev released (`TaskStop`).
-
-**Phase P5: DONE.** Alex-Mobile-Dev delivered `gifts.v1`/`gift_index.v1`/
-`gift_taxonomy.v1` content packs + `validateGiftPacks` (shared
-`invariant_terms` pass plus 5 gift-specific rules: price/commerce leakage,
-unknown `branch_id`/`effort_tier_id`, dangling `gift_index`→`gift_id`,
-missing required branch, branch without an idea). Effort tiers carry an
-hours `max_minutes` bound so P6 never hardcodes per-tier knowledge. Scrum
-Master independently re-ran (not just trusted the report): 226 tests green
-across `test/features/gift_ideas test/features/context_notebook
-test/features/invite_composer`, `flutter analyze lib/features/gift_ideas
-test/features/gift_ideas` clean, and read the gate + test source directly to
-confirm every claimed fixture (currency figure, shorthand amount,
-cheap/store-name/store-link/bare-figure, dangling id, missing-branch) is
-real and wired to the right rule. Committed in story worktree: `413765f` (8
-files, 1520 insertions/2 deletions). Boundary `BaseHead` refreshed to
-`413765f775e068790fd60deef2be39fccac11ea0`. Alex-Mobile-Dev released
-(`TaskStop`).
-
-**Phase P4: DONE.** Alex-Mobile-Dev delivered `notebook_screen.dart` +
-`skill_profile_screen.dart` (both pushed off the Me tab, replacing P3's
-`UnimplementedError` stubs in `context_notebook_entry_point.dart`) +
-`context_inline_add_row.dart` shared widget + two new `_MenuRow`s in
-`me_screen.dart`. Scrum Master independently verified, not taken on the
-specialist's word:
-- `flutter test test/features/context_notebook test/features/account`
-  re-run fresh from current worktree state: clean pass, no filters. Two of
-  its files' result lines were obscured in the combined run's captured
-  output by the compact reporter's concurrent-file progress-line
-  interleaving (a file's name can be absent from the printed lines even
-  though its tests ran and passed — only the final `+N ~M: All tests
-  passed!` tally is authoritative for a multi-file run). Resolved by
-  running `notebook_screen_test.dart`, `skill_profile_screen_test.dart`,
-  and `context_content_gate_test.dart` standalone: 37/37 passing,
-  confirming the combined run's tally was correct all along. Record this
-  reporter behavior so it isn't re-investigated as a regression later.
-- `flutter analyze lib test`: 217 issues, 0 errors — exact match to the
-  specialist's claimed pre-existing baseline; P4's three new files carry
-  zero analyzer issues.
-- `visual-fidelity-report.md` (`VISUAL_FIDELITY: PASS`) read in full: both
-  screens captured via `RepaintBoundary.toImage` in the story's own widget
-  test at the design reference viewport (repo pattern from STORY-021), all
-  Vietnamese diacritics verified legible in every capture, no banned
-  surfaces. 12 `DESIGN_SPEC_CONFLICT` items recorded where the canvas frame
-  predates `ux/uiux-spec.md` and the spec correctly wins (no count/progress
-  read anywhere per AC-25, flat name-only skill rows per AC-12, per-group
-  `+ tự thêm` rows, no switcher/tab-bar/explainer-card/cross-link-CTA — the
-  phase contract's two separate pushed screens, not the canvas's one
-  switcher frame).
-- `me_screen.dart`, `context_notebook_entry_point.dart`, and
-  `story_master.md` diffs confirmed to match the specialist's reported
-  scope exactly.
-
-Reviewer-carry note (not a P4 defect, outside this phase's Write Scope):
-in the visual-fidelity capture, `implemented-2-so-tay-nguoi-yeu-ios.png`
-shows the three interests newest-first while
-`implemented-2-so-tay-nguoi-yeu-md.png` (same repository, rendered moments
-later) shows them oldest-first — `ContextNotebookRepository.entries()` has
-no stable tie-break when `createdAt` ties. That ordering lives in the P1
-repository.
-
-Committed in story worktree: `4388b9f` (24 files, 2510 insertions/21
-deletions). Boundary `BaseHead` refreshed to
-`4388b9fa453f4e0c7d1d7508656bd79151edf8f7`. Alex-Mobile-Dev released
-(`TaskStop`).
-
-**Phase P6 DONE** — gift repository and deterministic selector
-(`Alex-Mobile-Dev`, Depends-On P1+P5, per
-`coding-plan/phase-P6-gift-repository-and-deterministic-selector.md`).
-`GiftRepository` (data/gift_repository.dart) reads the three shipped packs
-plus a fresh `ContextNotebookReader` snapshot each call — no local
-schema/DAO/saved-gift list of its own (SC-1'/AC-22); un-seeded manual
-skills excluded from context (index keys by durable seed id, not text).
-`GiftSelector` (domain/gift_selector.dart) ranks by match count with a
-stable id tie-break (total order, AC-28) and rotates via `cursor % length`
-with no persisted cursor/exhaustion state (AC-33); score is plain match
-count with no per-kind weighting (R-15a), which also satisfies the
-P5-owned `gift_content_gate_test.dart` bare-integer-literal ban. Registered
-as lazy singletons in `service_locator.dart`. Scrum Master independently
-verified, not taken on the specialist's word:
-- `git status` matched the claimed 7 changed/new paths exactly.
-- Fresh `flutter test test/features/gift_ideas test/features/context_notebook`
-  re-run (bare): `00:06 +161 ~4: All tests passed!` — exact match (161
-  pass, 4 skip = P4's visual-capture cases, 0 failures).
-- Read `gift_selector.dart` (279 lines) and `gift_repository.dart` (95
-  lines) in full: confirmed no `Random`/`DateTime.now`/`dart:io`/http
-  imports, confirmed the deterministic total-order sort and modulo
-  rotation, confirmed no local store/DAO.
-- Read `gift_selector_test.dart` (24 cases) and `gift_repository_test.dart`
-  (10 cases) in full: confirmed the AC-28 golden-order two-run/reversed-
-  order tests, N=1/N=200 data-driven size tests (AC-33/R-15b), and the
-  anti-second-store/anti-randomness text-scan test including its own
-  self-check that the scan reaches the new files.
-- Confirmed the `service_locator.dart` diff is exactly two lazy singleton
-  registrations plus imports, no unrelated changes.
-- Re-ran `flutter analyze lib test` independently: 219 issues, 0 errors —
-  exact +2 delta from P4's 217 baseline, both `prefer_initializing_formals`
-  on `gift_repository.dart:17`/`:18` (`_notebook`/`_loader`).
-- Spot-checked AC-13/15/17/18/20/28/32/33 against `requirements.md`: all
-  cited ACs' actual text matches how each test/group uses them.
-
-Reviewer-carry note (cosmetic, non-blocking): `gift_repository_test.dart`'s
-anti-second-store/anti-randomness group is still labeled
-`(AC-17, AC-18, AC-28)`, but AC-17/AC-18 are the effort-ceiling and
-no-cost-branch filters, unrelated to that test's actual assertions
-(schema/no-DB/no-random/no-network/no-saved-list). `test-results.md`'s own
-narrative already cites the correct `(AC-28, AC-32)` for this check; only
-the Dart group-name string itself was left stale. Test logic and AC
-coverage are correct.
-
-Committed in story worktree: `c71530b` (7 files, 1341 insertions/2
-deletions). Boundary `BaseHead` refreshed to
-`c71530b11380b33febf2e1e024187d50734f70f2`. Alex-Mobile-Dev released
-(`TaskStop`).
-
-**Next**: dispatch Phase P7 (Depends-On P3,P6, both merged) — gift screen,
-quick entry, and push-to-hub, per
-`coding-plan/phase-P7-gift-screen-quick-entry-and-push-to-hub.md` (not yet
-read this session; read it fresh before building the handoff). P7 closes
-the phase graph; not parallelizable. After P7 completes and is
-independently verified/committed, story tier is `complex` → route through
-full Reviewer (`Iris-QC`) before `DONE`, not Scrum Master lightweight
-validation. On blocker (including `MOBILE_RUNTIME_UNAVAILABLE` or
-`CV_SHAPE_REGRESSION`): record it here and stop.
-
-After STORY-004 reaches DONE, remaining runnable-now stories are STORY-006
-and STORY-012 (both Depends-On STORY-001 only).
-
-**`BUG-20260910-001`: fully closed, gate-satisfied.** Iris-QC's bugfix-review
-returned `Outcome: DEFERRED_ONLY` (0 blocking, 4 deferred, 1 dismissed) in
-the integration worktree. Copied `scope-gate.md`+`review-report.md` into the
-control-checkout canonical path, reconciled `bug_master.md`'s Artifacts
-checklist (all 3 checked) and Routing Notes, committed (`a98743d`), synced
-into the integration branch (`sync-integration`), then `git clean -fd` the
-now-redundant duplicate review output left in the integration worktree. No
-further action needed on this bug.
-
-**Known non-blocking guard quirks** (do not re-investigate):
-- `validate-reviewer-handoff.sh NO_REVIEW_CONTEXT` on scoped-slice dispatches:
-  it reads the control checkout's `review/` dir, which doesn't exist
-  pre-merge (branch unmerged) — expected, not a defect. Policy: accept
-  scoped-slice results via teammate message + independent worktree file
-  verification regardless of this gate's state.
-- `scrum-master-active-scope.json`'s `scope_kind` field auto-reverts to
-  `"requirement"` on every handoff even when hand-corrected to `"story"` —
-  tooling-recomputed, not persistable by hand, does not block delivery.
-- Ordinary `Flow: story` Git-Boundary `BaseHead` must equal current worktree
-  HEAD (not the pre-story merge-base); put the merge-base
-  (`711274e3fde25788c91390a44572d53766bba778`) in handoff prose/query keys
-  instead, e.g. `git -C <Worktree> diff 711274e3... HEAD`.
-
-**Open, non-blocking, needs a real user decision** (surfaced via
-`PushNotification`, logged in `req_master.md` Design Ruling Log 2026-09-10
-STORY-002 row): (a) vertical frame-card list vs. chip strip, (b) separate
-full-screen per-field editor vs. inline sheet edit — genuine
-navigation-architecture PO/user call, not resolvable by Scrum Master analogy.
-Current spec-compliant implementation stays valid/mergeable while open.
-
-Git boundary (refresh via `git-story-boundary.sh status --req
-REQ-016_solo_stage1_relationship_assistant --story
-STORY-002_invite_message_composer` if resuming later):
-
-```
-Git-Boundary: REQUIRED
-Story-Class: shared-foundation
-Depends-On: STORY-001_activity_card_hub
-Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-002_invite_message_composer
-Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-002_invite_message_composer
-MergeTarget: codex/REQ-016_solo_stage1_relationship_assistant-integration
-BaseHead: b99d3ac9036aee89ade1bdc41b991c7e9f13fec6
-BoundaryState: /Users/alantravala/workspace/snapsofts/cupid-apps/.git/ai-team-story-boundaries/REQ-016_solo_stage1_relationship_assistant/STORY-002_invite_message_composer.json
-```
-
-**Standing boundary note** for this and every future story depending on an
-already-merged prior story: `git-story-boundary.sh start` defaults
-`MergeTarget` to `main` and `BaseHead` to `main` HEAD — wrong here, `main`
-never holds a story's merged code (only the integration branch does). Fix
-sequence: `start` -> `repair-boundary --branch <branch> --worktree <path>
---merge-target codex/REQ-016_solo_stage1_relationship_assistant-integration
---story-class <class> --depends-on <deps>` -> `sync-target` (pulls the
-integration branch's commits into the story worktree; `start`/`repair-boundary`
-alone do not). Resolve any `sync-target` conflict directly (Scrum-Master git
-orchestration, never delegated), then `sync-target --continue`.
-
-## Archival: STORY-002_invite_message_composer — DONE, merged
-
-complex, shared-foundation, Depends-On STORY-001. Merged into
-`codex/REQ-016_solo_stage1_relationship_assistant-integration` at
-`844487bc2c5c29609c531575c43af74b3fdf2502` (story commit `c65cda4`), review
-`Outcome: DEFERRED_ONLY` (`review/review-report.md`, final-synthesis).
-Closed `BUG-20260910-001` as part of this story's patch round. Deferred
-findings to carry into STORY-007/008 planning: D-A2 (`validatePresetPack` no
-`lib/` call site), D-B2 (`savePayload` key validation deferred), D-C1
-(composer full-snapshot hazard, re-check for non-modal reuse).
-
-## Archival: STORY-001_activity_card_hub — DONE, merged
-
-Shared-foundation dependency for STORY-002/004/005/006/007/008/009/010/011/
-012/013. Merged into `codex/REQ-016_solo_stage1_relationship_assistant-integration`
-at `merge_sha 4c18bd31e5f011556c9656319201a02d9780a575`, review `Outcome:
-DEFERRED_ONLY`. Full history superseded by artifacts; see
-`STORY-001_activity_card_hub/review/review-report.md` if ever needed.
-Non-blocking carry-forward: `req_master.md` G-3/D-23/D-26 closure commit
-`fd1da92` is on `main` but not yet on the integration branch — reconcile
-whenever `land-integration` runs.
-
-## Archival: STORY-003_private_journal — DONE, merged
-
-Independent (Depends-On NONE). Merged into
-`codex/REQ-016_solo_stage1_relationship_assistant-integration` at `69b3690`,
-review `Outcome: DEFERRED_ONLY`.
-
-## Story Graph (from `requirements/requirements.md`)
-
-| Story | Depends On | Story-Class |
+| Story | Depends On | Status |
 |---|---|---|
-| STORY-001 | NONE | shared-foundation (DONE, merged) |
-| STORY-002 | STORY-001 | shared-foundation (DONE, merged) |
-| STORY-003 | NONE | standard (DONE, merged) |
-| STORY-004 | STORY-001 | standard |
-| STORY-005 | STORY-001, STORY-004 | standard |
-| STORY-006 | STORY-001 | standard |
-| STORY-007 | STORY-001, STORY-002, STORY-003, STORY-005 | standard |
-| STORY-008 | STORY-001, STORY-002, STORY-003, STORY-004 | standard |
-| STORY-009 | STORY-004 | standard |
-| STORY-010 | STORY-004 | standard |
-| STORY-011 | STORY-001, STORY-004, STORY-005, STORY-008 | standard |
-| STORY-012 | STORY-001 | standard |
-| STORY-013 | STORY-001, STORY-004 | standard |
+| STORY-001 | NONE | DONE, merged |
+| STORY-002 | STORY-001 | DONE, merged |
+| STORY-003 | NONE | DONE, merged |
+| STORY-004 | STORY-001 | DONE, merged |
+| STORY-005 | STORY-001, STORY-004 | DONE, merged. Final-synthesis `Outcome: CLEAN`. Open note: `BUG-20260923-002`'s 3 assertions are already green on this story's branch (fixed by P7) — re-verify on integration branch before dispatching a bug-fixer. |
+| STORY-006 | STORY-001 | DONE, merged |
+| STORY-007 | STORY-001, STORY-002, STORY-003, STORY-005 | DONE, merged (Round 22). Final-synthesis `Outcome: DEFERRED_ONLY`. Open PO question (not yet escalated): see Open user decisions item 4 below. |
+| STORY-008 | STORY-001, STORY-002, STORY-003, STORY-004 | DONE, merged (Round 23). Reviewer round-4 `Outcome: DEFERRED_ONLY`. |
+| STORY-009 | STORY-004 | DONE, merged |
+| STORY-010 | STORY-004 | DONE, merged |
+| STORY-011 | STORY-001, STORY-004, STORY-005, STORY-008 | DONE, merged (Round 34), merge `e346e147`. Final-synthesis `Outcome: DEFERRED_ONLY` (10 deferred, 0 blocking). |
+| STORY-012 | STORY-001 | DONE, merged (Round 38, merge `e9519243`). Final-synthesis `Outcome: DEFERRED_ONLY`. |
+| STORY-013 | STORY-001, STORY-004 | DONE, merged (Round 16) |
 
-Requirement Status: IN_PROGRESS (3 of 13 stories DONE: STORY-001, STORY-002,
-STORY-003; 10 remaining, all now unblocked/runnable once their own deps are
-DONE — STORY-004/006/012 runnable now).
+## Open user decisions
 
-Open, non-blocking bugs (cite, do not re-run repo-wide commands):
-`BUG-20260907-001` (repo-wide `flutter test` pre-existing failures),
-`BUG-20260908-001` (repo-wide `flutter analyze` pre-existing chat/dream_jar
-warnings). Closed: `BUG-20260907-002`, `BUG-20260910-001`.
+1-3. **RESOLVED, applied, not reopened** (STORY-013 evidence-filename fix;
+   STORY-005 P5-P7 rework review; STORY-007 P3/P4 Design-Ruling-Log D-10/D-6
+   choices — see `req_master.md` `## Design Ruling Log` 2026-09-17/23 rows).
+
+4. **OPEN, not yet escalated to user/PO.** STORY-007 final-synthesis review
+   (`review/review-report.md` §4) found `ThankYouBlockCubit.resolve()` consumes
+   the one-time unlock at screen-*build* time (`initState`), not when the
+   block actually scrolls into view — a long card can burn the unlock before
+   the user ever sees it, with no un-consume API. Does not block DONE (AC
+   wording gap, not an AC violation). PO question: should AC-3's "consume" mean
+   "on screen build" or "on block actually visible"?
+
+5. **OPEN, not yet escalated to user/PO.** `stage1_wipe_registry_parity_test.dart`
+   has a pre-existing red assertion touching 3 other stories' status tables
+   (confirmed non-blocking for STORY-007, not caused by it). Needs a PO/Tech
+   Lead decision; root decision never escalated.
+
+## Still-open non-blocking items
+
+- STORY-008: retry `runtime_smoke` now that host disk has 28Gi free; re-review
+  F-3 in `STORY-008/review/review-report.md` before sealing.
+- Open, non-blocking bugs (cite, do not re-run repo-wide/broad commands):
+  `BUG-20260907-001` (repo-wide `flutter test` pre-existing failures),
+  `BUG-20260908-001` (repo-wide `flutter analyze` pre-existing chat/dream_jar
+  warnings), `BUG-20260923-001` (Drift `schemaVersion` migration test lag —
+  11 reds in `test/core/database/`), `BUG-20260923-002`
+  (`test/features/conversation_starters` 3 pre-existing enum/rule-list-length
+  reds, root cause STORY-005 P6/P7 rework — but see STORY-005 row above, may
+  already be resolved on integration branch), `BUG-20260924-001` (3
+  pre-existing `test/design_system/` reds, confirmed pre-existing at STORY-007
+  P3's own BaseHead). Closed: `BUG-20260907-002`, `BUG-20260910-001`.
+- Integration branch re-verification owed: re-run integration build/runtime
+  verification and record under
+  `REQ-016_solo_stage1_relationship_assistant/integration-review/` BEFORE any
+  future `land-integration` for this requirement — prior evidence is stale.
+- STORY-013: `coding-plan/master-plan.md`, all 6 phase files, and
+  `test-results.md` use literal `Status: COMPLETE`, not the gate-recognized
+  `DONE|SKIPPED|DEFERRED|WAIVED|N/A` (per Alan-Techlead-3 verification,
+  2026-09-26; story itself is `MERGE_COMPLETE: true`/`MERGED`, review
+  `Outcome: DEFERRED_ONLY`). Not yet known to block anything post-merge; if any
+  future gate scans STORY-013's own phase/plan files and rejects `COMPLETE`,
+  this is the cause — fix is Scrum-Master-owned artifact wording, not rework.
+
+## 3-part verification protocol (use before sealing any specialist's reported-complete work)
+
+(1) `ListAgents`/`list-releasable-agents.sh` shows the agent idle/gone; (2)
+worktree `git diff`/`git status` matches the declared WriteScope; (3) the
+specialist's own output file / `story_master.md` Status field reads
+DONE/COMPLETE. After sealing: commit (Scrum Master only), then
+`git-story-boundary.sh refresh-base` before the next spawn handoff.
 
 ## Do Not Re-read
 
-- `req_master.md`, `requirements/requirements.md`, STORY-001/STORY-003
-  `story_master.md`, STORY-002 `requirements.md`/`uiux-spec.md`,
-  `architecture/solution.md`, `contract-summary.md`, `coding-plan/master-plan.md`
-  — already loaded/edited this session, all superseded by their own artifacts.
-- STORY-001 full phase-by-phase P1-P16 history, STORY-002 phase-by-phase
-  P1-P6 commit narrative, the full slice-A/B/C stop-gate troubleshooting
-  saga — fully superseded by artifacts and the one-line summaries above.
-- `review/slice-A-review.md`, `review/slice-B-review.md`,
-  `review/slice-C-review.md`, `review/review-report.md` (round 1) — already
-  read in full this session; final-synthesis reads them fresh, Scrum Master
-  should not re-read unless final-synthesis reports a discrepancy.
-- `test-results.md` files (can be 80KB+) — use `git diff`/`Read offset/limit`,
-  never a full Read.
+- `req_master.md` body text, `requirements/requirements.md`, all DONE stories'
+  `requirements.md`/`uiux-spec.md`/`architecture/*`/`coding-plan/master-plan.md`
+  for STORY-001/002/003/004/006/009/010/013 — superseded by this checkpoint.
+- `test-results.md` files (can be 80KB+) — use `git diff`/`Read
+  offset/limit`, never a full Read.
+- Round 1-35 narrative in git history of this file — superseded by the table
+  and "Current cursor" sections above.
+
+## Current cursor (Round 38, `continue parallel`, 2026-09-26 — all 13 stories merged, integration review not yet run)
+
+- **All 13 REQ-016 stories are now DONE and merged into
+  `codex/REQ-016_solo_stage1_relationship_assistant-integration`.**
+  Re-verified directly via `git-story-boundary.sh status --req
+  REQ-016_solo_stage1_relationship_assistant --story <STORY>` for every
+  story (not from any narrative or registry table) plus `git log --oneline
+  --grep="^merge("` on the integration worktree, which shows one
+  `merge(...): complete story` commit per story, HEAD `e9519243`
+  (STORY-012). Integration worktree is clean, no `MERGE_HEAD`, on branch
+  `codex/REQ-016_solo_stage1_relationship_assistant-integration`.
+- **Root cause of this round's near-miss:** `req_master.md`'s `## User
+  Stories` table still read `TODO` for STORY-005/007/008/010/011/013 even
+  though this same checkpoint file already knew (as of Round 36) that all
+  but STORY-012 were DONE/merged — the registry table and this checkpoint
+  had drifted apart over multiple rounds, independent of any concurrent
+  session. Trusting the stale registry row caused this round to spawn 4
+  redundant Tech Lead planning runs (STORY-005/008/010/013) against
+  already-merged, already-reviewed stories; a concurrent peer session
+  (`ListAgents` showed `cupid-apps-45`) may also have been merging some of
+  these at the same time. All 4 Tech Leads self-detected via the mandatory
+  3-probe check (architecture/solution.md, coding-plan phase Status,
+  review/review-report.md Outcome) and made ZERO writes; all were STOP-first
+  redirected and confirmed no-op via idle_notification before release.
+  **Fix applied:** synced `req_master.md`'s User Stories table to `DONE`
+  for all 6 stale rows, commit `323f4666`, keeping requirement `Status:
+  IN_PROGRESS` (integration review still pending). Lesson for future
+  rounds: `git-story-boundary.sh status` is the only authoritative merge
+  signal — Glob/Read the story's own `story_master.md` + boundary state
+  BEFORE any Tech Lead/PO/reviewer dispatch, never trust `req_master.md`'s
+  table alone.
+- 4 dispatched Tech Leads (Alan-Techlead, -2, -3, -4) released via
+  `TaskStop` after confirming idle + no-op. Scheduler `active_runs: []`,
+  `.claude/hooks/prune-parallel-runs.sh --apply --quiet` confirms all 13
+  run files current (0 prunable).
+- **Next resume action:** REQ-016 has no
+  `integration-review/review-report.md` yet
+  (`data/requirements/REQ-016_solo_stage1_relationship_assistant/integration-review/`
+  does not exist). Per `AGENTS.md` Stable Delivery Gates, the requirement
+  cannot be marked `DONE` until requirement integration review records
+  `Outcome: CLEAN` or `Outcome: DEFERRED_ONLY` there. Load
+  `.claude/skills/scrum-master/workflows/parallel-continue/merge-and-review.md`
+  (not yet reloaded this round) for the exact integration-review dispatch
+  template, then delegate `Iris-QC` with `ConcurrencyClass:
+  integration-review` scoped to the full integration branch diff against
+  REQ-016's pre-story base. Do NOT re-dispatch Tech Lead/PO/UX/mobile-dev for
+  any of the 13 stories — all are closed.
+- Still-open non-blocking items below (STORY-008 retry, open bugs, PO
+  questions 4/5) remain unresolved and do not block integration review.
+
+## Superseded cursor (Round 37, `continue parallel`, 2026-09-25 — STORY-012 P9 implementation, story now DONE/merged)
+
+- Round 36 closed out: Alan-Techlead's `Mode: coding-plan` continuation
+  returned `TECH_LEAD_COMPLETE: YES` — added Phase P9 (widget `eyebrow_line`
+  + phase_id color-dot install, D-10, merged with D-11/D-12
+  regression-only) and Phase P10 (AC-18 hide-together fix in
+  `evening_check_in_sheet.dart`) to `coding-plan/master-plan.md`. Both new
+  phase files verified read-in-full against declared WriteScope/output paths
+  before trusting. Also corrected two stale premises from Round 35/36's own
+  framing (see `master-plan.md` §6 Notes): the real D-3 gap was an
+  already-DONE ISO-date-format fix (not an `ActivityCard` clock-time gap);
+  the real remaining D-6/C-1 gap is narrowly AC-18 in
+  `evening_check_in_sheet.dart` (not a WriteScope-widen into
+  `activity_card_tile.dart`/hub/l10n as previously assumed).
+- Sealed via `git-story-boundary.sh refresh-base` → BaseHead now
+  `139739387aff283c24e1023d8f37ed1d71feb052`. Alan-Techlead released
+  (`TaskStop`) — its work for this story is done.
+- Dispatched Alex-Mobile-Dev (fresh `Agent()` spawn, RunId
+  `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-mobile-dev`)
+  `Mode: mobile-implementation` for Phase P9. Returned `MOBILE_COMPLETE: YES`
+  — independently verified (git diff matched WriteScope + 3 justified
+  extra files; phase file §7/master-plan/test-results all read DONE) and
+  sealed via `git-story-boundary.sh refresh-base` → BaseHead now
+  `23e7bb9e78311d1fabba65465af7dce1f28ef967`. `flutter test
+  test/features/phase_status` → `+245 ~6` (0 regressions vs P8's `+235 ~6`).
+  VISUAL_FIDELITY stays FAIL overall (pre-existing R-1 + new R-5, see below).
+  Reused the SAME agent via `SendMessage` (not a fresh spawn) to dispatch
+  Phase P10 next — **in flight**.
+- **Open decisions surfaced by P9, not yet resolved (see story checkpoint
+  "Current State" for full detail), do not guess these:**
+  - R-5: `phase-P9` §6 self-contradicts (requires widget screenshot capture,
+    forbids native build). The widget is an OS-level surface
+    (RemoteViews/WidgetKit) outside the Flutter render tree, so the
+    RepaintBoundary harness cannot reach it — Alex substituted a canvas↔code
+    attribute table backed by 34 green `native_copy_scan_test.dart` cases.
+    Needs a Scrum Master/Tech Lead call: accept that as `NOT_APPLICABLE` for
+    per-story capture, or open scope for a real native-build+device pass.
+  - D-13: `--dot-today` (`#FF7FB6`) sits on its own pink→purple gradient
+    background (D-12), near-zero contrast; canvas draws a lightning bolt
+    there instead. Contract `contract-summary.md` §3a locks the role/token
+    names — needs UI/UX + Tech Lead. Scrum Master cannot spawn Pink-Designer
+    directly (role-map: only `brainstormer` does).
+  - R-3 (pre-existing, not new): Android widget countdown digit sizing
+    (D-11) still needs a `SpannableString` fix, out of P9's file-open scope.
+- **Staleness caveat (still applies going forward):** a `SendMessage`
+  continuation to any specialist will NOT update that run's file
+  `status`/`mode` — only a fresh `Agent()` spawn does. Reconcile via
+  `ListAgents` / mailbox reply, not run-file status alone, before treating a
+  wait as resolved.
+- User resolved both R-5 and D-13 (2026-09-25): R-5 = open scope for a real
+  native-build+device widget capture; D-13 = replace the `date_day` dot with
+  a lightning-bolt glyph (canvas `sb-84-widget-bon-pha`), a §3a contract
+  shape change, not a color swap.
+- D-13 Design Ruling Log row added to this file's `## Design Ruling Log`
+  (commit `ecade7ad`), satisfying `guard-design-ruling-required.sh`. Andy-PO
+  `Mode: ac-patch` RETURNED `PRODUCT_OWNER_COMPLETE: YES` — patched
+  `requirements.md`/`uiux-spec.md` wording from "chấm màu" to shape-neutral
+  "chỉ báo pha" for the glyph exception; verified and committed `e04157b4`,
+  BaseHead resealed, Andy-PO released. Alan-Techlead (fresh spawn) now
+  dispatched `Mode: architecture-solution` (RunId `...-tech-lead`) for BOTH
+  D-13 (§3a glyph-shape contract) and the P10 blocker's (a)/(b)/(c) call —
+  awaiting `TECH_LEAD_COMPLETE`. A separate `Mode: coding-plan` follow-up
+  handoff will come after (guard `TECHLEAD_MODE_MIXED_OUTPUTS` forbids
+  combining the two modes in one handoff).
+- **New, separate blocker discovered 2026-09-25:** Alex-Mobile-Dev's P10 run
+  made ZERO edits and returned `p10_blocker` (`PHASE_SPEC_CONTRADICTS_CODE`)
+  — phase-P10's AC-18 gate (`widget.openJournal == null` as a proxy for
+  "STORY-003 not yet delivered") is inverted on the only production call
+  path (`openJournal` is always null in production; STORY-003 is always
+  delivered). Needs a Tech Lead call among 3 named options (a)/(b)/(c) — see
+  story checkpoint "P10 blocker" section for full evidence/options. Routed to
+  the SAME upcoming Tech Lead dispatch as D-13, not a separate escalation.
+- Confirmed constraint (reconfirmed this round): `git-story-boundary.sh
+  start` BLOCKS a new spawn (any concurrency class, including `planning`)
+  while the story worktree is dirty — committed the pending
+  checkpoint/test-results drift as `820d1912` and re-sealed BaseHead before
+  dispatching Andy-PO.
+- Next resume action: (1) on Alan-Techlead `TECH_LEAD_COMPLETE`
+  (architecture-solution only), independently verify (3-part protocol) + seal
+  + commit; (2) dispatch a SEPARATE `Mode: coding-plan` follow-up (same agent
+  via `SendMessage` if addressable, else fresh spawn) to patch/add phases:
+  corrected P10 (per Tech Lead's a/b/c choice), D-13 implementation, R-5
+  native-build/device capture (Depends-On the D-13 implementation phase); (3)
+  dispatch Alex-Mobile-Dev (FRESH spawn — prior instance already released) for
+  those 3 phases in sequence; (4) reconcile control-checkout `story_master.md`
+  Architecture/Implementation checkboxes (currently stale `[ ]` there); (5)
+  once all phases are terminal, route to Iris-QC (Story-Class `standard`, not
+  Tier 0-eligible).
+- Story Git Boundary: Worktree
+  `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget`;
+  Branch `codex/REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget`;
+  MergeTarget `codex/REQ-016_solo_stage1_relationship_assistant-integration`;
+  BaseHead `e04157b42400ee7119235a4a3395c9ffbbc0cde5`; BoundaryState under
+  `.git/ai-team-story-boundaries/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget.json`.
+- `pending_count: 0` stories for REQ-016 — all 13 DONE/merged. Requirement
+  itself stays `IN_PROGRESS` pending integration review (see "Current
+  cursor" above).

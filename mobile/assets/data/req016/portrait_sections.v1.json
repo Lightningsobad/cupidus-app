@@ -1,0 +1,89 @@
+{
+  "id": "req016.portrait_sections",
+  "version": "1.0.0",
+  "schema_id": "req016.portrait_sections.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "portrait.section.daily_taste.v1",
+      "heading": "Những điều người ấy thấy dễ chịu",
+      "bindings": {
+        "mon_an": "portrait.q.interest.food.v1",
+        "cuoi_tuan": "portrait.q.interest.rest.v1",
+        "de_chiu": "portrait.q.guess.comfort.v1"
+      },
+      "clauses": [
+        {
+          "text": "Theo cách bạn kể, người ấy hay nghiêng về {mon_an} khi hai người tìm chỗ ăn.",
+          "requires": ["mon_an"]
+        },
+        {
+          "text": "Bạn đang thấy những khoảng rảnh của người ấy gắn với {cuoi_tuan}.",
+          "requires": ["cuoi_tuan"]
+        },
+        {
+          "text": "Theo cách bạn nhìn, {de_chiu} là thứ giúp người ấy nhẹ người sau một ngày dài.",
+          "requires": ["de_chiu"]
+        }
+      ],
+      "ask_ids": ["portrait.ask.food_memory.v1", "portrait.ask.weekend_plan.v1"],
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "portrait.section.own_days.v1",
+      "heading": "Những ngày có ý nghĩa riêng",
+      "bindings": {
+        "ngay_rieng": "portrait.q.event.own_day.v1",
+        "dip_toi": "portrait.q.event.upcoming.v1"
+      },
+      "clauses": [
+        {
+          "text": "Bạn kể rằng {ngay_rieng} là ngày người ấy giữ cho riêng mình.",
+          "requires": ["ngay_rieng"]
+        },
+        {
+          "text": "Theo cách bạn kể, {dip_toi} là dịp bạn đang muốn chuẩn bị sớm.",
+          "requires": ["dip_toi"]
+        },
+        {
+          "text": "Bạn đang thấy {ngay_rieng} và {dip_toi} nằm gần nhau trong năm nay.",
+          "requires": ["ngay_rieng", "dip_toi"]
+        }
+      ],
+      "ask_ids": ["portrait.ask.own_day_story.v1", "portrait.ask.upcoming_wish.v1"],
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    },
+    {
+      "id": "portrait.section.your_guess.v1",
+      "heading": "Phần bạn đang đoán",
+      "bindings": {
+        "cach_quan_tam": "portrait.q.guess.care_language.v1",
+        "dieu_ngai": "portrait.q.guess.crowd.v1"
+      },
+      "clauses": [
+        {
+          "text": "Theo cách bạn nhìn, người ấy nhận ra sự quan tâm rõ nhất qua {cach_quan_tam}.",
+          "requires": ["cach_quan_tam"]
+        },
+        {
+          "text": "Bạn đang thấy {dieu_ngai} là thứ dễ làm người ấy ngại khi đi chơi đông người.",
+          "requires": ["dieu_ngai"]
+        }
+      ],
+      "ask_ids": ["portrait.ask.care_check.v1", "portrait.ask.crowd_check.v1"],
+      "editorial_review": {
+        "layer1": "editorial.vi.layer1",
+        "layer2": "editorial.vi.layer2",
+        "approved_at": "2026-09-11"
+      }
+    }
+  ]
+}

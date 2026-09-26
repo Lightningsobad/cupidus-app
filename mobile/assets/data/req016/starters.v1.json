@@ -1,0 +1,62 @@
+{
+  "id": "starters",
+  "version": "1.0.0",
+  "schema_id": "req016.starters.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "starter.chuyen_buon_cuoi.v1",
+      "kind": "generic",
+      "text": "Hôm nay có chuyện gì làm bạn bật cười không?"
+    },
+    {
+      "id": "starter.cuoi_tuan_ranh.v1",
+      "kind": "generic",
+      "text": "Nếu cuối tuần này rảnh nguyên ngày, bạn muốn đi đâu?"
+    },
+    {
+      "id": "starter.bai_hat_dang_nghe.v1",
+      "kind": "generic",
+      "text": "Dạo này bạn nghe đi nghe lại bài nào?"
+    },
+    {
+      "id": "starter.mon_an_hoai_khong_chan.v1",
+      "kind": "generic",
+      "text": "Có món nào bạn ăn hoài mà vẫn thấy ngon không?"
+    },
+    {
+      "id": "starter.chuyen_ngoc_cua_minh.v1",
+      "kind": "generic",
+      "text": "Mình vừa nhớ ra một chuyện hồi bé mình làm hơi ngố, bạn có chuyện nào kiểu vậy không?"
+    },
+    {
+      "id": "starter.gio_di_ngu.v1",
+      "kind": "generic",
+      "text": "Tối nay bạn định làm gì trước khi đi ngủ?"
+    },
+    {
+      "id": "starter.so_thich_bat_dau.v1",
+      "kind": "contextual",
+      "context_slot": "interest",
+      "text": "Bạn bắt đầu thích {value} từ lúc nào vậy?"
+    },
+    {
+      "id": "starter.so_thich_lan_gan_nhat.v1",
+      "kind": "contextual",
+      "context_slot": "interest",
+      "text": "Lần gần nhất bạn dành thời gian cho {value} là khi nào?"
+    },
+    {
+      "id": "starter.su_kien_du_dinh.v1",
+      "kind": "contextual",
+      "context_slot": "event",
+      "text": "Sắp tới {value} rồi, bạn định làm gì hôm đó?"
+    },
+    {
+      "id": "starter.su_kien_mong_cho.v1",
+      "kind": "contextual",
+      "context_slot": "event",
+      "text": "Nhắc tới {value}, có điều gì bạn mong nhất không?"
+    }
+  ]
+}

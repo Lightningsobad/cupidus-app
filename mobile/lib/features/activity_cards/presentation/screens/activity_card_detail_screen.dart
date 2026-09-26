@@ -15,6 +15,7 @@ import '../../domain/activity_card.dart';
 import '../../domain/activity_card_repository.dart';
 import '../../domain/activity_type.dart';
 import '../../domain/time_of_day_slot.dart';
+import '../../thank_you/presentation/widgets/thank_you_block.dart';
 import '../activity_card_detail_cubit.dart';
 import '../formatters/vi_field_format.dart';
 import '../widgets/activity_card_tile.dart';
@@ -38,6 +39,7 @@ class ActivityCardDetailScreen extends StatelessWidget {
     this.repository,
     this.prepareActions,
     this.beforeYouGo,
+    this.thankYou,
     this.onDeleted,
   });
 
@@ -56,6 +58,11 @@ class ActivityCardDetailScreen extends StatelessWidget {
   /// pack, the real dismissal store, and the device clock.
   final BeforeYouGoOptions? beforeYouGo;
 
+  /// Test/preview seams for the nested "Cảm ơn + chốt việc kế tiếp" block,
+  /// matching [repository]. Left null in production so the block resolves the
+  /// registered activation ledger.
+  final ThankYouOptions? thankYou;
+
   /// Called once the card is gone, so the caller can drop it from its list
   /// before this screen pops.
   final VoidCallback? onDeleted;
@@ -70,6 +77,7 @@ class ActivityCardDetailScreen extends StatelessWidget {
       child: _ActivityCardDetailBody(
         prepareActions: prepareActions ?? showPrepareActionsSheet,
         beforeYouGo: beforeYouGo,
+        thankYou: thankYou,
         onDeleted: onDeleted,
       ),
     );
@@ -88,11 +96,13 @@ class _ActivityCardDetailBody extends StatefulWidget {
   const _ActivityCardDetailBody({
     required this.prepareActions,
     this.beforeYouGo,
+    this.thankYou,
     this.onDeleted,
   });
 
   final PrepareActionsPresenter prepareActions;
   final BeforeYouGoOptions? beforeYouGo;
+  final ThankYouOptions? thankYou;
   final VoidCallback? onDeleted;
 
   @override
@@ -436,6 +446,11 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
                     const SizedBox(height: CupidSpacing.md),
                   ],
                   _titleField(context, state),
+                  // The same day count the hub tile shows, from the same
+                  // helper: a card cannot say "còn 2 ngày" in the list and
+                  // something else here (AC-14). A past date draws nothing and
+                  // leaves the plain date in the meta block below (AC-15).
+                  _countdownLine(context, card),
                   const SizedBox(height: CupidSpacing.md),
                   _metaBlock(context, card),
                   const SizedBox(height: CupidSpacing.md),
@@ -457,6 +472,12 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
                     today: _beforeYouGoToday,
                     options: widget.beforeYouGo,
                   ),
+                  // STORY-007: the "ghi lại" counterpart of the line above —
+                  // same relative position, same container, opposite status,
+                  // so the two can never draw on one card (`ux/uiux-spec.md`
+                  // mục 6). Draws nothing until a *Đã đi rồi* card reaches an
+                  // eligible turn, and nothing ever again after it spends one.
+                  ThankYouSection(card: card, options: widget.thankYou),
                   const SizedBox(height: CupidSpacing.xl),
                 ],
               ),
@@ -464,6 +485,27 @@ class _ActivityCardDetailBodyState extends State<_ActivityCardDetailBody> {
           ]),
         ),
       ],
+    );
+  }
+
+  Widget _countdownLine(BuildContext context, ActivityCard card) {
+    final String? label = activityCardCountdownLabel(
+      context,
+      card: card,
+      today: _beforeYouGoToday,
+    );
+    if (label == null) {
+      return const SizedBox.shrink();
+    }
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    return Padding(
+      padding: const EdgeInsets.only(top: CupidSpacing.xs),
+      child: Text(
+        label,
+        key: const Key('card_detail_countdown'),
+        style: type.caption.copyWith(color: colors.colorText),
+      ),
     );
   }
 

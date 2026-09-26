@@ -19,7 +19,8 @@ enum InvariantRule {
   streakDisplay('streak_display'),
   scoreOrRatio('score_or_ratio'),
   recipientBehaviour('recipient_behaviour'),
-  manipulativeTone('manipulative_tone');
+  manipulativeTone('manipulative_tone'),
+  assertiveClaim('assertive_claim');
 
   const InvariantRule(this.wireValue);
 
@@ -35,6 +36,21 @@ enum NotebookBoundaryRule {
   judgementProbe('judgement_probe');
 
   const NotebookBoundaryRule(this.wireValue);
+
+  final String wireValue;
+}
+
+/// The R-1g structural rule at the *input* layer: a line about the other person
+/// has to close by asking them, not by settling the matter (AC-20/BR-8). It is
+/// structure rather than vocabulary, so it lives beside the denylists instead of
+/// inside them, and it is its own enum rather than a seventh [InvariantRule] —
+/// the four shipped gates map invariant hits by wire value through a `firstWhere`
+/// with no `orElse`, so a new member there is a runtime `StateError` in four
+/// unrelated features.
+enum StarterStructureRule {
+  missingQuestionEnding('missing_question_ending');
+
+  const StarterStructureRule(this.wireValue);
 
   final String wireValue;
 }
@@ -80,6 +96,15 @@ const Map<InvariantRule, List<String>> invariantDeniedTerms =
     'thả thính',
     'tán tỉnh',
     'thao túng',
+  ],
+  InvariantRule.assertiveClaim: <String>[
+    'người ấy là',
+    'chắc chắn thích',
+    'chắc chắn là',
+    'rõ ràng là',
+    'thực ra',
+    'thật ra là',
+    'vốn dĩ',
   ],
 };
 
@@ -145,6 +170,13 @@ class NotebookBoundaryHit {
   final String detail;
 }
 
+class StarterStructureHit {
+  const StarterStructureHit(this.rule, this.detail);
+
+  final StarterStructureRule rule;
+  final String detail;
+}
+
 Iterable<InvariantTermHit> invariantHitsIn(String text) sync* {
   final String haystack = text.toLowerCase();
 
@@ -165,6 +197,22 @@ Iterable<InvariantTermHit> invariantHitsIn(String text) sync* {
         );
       }
     }
+  }
+}
+
+/// Closing punctuation a reader would accept as "this is asking me something".
+/// The halfwidth form is what an author types; the fullwidth form is what a CMS
+/// export can carry back from an IME, and both have to count or the gate would
+/// reject a line that reads as a question on screen.
+const String _questionMarks = '?？';
+
+Iterable<StarterStructureHit> starterStructureHitsIn(String text) sync* {
+  final String trimmed = text.trimRight();
+  if (trimmed.isEmpty || !_questionMarks.contains(trimmed[trimmed.length - 1])) {
+    yield const StarterStructureHit(
+      StarterStructureRule.missingQuestionEnding,
+      'text does not end by asking the other person, so it closes as a verdict',
+    );
   }
 }
 

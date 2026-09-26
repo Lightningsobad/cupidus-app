@@ -134,6 +134,47 @@ class JournalRepository {
     return entryById(id);
   }
 
+  /// Backs [journalPhotoPathsForOrigin]: the photo files of this owner's
+  /// entries carrying [originRef], as absolute paths, in entry-photo sort
+  /// order.
+  ///
+  /// Selects the photo table and reaches the entry table only to filter, so
+  /// there is no shape of this method that could return body text or a
+  /// timestamp by accident (AC-17). A path whose file is gone is dropped, which
+  /// is what makes a deleted entry's photos disappear from every caller the
+  /// moment [deleteEntry] has run (AC-18).
+  Future<List<String>> photoFilePathsForOrigin(String originRef) async {
+    final owner = _ownerUserId;
+    if (owner == null) {
+      return const <String>[];
+    }
+    final rows = await (_database.select(_database.journalPhotos).join([
+      innerJoin(
+        _database.journalEntries,
+        _database.journalEntries.id.equalsExp(_database.journalPhotos.entryId),
+      ),
+    ])
+          ..where(
+            _database.journalEntries.ownerUserId.equals(owner) &
+                _database.journalEntries.originRef.equals(originRef),
+          )
+          ..orderBy([
+            OrderingTerm(expression: _database.journalPhotos.entryId),
+            OrderingTerm(expression: _database.journalPhotos.sortIndex),
+          ]))
+        .get();
+
+    final paths = <String>[];
+    for (final row in rows) {
+      final photo = row.readTable(_database.journalPhotos);
+      final file = await _mediaStore.resolvePhoto(photo.relativePath);
+      if (file.existsSync()) {
+        paths.add(file.path);
+      }
+    }
+    return paths;
+  }
+
   Future<void> deleteEntry(String id) async {
     final owner = _ownerUserId;
     if (owner == null) {

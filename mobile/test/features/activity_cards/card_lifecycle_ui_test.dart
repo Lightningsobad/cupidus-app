@@ -1,3 +1,5 @@
+import 'package:cupid_mobile/core/database/cupid_database.dart';
+import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
@@ -6,6 +8,7 @@ import 'package:cupid_mobile/features/activity_cards/presentation/activity_card_
 import 'package:cupid_mobile/features/activity_cards/presentation/screens/activity_card_detail_screen.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/widgets/status_change_picker.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -152,6 +155,22 @@ Future<void> _selectOverflow(WidgetTester tester, String action) async {
 
 void main() {
   const CupidColorTokens colors = CupidColorTokens.dark();
+
+  // A *Đã đi rồi* card mounted here now consults STORY-007's activation ledger
+  // through the composition root. An empty in-memory database keeps that lookup
+  // honest: nothing is armed, so the block never draws and the lifecycle
+  // assertions below see the same layout they always did.
+  late CupidDatabase database;
+
+  setUp(() {
+    database = CupidDatabase(NativeDatabase.memory());
+    getIt.registerSingleton<CupidDatabase>(database);
+  });
+
+  tearDown(() async {
+    await getIt.reset();
+    await database.close();
+  });
 
   group('AC-12 · one gesture sets the date and the status', () {
     test('picking a date saves it and moves the card to Đã hẹn ngày', () async {

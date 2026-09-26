@@ -1,21 +1,32 @@
 # Story Master: STORY-008 Kịch bản buổi hẹn 3 phần
 
-Status: TODO
+Status: DONE
 Complexity: standard
 Story-Class: standard
-Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
+Implementation Lane: mobile (chốt ở `architecture/solution.md` §4 — không có
+lane backend/devops; story không ghi DB, không gọi mạng, `schemaVersion` không đổi)
 Requirement: REQ-016
 Screen: Kịch bản buổi hẹn 3 phần — màn (9), **nhóm KHOÁ VỊ TRÍ**. Chỉ vào được
 từ một thẻ *Đã hẹn ngày* ở màn (1).
+Design-Screen: 9-kich-ban-buoi-hen
+Design-Screen-Note: ios, resolved 2026-09-17 — see
+`visual-fidelity/visual-fidelity-report.md`; alias `s1:datescript` là id trên
+canvas `cupid-app` KHÔNG được neo, `req_master.md:13` neo
+`Design-Surface: cupid-ch-ng-1`. Khung canvas có 5 mục DESIGN_SPEC_CONFLICT vs
+AC ràng buộc — AC thắng theo tiền lệ canvas-vs-AC của REQ-016 — và 1 mục
+DESIGN_ANCHOR_OPEN cần Product Owner phán quyết, không chặn ship.
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục C.9, D (SC-2,
 SC-6), A (J5, J7), F (3d)
 
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
+- [x] Implementation (Development) — kế hoạch: `coding-plan/master-plan.md`
+  (P1 → P2 → P3 → P4, một lane Mobile Developer)
+- [x] Review (Reviewer) — `review/review-report.md`, `Outcome: DEFERRED_ONLY`
+  (rework re-review 2026-09-24, lượt 4: F-1..F-5 và D-1 đều đóng; D-2..D-7,
+  N-1, N-2 hoãn không chặn)
 
 ## Depends On
 - STORY-001 — vào từ một thẻ *Đã hẹn ngày*.

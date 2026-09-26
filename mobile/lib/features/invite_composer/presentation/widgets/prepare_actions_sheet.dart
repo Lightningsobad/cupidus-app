@@ -9,6 +9,7 @@ import '../../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../../design_system/tokens/cupid_spacing.dart';
 import '../../../../design_system/tokens/cupid_typography_tokens.dart';
 import '../../../activity_cards/domain/activity_card.dart';
+import '../../../date_script/date_script_entry_point.dart';
 import '../../domain/invite_preset.dart';
 import '../../domain/preset_catalogue.dart';
 import 'invite_composer_sheet.dart';
@@ -29,6 +30,11 @@ typedef InviteComposerOpener =
       ActivityCard card,
       String categoryId,
     );
+
+/// How screen (9) is opened from this sheet. Same seam, same reason: a test
+/// drives the row without this sheet reaching for the date script's internals.
+typedef DateScriptOpener =
+    Future<void> Function(BuildContext context, ActivityCard card);
 
 /// How the whole sheet is presented, so the card detail screen can be driven
 /// in a test without this feature's DI. Mirrors that screen's existing
@@ -71,11 +77,13 @@ Future<void> showPrepareActionsSheet(
   ActivityCard card, {
   PresetCatalogue? catalogue,
   InviteComposerOpener openComposer = showInviteComposerSheet,
+  DateScriptOpener openDateScript = openDateScriptScreen,
 }) async {
   final List<_PrepareAction> actions = await _resolveActions(
     card,
     catalogue ?? getIt<PresetCatalogue>(),
     openComposer,
+    openDateScript,
   );
   if (actions.isEmpty || !context.mounted) {
     return;
@@ -105,6 +113,7 @@ Future<List<_PrepareAction>> _resolveActions(
   ActivityCard card,
   PresetCatalogue catalogue,
   InviteComposerOpener openComposer,
+  DateScriptOpener openDateScript,
 ) async {
   final List<_PrepareAction> actions = <_PrepareAction>[];
   if (await _hasPresets(catalogue, inviteCategoryId)) {
@@ -116,6 +125,21 @@ Future<List<_PrepareAction>> _resolveActions(
             _prepareText(context, 'Xuất lời mời', 'Export the invite'),
         run: (BuildContext context) =>
             openComposer(context, card, inviteCategoryId),
+      ),
+    );
+  }
+  // Second row, after "Xuất lời mời", and only for a card that already has a
+  // date: a script for an outing nobody has scheduled has nothing to fill its
+  // date and time with. Absent rather than disabled — a greyed row is still an
+  // affordance pointing at screen (9) (AC-2/SC-6).
+  if (card.status == ActivityCardStatus.scheduled) {
+    actions.add(
+      _PrepareAction(
+        rowKey: const Key('prepare_action_date_script'),
+        icon: CupidIcons.menuBook,
+        label: (BuildContext context) =>
+            _prepareText(context, 'Kịch bản buổi hẹn', 'Date script'),
+        run: (BuildContext context) => openDateScript(context, card),
       ),
     );
   }

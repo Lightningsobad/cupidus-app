@@ -5,9 +5,101 @@ import '../../../../design_system/tokens/cupid_color_tokens.dart';
 import '../../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../../design_system/tokens/cupid_spacing.dart';
 import '../../../../design_system/tokens/cupid_typography_tokens.dart';
+import '../../../phase_status/presentation/phase_status_line.dart';
 import '../../domain/activity_card.dart';
 import '../../domain/activity_type.dart';
 import 'activity_status_filter.dart';
+
+/// Days remaining until a scheduled card's date (AC-14), or `null` when the
+/// card carries no countdown at all.
+///
+/// `null` on three distinct cases that all read the same way to a user: a card
+/// with no date, a card that is not scheduled, and a date that has already
+/// passed. The last one is the point of AC-15 — a missed date is still drawn,
+/// neutrally, as the plain date already in the card's meta line, and nothing
+/// here counts the days since. There is no overdue label, no negative number
+/// and no time of day: the unit is whole days and stops there.
+int? activityCardCountdownDays({
+  required ActivityCard card,
+  required DateTime today,
+}) {
+  if (card.status != ActivityCardStatus.scheduled || card.scheduledOn == null) {
+    return null;
+  }
+  final int? days = civilDaysUntil(
+    scheduledOnIso: card.scheduledOn!,
+    today: today,
+  );
+  if (days == null || days < 0) {
+    return null;
+  }
+  return days;
+}
+
+/// The countdown as one readable sentence. The card draws the number at
+/// display size beside its unit (D-4), so this stays the spoken form: a screen
+/// reader hears "còn 4 ngày", not a bare numeral followed by a noun.
+String? activityCardCountdownLabel(
+  BuildContext context, {
+  required ActivityCard card,
+  required DateTime today,
+}) {
+  final int? days = activityCardCountdownDays(card: card, today: today);
+  if (days == null) {
+    return null;
+  }
+  if (days == 0) {
+    return activityHubText(context, 'Hôm nay', 'Today');
+  }
+  return activityHubText(context, 'còn $days ngày', '$days days to go');
+}
+
+const Map<int, String> _weekdayVi = <int, String>{
+  DateTime.monday: 'T2',
+  DateTime.tuesday: 'T3',
+  DateTime.wednesday: 'T4',
+  DateTime.thursday: 'T5',
+  DateTime.friday: 'T6',
+  DateTime.saturday: 'T7',
+  DateTime.sunday: 'CN',
+};
+
+const Map<int, String> _weekdayEn = <int, String>{
+  DateTime.monday: 'MON',
+  DateTime.tuesday: 'TUE',
+  DateTime.wednesday: 'WED',
+  DateTime.thursday: 'THU',
+  DateTime.friday: 'FRI',
+  DateTime.saturday: 'SAT',
+  DateTime.sunday: 'SUN',
+};
+
+/// The scheduled date as a reader sees dates (D-3), not as the store holds
+/// them: the card used to print the raw `YYYY-MM-DD` column value.
+///
+/// Day granularity only, and deliberately so — the card carries a civil date
+/// and no clock field, so there is no hour to print and none is invented. An
+/// unparseable value falls back to the stored string rather than to a blank,
+/// because a date a user typed is still information.
+String activityCardDateLabel(
+  BuildContext context, {
+  required String scheduledOnIso,
+  required DateTime today,
+}) {
+  final DateTime? date = DateTime.tryParse('${scheduledOnIso}T00:00:00Z');
+  if (date == null) {
+    return scheduledOnIso;
+  }
+  if (civilDaysUntil(scheduledOnIso: scheduledOnIso, today: today) == 0) {
+    return activityHubText(context, 'HÔM NAY', 'TODAY');
+  }
+  final String weekday = activityHubText(
+    context,
+    _weekdayVi[date.weekday]!,
+    _weekdayEn[date.weekday]!,
+  );
+  return '$weekday ${date.day}/${date.month}';
+}
 
 /// SC-4: one label per status, and the only primary action a card may carry.
 String activityPrimaryActionLabel(
@@ -71,6 +163,62 @@ String activityTypeSemanticLabel(BuildContext context, ActivityType? type) {
   }
 }
 
+/// The status half of the card eyebrow (D-2). Reports where the card already
+/// is, in this user's own bookkeeping — never a judgement of the other person:
+/// "đang đợi" is the state of an invitation this user sent, which is exactly
+/// what the reply chip already records (R-1b, AC-20).
+String activityCardStatusLabel(
+  BuildContext context, {
+  required ActivityCard card,
+  required ActivityCardReplyState replyState,
+  required int? countdownDays,
+}) {
+  switch (card.status) {
+    case ActivityCardStatus.idea:
+      return activityHubText(context, 'MỚI NGHĨ RA', 'NEW IDEA');
+    case ActivityCardStatus.done:
+      return activityHubText(context, 'ĐÃ XONG', 'DONE');
+    case ActivityCardStatus.memory:
+      return activityHubText(context, 'KỶ NIỆM', 'A MEMORY');
+    case ActivityCardStatus.scheduled:
+      if (countdownDays == 0) {
+        return activityHubText(context, 'ĐÚNG HÔM NAY', 'TODAY IS THE DAY');
+      }
+      if (!card.invited) {
+        return activityHubText(context, 'ĐÃ HẸN NGÀY', 'DATE SET');
+      }
+      return replyState == ActivityCardReplyState.answered
+          ? activityHubText(context, 'CHỐT RỒI', 'CONFIRMED')
+          : activityHubText(context, 'ĐANG ĐỢI TRẢ LỜI', 'WAITING FOR A REPLY');
+  }
+}
+
+/// The eyebrow dot, which carries the same distinction as the label beside it
+/// and never carries it alone — the colour is a second channel on a text label,
+/// not the only way to read the state (`ux/uiux-spec.md` §5).
+Color activityCardStatusColor(
+  CupidColorTokens colors, {
+  required ActivityCard card,
+  required ActivityCardReplyState replyState,
+  required int? countdownDays,
+}) {
+  switch (card.status) {
+    case ActivityCardStatus.idea:
+      return colors.colorAccentLilac;
+    case ActivityCardStatus.done:
+    case ActivityCardStatus.memory:
+      return colors.colorMint;
+    case ActivityCardStatus.scheduled:
+      if (countdownDays == 0) {
+        return colors.colorAccentPink;
+      }
+      if (card.invited && replyState != ActivityCardReplyState.answered) {
+        return colors.colorAccentPurple;
+      }
+      return colors.colorMint;
+  }
+}
+
 /// One card in a status pane (`ux/uiux-spec.md` §2). The footer holds exactly
 /// one primary action, whose label comes from [primaryActionFor] — never a
 /// second CTA — plus at most one collapsed "…" overflow holding the secondary
@@ -86,12 +234,24 @@ class ActivityCardTile extends StatelessWidget {
     required this.onPrimaryAction,
     required this.onToggleReply,
     required this.onOverflowAction,
+    this.today,
+    this.phaseBlock,
   });
 
   final ActivityCard card;
 
+  /// The phase guidance block, when this card is the one the phase is about
+  /// (D-1). It sits inside the card, on its own surface, because the design
+  /// draws it as part of the card it explains rather than as a heading over
+  /// the whole list. `null` on every other card.
+  final Widget? phaseBlock;
+
   /// Effective reply state, which the cubit may be holding optimistically.
   final ActivityCardReplyState replyState;
+
+  /// Clock seam for the countdown, supplied by the hub so every card on screen
+  /// counts from the same day. `null` reads the device clock.
+  final DateTime? today;
   final VoidCallback onPrimaryAction;
   final VoidCallback onToggleReply;
   final ValueChanged<ActivityCardOverflowAction> onOverflowAction;
@@ -101,21 +261,60 @@ class ActivityCardTile extends StatelessWidget {
     final CupidColorTokens colors = context.cupidColors;
     final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
+    final DateTime day = today ?? DateTime.now();
     final String? subtitle = _subtitle(context);
+    final int? countdownDays = activityCardCountdownDays(card: card, today: day);
+    // D-5: the card whose date is today is the one thing on the screen the user
+    // can still act on, so it is drawn one tier up — lifted surface, accent
+    // edge, full-width call to action — instead of as one more card in a stack
+    // of equals.
+    final bool today0 = countdownDays == 0;
     final bool showReplyChip =
         card.status == ActivityCardStatus.scheduled && card.invited;
+    final Widget? phaseBlock = this.phaseBlock;
 
     return Container(
       key: Key('activity_card_tile_${card.id}'),
       padding: const EdgeInsets.all(CupidSpacing.md),
       decoration: BoxDecoration(
-        color: colors.colorSurface,
+        color: today0 ? colors.colorSurfaceAlt : colors.colorSurface,
         borderRadius: BorderRadius.circular(platform.radiusCard),
+        border: today0
+            ? Border.all(
+                color: colors.colorAccentPink.withValues(alpha: 0.55),
+                width: 1.5,
+              )
+            : null,
+        boxShadow: today0 ? colors.glowShadow : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
+          _StatusEyebrow(
+            cardId: card.id,
+            label: <String>[
+              activityCardStatusLabel(
+                context,
+                card: card,
+                replyState: replyState,
+                countdownDays: countdownDays,
+              ),
+              if (card.scheduledOn != null && !today0)
+                activityCardDateLabel(
+                  context,
+                  scheduledOnIso: card.scheduledOn!,
+                  today: day,
+                ),
+            ].join(' · '),
+            color: activityCardStatusColor(
+              colors,
+              card: card,
+              replyState: replyState,
+              countdownDays: countdownDays,
+            ),
+          ),
+          const SizedBox(height: CupidSpacing.xs),
           Text(
             card.title,
             maxLines: 2,
@@ -125,6 +324,18 @@ class ActivityCardTile extends StatelessWidget {
               color: colors.colorText,
             ),
           ),
+          if (countdownDays != null && countdownDays > 0) ...<Widget>[
+            const SizedBox(height: CupidSpacing.xs),
+            _CountdownBlock(
+              cardId: card.id,
+              days: countdownDays,
+              spoken: activityCardCountdownLabel(
+                context,
+                card: card,
+                today: day,
+              )!,
+            ),
+          ],
           if (subtitle != null) ...<Widget>[
             const SizedBox(height: CupidSpacing.xs),
             Row(
@@ -153,6 +364,10 @@ class ActivityCardTile extends StatelessWidget {
               ],
             ),
           ],
+          if (phaseBlock != null) ...<Widget>[
+            const SizedBox(height: CupidSpacing.md),
+            phaseBlock,
+          ],
           if (showReplyChip) ...<Widget>[
             const SizedBox(height: CupidSpacing.sm),
             _ReplyChip(
@@ -163,16 +378,29 @@ class ActivityCardTile extends StatelessWidget {
           ],
           const SizedBox(height: CupidSpacing.md),
           Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: today0 ? MainAxisSize.max : MainAxisSize.min,
             children: <Widget>[
-              _PrimaryActionPill(
-                cardId: card.id,
-                label: activityPrimaryActionLabel(
-                  context,
-                  primaryActionFor(card.status),
+              if (today0)
+                Expanded(
+                  child: _PrimaryActionPill(
+                    cardId: card.id,
+                    wide: true,
+                    label: activityPrimaryActionLabel(
+                      context,
+                      primaryActionFor(card.status),
+                    ),
+                    onTap: onPrimaryAction,
+                  ),
+                )
+              else
+                _PrimaryActionPill(
+                  cardId: card.id,
+                  label: activityPrimaryActionLabel(
+                    context,
+                    primaryActionFor(card.status),
+                  ),
+                  onTap: onPrimaryAction,
                 ),
-                onTap: onPrimaryAction,
-              ),
               const SizedBox(width: CupidSpacing.sm),
               _OverflowButton(cardId: card.id, onSelected: onOverflowAction),
             ],
@@ -188,9 +416,12 @@ class ActivityCardTile extends StatelessWidget {
   ///
   /// The activity type is deliberately absent: D-5 moved it out of this string
   /// and into the leading glyph, so it is never both an icon and a word.
+  ///
+  /// The date is absent for the same reason since D-3: it is drawn once, in the
+  /// eyebrow, in the form a reader expects — it used to appear here as the raw
+  /// `YYYY-MM-DD` column value.
   String? _subtitle(BuildContext context) {
     final List<String> parts = <String>[
-      if (card.scheduledOn != null) card.scheduledOn!,
       if (card.distanceKm != null) '${_trimDouble(card.distanceKm!)} km',
       if (card.priceVnd != null && card.priceVnd! > 0)
         _formatVnd(card.priceVnd!),
@@ -213,6 +444,106 @@ String _formatVnd(int value) {
   }
   grouped.write('đ');
   return grouped.toString();
+}
+
+/// The status eyebrow above the card title (D-2): a phase-coloured dot and the
+/// state in small caps, with the date joined onto it when the card has one.
+class _StatusEyebrow extends StatelessWidget {
+  const _StatusEyebrow({
+    required this.cardId,
+    required this.label,
+    required this.color,
+  });
+
+  final String cardId;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidTypographyTokens type = context.cupidType;
+
+    return Row(
+      children: <Widget>[
+        Container(
+          key: Key('activity_card_eyebrow_dot_$cardId'),
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: CupidSpacing.xs),
+        Expanded(
+          child: Text(
+            label,
+            key: Key('activity_card_eyebrow_$cardId'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            // 12px small-caps eyebrow, per the size the design source draws
+            // card eyebrows at — see the `caption` dartdoc in
+            // `CupidTypographyTokens`, which owns the 13px metadata role only.
+            style: type.caption.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+              color: color,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The days-remaining number at display size beside its unit (D-4). The pair
+/// is announced as one sentence so the number is never read out on its own.
+class _CountdownBlock extends StatelessWidget {
+  const _CountdownBlock({
+    required this.cardId,
+    required this.days,
+    required this.spoken,
+  });
+
+  final String cardId;
+  final int days;
+  final String spoken;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+
+    return Semantics(
+      label: spoken,
+      excludeSemantics: true,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            '$days',
+            key: Key('activity_card_countdown_numeral_$cardId'),
+            style: type.display.copyWith(
+              color: colors.colorAccentPink,
+              height: 1,
+            ),
+          ),
+          const SizedBox(width: CupidSpacing.sm),
+          Expanded(
+            child: Text(
+              activityHubText(
+                context,
+                'ngày nữa',
+                days == 1 ? 'day to go' : 'days to go',
+              ),
+              key: Key('activity_card_countdown_$cardId'),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: type.body.copyWith(color: colors.colorTextMuted),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// "đã rủ" chip: exactly two values, toggled on tap, with no time label
@@ -333,11 +664,15 @@ class _PrimaryActionPill extends StatelessWidget {
     required this.cardId,
     required this.label,
     required this.onTap,
+    this.wide = false,
   });
 
   final String cardId;
   final String label;
   final VoidCallback onTap;
+
+  /// Fills the width it is given instead of hugging its label (D-5).
+  final bool wide;
 
   @override
   Widget build(BuildContext context) {
@@ -364,7 +699,7 @@ class _PrimaryActionPill extends StatelessWidget {
                 vertical: CupidSpacing.sm,
               ),
               child: Center(
-                widthFactor: 1,
+                widthFactor: wide ? null : 1,
                 child: Text(
                   label,
                   style: type.body.copyWith(

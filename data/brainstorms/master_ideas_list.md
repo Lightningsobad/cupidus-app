@@ -7,3 +7,4 @@
 | IDEA-20260828-002_couple-feature-expansion | Couple Feature Expansion: cuốn hút hơn, unique hơn, hữu ích hơn | ACTIVE | EXPANDED | `data/brainstorms/IDEA-20260828-002_couple-feature-expansion/idea.md` | user | 2026-09-03 |
 | IDEA-20260829-001_solo-stage1-breadth-expansion | Solo Stage-1 Breadth Expansion: mở rộng chiều rộng tính năng chế độ 1 người (→ REQ-016) | ACTIVE | HANDED_OFF | `data/brainstorms/IDEA-20260829-001_solo-stage1-breadth-expansion/idea.md` | user | 2026-09-06 |
 | IDEA-20260831-001_couple-milestone-achievements | Couple Milestone Achievements: hệ dấu mốc/thành tựu cho cặp đôi để khoe | ACTIVE | EXPANDED | `data/brainstorms/IDEA-20260831-001_couple-milestone-achievements/idea.md` | user | 2026-09-04 |
+| IDEA-20260925-001_checkin-to-notebook-capture | Ghi vào sổ tay từ màn check-in 23h (→ REQ-017) | ACTIVE | HANDED_OFF | `data/brainstorms/IDEA-20260925-001_checkin-to-notebook-capture/idea.md` | user (lựa chọn C) | 2026-09-25 |

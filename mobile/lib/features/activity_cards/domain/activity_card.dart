@@ -26,7 +26,12 @@ enum ActivityCardOrigin {
   manual('manual'),
   pastedLink('pasted_link'),
   occasionSuggestion('occasion_suggestion'),
-  giftSuggestion('gift_suggestion');
+  giftSuggestion('gift_suggestion'),
+  conversationStarter('conversation_starter'),
+  compatibilityLookup('compatibility_lookup'),
+  nextPlanAfterDate('next_plan_after_date'),
+  dateScript('date_script'),
+  zodiacShell('zodiac_shell');
 
   const ActivityCardOrigin(this.wireValue);
 

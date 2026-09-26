@@ -10,6 +10,12 @@ import 'package:path_provider/path_provider.dart';
 import '../../features/activity_cards/data/activity_card_repository_impl.dart';
 import '../../features/activity_cards/data/closed_archive_reader_impl.dart';
 import '../../features/activity_cards/domain/activity_card_repository.dart';
+import '../../features/activity_cards/thank_you/data/thank_you_activation_dao.dart';
+import '../../features/activity_cards/thank_you/data/thank_you_activation_repository_impl.dart';
+import '../../features/activity_cards/thank_you/domain/thank_you_activation_card_status_listener.dart';
+import '../../features/activity_cards/thank_you/domain/thank_you_activation_card_status_repository.dart';
+import '../../features/activity_cards/thank_you/domain/thank_you_activation_repository.dart';
+import '../../features/activity_cards/thank_you/domain/thank_you_activation_service.dart';
 import '../../features/chapter_closure/data/chapter_closure_service.dart';
 import '../../features/chapter_closure/data/stage1_last_opened_store.dart';
 import '../../features/chapter_closure/data/stage1_wipe_registry.dart';
@@ -19,6 +25,10 @@ import '../../features/chapter_closure/domain/return_gate_resolver.dart';
 import '../../features/context_notebook/context_notebook_entry_point.dart';
 import '../../features/context_notebook/data/context_notebook_dao.dart';
 import '../../features/context_notebook/data/context_notebook_repository.dart';
+import '../../features/compatibility_lookup/data/relationship_label_repository.dart';
+import '../../features/compatibility_lookup/presentation/cubit/compatibility_lookup_cubit.dart';
+import '../content/content_package.dart';
+import '../database/daos/relationship_labels_dao.dart';
 import '../../features/gift_ideas/data/gift_repository.dart';
 import '../../features/gift_ideas/domain/gift_selector.dart';
 import '../../features/invite_composer/data/invite_payload_repository_impl.dart';
@@ -344,10 +354,35 @@ void setupServiceLocator() {
     () => getIt<CupidDatabase>().activityCardDao,
   );
 
+  // REQ-016 STORY-007 P1 (`architecture/solution.md` §4): the card store every
+  // consumer resolves is the ledger-aware wrapper, so a card entering *Đã đi
+  // rồi* arms its one lifetime turn in a real build (AC-1/AC-14) and leaving
+  // the status cancels a pending one (AC-5). `ActivityCardRepositoryImpl` and
+  // the card schema stay untouched: the dependency runs STORY-007 -> STORY-001
+  // and never back.
+  getIt.registerLazySingleton<ThankYouActivationRepository>(
+    () => ThankYouActivationRepositoryImpl(
+      ThankYouActivationDao(getIt<CupidDatabase>()),
+    ),
+  );
+
+  getIt.registerLazySingleton<ThankYouActivationService>(
+    () => ThankYouActivationService(getIt<ThankYouActivationRepository>()),
+  );
+
+  getIt.registerLazySingleton<ThankYouActivationCardStatusListener>(
+    () => ThankYouActivationCardStatusListener(
+      getIt<ThankYouActivationService>(),
+    ),
+  );
+
   getIt.registerLazySingleton<ActivityCardRepository>(
-    () => ActivityCardRepositoryImpl(
-      dao: getIt<ActivityCardDao>(),
-      ownerKeyStore: getIt<BackendUserIdStore>(),
+    () => ThankYouActivationAwareCardRepository(
+      inner: ActivityCardRepositoryImpl(
+        dao: getIt<ActivityCardDao>(),
+        ownerKeyStore: getIt<BackendUserIdStore>(),
+      ),
+      listener: getIt<ThankYouActivationCardStatusListener>(),
     ),
   );
 
@@ -381,6 +416,21 @@ void setupServiceLocator() {
     ),
   );
 
+  // REQ-016 STORY-010 P2 (`architecture/contract-summary.md` §4): the labels
+  // the user declares for themselves and for the other person. Same rule as the
+  // notebook above -- client-owned data that must survive sign-out, so it is not
+  // a `SessionScopedStore` and isolation comes from `owner_key`.
+  getIt.registerLazySingleton<RelationshipLabelsDao>(
+    () => getIt<CupidDatabase>().relationshipLabelsDao,
+  );
+
+  getIt.registerLazySingleton<RelationshipLabelRepository>(
+    () => RelationshipLabelRepository(
+      dao: getIt<RelationshipLabelsDao>(),
+      ownerKeyStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
   // REQ-016 STORY-013 P2 (`architecture/contract-summary.md` §3): the closure
   // ledger's writer and its read gate. Also not session-scoped -- a sign-out
   // that deleted the ledger would silently un-close a chapter the user closed
@@ -406,6 +456,22 @@ void setupServiceLocator() {
       dao: getIt<ActivityCardDao>(),
       closureDao: getIt<ChapterClosureDao>(),
       ownerKeyStore: getIt<BackendUserIdStore>(),
+    ),
+  );
+
+  // REQ-016 STORY-010 P4: screen (10). The loader is a singleton because it is
+  // stateless and every feature that ships a content pack wants the same one;
+  // the cubit is a factory because it is per-screen and holds the packs it read
+  // until the screen it belongs to is gone.
+  getIt.registerLazySingleton<ContentPackageLoader>(
+    () => const ContentPackageLoader(),
+  );
+
+  getIt.registerFactory<CompatibilityLookupCubit>(
+    () => CompatibilityLookupCubit(
+      labels: getIt<RelationshipLabelRepository>(),
+      cards: getIt<ActivityCardRepository>(),
+      loader: getIt<ContentPackageLoader>(),
     ),
   );
 

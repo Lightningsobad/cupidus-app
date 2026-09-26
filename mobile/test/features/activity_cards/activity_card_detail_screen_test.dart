@@ -3,6 +3,8 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:cupid_mobile/core/content/content_package.dart';
+import 'package:cupid_mobile/core/database/cupid_database.dart';
+import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
@@ -15,6 +17,7 @@ import 'package:cupid_mobile/features/activity_cards/presentation/widgets/time_o
 import 'package:cupid_mobile/features/invite_composer/domain/preset_catalogue.dart';
 import 'package:cupid_mobile/features/invite_composer/presentation/widgets/prepare_actions_sheet.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -509,6 +512,23 @@ class _RouteRecorder extends NavigatorObserver {
 }
 
 void main() {
+  // STORY-007 mounts a ledger-backed block at the foot of the screen, so the
+  // screen now reaches the database through the composition root the way it
+  // already reaches `ActivityCardRepository`. An empty in-memory ledger is the
+  // honest stand-in: no card here is ever armed, so the block stays absent and
+  // the layout these tests assert on is unchanged.
+  late CupidDatabase database;
+
+  setUp(() {
+    database = CupidDatabase(NativeDatabase.memory());
+    getIt.registerSingleton<CupidDatabase>(database);
+  });
+
+  tearDown(() async {
+    await getIt.reset();
+    await database.close();
+  });
+
   group('one screen, two modes (AC-13)', () {
     testWidgets('"ghi lại" is a mode of the detail screen, not a destination',
         (WidgetTester tester) async {

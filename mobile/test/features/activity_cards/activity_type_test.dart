@@ -173,9 +173,11 @@ void main() {
         'no migration of its own', () async {
       // The version moved 3 -> 4 for ruling B-1's five new columns, 4 -> 5 for
       // `location` + `invite_messages`, 5 -> 6 for the context-notebook tables,
-      // and 6 -> 7 for the chapter-closure ledger, never for this converter:
+      // 6 -> 7 for `calendar_event_state` + `portrait_answers`, 7 -> 8 for
+      // `relationship_labels`, 8 -> 9 for the chapter-closure ledger, and
+      // 9 -> 10 for `thank_you_activations`, never for this converter:
       // attaching it to an existing TEXT column emits no DDL.
-      expect(database.schemaVersion, 7);
+      expect(database.schemaVersion, 10);
       final GeneratedColumn<Object> column = database.activityCards.$columns
           .firstWhere((GeneratedColumn<Object> c) => c.name == 'activity_type');
       expect(column.type, DriftSqlType.string);
@@ -189,8 +191,11 @@ void main() {
       testWidgets('${entry.key.wireValue} renders its mapped glyph', (
         WidgetTester tester,
       ) async {
+        // D-3 moved the scheduled date off line 2, so a date-only card now has
+        // no line 2 and therefore no leading glyph. Give the card a distance so
+        // line 2 exists and this test still measures the glyph mapping.
         await tester.pumpWidget(
-          _host(_tile(_card(activityType: entry.key))),
+          _host(_tile(_card(activityType: entry.key, distanceKm: 1.8))),
         );
 
         final Icon icon = tester.widget<Icon>(
@@ -243,7 +248,7 @@ void main() {
       final Text meta = tester.widget<Text>(
         find.byKey(const Key('activity_card_meta_x')),
       );
-      expect(meta.data, '2026-09-07 · 1.8 km · 70.000đ');
+      expect(meta.data, '1.8 km · 70.000đ');
       for (final ActivityType type in ActivityType.values) {
         expect(find.textContaining(type.wireValue), findsNothing);
       }
