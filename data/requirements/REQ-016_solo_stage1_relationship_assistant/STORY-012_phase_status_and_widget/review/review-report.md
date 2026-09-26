@@ -142,6 +142,29 @@ Design-Screen: ngan-da-hen-ngay-dang-doi, man-goc-muon-lam, 23h-vua-ve-j8,
 
 rồi để câu diễn giải alias thành một dòng văn xuôi **riêng, ngoài trường**.
 
+**Vá đã xuất hiện giữa lượt review, chưa commit.** Trong lúc tôi đang viết mục
+này, `story_master.md` trong worktree bị sửa bởi một actor khác (không phải tôi —
+tệp nằm ngoài WriteScope của tôi). `git diff` cho thấy đúng bản vá tôi đề nghị
+ở trên: trường rút về năm id canvas trần, phần alias chuyển thành đoạn văn xuôi
+riêng dưới trường, có dẫn lại `architecture/solution.md` §8 và Design Ruling Log
+hàng B-7. Mốc thời gian khớp với thứ tự này: tôi ghi B-8 vào báo cáo lúc
+`19:40:02`, `story_master.md` được sửa lúc `19:44:08` (giờ máy). Dạng mới **đúng**
+và không mất thông tin nào — tôi đã đọc và xác nhận.
+
+Tôi vẫn giữ `PATCH_REQUIRED`, vì ba lẽ, không phải vì hình thức:
+
+1. Bản vá **chưa commit**. Trạng thái story là commit `6ee190eb`, và ở commit đó
+   trường vẫn sai. Reviewer chấm trạng thái đã ghi nhận, không chấm nội dung đang
+   nằm trên đĩa; người commit là Scrum Master, không phải tôi.
+2. Nửa "giải id" của cổng **vẫn chưa ai chạy được sau khi vá** — vì đúng giới hạn
+   tôi nêu ngay dưới đây, và vì cổng chỉ kích hoạt khi outcome đạt. Bốn trong năm
+   id vẫn chưa được chứng thực là hợp lệ.
+3. Sửa trong lúc lượt review đang giữ `LockScope: story-state:STORY-012…` khiến
+   cây làm việc dịch chuyển dưới chân người review. Ở đây kết quả là tốt và tôi
+   **không** đề nghị hoàn tác, nhưng cách đóng đúng là: Scrum Master commit bản
+   vá, cổng chạy trên commit đó, rồi một lượt xác nhận cực hẹp — chứ không phải
+   tôi chứng nhận một thay đổi chưa commit mà tôi không kiểm được bằng cổng.
+
 **Giới hạn của kiểm chứng này, nói thẳng:** tôi **không** xác nhận được cả năm
 id bare đều hợp lệ. Tập id hợp lệ do `.claude/hooks/**` tính ra (tôi bị cấm đọc);
 cả hai entrypoint `.sh` (`verify-story-visual-fidelity-gate.sh`,
@@ -238,12 +261,13 @@ Ba điểm đáng giữ lại vì chúng nên lặp lại:
 - **Chưa** tick `Review (Reviewer)`.
 - Story status: **`PATCH_REQUIRED`**. Chưa đủ điều kiện gộp vào
   `codex/REQ-016_solo_stage1_relationship_assistant-integration`.
-- **B-8 là việc của Scrum Master, một dòng.** Sửa `Design-Screen:` ở
-  `story_master.md:17-24` thành danh sách id canvas trần (xem dạng đề nghị ở mục
-  B-8), đưa câu diễn giải alias ra ngoài trường, rồi **chạy lại cổng**. Tôi
-  không tự sửa: tệp nằm ngoài WriteScope `review` của tôi và reviewer SKILL
-  rule 7 cấm reviewer sửa `story_master.md`. Đây là lượt vá artefact thuần, không
-  cần mở lại lane mobile và không cần chụp lại ảnh nào.
+- **B-8 là việc của Scrum Master, một dòng — và bản vá đã nằm sẵn trong worktree,
+  chưa commit.** Việc còn lại: **commit** bản vá `Design-Screen:` đang có trên đĩa
+  (dạng đã đúng, tôi đã đọc và xác nhận) rồi **chạy lại cổng** trên commit đó.
+  Tôi không tự sửa và không tự commit: tệp nằm ngoài WriteScope `review` của tôi,
+  reviewer SKILL rule 7 cấm reviewer sửa `story_master.md`, và reviewer không
+  commit. Đây là lượt vá artefact thuần — không cần mở lại lane mobile, không cần
+  chụp lại ảnh nào, không cần chạy lại test nào.
 - Sau khi cổng xanh, khoản chặn duy nhất hết hiệu lực và lượt review kế tiếp có
   thể là một lượt **cực hẹp**: chỉ xác nhận dòng `Design-Screen:` và kết quả
   cổng. Mọi kết luận thực chất khác của S10 (B-1a, N-7, không hồi quy, các cổng

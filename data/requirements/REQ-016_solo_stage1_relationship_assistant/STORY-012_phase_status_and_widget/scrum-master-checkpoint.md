@@ -91,26 +91,85 @@ Next Valid Step:
      closes this story — do not fold into S10, do not block DONE on it,
      track separately (e.g. as a small hot-fix or a queued item once
      REQ-016 wave allows a non-story-scoped touch).
-3. **DONE 2026-09-26** — Iris-QC S10 `full-story-review`: **Outcome
-   DEFERRED_ONLY**, 0 blocking. Independently re-verified B-1a/B-7/N-7 closed
-   (own screenshot inspection + own old-name/new-name control run of
-   `visual_fidelity.py`), AC9 PASS all 7 screens, B-2..B-6 unregressed. Two
-   new non-blocking: **N-10** (capture harness hard-codes old
-   `implemented-*.png` names, same routing as the item 2 follow-up above) and
-   **N-11** (`test/features/activity_cards` suite unconditionally overwrites
-   STORY-002 PNGs, already reverted by reviewer via `git checkout --`, fold
-   into the same follow-up pass). Sealed `282454df`. `story_master.md` Review
-   ticked, Status: DONE.
-4. **NEXT** — Run `.claude/hooks/git-story-boundary.sh complete --req
-   REQ-016_solo_stage1_relationship_assistant --story
-   STORY-012_phase_status_and_widget`, merge to
-   `codex/REQ-016_solo_stage1_relationship_assistant-integration`, confirm
-   `master_requirements_list.md`/`req_master.md` story tracking reflects DONE.
-   Then route separately (NOT blocking DONE): the ux-spec header gap
-   (Design-Surface/Design-Screen lines) to Brainstormer/Pink-Designer, N-2 to
-   DevOps, and a standalone `mobile/test/**` WriteScope pass for N-10+N-11 to
-   mobile-dev. After that, check REQ-016 for remaining non-DONE stories; if
-   none, proceed toward requirement integration review.
+3. **SUPERSEDED 2026-09-26** — Iris-QC S10 `full-story-review` was first
+   sealed `282454df` with **Outcome DEFERRED_ONLY**, 0 blocking, and Scrum
+   Master acted on it: ticked `story_master.md` Review, set `Status: DONE`,
+   and ran `git-story-boundary.sh complete` + began the integration merge.
+   That was based on a STALE snapshot. Before that merge attempt landed, the
+   reviewer had already revised `review/review-report.md` (uncommitted at
+   the time) to **Outcome: PATCH_REQUIRED** with a new blocking finding
+   **B-8**. The `git-story-boundary.sh merge --continue` helper auto-swept
+   those uncommitted worktree changes into commit `c59245e2` (story branch)
+   and correctly blocked because the paused integration merge target no
+   longer matched the story's advanced HEAD — this is what surfaced the
+   discrepancy. Scrum Master ran `merge --abort` (boundary remains
+   COMMITTED) to discard the now-invalid paused merge attempt (this also
+   discarded the already-completed 3-file conflict resolution in the
+   integration worktree — `activity_card_hub_view.dart`, `app_en.arb`,
+   `app_vi.arb` — which must be redone from scratch when re-merging).
+   - Revised S10 conclusions (see `review/review-report.md` post-`c59245e2`):
+     B-1a and N-7 still closed for real (unchanged). **B-7 half-closed**: the
+     `visual_fidelity.py` pairing/pixel check passes, but the separate
+     `verify-story-visual-fidelity-gate.sh` stop-gate ALSO parses
+     `story_master.md`'s `Design-Screen:` field by comma-split to resolve
+     real design-source ids — never exercised before this pass (S8/S9 never
+     reached that far) — and it hard-blocked.
+   - **New blocking finding B-8** (Scrum-Master-owned, outside reviewer's
+     `review/` WriteScope per reviewer SKILL rule 7): `story_master.md`'s
+     `Design-Screen:` field (written by commit `802b3fa6` in the B-7
+     naming-convention ruling) embedded `(alias: ...)` parentheticals,
+     Vietnamese prose, and a markdown reference inside the comma-parsed
+     value, so the gate parsed a garbage first "id" and hard-blocked.
+     Reviewer could not fix it herself and proposed the exact one-line fix.
+   - **DONE 2026-09-26 (this session, Scrum Master)** — applied the
+     reviewer's proposed fix directly in the story worktree: `Design-Screen:`
+     now holds only the 5 bare canonical canvas ids
+     (`ngan-da-hen-ngay-dang-doi, man-goc-muon-lam, 23h-vua-ve-j8,
+     j12-nhan-ra-cot-moc, sb-84-widget-bon-pha`), with the alias/build-label
+     mapping moved to a separate prose paragraph immediately below it (NOT
+     part of the machine-read field). Also corrected `story_master.md`:
+     `Status: DONE` → `Status: PATCH_REQUIRED`, Review checkbox un-ticked,
+     and the Review artifact bullet rewritten to describe the real
+     PATCH_REQUIRED/B-8 outcome instead of the stale DEFERRED_ONLY text. NOT
+     yet committed in the story worktree.
+4. **NEXT** —
+   a. Refresh the Story Git Boundary (`git-story-boundary.sh status --req
+      REQ-016_solo_stage1_relationship_assistant --story
+      STORY-012_phase_status_and_widget`) to confirm current `Worktree`/
+      `Branch`/`BaseHead` before any further action.
+   b. Commit the `story_master.md` fix in the story worktree via
+      `git-story-boundary.sh commit` (message should reference B-8 fix).
+   c. Determine and run the correct re-verification of
+      `verify-story-visual-fidelity-gate.sh` against the corrected
+      `Design-Screen:` field. Manual `.sh` invocation is known to silently
+      exit 0 (see MEMORY.md `visual_fidelity_gate_cli`); the reliable
+      diagnostic is `.claude/hooks/lib/visual_fidelity.py --dir/--stage`, but
+      the `Design-Screen:`-parsing half of the check is inside the `.sh`
+      wrapper itself — confirm the real invocation path (likely only
+      reproducible through the actual stop-gate hook trigger, e.g. a real
+      `git-story-boundary.sh complete` attempt) before concluding B-8 is
+      closed.
+   d. Dispatch **Iris-QC** for the reviewer's own recommended narrow
+      follow-up: confirm ONLY the `Design-Screen:` line and the gate result.
+      All other S10 conclusions (B-1a, N-7, no regression, test/analyze/
+      smoke gates) remain valid and do not need to be redone. Use
+      `.claude/hooks/handoff-build.sh spawn`/`continue` to get correct
+      `BaseHead` (must be an ancestor of current worktree HEAD, not HEAD
+      itself).
+   e. Only after that narrow review returns CLEAN/DEFERRED_ONLY: re-tick
+      Review, set `Status: DONE` again in `story_master.md`, then
+      re-resolve the SAME 3-file merge conflict
+      (`activity_card_hub_view.dart`, `app_en.arb`, `app_vi.arb`) in the
+      integration worktree and run `git-story-boundary.sh complete`/`merge
+      --continue` to actually land the story.
+   f. After a successful merge: confirm `master_requirements_list.md`/
+      `req_master.md` story tracking reflects DONE for STORY-012. Then route
+      separately (NOT blocking DONE): the ux-spec header gap
+      (Design-Surface/Design-Screen lines) to Brainstormer/Pink-Designer,
+      N-2 to DevOps, and a standalone `mobile/test/**` WriteScope pass for
+      N-10+N-11 to mobile-dev. After that, check REQ-016 for remaining
+      non-DONE stories; if none, proceed toward requirement integration
+      review.
 
 Do Not Re-read:
 - The full Alan-Techlead/Alex-Mobile-Dev dispatch narrative, crash/recovery,
