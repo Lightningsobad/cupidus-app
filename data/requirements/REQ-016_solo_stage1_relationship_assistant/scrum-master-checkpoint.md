@@ -1,6 +1,6 @@
 # Scrum Master Checkpoint: REQ-016 Solo Stage-1 relationship assistant
 
-## Current state (as of Round 36, 2026-09-25)
+## Current state (as of Round 38, 2026-09-26)
 
 Ground truth = integration-worktree `story_master.md` copies +
 `git-story-boundary.sh status`, not narrative history. DONE stories are
@@ -20,7 +20,7 @@ collapsed to one line; full trail lives in each story's own
 | STORY-009 | STORY-004 | DONE, merged |
 | STORY-010 | STORY-004 | DONE, merged |
 | STORY-011 | STORY-001, STORY-004, STORY-005, STORY-008 | DONE, merged (Round 34), merge `e346e147`. Final-synthesis `Outcome: DEFERRED_ONLY` (10 deferred, 0 blocking). |
-| STORY-012 | STORY-001 | **IN_PROGRESS.** See "Current cursor" below — the only non-DONE story. |
+| STORY-012 | STORY-001 | DONE, merged (Round 38, merge `e9519243`). Final-synthesis `Outcome: DEFERRED_ONLY`. |
 | STORY-013 | STORY-001, STORY-004 | DONE, merged (Round 16) |
 
 ## Open user decisions
@@ -79,7 +79,57 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 - Round 1-35 narrative in git history of this file — superseded by the table
   and "Current cursor" sections above.
 
-## Current cursor (Round 37, `continue parallel`, 2026-09-25 — STORY-012 P9 implementation)
+## Current cursor (Round 38, `continue parallel`, 2026-09-26 — all 13 stories merged, integration review not yet run)
+
+- **All 13 REQ-016 stories are now DONE and merged into
+  `codex/REQ-016_solo_stage1_relationship_assistant-integration`.**
+  Re-verified directly via `git-story-boundary.sh status --req
+  REQ-016_solo_stage1_relationship_assistant --story <STORY>` for every
+  story (not from any narrative or registry table) plus `git log --oneline
+  --grep="^merge("` on the integration worktree, which shows one
+  `merge(...): complete story` commit per story, HEAD `e9519243`
+  (STORY-012). Integration worktree is clean, no `MERGE_HEAD`, on branch
+  `codex/REQ-016_solo_stage1_relationship_assistant-integration`.
+- **Root cause of this round's near-miss:** `req_master.md`'s `## User
+  Stories` table still read `TODO` for STORY-005/007/008/010/011/013 even
+  though this same checkpoint file already knew (as of Round 36) that all
+  but STORY-012 were DONE/merged — the registry table and this checkpoint
+  had drifted apart over multiple rounds, independent of any concurrent
+  session. Trusting the stale registry row caused this round to spawn 4
+  redundant Tech Lead planning runs (STORY-005/008/010/013) against
+  already-merged, already-reviewed stories; a concurrent peer session
+  (`ListAgents` showed `cupid-apps-45`) may also have been merging some of
+  these at the same time. All 4 Tech Leads self-detected via the mandatory
+  3-probe check (architecture/solution.md, coding-plan phase Status,
+  review/review-report.md Outcome) and made ZERO writes; all were STOP-first
+  redirected and confirmed no-op via idle_notification before release.
+  **Fix applied:** synced `req_master.md`'s User Stories table to `DONE`
+  for all 6 stale rows, commit `323f4666`, keeping requirement `Status:
+  IN_PROGRESS` (integration review still pending). Lesson for future
+  rounds: `git-story-boundary.sh status` is the only authoritative merge
+  signal — Glob/Read the story's own `story_master.md` + boundary state
+  BEFORE any Tech Lead/PO/reviewer dispatch, never trust `req_master.md`'s
+  table alone.
+- 4 dispatched Tech Leads (Alan-Techlead, -2, -3, -4) released via
+  `TaskStop` after confirming idle + no-op. Scheduler `active_runs: []`,
+  `.claude/hooks/prune-parallel-runs.sh --apply --quiet` confirms all 13
+  run files current (0 prunable).
+- **Next resume action:** REQ-016 has no
+  `integration-review/review-report.md` yet
+  (`data/requirements/REQ-016_solo_stage1_relationship_assistant/integration-review/`
+  does not exist). Per `AGENTS.md` Stable Delivery Gates, the requirement
+  cannot be marked `DONE` until requirement integration review records
+  `Outcome: CLEAN` or `Outcome: DEFERRED_ONLY` there. Load
+  `.claude/skills/scrum-master/workflows/parallel-continue/merge-and-review.md`
+  (not yet reloaded this round) for the exact integration-review dispatch
+  template, then delegate `Iris-QC` with `ConcurrencyClass:
+  integration-review` scoped to the full integration branch diff against
+  REQ-016's pre-story base. Do NOT re-dispatch Tech Lead/PO/UX/mobile-dev for
+  any of the 13 stories — all are closed.
+- Still-open non-blocking items below (STORY-008 retry, open bugs, PO
+  questions 4/5) remain unresolved and do not block integration review.
+
+## Superseded cursor (Round 37, `continue parallel`, 2026-09-25 — STORY-012 P9 implementation, story now DONE/merged)
 
 - Round 36 closed out: Alan-Techlead's `Mode: coding-plan` continuation
   returned `TECH_LEAD_COMPLETE: YES` — added Phase P9 (widget `eyebrow_line`
@@ -173,4 +223,6 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
   MergeTarget `codex/REQ-016_solo_stage1_relationship_assistant-integration`;
   BaseHead `e04157b42400ee7119235a4a3395c9ffbbc0cde5`; BoundaryState under
   `.git/ai-team-story-boundaries/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget.json`.
-- `pending_count: 1` (STORY-012) for REQ-016 — only non-DONE story.
+- `pending_count: 0` stories for REQ-016 — all 13 DONE/merged. Requirement
+  itself stays `IN_PROGRESS` pending integration review (see "Current
+  cursor" above).
