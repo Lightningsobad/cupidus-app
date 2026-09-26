@@ -1,24 +1,109 @@
 # REQ-016 Requirement Integration Review
 
-This file holds two reviews. The **Round 43 scoped re-review** below is the
-current one and carries the single live `Outcome:` line. The **Round 39 review**
-is preserved verbatim underneath it as history; its verdict is restated inline
-so only one literal verdict line exists in this file.
+This file holds three reviews. The **Round 44 F-I4 closure re-check** below is
+the current one and carries the single live `Outcome:` line. The **Round 43
+scoped re-review** and the **Round 39 review** are preserved verbatim underneath
+it as history; their verdicts are restated inline so only one literal verdict
+line exists in this file.
 
 ---
 
-# Round 43 scoped re-review
+# Round 44 — F-I4 closure re-check
+
+Review type: requirement-integration-review (narrow closure re-check)
+Requirement: REQ-016_solo_stage1_relationship_assistant
+Scope gate: `data/requirements/REQ-016_solo_stage1_relationship_assistant/integration-review/scope-gate.md`
+Branch: `codex/REQ-016_solo_stage1_relationship_assistant-integration`
+HEAD reviewed: `35723ed206b6a9670e92c0f49f988321deeb5979`
+Diff baseline: `893c364954d5e8ed67697fbdb0934c502283c33f`
+Reviewed: 2026-09-27
+RunId: `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-reviewer-fi4close`
+
+Outcome: DEFERRED_ONLY
+
+## Round 44 — what was in scope
+
+Only the span `893c3649..35723ed2` (1 commit, 1 file, +29/−3): the seam A row and
+its "Result on content" narrative in `mobile-visual-audit.md`. This round
+adjudicates exactly one question — **is F-I4 closed?** The 14 rows Round 43
+recorded PASS or accepted-exclusion (seams B/C/D, F-I2 items 5/6, F-I3 item 7,
+the F-M1 architecture and implementation, the accepted 3rd-import deviation,
+BUG-20260927-001) are untouched by this diff and stand by reference; they were
+not re-scanned.
+
+## Round 44 — verdict rationale
+
+F-I4 is genuinely closed. The seam A `PASS` is backed by four post-fix captures
+that I opened, magnified and compared myself rather than reading off the
+narrative — the same discipline that produced F-I4 in Round 43. The screenshots
+show what the narrative claims, the harness that produced them drives the real
+shipped widget tree rather than a mock of the block, and the captures are
+provably newer than the F-M1 fix. No new blocking finding. The only residual
+items are two evidence-durability notes and the pre-existing deferred set, none
+of which block requirement closure.
+
+## Round 44 — verification results
+
+| # | Item | Verdict | Evidence |
+|---|---|---|---|
+| 1 | WriteScope discipline | **PASS** | `git diff 893c3649..35723ed2 --name-only` returns exactly one path, `integration-review/mobile-visual-audit.md` (+29/−3). No source file touched, no PNG committed into the repo, worktree `git status` clean. |
+| 2 | Seam A table row + narrative read in context | **PASS** | `mobile-visual-audit.md:47` now reads `PASS (re-captured at 893c3649 …)`; `:61-100` carries the full re-written narrative. Read in place, not from the handoff's diff summary. |
+| 3 | `seamA3` — `Sổ tay` content | **PASS** | Opened and cropped ×3. Muted caption header `Sổ tay` over one surface card with **exactly two** rows: `Sổ tay người yêu` (lilac `menuBook` badge) and `Những gì bạn giỏi` (butter `checklist` badge), each with a trailing chevron, one hairline divider between them. Matches the narrative term for term. |
+| 4 | `seamA4` — `Nhật ký` content | **PASS** | Opened and cropped ×3. Caption `Nhật ký`, one card, **one** row `Nhật ký riêng` (mint `lock` badge) + chevron, **no** divider — exactly as claimed. |
+| 5 | Parity with `seamC1`'s `_PrivateStorageBlock` | **PASS** | Side-by-side crops of both at the same scale: badge size, corner radius, per-row tint (mint `lock` / lilac `menuBook` / butter `checklist`), row height, type scale, chevron and divider treatment are indistinguishable. The claim of visual identity is accurate, not approximate. |
+| 6 | No overflow, clipping or truncation | **PASS** | At 412×915 both blocks sit well inside the card; no ellipsis, no clipped glyph, no RenderFlex artefact. |
+| 7 | Vietnamese diacritics | **PASS** | At ×3 magnification every mark is present and correctly placed — `Sổ tay người yêu`, `Những gì bạn giỏi`, `Nhật ký riêng`, `Muốn làm`, `Ý tưởng`. No tofu box anywhere, including the icon glyphs. |
+| 8 | AC-21 / SC-1' not regressed | **PASS** | No activity-card content on any non-`Muốn làm` tab in `seamA2`/`seamA3`/`seamA4`; the harness asserts `find.text('Đi biển')` → `findsNothing` per tab (`solo_shell_seam_capture_test.dart:173`). `seamA1` shows `Muốn làm` rendering its own surface unchanged. |
+| 9 | `Ý tưởng` placeholder is spec, not a defect | **PASS** | `seamA2` renders `Ý tưởng — sắp có`, the neutral placeholder `ux/uiux-spec.md` §6 prescribes for an unshipped entry point, deliberately retained by `fm1-solo-tabs-solution.md` §2/§6 and tracked as non-blocking OQ-1. Correctly excluded from the failure set. |
+| 10 | Captures are genuinely post-fix, not stale | **PASS** | mtimes: `seamA1`–`seamA4` all `2026-09-27T01:23:31–32`, harness `01:20:36`. Commit times: F-M1 fix `3b51172f` `00:50:48`, Round 43 review `893c3649` `01:09:10`, audit update `35723ed2` `01:24:32`. The captures postdate both the fix and the finding, and predate the doc update. Ordering is coherent. |
+| 11 | Harness drives the real widget tree, not a mock | **PASS** | `solo_shell_seam_capture_test.dart:126-133` pumps the real `PairGateShell` with a real `PairGateCubit` and `PartnerLink(partnerId: null)` (the REQ-016 solo premise); `:160-165` taps the real `solo_stage_one_tab_bar` by label; `:144-156,169-171` assert the shipped keys `solo_tab_destinations_soTay/nhatKy` and `solo_destination_row_notebook/skill_profile/journal` — the same symbols the Round 43 gate already confirmed as production. Nothing about the block is hand-built. |
+| 12 | Capture fidelity to what ships | **PASS** | `:68-79` wraps the tree in `CupidAppBackground` exactly as `cupid_app.dart:87,95` does, and `:42` loads the framework `MaterialIcons` font so `Icons.*` cannot render as false tofu. The known harness traps from Round 43 are handled, not re-introduced. |
+| 13 | D-I1 still accurately deferred | **PASS (narrower than described)** | Integration is 340 ahead / 11 behind `main`. `git diff HEAD...main --stat` shows those 11 touch **only** `data/` bookkeeping — `bug_master.md`, `master_bugs_list.md`, `scrum-master-checkpoint.md`. Zero source files diverge, so land-integration carries no code-merge risk. Not materially worse; stays deferred. |
+
+## Round 44 — residual non-blocking notes
+
+- **R44-N1 — audit evidence is machine-local.** The four PNGs live only in
+  `/tmp/req016-visual-audit/` and the harness is an out-of-tree scratch file
+  (`solo_shell_seam_capture_test.dart:1-2`). Once `/tmp` is cleared the seam A
+  `PASS` cannot be reproduced from the repository by another agent or on another
+  machine. This is the accepted outcome of the item-9 `/tmp`-only WriteScope
+  decision, so it is recorded rather than re-litigated — but the audit's verdict
+  is, from here on, a trusted assertion rather than a checkable one.
+- **R44-N2 — capture density.** Captures are `pixelRatio: 1` at 412×915
+  (`:57`, `:106-107`), not a real 3× device density. That is sufficient for the
+  layout, content and diacritic questions F-I4 actually asked, and is consistent
+  with every other seam in this audit; it is not evidence about text rendering at
+  shipping density. Non-blocking.
+- Pre-existing deferred findings D-I1–D-I4 and the accepted pre-existing
+  exclusion BUG-20260927-001 carry forward unchanged from Round 43. Their
+  presence is why this round is `DEFERRED_ONLY` rather than `CLEAN`; none of them
+  blocks requirement closure.
+
+## Round 44 — requirement state recommendation
+
+- F-I4 is **closed**. No blocking finding remains from the integration review.
+- `Outcome: DEFERRED_ONLY` satisfies the requirement-integration gate, so
+  REQ-016 may be marked `DONE` and `Review (Reviewer)` may be checked.
+- Remaining work is the queued land-integration step (D-I1), which this round
+  confirms is a `data/`-only catch-up merge with no source divergence.
+- No further reviewer round is needed for this requirement.
+
+---
+
+# Round 43 scoped re-review (history — superseded by Round 44 above)
+
+Round 43 verdict: **PATCH_REQUIRED**. Its single blocking finding F-I4 is
+verified closed in Round 44 above; its action item 8 landed as `35723ed2` and
+item 9 was resolved as the `/tmp`-only decision. Retained below for the record.
 
 Review type: requirement-integration-review (scoped re-review)
 Requirement: REQ-016_solo_stage1_relationship_assistant
-Scope gate: `data/requirements/REQ-016_solo_stage1_relationship_assistant/integration-review/scope-gate.md`
+Scope gate: superseded by the Round 44 scope gate at the same path
 Branch: `codex/REQ-016_solo_stage1_relationship_assistant-integration`
 HEAD reviewed: `3b51172f2494241b01f96c2378d89fceb9ef9bf9`
 Diff baseline: `753d2a863b630ec3629cb1cba898bac1f0e075f8`
 Reviewed: 2026-09-27
 RunId: `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-reviewer-fm1review`
-
-Outcome: PATCH_REQUIRED
 
 ## Round 43 — what was in scope
 

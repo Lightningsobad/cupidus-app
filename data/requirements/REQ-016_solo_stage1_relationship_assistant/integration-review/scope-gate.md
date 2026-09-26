@@ -1,77 +1,75 @@
-# Review Scope Gate: REQ-016 solo stage-1 relationship assistant — Round 43 scoped integration re-review
+# Review Scope Gate: REQ-016 solo stage-1 relationship assistant — Round 44 F-I4 closure re-check
 
 Phase: SCOPE_GATE
 SCOPE_GATE_COMPLETE: YES
 
 ## Identity
 
-- Review type: `requirement-integration-review` (scoped re-review, not a full re-review)
-- Review report path: `data/requirements/REQ-016_solo_stage1_relationship_assistant/integration-review/review-report.md` (new `## Round 43 scoped re-review` section appended; prior Round-39 report preserved)
-- Scope gate path: `data/requirements/REQ-016_solo_stage1_relationship_assistant/integration-review/scope-gate.md` (this file, replacing the Round-39 gate)
-- RunId: `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-reviewer-fm1review`
+- Review type: `requirement-integration-review` (narrow closure re-check, not a re-audit)
+- Review report path: `data/requirements/REQ-016_solo_stage1_relationship_assistant/integration-review/review-report.md` (new `# Round 44 — F-I4 closure re-check` section carrying the single live `Outcome:`; Round 43 and Round 39 preserved below it as history)
+- Scope gate path: `data/requirements/REQ-016_solo_stage1_relationship_assistant/integration-review/scope-gate.md` (this file, replacing the Round-43 gate)
+- RunId: `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-reviewer-fi4close`
 - Worktree: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-016_solo_stage1_relationship_assistant`
-- Diff span: `753d2a86..3b51172f` (4 commits: `0a8f4214`, `c1c538ea`, `9aadd52f`, `3b51172f`). Worktree HEAD `3b51172f`, `git status` clean.
+- Diff span: `893c3649..35723ed2` (1 commit, 1 file, +29/−3). Worktree HEAD `35723ed2`, `git status` clean.
 
 ## Scope Decision
 
 - Scope status: `PROCEED`
-- Why this review is within budget: the span touches exactly **2 source/test files** and **4 evidence/artifact files** — well inside the `requirement-integration-review` budget. The 9 cross-story contracts already marked PASS in the prior report (`55ade421`) are cited by reference and NOT re-verified, per the handoff's explicit scope narrowing. F-I1 was closed before `BaseHead` and is out of this span.
-- Current requirement status: `IN_PROGRESS` — prior integration review returned `Outcome: PATCH_REQUIRED` with action items 1–7 (F-I1/F-I2/F-I3). Items 1–4 (F-I1) closed pre-`BaseHead`; items 5, 6, 7 plus the audit-discovered F-M1 are what this round adjudicates.
+- Why this review is within budget: the span touches **one evidence file** and **zero source files**. Round 43 at this same report path already recorded 14/14 rows PASS or accepted-exclusion with exactly one blocking finding (F-I4, evidence-only). This round adjudicates F-I4 closure alone; every other Round 43 row is cited by reference and NOT re-verified, per the handoff's explicit scope narrowing.
+- Current requirement status: `IN_PROGRESS` — Round 43 returned `Outcome: PATCH_REQUIRED` with action items 8 (re-capture seam A) and 9 (PNG-persistence decision). Item 8 landed as `35723ed2`; item 9 was resolved by Scrum Master as `/tmp`-only. Whether item 8's evidence actually supports the claimed `PASS` is the sole question here.
 
 ## Governing Inputs
 
-- Primary artifacts:
-  - `data/requirements/REQ-016_solo_stage1_relationship_assistant/req_master.md` (query-only, 76 KB — decision D-3 at `:155`, seed scope at `:131`)
-  - `data/requirements/REQ-016_solo_stage1_relationship_assistant/architecture/fm1-solo-tabs-solution.md` (the F-M1 decision, new in this span)
-- Existing review findings: `integration-review/review-report.md` (`55ade421`) — F-I2 action items 5/6 (`:89-101`), F-I3 action item 7 (`:103-114`), deferred D-I1..D-I4 (`:116-123`)
-- Test evidence: rerun in this review (see Critical gates) — prior evidence for the changed test file is superseded by the rewrite in `3b51172f`
-- Extra artifacts required beyond the default minimum: none
+- Primary artifact: `data/requirements/REQ-016_solo_stage1_relationship_assistant/integration-review/mobile-visual-audit.md` (seam A row `:47` and narrative `:61-100` — the only changed content in span)
+- Existing review findings: `integration-review/review-report.md` Round 43 section — F-I4 and the 14 rows that stand by reference
+- Capture harness: `/tmp/req016-visual-audit/solo_shell_seam_capture_test.dart` (read to confirm the captures come from the real widget tree, not a mock)
+- Extra artifacts required beyond the default minimum: none. `req_master.md`, `fm1-solo-tabs-solution.md` and the two source files are out of this span and were not re-opened.
 
 ## Source/Test Files In Scope
 
-- `mobile/lib/features/home/presentation/home_screen.dart` (+287/−5 in span; 58 KB — diff-first, ranged reads only)
-- `mobile/test/features/activity_cards/activity_card_hub_view_test.dart` (+160/−32 in span; 37 KB — diff-first, ranged reads only)
-- Read-only contract confirmation (not changed, no full read):
-  `mobile/lib/features/journal/journal_entry_point.dart`,
-  `mobile/lib/features/context_notebook/context_notebook_entry_point.dart`
+- None. No source or in-repo test file changed in this span.
+- Out-of-tree capture harness read for evidence provenance only (not a repo file, not reviewed as deliverable code): `/tmp/req016-visual-audit/solo_shell_seam_capture_test.dart`
 
 ## Evidence Files In Scope
 
-- `data/requirements/REQ-016_solo_stage1_relationship_assistant/integration-review/build-runtime-evidence.md` (F-I2 item 5)
-- `data/requirements/REQ-016_solo_stage1_relationship_assistant/integration-review/mobile-visual-audit.md` (F-I2 item 6)
-- `data/requirements/REQ-016_solo_stage1_relationship_assistant/deployment/configuration-guide.md` (F-I3 item 7 — diff-only)
-- `data/requirements/REQ-016_solo_stage1_relationship_assistant/architecture/fm1-solo-tabs-solution.md` (F-M1 decision)
-- `/tmp/req016-visual-audit/seam*.png` (audit captures — opened, not trusted on the verdict token)
-- `data/bugs/BUG-20260927-001_context_content_gate_zodiac_pack_phrase_leak/bug_master.md` (accepted pre-existing exclusion — cited, not re-diagnosed)
+- `data/requirements/REQ-016_solo_stage1_relationship_assistant/integration-review/mobile-visual-audit.md` (the changed file)
+- `/tmp/req016-visual-audit/seamA1-solo-shell-muonlam.png`
+- `/tmp/req016-visual-audit/seamA2-solo-tab-yTuong.png`
+- `/tmp/req016-visual-audit/seamA3-solo-tab-soTay.png`
+- `/tmp/req016-visual-audit/seamA4-solo-tab-nhatKy.png`
+- `/tmp/req016-visual-audit/seamC1-me-hub-private-storage.png` (Round 43 PASS baseline, re-opened only as the parity reference the narrative claims identity with)
+- All six opened and magnified directly; none trusted on its narrative token.
 
 ## Risk Surfaces And Critical Gates
 
-- Touched risk surfaces: mobile navigation/discoverability, mobile interaction, frontend/mobile entry-point integration, runtime/configuration documentation, requirement-level closure (build + boot), cross-screen visual integration.
-- Source-of-truth artifacts or contracts: decision D-3 (`req_master.md:155`), AC-17 import/route-independence contracts as written in `journal_entry_point.dart:96-98` and `context_notebook_entry_point.dart:59-61`, AC-21/SC-1' (`find.text('Đi biển')` → `findsNothing` outside `Muốn làm`), AC-22 positioning intent per D-3's Outcome column.
+- Touched risk surfaces: requirement-level cross-screen visual integration (rule 12g2) — and only that. No code, navigation, persistence, build, runtime or configuration surface is in this span.
+- Source-of-truth artifacts or contracts: AC-21/SC-1' (`find.text('Đi biển')` → `findsNothing` outside `Muốn làm`), AC-17 entry-point contracts, decision D-3 four-tab bar, OQ-1 (`Ý tưởng` placeholder is specified, not a defect), `fm1-solo-tabs-solution.md` §2/§5.4 destination-block shape.
 - Critical gates to verify:
-  1. F-I2 item 5 — `## Integration Build & Runtime` with `- Build: PASS` and `- Runtime/Smoke: PASS` in ONE file (reviewer rule 12g3).
-  2. F-I2 item 6 — requirement-level `mobile-visual-audit.md` cross-screen check exists and is substantive (rule 12g2); confirm F-M1 was its only new blocking finding.
-  3. F-I3 item 7 — configuration guide covers local notifications and corrects the stale `POST_NOTIFICATIONS` claim (rule 12a).
-  4. F-M1 architecture decision does not violate AC-17 (no screen mounted as a tab body) or D-3 (four-tab bar labels unchanged).
-  5. F-M1 implementation — `Sổ tay`/`Nhật ký` render destination rows pushing through the existing entry points; `Muốn làm`/`Ý tưởng`/paired path unchanged; AC-21/SC-1' assertion preserved verbatim for all 4 tabs.
-  6. Targeted test reruns (no piped output, no bare full-suite `flutter test`): `test/features/activity_cards/activity_card_hub_view_test.dart` and `test/features/context_notebook/`.
+  1. WriteScope discipline — `893c3649..35723ed2 --name-only` shows `mobile-visual-audit.md` and nothing else; no PNG committed into the repo.
+  2. Seam A row and narrative read in place, not from the handoff's diff summary.
+  3. `seamA3`/`seamA4` screenshot content matches the narrative term for term: correct destination rows, badge tints, chevrons, divider presence/absence.
+  4. Parity with `seamC1`'s `_PrivateStorageBlock` as claimed (badge size/tint, radius, row height, type scale, chevron).
+  5. No overflow/clipping/truncation; Vietnamese diacritics correct with no tofu.
+  6. AC-21/SC-1' not regressed — no activity-card content on any non-`Muốn làm` tab.
+  7. Capture provenance — PNG mtimes postdate the F-M1 fix `3b51172f`, and the harness pumps the real `PairGateShell` and real tab bar rather than a hand-built block.
+  8. D-I1 re-confirmation — integration-vs-`main` divergence not materially worse than Round 43 described.
+- No test rerun in scope: zero source/test files changed, so no build, analyze or `flutter test` gate applies to this span. Round 43's green targeted runs stand by reference.
 - Mandatory web Playwright/browser-e2e gate: `NOT_APPLICABLE in ordinary continue`
 - Requirement visual audit evidence: `NOT_APPLICABLE` (no frontend/web participation in REQ-016)
 - Mandatory mobile e2e/emulator/signing/store gate: `NOT_APPLICABLE in ordinary continue`
-- Requirement mobile visual audit evidence: `REQUIRED` — present at `integration-review/mobile-visual-audit.md`, captures opened and verified real.
+- Requirement mobile visual audit evidence: `REQUIRED` — present at `integration-review/mobile-visual-audit.md`; seam A captures opened, magnified and verified real in this round.
 - Missing gate evidence or blocker: `N/A`
 
 ## Query Keys
 
-- `D-3` (`req_master.md:155`); seed scope `req_master.md:131`
-- `AC-17`, `AC-21`, `AC-22`, `SC-1'`
-- Symbols: `_SoloStageOneShell`, `_SoloTabPlaceholder`, `_PrivateStorageBlock`, `IndexedStack`, `solo_stage_one_tab_bar`, `solo_tab_placeholder_yTuong`, `solo_tab_destinations_*`, `solo_destination_row_*`
-- Entry points: `openNotebookScreen`, `openSkillProfileScreen`, `openJournalScreen`
-- l10n keys: `me_menu_context_notebook`, `me_menu_skill_profile`, `me_menu_private_journal`
+- Seam A row `mobile-visual-audit.md:47`; narrative `:61-100`; capture list `:244-247`
+- `seamA1`–`seamA4`, `seamC1`; `_SoloDestinationBlock`, `_PrivateStorageBlock`
+- Keys asserted by the harness: `solo_stage_one_tab_bar`, `solo_tab_placeholder_yTuong`, `solo_tab_destinations_soTay`, `solo_tab_destinations_nhatKy`, `solo_destination_row_notebook`, `solo_destination_row_skill_profile`, `solo_destination_row_journal`
+- Labels checked for diacritics: `Sổ tay người yêu`, `Những gì bạn giỏi`, `Nhật ký riêng`, `Muốn làm`, `Ý tưởng`
 - Assertion: `find.text('Đi biển')` → `findsNothing`
-- Import boundary: new `import` lines in `home_screen.dart` diff
-- Commands: `flutter test test/features/activity_cards/activity_card_hub_view_test.dart --no-pub --reporter compact`; `flutter test test/features/context_notebook/ --no-pub --reporter compact`
-- Accepted exclusion: `context_content_gate_test.dart:159` / BR-16 → `BUG-20260927-001`
+- Placeholder: `Ý tưởng — sắp có` (OQ-1, specified)
+- Commands: `git diff 893c3649..35723ed2 --name-only`; `git diff HEAD...main --stat`; `git rev-list --left-right --count main...HEAD`
+- Deferred carry-forward: D-I1–D-I4, `BUG-20260927-001`
 
 ## Phase 2 Approval
 
