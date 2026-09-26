@@ -60,6 +60,13 @@ collapsed to one line; full trail lives in each story's own
   verification and record under
   `REQ-016_solo_stage1_relationship_assistant/integration-review/` BEFORE any
   future `land-integration` for this requirement — prior evidence is stale.
+- STORY-013: `coding-plan/master-plan.md`, all 6 phase files, and
+  `test-results.md` use literal `Status: COMPLETE`, not the gate-recognized
+  `DONE|SKIPPED|DEFERRED|WAIVED|N/A` (per Alan-Techlead-3 verification,
+  2026-09-26; story itself is `MERGE_COMPLETE: true`/`MERGED`, review
+  `Outcome: DEFERRED_ONLY`). Not yet known to block anything post-merge; if any
+  future gate scans STORY-013's own phase/plan files and rejects `COMPLETE`,
+  this is the cause — fix is Scrum-Master-owned artifact wording, not rework.
 
 ## 3-part verification protocol (use before sealing any specialist's reported-complete work)
 
