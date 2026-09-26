@@ -19,21 +19,32 @@ of truth):
   + finalized `action_label` field — verified directly against
   `architecture/contract-summary.md` §3a/§3b/§3c/§4a and `architecture/
   solution.md` §7 (order constraint: B-2 and B-6 must ship together).
-- One mobile-dev implementation pass then closed all 6 blocking findings in
-  full (B-1..B-6), independently verified by Scrum Master this session-chain
-  (extended test suite green, recaptured images eyeballed). Evidence:
-  `visual-fidelity/visual-fidelity-report.md` "Lượt patch #4". Worktree is
-  sealed/committed at `63a15bb06938d9896ee2ad8a23b61fffec50b54c` (clean).
-- 3 items mobile-dev explicitly left unresolved, for Reviewer/Scrum Master to
-  judge as blocking or deferrable — NOT yet resolved:
-  1. Out-of-WriteScope edit mobile-dev flagged but didn't make itself:
-     `mobile/android/app/src/main/res/xml/cupid_phase_widget_info.xml`
-     `minWidth` 180dp -> 250dp (requested by B-3).
-  2. Visual-fidelity naming-gate tension: `visual_fidelity.py` pairs
-     implemented/design renders by filename token, but
-     `validate-dev-design-render.sh` forbids relabelling canvas exports.
-  3. N-2 (non-blocking): runtime registry buildCommand missing `--flavor
-     local` — routes to DevOps separately, does not block this story.
+- One mobile-dev implementation pass then closed 5 of 6 blocking findings for
+  real (B-2..B-6), commit `a8aa1ff4`. Evidence:
+  `visual-fidelity/visual-fidelity-report.md` "Lượt patch #4". Worktree
+  sealed/committed at `63a15bb06938d9896ee2ad8a23b61fffec50b54c`.
+- **S9 `full-story-review` (Iris-QC) result — Outcome: PATCH_REQUIRED** (2
+  blocking, 9 non-blocking). Report: `review/review-report.md` +
+  `review/scope-gate.md`. Run file COMPLETED, `Iris-QC@session-e7df910a`
+  released via `TaskStop`.
+  - **B-1a (new blocking)**: `action_label` data reaches `displayStrings`
+    correctly (AC-39 gate measures it), but `_PhaseStatusAction` in
+    `mobile/lib/features/phase_status/presentation/phase_status_line.dart`
+    renders bare pink text, not the rounded-pill chip both `ux/uiux-spec.md`
+    §1's 2026-09-26 B-1 patch and the canvas require. Routes to mobile-dev,
+    AFTER B-7.
+  - **B-7 (new blocking, gates DONE)**: `visual_fidelity.py --stage review
+    --stack mobile` exits 1 — `story_master.md` names screens as build labels
+    (`evening`/`hub`/`quiet`/`widget`), canvas names them as content slugs
+    (`23h`/`j12`/`man`/`ngan`). Mobile-dev correctly did not rename canvas
+    exports. This is a Tech Lead naming-convention reconciliation, NOT product
+    code — no mobile-dev/UX change implied until Tech Lead decides the
+    mapping.
+  - Non-blocking of note: **N-7** — "Lượt patch #4" missing from
+    `coding-plan/test-results.md`; N-2 stays deferred to DevOps.
+  - The old "3 unresolved items" note above is superseded: the `minWidth`
+    180->250dp edit was already made in `a8aa1ff4` (stale, no action), the
+    naming tension is now formally B-7, N-2 unchanged.
 - **Guard bug found + fixed this session (user-authorized option (a))**:
   `.claude/hooks/guard-parallel-spawn.sh` `CODE_WRITER_MARKERS["mobile-dev"]`
   was `"MOBILE_IMPLEMENTATION_COMPLETE"`, which never matched real mobile-dev
@@ -44,15 +55,6 @@ of truth):
   (bundle-installed runtime, not project source) — fix is local/mechanical,
   needs upstreaming to the bundle repo separately for permanence across
   reinstalls, but is active now. Do not re-investigate this guard.
-- **S9 full-story-review dispatched**: `Iris-QC` (`Iris-QC@session-e7df910a`),
-  `Mode: full-story-review`, `RunId:
-  RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-reviewer`,
-  `BaseHead: b58afbe073eff4e1ebb9151735221532a9cf5a82` (the same
-  pre-implementation baseline S8 used, confirmed still an ancestor of current
-  worktree HEAD via `git merge-base --is-ancestor`), `WriteScope`/`OutputPath`
-  = `review/`, `review/review-report.md`. Prompted to verify B-1..B-6 closed,
-  judge the 3 items above, and record a single `Outcome:` line.
-  **STATUS: AWAITING RESULT** (SubagentStop / `REVIEW_COMPLETE`).
 - `main` control checkout already has the B-1 `req_master.md` Design Ruling
   Log row and the requirement-level checkpoint condensation committed
   (`d7137e1e`) — not pending.
@@ -62,21 +64,30 @@ of truth):
   already has the correct values (`cupid-ch-ng-1`, 7 screen ids) to copy from.
 
 Next Valid Step:
-- Await Iris-QC's S9 result. On return, reconcile the run file and
-  `data/runtime/scrum-master-active-scope.json`, then:
-  - `Outcome: CLEAN` or `DEFERRED_ONLY` -> run
-    `.claude/hooks/git-story-boundary.sh complete --req
-    REQ-016_solo_stage1_relationship_assistant --story
-    STORY-012_phase_status_and_widget`, merge to
-    `codex/REQ-016_solo_stage1_relationship_assistant-integration`, mark story
-    DONE, route the ux-spec header gap to Brainstormer/Pink-Designer and N-2 to
-    DevOps as separate follow-ups, then continue the REQ-016 wave (check
-    whether any other requirement story remains, else close toward
-    requirement integration review).
-  - `Outcome: PATCH_REQUIRED` -> route each new/reopened finding to its owning
-    role exactly as S8 did (Product Owner / Tech Lead+UX / mobile-dev), one
-    mobile-dev pass, then S10 re-review.
-  - `Outcome: BLOCKED` -> report the exact blocker to the user.
+1. Dispatch **Alan-Techlead** (`Mode: architecture-solution` or
+   `compact-story-plan`, whichever the template calls for a naming-convention
+   decision only) to settle **B-7**: reconcile `story_master.md` build-label
+   screen ids vs. the `cupid-ch-ng-1` canvas's content-slug ids (`evening`/
+   `hub`/`quiet`/`widget` vs `23h`/`j12`/`man`/`ngan`) so
+   `.claude/hooks/lib/visual_fidelity.py --stage review --stack mobile`
+   can pass. No product code in this pass.
+2. After Tech Lead returns, one mobile-dev pass for **B-1a** (rounded-pill
+   chip in `phase_status_line.dart`'s `_PhaseStatusAction`, per
+   `ux/uiux-spec.md` §1) + **N-7** (add "Lượt patch #4" note to
+   `coding-plan/test-results.md`) + recapture visual-fidelity cell 1.
+   WriteScope: `mobile/lib/features/phase_status/presentation/phase_status_line.dart`,
+   `coding-plan/test-results.md`, `visual-fidelity/`.
+3. Then S10 re-review by Iris-QC (fresh spawn or continuation, reviewer's
+   choice) using the same BaseHead-derivation caution as S9 (verify
+   `git-story-boundary.sh status` `base_head` hasn't drifted near HEAD before
+   trusting the auto-derived value; explicit `b58afbe073eff4e1ebb9151735221532a9cf5a82`
+   remains the correct pre-implementation baseline unless a later reviewer
+   pass explicitly rebases it).
+4. On `Outcome: CLEAN`/`DEFERRED_ONLY`: `git-story-boundary.sh complete`, merge
+   to `codex/REQ-016_solo_stage1_relationship_assistant-integration`, mark
+   DONE, route the ux-spec header gap (Design-Surface/Design-Screen lines) to
+   Brainstormer/Pink-Designer and N-2 to DevOps separately, then continue the
+   REQ-016 wave / close toward requirement integration review.
 
 Do Not Re-read:
 - The full Alan-Techlead/Alex-Mobile-Dev dispatch narrative, crash/recovery,

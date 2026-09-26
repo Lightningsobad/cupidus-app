@@ -22,27 +22,32 @@ Design-Screen: hub-waiting, hub-upcoming, hub-date_day, hub-quiet,
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
 - [x] Coding Plan (Tech Lead) — `coding-plan/master-plan.md`, `coding-plan/coding-agent-guide.md`, P1–P8
-- [x] Implementation (Development) — mobile-dev P1-P12 complete per
+- [ ] Implementation (Development) — mobile-dev P1-P12 complete per
   `coding-plan/master-plan.md` Phases Overview (all Status: DONE, BaseHead
-  `536d47cb92ff747505e7b6f1ac0469aac254cb55`). full-story-review S8
-  (`review/review-report.md`) found AC9 FAIL with 6 blocking visual-fidelity
-  findings B-1..B-6; Tech Lead architecture rework (B-2/B-5/B-6, action_label)
-  then one mobile-dev implementation pass closed all six, commit `a8aa1ff4`
-  (2026-09-26), independently verified by Scrum Master (3 recaptured images
-  eyeballed, extended test suite re-run green: +103 ~4). P6 blocker
-  (AC_CONFLICT_CROSS_REQUIREMENT vs REQ-002/STORY-021 AC4) resolved
-  2026-09-17 by user decision (Option 1: narrow the guard's
-  `flutter_local_notifications` clause to an import boundary under
-  `lib/features/reminders/**`, keep the ban on other 3 packages, keep
-  REQ-002/STORY-021 DONE). See `coding-plan/phase-P6-evening-check-in.md` §7/§8.
-  P9-P12 closed the widget-phase-label/glyph and R-5 visual-fidelity native
-  capture gaps; see `coding-plan/phase-P9..P12-*.md` §7 and
-  `visual-fidelity/visual-fidelity-report.md` "Lượt P12" and "Lượt patch #4".
-- [ ] Review (Reviewer) — S8 `full-story-review` Outcome: PATCH_REQUIRED
-  (`review/review-report.md`). 6 blocking findings B-1..B-6 (AC9) now closed
-  per "Lượt patch #4" (2026-09-26), pending S9 re-review by Iris-QC. 6 non-
-  blocking N-1..N-6 still open (N-2 routes to DevOps separately). See
-  checkpoint for routing.
+  `536d47cb92ff747505e7b6f1ac0469aac254cb55`). S8 found AC9 FAIL with 6
+  blocking visual-fidelity findings B-1..B-6; Tech Lead architecture rework
+  (B-2/B-5/B-6, action_label) then one mobile-dev pass closed 5 of 6 for real
+  (B-2..B-6), commit `a8aa1ff4` (2026-09-26). S9 re-review reopened work:
+  **B-1a** (new blocking) — `action_label` data flows correctly but
+  `_PhaseStatusAction` in `phase_status_line.dart` renders bare pink text,
+  not the rounded-pill chip `ux/uiux-spec.md` §1's 2026-09-26 B-1 patch and
+  the canvas both require. Unchecked pending one more mobile-dev pass. P6/P9-
+  P12 history unchanged, see `coding-plan/phase-P6..P12-*.md` and
+  `visual-fidelity/visual-fidelity-report.md` "Lượt P12"/"Lượt patch #4".
+- [ ] Review (Reviewer) — S9 `full-story-review` (Iris-QC) Outcome:
+  **PATCH_REQUIRED** (`review/review-report.md`, `review/scope-gate.md`). 2
+  blocking: **B-1a** (chip shape, see Implementation note above, routes to
+  mobile-dev after Tech Lead) and **B-7** (new — `visual_fidelity.py` DONE
+  gate fails: `story_master.md` screen ids vs canvas content-slug naming
+  convention mismatch; mobile-dev correctly did not rename canvas exports;
+  needs Tech Lead reconciliation before any review can return CLEAN, not a
+  product-code fix). 9 non-blocking, incl. **N-7** ("Lượt patch #4" missing
+  from `coding-plan/test-results.md`) and N-2 (DevOps buildCommand, deferred).
+  The earlier B-3 `minWidth` routing item is stale/moot — already fixed in
+  `a8aa1ff4`. Next: Tech Lead settles B-7 (naming convention only, no product
+  code), then one mobile-dev pass for B-1a + N-7 + cell-1 recapture.
+  WriteScope for that pass: `phase_status_line.dart`,
+  `coding-plan/test-results.md`, `visual-fidelity/`.
 
 ## Depends On
 - STORY-001 — mọi pha đọc từ trạng thái thẻ trong kho chung.
