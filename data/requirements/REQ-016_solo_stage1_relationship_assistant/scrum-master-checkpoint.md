@@ -21,7 +21,7 @@ collapsed to one line; full trail lives in each story's own
 | STORY-010 | STORY-004 | DONE, merged |
 | STORY-011 | STORY-001, STORY-004, STORY-005, STORY-008 | DONE, merged (Round 34), merge `e346e147`. Final-synthesis `Outcome: DEFERRED_ONLY` (10 deferred, 0 blocking). |
 | STORY-012 | STORY-001 | DONE, merged (Round 38, merge `e9519243`). Final-synthesis `Outcome: DEFERRED_ONLY`. |
-| STORY-013 | STORY-001, STORY-004 | DONE, merged (Round 16) |
+| STORY-013 | STORY-001, STORY-004 | DONE, merged (Round 16); F-I1 rework re-merged into integration Round 40, merge `753d2a86` |
 
 ## Open user decisions
 
@@ -127,16 +127,29 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
   `test-results.md`, no self-commit), explicitly told both patch1 blockers
   are already resolved. **In flight — awaiting SubagentStop/mailbox
   notification, not polling.**
-- **Next resume action:** on `Alex-Mobile-Dev` patch2 `MOBILE_COMPLETE: YES`,
-  verify (3-part protocol), commit (Scrum Master only), then
-  `git-story-boundary.sh merge --req REQ-016_solo_stage1_relationship_assistant
-  --story STORY-013_graceful_exit_and_return` to land STORY-013's rework back
-  into the integration branch. Then proceed exactly per the remaining Round
-  39 plan below (F-I2 devops pass + mobile-visual-audit, F-I3
-  configuration-guide.md fix, fresh `Iris-QC` requirement-integration-review,
-  then land-integration). If patch2 also BLOCKS, diagnose fresh — do not
-  assume it is one of the two already-fixed blockers without checking the
-  new run file's `blocker` text first.
+- `Alex-Mobile-Dev` patch2 returned `MOBILE_COMPLETE: YES` (test:
+  `flutter test test/features/chapter_closure/stage1_wipe_registry_parity_test.dart`
+  → `00:00 +6: All tests passed!`; `req016_table_total_counted: 14`). 3-part
+  verification passed (agent idle per `list-releasable-agents.sh`; worktree
+  diff exactly matched declared WriteScope — only
+  `stage1_wipe_registry.dart` + `test-results.md`; evidence in
+  `test-results.md` §12 cites the Tech Lead REGISTER decision, exact 14-table
+  count, and passing test/analyze commands). Committed `91542e4b`. Boundary
+  refreshed, then `git-story-boundary.sh merge` landed STORY-013 into
+  integration clean (no conflict) as `753d2a86`. Patch1 run file parked with
+  `waiting_reason`/`next_resume_action` (superseded, terminal, no further
+  action) rather than deleted — audit trail preserved. `Alex-Mobile-Dev-2`
+  released via `TaskStop`.
+- **Next resume action:** F-I1 is now fully resolved and merged. Proceed to
+  F-I2 (dispatch `devops` for `## Integration Build & Runtime` evidence on
+  the integration branch's current HEAD i.e. after `753d2a86`, plus dispatch
+  `Alex-Mobile-Dev` separately for `integration-review/mobile-visual-audit.md`
+  against the same integration worktree) and F-I3 (bundle into the same
+  `devops` dispatch: fix `deployment/configuration-guide.md` for
+  `flutter_local_notifications`/`timezone` coverage and the inaccurate
+  POST_NOTIFICATIONS single-consumer claim). Then a FRESH `Iris-QC`
+  requirement-integration-review (new RunId — prior one is terminal
+  `PATCH_REQUIRED`) before `land-integration`.
 
 ## Superseded cursor (Round 39, `continue parallel`, 2026-09-26 — integration review ran, PATCH_REQUIRED, rework in flight)
 
