@@ -267,7 +267,7 @@ payload widget: thêm một khoá nhãn-mí pha mới vào `architecture/contrac
 | STORY-009 | Chân dung "theo cách BẠN nhìn" | standard | DONE | `STORY-009_your_view_portrait/story_master.md` |
 | STORY-010 | Bảng tra ăn khớp | complex | TODO | `STORY-010_compatibility_lookup/story_master.md` |
 | STORY-011 | Vỏ hoàng đạo / trắc nghiệm | standard | TODO | `STORY-011_zodiac_quiz_shell/story_master.md` |
-| STORY-012 | Trạng thái theo pha, widget, và bộ đếm "của cải đang lớn" | complex | TODO | `STORY-012_phase_status_and_widget/story_master.md` |
+| STORY-012 | Trạng thái theo pha, widget, và bộ đếm "của cải đang lớn" | complex | DONE | `STORY-012_phase_status_and_widget/story_master.md` |
 | STORY-013 | Lối ra khi im lặng/bị từ chối, và lối quay lại sau vắng | standard | TODO | `STORY-013_graceful_exit_and_return/story_master.md` |
 
 Thứ tự phụ thuộc và bản đồ seed → story: `requirements/requirements.md` →
