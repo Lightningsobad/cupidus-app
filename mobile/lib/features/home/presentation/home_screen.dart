@@ -8,14 +8,17 @@ import 'package:cupid_mobile/features/account/presentation/screens/notification_
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
 import 'package:cupid_mobile/features/activity_cards/presentation/screens/activity_card_hub_view.dart';
 import 'package:cupid_mobile/features/auth/presentation/auth_strings.dart';
+import 'package:cupid_mobile/features/context_notebook/context_notebook_entry_point.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
 import 'package:cupid_mobile/features/dream_jar/presentation/screens/dream_jar_list_screen.dart';
+import 'package:cupid_mobile/features/journal/journal_entry_point.dart';
 import 'package:cupid_mobile/features/pet/data/pet_repository.dart';
 import 'package:cupid_mobile/features/timeline/data/timeline_repository.dart';
 import 'package:cupid_mobile/features/timeline/presentation/screens/timeline_screen.dart';
 import 'package:cupid_mobile/features/timeline/presentation/timeline_cubit.dart';
 import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_countdown_card.dart';
 import 'package:cupid_mobile/features/timeline/presentation/widgets/timeline_entry_point_card.dart';
+import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -80,6 +83,17 @@ const double _quickGridIconTitleGap = 11;
 const double _quickGridTitleSubtitleGap = 3;
 const double _quickGridTitleFontSize = 14;
 const double _quickGridSubtitleFontSize = 11.5;
+
+/// Solo destination-row geometry, transcribed from `_PrivateStorageBlock`'s
+/// rows in `me_screen.dart:36-48` rather than re-derived, because F-M1 requires
+/// the two menu surfaces to read as the same pattern
+/// (`architecture/fm1-solo-tabs-solution.md` §2, presentation constraint).
+const double _destinationRowVerticalPadding = 14;
+const double _destinationBadgeSize = 38;
+const double _destinationBadgeRadius = 13;
+const double _destinationBadgeIconSize = 20;
+const double _destinationTrailingIconSize = 19;
+const double _destinationBadgeTintOpacity = 0.18;
 
 /// Same literal in `vi` and `en`, mirroring `zodiac_red_flag_screen.dart:40-42`
 /// — the design source's locale maps carry one `t_zodiac` string, so this tile
@@ -149,7 +163,16 @@ class HomeScreen extends StatelessWidget {
     Future<bool> Function()? resolveNotificationsUnconfigured,
     PetRepository? petRepository,
     ActivityCardRepository? activityCardRepository,
+    Future<void> Function(BuildContext)? openNotebook,
+    Future<void> Function(BuildContext)? openSkillProfile,
+    Future<void> Function(BuildContext)? openJournal,
   }) :
+       // ignore: prefer_initializing_formals
+       _openNotebook = openNotebook,
+       // ignore: prefer_initializing_formals
+       _openSkillProfile = openSkillProfile,
+       // ignore: prefer_initializing_formals
+       _openJournal = openJournal,
        // ignore: prefer_initializing_formals
        _activityCardRepository = activityCardRepository,
        // ignore: prefer_initializing_formals
@@ -178,6 +201,14 @@ class HomeScreen extends StatelessWidget {
   /// entry-point test can render the solo hub without a composition root.
   final ActivityCardRepository? _activityCardRepository;
 
+  /// F-M1 test seams (`architecture/fm1-solo-tabs-solution.md` §3), the same
+  /// shape as [_resolvePairingStatus]: each defaults to the real feature entry
+  /// point, and the solo shell's own test host registers no `getIt`, so without
+  /// these a tapped destination row would throw instead of navigating.
+  final Future<void> Function(BuildContext)? _openNotebook;
+  final Future<void> Function(BuildContext)? _openSkillProfile;
+  final Future<void> Function(BuildContext)? _openJournal;
+
   static Future<PairingStatus> _defaultResolvePairingStatus() =>
       getIt<CouplePairingStore>().resolve();
 
@@ -204,6 +235,9 @@ class HomeScreen extends StatelessWidget {
       soloBuilder: (BuildContext context) => _SoloStageOneShell(
         muonLamBuilder: (BuildContext context) =>
             ActivityCardHubView(repository: _activityCardRepository),
+        openNotebook: _openNotebook,
+        openSkillProfile: _openSkillProfile,
+        openJournal: _openJournal,
       ),
       coupleBuilder: _buildCoupleHome,
     );
@@ -283,9 +317,21 @@ enum SoloStageOneTab { muonLam, yTuong, soTay, nhatKy }
 /// The tab bar that replaces the app shell's on the solo surface. Only the
 /// solo branch mounts it — the paired branch keeps the existing shell.
 class _SoloStageOneShell extends StatefulWidget {
-  const _SoloStageOneShell({required this.muonLamBuilder});
+  const _SoloStageOneShell({
+    required this.muonLamBuilder,
+    this.openNotebook,
+    this.openSkillProfile,
+    this.openJournal,
+  });
 
   final WidgetBuilder muonLamBuilder;
+
+  /// Each null seam falls back to the real feature entry point in
+  /// [_SoloStageOneShellState._tabBody] rather than in this constructor, which
+  /// is what keeps the constructor `const`.
+  final Future<void> Function(BuildContext)? openNotebook;
+  final Future<void> Function(BuildContext)? openSkillProfile;
+  final Future<void> Function(BuildContext)? openJournal;
 
   @override
   State<_SoloStageOneShell> createState() => _SoloStageOneShellState();
@@ -316,6 +362,58 @@ class _SoloStageOneShellState extends State<_SoloStageOneShell> {
     }
   }
 
+  /// F-M1 (`architecture/fm1-solo-tabs-solution.md` §2): every tab except
+  /// `Muốn làm` is a destination list, never the destination screen itself —
+  /// those three screens each own a `Scaffold` with a back button that would pop
+  /// this shell, and mounting them here would open three private-data surfaces
+  /// on app entry because [IndexedStack] keeps all four bodies alive.
+  Widget _tabBody(BuildContext context, SoloStageOneTab tab) {
+    final CupidColorTokens colors = context.cupidColors;
+    final AppL10n l10n = AppL10n.of(context);
+
+    switch (tab) {
+      case SoloStageOneTab.muonLam:
+        return widget.muonLamBuilder(context);
+      case SoloStageOneTab.yTuong:
+        return _SoloTabPlaceholder(tab: tab, label: _label(context, tab));
+      case SoloStageOneTab.soTay:
+        return _SoloDestinationBlock(
+          blockKey: const Key('solo_tab_destinations_soTay'),
+          header: _label(context, tab),
+          destinations: <_SoloDestination>[
+            _SoloDestination(
+              rowKey: const Key('solo_destination_row_notebook'),
+              icon: CupidIcons.menuBook,
+              badgeTint: colors.colorAccentLilac,
+              label: l10n.me_menu_context_notebook,
+              open: widget.openNotebook ?? openNotebookScreen,
+            ),
+            _SoloDestination(
+              rowKey: const Key('solo_destination_row_skill_profile'),
+              icon: CupidIcons.checklist,
+              badgeTint: colors.colorButter,
+              label: l10n.me_menu_skill_profile,
+              open: widget.openSkillProfile ?? openSkillProfileScreen,
+            ),
+          ],
+        );
+      case SoloStageOneTab.nhatKy:
+        return _SoloDestinationBlock(
+          blockKey: const Key('solo_tab_destinations_nhatKy'),
+          header: _label(context, tab),
+          destinations: <_SoloDestination>[
+            _SoloDestination(
+              rowKey: const Key('solo_destination_row_journal'),
+              icon: CupidIcons.lock,
+              badgeTint: colors.colorMint,
+              label: l10n.me_menu_private_journal,
+              open: widget.openJournal ?? openJournalScreen,
+            ),
+          ],
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -324,10 +422,7 @@ class _SoloStageOneShellState extends State<_SoloStageOneShell> {
         index: _tab.index,
         children: <Widget>[
           for (final SoloStageOneTab tab in SoloStageOneTab.values)
-            if (tab == SoloStageOneTab.muonLam)
-              widget.muonLamBuilder(context)
-            else
-              _SoloTabPlaceholder(tab: tab, label: _label(context, tab)),
+            _tabBody(context, tab),
         ],
       ),
       bottomNavigationBar: CupidTabBar(
@@ -366,6 +461,193 @@ class _SoloTabPlaceholder extends StatelessWidget {
       child: Text(
         vi ? '$label — sắp có' : '$label — coming soon',
         style: context.cupidType.body.copyWith(color: colors.colorTextMuted),
+      ),
+    );
+  }
+}
+
+/// One row of a [_SoloDestinationBlock]: a label and the entry-point call that
+/// opens it. [open] takes the tapping row's own [BuildContext] so the push runs
+/// against the shell's [Navigator], and is injectable so a widget test can
+/// assert the call without a composition root.
+class _SoloDestination {
+  const _SoloDestination({
+    required this.rowKey,
+    required this.icon,
+    required this.badgeTint,
+    required this.label,
+    required this.open,
+  });
+
+  final Key rowKey;
+  final IconData icon;
+  final Color badgeTint;
+  final String label;
+  final Future<void> Function(BuildContext) open;
+}
+
+/// The body of a solo tab that frames already-shipped screens (F-M1): a small
+/// header over one row per destination, each pushing its own independent route
+/// through that feature's public entry point.
+///
+/// Shaped after `me_screen.dart`'s `_PrivateStorageBlock`, which is the surface
+/// AC-17 already permits: the block sits *outside* every screen it lists, so no
+/// two of those screens gain a switcher between them. Absolutely forbidden here
+/// are a segmented control, a sub-tab, or any control that swaps one listed
+/// destination for another in place.
+///
+/// Deliberately light — header plus rows, nothing else. AC-21/SC-1' keeps the
+/// single card store on `Muốn làm`, so this block must never carry counts, a
+/// content preview, a large card, a floating CTA, or an activity card in any
+/// form.
+class _SoloDestinationBlock extends StatelessWidget {
+  const _SoloDestinationBlock({
+    required this.blockKey,
+    required this.header,
+    required this.destinations,
+  });
+
+  final Key blockKey;
+  final String header;
+  final List<_SoloDestination> destinations;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+    final CupidPlatformTokens platformTokens = context.cupidPlatform;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          _cardColumnPaddingHorizontal,
+          CupidSpacing.lg,
+          _cardColumnPaddingHorizontal,
+          0,
+        ),
+        child: Column(
+          key: blockKey,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(
+                left: CupidSpacing.xs,
+                bottom: CupidSpacing.sm,
+              ),
+              child: Text(
+                header,
+                style: type.caption.copyWith(
+                  color: colors.colorTextMuted,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: colors.colorSurface,
+                borderRadius: BorderRadius.circular(
+                  platformTokens.radiusCard,
+                ),
+                boxShadow: platformTokens.elevationShadow,
+              ),
+              child: Material(
+                type: MaterialType.transparency,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: CupidSpacing.md,
+                    vertical: CupidSpacing.xs,
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      for (int i = 0; i < destinations.length; i++)
+                        _SoloDestinationRow(
+                          destination: destinations[i],
+                          showDivider: i < destinations.length - 1,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// One [_SoloDestinationBlock] row, drawn with the same badge, divider, and
+/// chevron treatment as `me_screen.dart`'s `_MenuRow`.
+class _SoloDestinationRow extends StatelessWidget {
+  const _SoloDestinationRow({
+    required this.destination,
+    required this.showDivider,
+  });
+
+  final _SoloDestination destination;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    final CupidColorTokens colors = context.cupidColors;
+    final CupidTypographyTokens type = context.cupidType;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: showDivider
+            ? Border(bottom: BorderSide(color: colors.colorLine))
+            : null,
+      ),
+      child: Semantics(
+        button: true,
+        child: InkWell(
+          key: destination.rowKey,
+          onTap: () => destination.open(context),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: _destinationRowVerticalPadding,
+            ),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  width: _destinationBadgeSize,
+                  height: _destinationBadgeSize,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: destination.badgeTint.withValues(
+                      alpha: _destinationBadgeTintOpacity,
+                    ),
+                    borderRadius: BorderRadius.circular(
+                      _destinationBadgeRadius,
+                    ),
+                  ),
+                  child: CupidIcon(
+                    destination.icon,
+                    size: _destinationBadgeIconSize,
+                    color: destination.badgeTint,
+                  ),
+                ),
+                const SizedBox(width: CupidSpacing.md),
+                Expanded(
+                  child: Text(
+                    destination.label,
+                    style: type.body.copyWith(
+                      color: colors.colorText,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                CupidIcon(
+                  CupidIcons.chevronRight,
+                  size: _destinationTrailingIconSize,
+                  color: colors.colorTextMuted,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

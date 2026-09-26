@@ -1,8 +1,11 @@
 import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
+import 'package:cupid_mobile/core/database/cupid_database.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
+import 'package:cupid_mobile/features/context_notebook/data/context_notebook_dao.dart';
+import 'package:cupid_mobile/features/context_notebook/data/context_notebook_repository.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
 import 'package:cupid_mobile/features/activity_cards/domain/activity_type.dart';
@@ -14,6 +17,7 @@ import 'package:cupid_mobile/features/dream_jar/data/dream_jar.dart';
 import 'package:cupid_mobile/features/dream_jar/data/dream_jar_repository.dart';
 import 'package:cupid_mobile/features/home/presentation/home_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -146,7 +150,10 @@ ActivityCard _card({
   );
 }
 
-Widget _host(Widget child) => MaterialApp(
+Widget _host(
+  Widget child, {
+  List<NavigatorObserver> navigatorObservers = const <NavigatorObserver>[],
+}) => MaterialApp(
       theme: buildCupidTheme(
         platform: CupidPlatform.material,
         brightness: Brightness.dark,
@@ -154,11 +161,45 @@ Widget _host(Widget child) => MaterialApp(
       locale: const Locale('vi'),
       localizationsDelegates: AppL10n.localizationsDelegates,
       supportedLocales: AppL10n.supportedLocales,
+      navigatorObservers: navigatorObservers,
       home: CupidPlatformOverride(
         platform: CupidPlatform.material,
         child: child,
       ),
     );
+
+/// The four stage-1 solo tab labels, in the order `ux/uiux-spec.md` §1 draws
+/// them.
+const Map<SoloStageOneTab, String> _soloTabLabels = <SoloStageOneTab, String>{
+  SoloStageOneTab.muonLam: 'Muốn làm',
+  SoloStageOneTab.yTuong: 'Ý tưởng',
+  SoloStageOneTab.soTay: 'Sổ tay',
+  SoloStageOneTab.nhatKy: 'Nhật ký',
+};
+
+/// Taps a solo tab through the tab bar itself, so the assertion that follows is
+/// about what selecting that tab renders rather than about a directly pumped
+/// body.
+Future<void> _tapSoloTab(WidgetTester tester, SoloStageOneTab tab) async {
+  await tester.tap(
+    find.descendant(
+      of: find.byKey(const Key('solo_stage_one_tab_bar')),
+      matching: find.text(_soloTabLabels[tab]!),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+/// Records what the F-M1 destination rows push, so the seam-B contract can be
+/// asserted without importing a notebook or journal internal into this file.
+class _RecordingNavigatorObserver extends NavigatorObserver {
+  final List<Route<dynamic>> pushed = <Route<dynamic>>[];
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    pushed.add(route);
+  }
+}
 
 /// The SC-4 table (`ux/uiux-spec.md` §2), transcribed once and asserted
 /// against the rendered footer of every status.
@@ -850,8 +891,8 @@ void main() {
     );
 
     testWidgets(
-      'AC-22/AC-21: the other three tabs navigate to a placeholder shell and '
-      'never to a second card list',
+      'F-M1/AC-21: "Sổ tay" and "Nhật ký" list their shipped destinations, '
+      '"Ý tưởng" stays a placeholder, and no tab renders a second card list',
       (WidgetTester tester) async {
         await tester.pumpWidget(
           _host(
@@ -865,44 +906,131 @@ void main() {
                   title: 'Đi biển',
                 ),
               ]),
+              openNotebook: (BuildContext _) async {},
+              openSkillProfile: (BuildContext _) async {},
+              openJournal: (BuildContext _) async {},
             ),
           ),
         );
         await tester.pumpAndSettle();
 
-        const Map<SoloStageOneTab, String> labels = <SoloStageOneTab, String>{
-          SoloStageOneTab.muonLam: 'Muốn làm',
-          SoloStageOneTab.yTuong: 'Ý tưởng',
-          SoloStageOneTab.soTay: 'Sổ tay',
-          SoloStageOneTab.nhatKy: 'Nhật ký',
-        };
-        Future<void> tapTab(SoloStageOneTab tab) async {
-          await tester.tap(
-            find.descendant(
-              of: find.byKey(const Key('solo_stage_one_tab_bar')),
-              matching: find.text(labels[tab]!),
-            ),
-          );
-          await tester.pumpAndSettle();
-        }
+        // Only "Ý tưởng" has no shipped owning story, so it is the only tab
+        // that keeps the §6 "sắp có" answer (F-M1 solution §6, OQ-1).
+        await _tapSoloTab(tester, SoloStageOneTab.yTuong);
+        expect(
+          find.byKey(const Key('solo_tab_placeholder_yTuong')),
+          findsOneWidget,
+        );
+        expect(find.text('Đi biển'), findsNothing);
 
-        for (final SoloStageOneTab tab in SoloStageOneTab.values) {
-          if (tab == SoloStageOneTab.muonLam) {
-            continue;
-          }
-          await tapTab(tab);
+        await _tapSoloTab(tester, SoloStageOneTab.soTay);
+        expect(
+          find.byKey(const Key('solo_tab_destinations_soTay')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('solo_destination_row_notebook')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('solo_destination_row_skill_profile')),
+          findsOneWidget,
+        );
+        expect(find.text('Sổ tay người yêu'), findsOneWidget);
+        expect(find.text('Những gì bạn giỏi'), findsOneWidget);
+        expect(find.text('Đi biển'), findsNothing);
 
-          expect(
-            find.byKey(Key('solo_tab_placeholder_${tab.name}')),
-            findsOneWidget,
-          );
-          // The single card store stays on "Muốn làm": no other tab renders
-          // a card list of its own.
-          expect(find.text('Đi biển'), findsNothing);
-        }
+        await _tapSoloTab(tester, SoloStageOneTab.nhatKy);
+        expect(
+          find.byKey(const Key('solo_tab_destinations_nhatKy')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('solo_destination_row_journal')),
+          findsOneWidget,
+        );
+        expect(find.text('Nhật ký riêng'), findsOneWidget);
+        expect(find.text('Đi biển'), findsNothing);
 
-        await tapTab(SoloStageOneTab.muonLam);
+        await _tapSoloTab(tester, SoloStageOneTab.muonLam);
         expect(find.text('Đi biển'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'F-M1: each destination row calls its own opener exactly once',
+      (WidgetTester tester) async {
+        final List<String> opened = <String>[];
+
+        await tester.pumpWidget(
+          _host(
+            HomeScreen(
+              resolvePairingStatus: () async => PairingStatus.unpaired,
+              activityCardRepository: _FakeActivityCardRepository(),
+              openNotebook: (BuildContext _) async => opened.add('notebook'),
+              openSkillProfile: (BuildContext _) async => opened.add('skill'),
+              openJournal: (BuildContext _) async => opened.add('journal'),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await _tapSoloTab(tester, SoloStageOneTab.soTay);
+        await tester.tap(find.byKey(const Key('solo_destination_row_notebook')));
+        await tester.pumpAndSettle();
+        expect(opened, <String>['notebook']);
+
+        await tester.tap(
+          find.byKey(const Key('solo_destination_row_skill_profile')),
+        );
+        await tester.pumpAndSettle();
+        expect(opened, <String>['notebook', 'skill']);
+
+        await _tapSoloTab(tester, SoloStageOneTab.nhatKy);
+        await tester.tap(find.byKey(const Key('solo_destination_row_journal')));
+        await tester.pumpAndSettle();
+        expect(opened, <String>['notebook', 'skill', 'journal']);
+      },
+    );
+
+    testWidgets(
+      'F-M1 seam B: the real opener pushes an independent route that does not '
+      'carry the solo tab bar',
+      (WidgetTester tester) async {
+        final CupidDatabase database = CupidDatabase(NativeDatabase.memory());
+        addTearDown(database.close);
+        getIt.registerSingleton<ContextNotebookRepository>(
+          ContextNotebookRepository(
+            dao: ContextNotebookDao(database),
+            ownerKeyStore: BackendUserIdStore()..updateUserId('user-1'),
+          ),
+        );
+        final _RecordingNavigatorObserver observer =
+            _RecordingNavigatorObserver();
+
+        await tester.pumpWidget(
+          _host(
+            HomeScreen(
+              resolvePairingStatus: () async => PairingStatus.unpaired,
+              activityCardRepository: _FakeActivityCardRepository(),
+            ),
+            navigatorObservers: <NavigatorObserver>[observer],
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(observer.pushed, hasLength(1));
+
+        await _tapSoloTab(tester, SoloStageOneTab.soTay);
+        await tester.tap(find.byKey(const Key('solo_destination_row_notebook')));
+        await tester.pumpAndSettle();
+
+        // One more route on the stack, and the destination owns the whole
+        // screen: it is not a tab body of the solo shell.
+        expect(observer.pushed, hasLength(2));
+        expect(
+          find.byKey(const Key('solo_stage_one_tab_bar')),
+          findsNothing,
+        );
       },
     );
 
