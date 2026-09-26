@@ -169,7 +169,7 @@ chi tiết thì các test đó đỏ.
 
 ## Story Runtime Startup Smoke
 
-**Status: PASS.** Chạy trên `main()` đã ship, không phải `main_preview.dart`.
+**Result: PASS.** Chạy trên `main()` đã ship, không phải `main_preview.dart`.
 
 Runtime registry entry: `data/devops/system/runtime-command-registry.json` →
 `mobile-app` (`path: mobile`, `buildCommand: flutter build apk --debug`).
