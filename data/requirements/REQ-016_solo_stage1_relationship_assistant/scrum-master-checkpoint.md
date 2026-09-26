@@ -86,7 +86,59 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 - Round 1-35 narrative in git history of this file — superseded by the table
   and "Current cursor" sections above.
 
-## Current cursor (Round 39, `continue parallel`, 2026-09-26 — integration review ran, PATCH_REQUIRED, rework in flight)
+## Current cursor (Round 40, `continue parallel`, 2026-09-26 — F-I1 tech-lead decision landed, mobile-dev patch1 BLOCKED, both blockers fixed, patch2 dispatched)
+
+- `Alan-Techlead` patch1 run (`RUN-...-tech-lead-patch1`) completed
+  (`calendar_event_state_decision: REGISTER`); its run file was stuck stale
+  `ACTIVE` (transcript-path mismatch, known failure mode) — reconciled via
+  direct `.claude/hooks/release-parallel-run.sh <run-id>`, scheduler
+  `active_runs`/`paused_runs`/`blocked_runs` now clean. Decision committed to
+  `STORY-013/architecture/solution.md` §7 Addendum (commit `deecdeaf`).
+- Dispatched `Alex-Mobile-Dev` patch1 (RunId `...-mobile-dev-patch1`) to
+  register the 3 tables + rerun parity test. **Returned BLOCKED** (run file
+  terminal, `status: BLOCKED`) with two distinct, correctly-diagnosed
+  blockers — not retried on the same RunId (terminal), a NEW RunId used
+  instead:
+  1. `WRONG_OPERATING_ROOT_FOR_F-I1` — STORY-013's story branch predates the
+     sibling-story merges (STORY-009/010, `calendar_event_state` owner) that
+     introduce the very tables F-I1 needs; the fix literally could not
+     compile at that `BaseHead`.
+  2. `TEST_GATE_PHASE_STATUS` — `master-plan.md` + 6 phase files used literal
+     `Status: COMPLETE` (pre-flagged non-blocking watch item from Round 39,
+     Alan-Techlead-3's duplicate message) — the code-writer stop gate only
+     accepts `DONE|SKIPPED|DEFERRED|WAIVED|N/A`. Correctly declined by
+     Alex-Mobile-Dev as out of his WriteScope / not his evidence to fabricate.
+- **Both fixed by Scrum Master directly (own authority, no specialist
+  needed):**
+  1. `git-story-boundary.sh sync-target --req
+     REQ-016_solo_stage1_relationship_assistant --story
+     STORY-013_graceful_exit_and_return` — clean merge, no conflict, merged
+     the integration branch into the STORY-013 story branch. New
+     `BaseHead: d95d1eeedfb6fad111a6ffa5a78256a7eb8b6256`. Verified the 3
+     table files now physically exist in the synced worktree.
+  2. Relabeled `Status: COMPLETE` -> `Status: DONE` in `master-plan.md`
+     (Phase Overview table) and all 6 `phase-P*.md` files' own `## 7. Status`
+     sections, in the STORY-013 worktree. Commit `b08bd4be`.
+- Re-dispatched `Alex-Mobile-Dev` as patch2 (RunId `...-mobile-dev-patch2`,
+  `Session-Recovery: YES`, `BaseHead: d95d1eeedfb6fad111a6ffa5a78256a7eb8b6256`),
+  same task as patch1 (register `portrait_answers`/`relationship_labels`/
+  `calendar_event_state` via `_ownedBy(...)`, correct the parity test's
+  expected total table count, run only that test file, update
+  `test-results.md`, no self-commit), explicitly told both patch1 blockers
+  are already resolved. **In flight — awaiting SubagentStop/mailbox
+  notification, not polling.**
+- **Next resume action:** on `Alex-Mobile-Dev` patch2 `MOBILE_COMPLETE: YES`,
+  verify (3-part protocol), commit (Scrum Master only), then
+  `git-story-boundary.sh merge --req REQ-016_solo_stage1_relationship_assistant
+  --story STORY-013_graceful_exit_and_return` to land STORY-013's rework back
+  into the integration branch. Then proceed exactly per the remaining Round
+  39 plan below (F-I2 devops pass + mobile-visual-audit, F-I3
+  configuration-guide.md fix, fresh `Iris-QC` requirement-integration-review,
+  then land-integration). If patch2 also BLOCKS, diagnose fresh — do not
+  assume it is one of the two already-fixed blockers without checking the
+  new run file's `blocker` text first.
+
+## Superseded cursor (Round 39, `continue parallel`, 2026-09-26 — integration review ran, PATCH_REQUIRED, rework in flight)
 
 - `Iris-QC` ran `Mode: requirement-integration-review` (RunId
   `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-reviewer`) on the
