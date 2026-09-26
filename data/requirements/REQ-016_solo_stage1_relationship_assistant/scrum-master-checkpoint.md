@@ -86,7 +86,62 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 - Round 1-35 narrative in git history of this file — superseded by the table
   and "Current cursor" sections above.
 
-## Current cursor (Round 40, `continue parallel`, 2026-09-26 — F-I1 tech-lead decision landed, mobile-dev patch1 BLOCKED, both blockers fixed, patch2 dispatched)
+## Current cursor (Round 41, `continue parallel`, 2026-09-26 — F-I2/F-I3 devops dispatched, mobile-visual-audit blocked on lock, patch1 run closed out)
+
+- Resolved OPEN_RUNS Stop-hook guard re-trigger on
+  `RUN-...-STORY-013_graceful_exit_and_return-mobile-dev-patch1`: per
+  `.agent-contract/parallel-execution-policy.md` ("BLOCKED... must be
+  reported until Scrum Master routes rework... or intentionally parks
+  them"), adding only `waiting_reason`/`next_resume_action` while leaving
+  `status: BLOCKED` was NOT sufficient to stop the guard re-flagging it.
+  Rework was already routed and landed (patch2, `MOBILE_COMPLETE: YES`,
+  merged `753d2a86`), so the run file's own `status` field now reads
+  `COMPLETED` with `resolution: SUPERSEDED_BY_REWORK` and
+  `resolved_by_run_id` pointing at patch2 — matching the precedent set by
+  the terminal `...-NONE-reviewer` run file, where `status: COMPLETED` is
+  independent of business outcome (there: `review_outcome: PATCH_REQUIRED`;
+  here: superseded-without-completing). `waiting_reason`/`next_resume_action`
+  text kept as-is for audit trail.
+- Dispatched `Frank-Devops` (`Flow: parallel-requirement`, `Story: NONE`,
+  `Mode: devops-implementation`, RunId
+  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-devops-fi2fi3`,
+  `ConcurrencyClass: code-writer` — `integration-review` class is
+  reviewer-only per `BAD_CONCURRENCY_CLASS`, `LockScope:
+  requirement-state:REQ-016_solo_stage1_relationship_assistant`, worktree =
+  the existing integration worktree, `BaseHead: 753d2a86...`) for F-I2
+  action item 5 (`integration-review/build-runtime-evidence.md`: real build +
+  real app-launch smoke, `## Integration Build & Runtime`, plus a
+  confirm/deny on whether `BUG-20260923-001`'s 11 `test/core/database/` reds
+  are version-lag only) and F-I3 action item 7
+  (`deployment/configuration-guide.md`: add local-notification section, fix
+  the stale POST_NOTIFICATIONS single-consumer claim). **In flight — awaiting
+  SubagentStop/mailbox notification, not polling.**
+- Attempted to dispatch `Alex-Mobile-Dev` (same requirement-level pattern,
+  `Mode: requirement-mobile-visual-audit`, RunId
+  `...-NONE-mobile-dev-visualaudit`) for F-I2 action item 6
+  (`integration-review/mobile-visual-audit.md`) in the SAME batch. **Blocked
+  by `guard-parallel-spawn.sh` [GENERIC]: `requirement-state:
+  REQ-016_solo_stage1_relationship_assistant` lock already held** by the
+  just-spawned Frank-Devops run. Expected/correct serialization (no
+  finer-grained lock class exists for requirement-level integration-review
+  artifacts) — NOT a bug, not retried with a workaround lock. No orphaned run
+  file was created for this blocked attempt (confirmed via scheduler dump).
+- **Next resume action:** on Frank-Devops `DEVOPS_COMPLETE: YES` (or a typed
+  blocker), run the 3-part verification protocol, commit its two files inside
+  the integration worktree (Scrum-Master-owned, no self-commit by the
+  specialist), refresh `git-story-boundary.sh refresh-base` if needed, THEN
+  re-dispatch `Alex-Mobile-Dev` for F-I2 action item 6 (`BaseHead` re-derived
+  from the then-current integration HEAD via a fresh `handoff-build.sh
+  spawn`, not reused from the blocked attempt above). After both land,
+  dispatch a FRESH `Iris-QC` requirement-integration-review (new RunId) scoped
+  to: `stage1_wipe_registry.dart`, the parity test result, the configuration
+  guide section, and the two new integration-review evidence files (per the
+  prior review's own closing note — the 9 PASS rows do not need
+  re-verification). On `Outcome: CLEAN`/`DEFERRED_ONLY`: re-sync `main` if it
+  moved, `cleanup-requirement`, `land-integration`, flip `req_master.md` +
+  `master_requirements_list.md` to `DONE`.
+
+## Superseded cursor (Round 40, `continue parallel`, 2026-09-26 — F-I1 tech-lead decision landed, mobile-dev patch1 BLOCKED, both blockers fixed, patch2 dispatched)
 
 - `Alan-Techlead` patch1 run (`RUN-...-tech-lead-patch1`) completed
   (`calendar_event_state_decision: REGISTER`); its run file was stuck stale
