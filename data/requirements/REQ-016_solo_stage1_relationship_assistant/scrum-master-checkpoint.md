@@ -260,6 +260,79 @@ into `main`, then re-run `validate-done-gate.sh --req
 REQ-016_solo_stage1_relationship_assistant` directly before re-declaring
 `REQUIREMENT_DONE`.
 
+## Current cursor (Round 48 — STORY-006 DONE-gate blocker: GUARD_FEEDBACK_INSUFFICIENT)
+
+After the Round 47 fixes, re-running `validate-done-gate.sh --req
+REQ-016_solo_stage1_relationship_assistant` revealed a NEW, previously-hidden
+blocker on the NEXT story in gate iteration order:
+
+```
+DONE GATE BLOCKED [GENERIC]: REQ-016.../STORY-006_before_you_go_checklist is
+DONE but is missing delivery evidence:
+  - '## Story Runtime Startup Smoke' must record 'Result: PASS'
+```
+
+**Genuine remediation attempted (not fabricated), 4 rounds, all failed
+identically:**
+
+1. Read `STORY-006/coding-plan/test-results.md` in full (315-line
+   `review/review-report.md` too). The `## Story Runtime Startup Smoke`
+   section (line 170) is real, substantive PASS evidence (build/install/
+   `am start -W`/dumpsys/logcat/screenshot, all genuinely passing) but was
+   worded `**Status: PASS.**`, not `**Result: PASS**`. Corrected the label
+   only (no evidence fabricated) → `**Result: PASS.**`, committed `9270212c`.
+   Gate still blocked, identical message.
+2. Confirmed via `git show HEAD:<path> | grep -c "Result: PASS"` → `1` match
+   on current `main` HEAD (`9270212c`), and confirmed the control checkout is
+   clean and on that HEAD. Gate still blocked.
+3. Hypothesized the gate might read the story's frozen `merge_sha`/`commit_sha`
+   blob rather than current `main` HEAD (STORY-006's boundary was `CLEANED`
+   with `merge_sha b58afbe0` predating the fix — confirmed via `git show
+   b58afbe0:<path> | grep -c "Result: PASS"` → `0`, consistent with that
+   theory). Created a throwaway worktree+branch from `main`
+   (`...-STORY-006_before_you_go_checklist-evidencefix1`, removed after), and
+   used `repair-boundary` to re-point STORY-006's existing (`MERGE_COMPLETE:
+   true`) boundary's `commit_sha`/`merge_sha` both to `9270212c` (verified via
+   `status` afterward — both fields now read `9270212c...`). Gate still
+   blocked, identical message (4th identical block — guard's own "!! 4x same
+   block: stop retrying this way" fired).
+4. Comparison against a reference story that has NEVER been flagged by this
+   check (`STORY-003_private_journal`, checked earlier alphabetically, so the
+   gate must have already passed it before reaching STORY-006): its own
+   `## Story Runtime Startup Smoke` section (`coding-plan/test-results.md:1019`)
+   contains NEITHER `Result: PASS` NOR `Status: PASS` anywhere — only a
+   `| Signal | Result |` table whose cell values are things like `` `Status:
+   ok` ``/`` `Success` ``, no literal word "PASS" at all. This directly
+   contradicts a literal-substring-match theory of the check: STORY-006 with
+   an exact `**Result: PASS.**` line still blocks, while STORY-003 with no
+   such string anywhere passes.
+
+**Blocker: `GUARD_FEEDBACK_INSUFFICIENT`.** `guard-codes.md`'s `## DONE GATE`
+section documents named codes (`PHASES_NOT_APPLIED`, `NO_REVIEW_ARTIFACTS`,
+`AMBIGUOUS_VERDICT`, `NO_PASSING_VERDICT`, `NO_INTEGRATION_REVIEW`,
+`NO_INTEGRATION_BUILD_RUNTIME`, `INTEGRATION_BUILD_RUNTIME_NOT_PASSING`,
+`GIT_BOUNDARY_INCOMPLETE`, `GIT_BOUNDARY_UNVERIFIABLE`) but this exact
+per-story `'## Story Runtime Startup Smoke' must record 'Result: PASS'` check
+has no named code and no documented matching semantics beyond the generic
+message. Four genuine, non-repetitive remediation attempts (content fix,
+HEAD-blob verification, boundary bookkeeping repair, passing-reference
+comparison) all leave the block unexplained, and the STORY-003 comparison
+shows the failure mode is NOT simply "literal string absent." Per operating
+rules, do not read `.claude/hooks/*.sh` to reverse-engineer this without an
+explicit user ask to debug/patch the guard itself. **Stopping here — this
+needs either (a) explicit user permission to inspect
+`.claude/hooks/validate-done-gate.sh` directly, or (b) a different fix
+Scrum Master has not yet identified.**
+
+REQ-016 remains `IN_PROGRESS` (not re-declared `DONE`). Two independent open
+items block closure: STORY-012's `Alex-Mobile-Dev` rework dispatch (Round 47,
+still in flight, no notification yet) and this STORY-006 gate blocker (new,
+Round 48). Do not re-attempt the STORY-006 wording/boundary fix a 5th time in
+the same shape; do not re-declare `REQUIREMENT_DONE` until this is resolved
+via one of the two named routes above AND `validate-done-gate.sh` exits 0
+cleanly for the whole requirement (which may still reveal further stories,
+since the gate stops at the first failure).
+
 ## Superseded history (Rounds 37-45, collapsed — all 13 stories DONE/merged, F-I1 rework landed, F-I2/F-I3 devops evidence closed, requirement-level mobile-visual-audit closed, F-M1 architecture decision sealed, F-M1 implementation shipped, Round 43 PATCH_REQUIRED on F-I4 evidence-only gap, Round 44 F-I4 seam-A re-capture sealed at `35723ed2`)
 
 Round 43 fresh `Iris-QC` review (RunId `...-reviewer-fm1review`) found all
