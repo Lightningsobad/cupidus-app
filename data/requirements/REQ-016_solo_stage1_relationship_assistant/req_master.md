@@ -260,15 +260,15 @@ payload widget: thêm một khoá nhãn-mí pha mới vào `architecture/contrac
 | STORY-002 | Xuất lời mời — khung nhại + mad-libs | complex | DONE | `STORY-002_invite_message_composer/story_master.md` |
 | STORY-003 | Nhật ký riêng | standard | DONE | `STORY-003_private_journal/story_master.md` |
 | STORY-004 | Gợi ý quà, và sổ tay / hồ sơ kỹ năng thu thập tại chỗ | complex | DONE | `STORY-004_relationship_notebook_and_gift_ideas/story_master.md` |
-| STORY-005 | Mồi chuyện — kho câu thường xanh và sự kiện có lịch | standard | TODO | `STORY-005_conversation_starters/story_master.md` |
+| STORY-005 | Mồi chuyện — kho câu thường xanh và sự kiện có lịch | standard | DONE | `STORY-005_conversation_starters/story_master.md` |
 | STORY-006 | "Trước giờ đi" — checklist tất định (SB-211) | standard | DONE | `STORY-006_before_you_go_checklist/story_master.md` |
-| STORY-007 | "Cảm ơn + chốt việc kế tiếp" (SB-212) | standard | TODO | `STORY-007_thank_you_and_next_plan/story_master.md` |
-| STORY-008 | Kịch bản buổi hẹn 3 phần | standard | TODO | `STORY-008_date_script_three_parts/story_master.md` |
+| STORY-007 | "Cảm ơn + chốt việc kế tiếp" (SB-212) | standard | DONE | `STORY-007_thank_you_and_next_plan/story_master.md` |
+| STORY-008 | Kịch bản buổi hẹn 3 phần | standard | DONE | `STORY-008_date_script_three_parts/story_master.md` |
 | STORY-009 | Chân dung "theo cách BẠN nhìn" | standard | DONE | `STORY-009_your_view_portrait/story_master.md` |
-| STORY-010 | Bảng tra ăn khớp | complex | TODO | `STORY-010_compatibility_lookup/story_master.md` |
-| STORY-011 | Vỏ hoàng đạo / trắc nghiệm | standard | TODO | `STORY-011_zodiac_quiz_shell/story_master.md` |
+| STORY-010 | Bảng tra ăn khớp | complex | DONE | `STORY-010_compatibility_lookup/story_master.md` |
+| STORY-011 | Vỏ hoàng đạo / trắc nghiệm | standard | DONE | `STORY-011_zodiac_quiz_shell/story_master.md` |
 | STORY-012 | Trạng thái theo pha, widget, và bộ đếm "của cải đang lớn" | complex | DONE | `STORY-012_phase_status_and_widget/story_master.md` |
-| STORY-013 | Lối ra khi im lặng/bị từ chối, và lối quay lại sau vắng | standard | TODO | `STORY-013_graceful_exit_and_return/story_master.md` |
+| STORY-013 | Lối ra khi im lặng/bị từ chối, và lối quay lại sau vắng | standard | DONE | `STORY-013_graceful_exit_and_return/story_master.md` |
 
 Thứ tự phụ thuộc và bản đồ seed → story: `requirements/requirements.md` →
 `## Seed To Story Mapping` và `## Story Order And Dependencies`.
