@@ -42,8 +42,9 @@ collapsed to one line; full trail lives in each story's own
    (confirmed non-blocking for STORY-007, not caused by it). Needs a PO/Tech
    Lead decision; root decision never escalated.
 
-6. **OPEN, BLOCKING — escalated to user this round (Round 41), REQ-016 cannot
-   be marked DONE until resolved.** F-I2 action item 6
+6. **RESOLVED by user 2026-09-26 (Round 42): wire the 3 tabs to their
+   already-shipped screens** (not deferred; D-3 stands as originally written).
+   Implementation now in flight — see Round 42 cursor below. Was: F-I2 action item 6
    (`integration-review/mobile-visual-audit.md`, Round 41, committed `c1c538ea`)
    found **F-M1**: in solo/unpaired mode — REQ-016's own premise — 3 of the 4
    solo stage-1 tabs (`Sổ tay`, `Nhật ký`, and the Me-hub path to `Hồ sơ kỹ
@@ -115,7 +116,36 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 - Round 1-35 narrative in git history of this file — superseded by the table
   and "Current cursor" sections above.
 
-## Current cursor (Round 41, `continue parallel`, 2026-09-26 — F-I2/F-I3 devops dispatched, mobile-visual-audit blocked on lock, patch1 run closed out)
+## Current cursor (Round 42, `continue parallel`, 2026-09-26 — user decided F-M1, Tech Lead dispatched to design the tab-wiring)
+
+- User answered the Open user decisions item 6 escalation (AskUserQuestion):
+  **wire the 3 tabs to the already-shipped screens**, not defer D-3. D-3
+  stands as originally written; do not reopen it again.
+- Dispatched `Alan-Techlead` (`Flow: parallel-requirement`, `Story: NONE`,
+  `Mode: architecture-solution`, RunId
+  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-tech-lead-fm1`,
+  `ConcurrencyClass: planning`, worktree = the existing integration worktree,
+  `BaseHead: c1c538ea67e642a0a9c8c3b9ac39debe9796fef1`) to decide the concrete
+  navigation approach for wiring `Sổ tay`/`Nhật ký`/`Hồ sơ kỹ năng` tabs
+  directly to `JournalScreen`/`NotebookScreen`/`SkillProfileScreen` without
+  going through the paired-only `MeScreen`/`AppShell` path, and to recommend
+  `coding-plan` vs. direct `mobile-implementation` for the follow-up. Output:
+  `architecture/fm1-solo-tabs-solution.md`. **In flight — awaiting
+  SubagentStop/mailbox notification, not polling.**
+- **Next resume action:** on `TECH_LEAD_COMPLETE: YES`, 3-part verify + seal +
+  commit, then dispatch `Alex-Mobile-Dev` per the Tech Lead's
+  `next_mode_recommendation` (either a `coding-plan` follow-up first, or
+  direct `mobile-implementation`) to implement the wiring against the SAME
+  integration worktree/branch. After that lands, dispatch a FRESH `Iris-QC`
+  requirement-integration-review (new RunId) scoped to the F-M1 fix PLUS the
+  Round 41 F-I2/F-I3 evidence (`stage1_wipe_registry.dart`, parity test,
+  configuration guide, build-runtime-evidence.md, mobile-visual-audit.md) —
+  the 9 previously-PASS cross-story contracts still do not need
+  re-verification. On `Outcome: CLEAN`/`DEFERRED_ONLY`: re-sync `main` if
+  moved, `cleanup-requirement`, `land-integration`, flip `req_master.md` +
+  `master_requirements_list.md` to `DONE`.
+
+## Superseded cursor (Round 41, `continue parallel`, 2026-09-26 — F-I2/F-I3 devops dispatched, mobile-visual-audit blocked on lock, patch1 run closed out)
 
 - Resolved OPEN_RUNS Stop-hook guard re-trigger on
   `RUN-...-STORY-013_graceful_exit_and_return-mobile-dev-patch1`: per
