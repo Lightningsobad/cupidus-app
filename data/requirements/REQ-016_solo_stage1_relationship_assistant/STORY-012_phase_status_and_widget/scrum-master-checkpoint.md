@@ -382,9 +382,80 @@ roles (per mobile-dev's own routing, matches its `next_step`):
 2. N-2 (runtime registry `buildCommand` missing `--flavor local`) — routes to
    DevOps, unrelated to this story's own gate.
 
-**Next step: dispatch Iris-QC for S9 `full-story-review` (re-review), scoped
-to the six now-closed B-1..B-6 findings** at `BaseHead: a8aa1ff497a6a1fd7fdb5a74166b0beca6a3919e`,
-against `review/review-report.md` (S8) and `visual-fidelity/visual-fidelity-report.md`
-"Lượt patch #4" section. This is a fresh review pass (S8's own report is
-already a complete, closed artifact), not a continuation of the S8 reviewer
-run, so a new `Iris-QC` spawn is correct here, not `SendMessage`.
+**Next step (attempted, BLOCKED): dispatch Iris-QC for S9 `full-story-review`
+(re-review), scoped to the six now-closed B-1..B-6 findings**, using
+`.claude/hooks/handoff-build.sh spawn --target reviewer --mode full-story-review
+--flow parallel-story ...`, which correctly self-corrected `BaseHead` to
+`b58afbe073eff4e1ebb9151735221532a9cf5a82` (the story's branch point off
+`codex/REQ-016_solo_stage1_relationship_assistant-integration`, matching the S8
+run's own `review_base_head`, because the boundary's just-refreshed
+`BaseHead: a8aa1ff4...` would produce an empty review diff). This is a fresh
+review pass (S8's own report at `review/review-report.md` is already a
+complete, closed artifact with `review_outcome: PATCH_REQUIRED`), not a
+continuation of the S8 reviewer run — a new `Iris-QC` spawn was the correct
+call, not `SendMessage`.
+
+## BLOCKER — guard-parallel-spawn.sh [GENERIC], unresolved (2026-09-26)
+
+The `Agent(name: "Iris-QC", ...)` spawn was blocked twice with the byte-identical
+message (harness-truncated, ends mid-sentence with a literal ellipsis):
+
+> PARALLEL SPAWN GUARD BLOCKED [GENERIC]: story-review blocked; no completed
+> implementation lane with durable completion marker found for
+> REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget
+> (checked live parallel-run…
+
+The second occurrence added: `!! 3x same block: stop retrying this way — apply
+the fix exactly, or return a blocker.` Per that explicit instruction, the
+identical spawn call is not being retried a third time.
+
+Investigation performed before stopping (all via execution/inspection, never by
+reading `.claude/hooks/**` source, per operating rules):
+1. `.claude/hooks/guard-codes.md` `## PARALLEL SPAWN GUARD` section (lines
+   121-191) read in full — no documented subcode (`MISSING_FIELDS`,
+   `WORKTREE_MISSING`, `DIRTY_WORKTREE`, `STALE_BASEHEAD`, `LOCK_BUSY`,
+   `SCOPE_OVERLAP`, `CAP_REACHED`, `BAD_LOCK_CLASS`, `BAD_CONCURRENCY_CLASS`,
+   `DEP_NOT_MERGED`, `BAD_RUNID`, `BAD_TARGET`, `SCHEDULER_JSON_CORRUPT`)
+   matches "no completed implementation lane... found".
+2. `data/runtime/parallel-scheduler.json` inspected directly — `active_runs`,
+   `paused_runs`, `blocked_runs` are all `[]`; there is no `completed_runs` or
+   per-story tracking array in this schema at all.
+3. `data/runtime/parallel-runs/RUN-...-STORY-012_phase_status_and_widget-mobile-dev.json`
+   re-read in full — genuinely `status: "COMPLETED"`,
+   `completion_marker: "MOBILE_COMPLETE: YES"`,
+   `completion_markers: ["MOBILE_COMPLETE: YES"]`, `concurrency_class:
+   "code-writer"` — this run file, read directly, satisfies exactly what the
+   guard message says is missing. Its `worktree_head` field
+   (`0cf0abd7a5d70dd951841f241c58bd7e41e846b6`) is stale relative to the two
+   Scrum-Master commits made after it completed (`a8aa1ff4`, `8d568b9c`) — a
+   plausible but **unconfirmed** root cause (the guard may be matching on live
+   worktree HEAD rather than reading this run file's terminal `status`
+   directly, contrary to this session's own operating rule that "run file
+   `status` is the source of truth").
+4. `register-parallel-run.sh`, `release-parallel-run.sh`,
+   `validate-scheduler-json.sh` probed for a legitimate fix path: run with no
+   args and with `--help`, all three exited `0` with zero output — no usage
+   surface discoverable without reading source, which is out of bounds here
+   (no explicit user request to debug the hook implementation itself).
+5. `prune-parallel-runs.sh --apply --quiet` run — `scanned 9 run file(s); kept
+   9; prunable 0` — confirms no stale index entries to clear.
+6. `list-releasable-agents.sh` + `TaskStop` on all 4 printed names — all 4
+   already released (`No task found`), confirming no agent is actually stuck
+   mid-run; this is a pure spawn-gate block, not an orphaned agent.
+
+**Reported per operating rules: `GUARD_FEEDBACK_INSUFFICIENT`.** The guard
+block plus `guard-codes.md` do not give a fix that Scrum Master can apply
+without reading hook source (`guard-parallel-spawn.sh`, out of bounds without
+an explicit user request to debug it). Stopping here rather than retrying the
+identical spawn a third time.
+
+**Resumption**: once a user decision authorizes either (a) reading/patching
+`guard-parallel-spawn.sh` to diagnose the false block, or (b) an alternate
+route (e.g. a Tier-appropriate Scrum-Master lightweight path, if this story
+still qualifies — it does not, per `Story-Class: standard` /
+`Complexity: complex`, so Reviewer remains required), retry the exact same
+`handoff-build.sh spawn --target reviewer --mode full-story-review
+--flow parallel-story` call with `BaseHead: b58afbe073eff4e1ebb9151735221532a9cf5a82`,
+`RunId: RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-reviewer`.
+The story worktree itself is clean and fully committed (`8d568b9c`); nothing
+here needs redoing.
