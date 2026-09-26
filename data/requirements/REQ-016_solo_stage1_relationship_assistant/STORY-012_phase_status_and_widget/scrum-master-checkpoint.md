@@ -91,21 +91,26 @@ Next Valid Step:
      closes this story — do not fold into S10, do not block DONE on it,
      track separately (e.g. as a small hot-fix or a queued item once
      REQ-016 wave allows a non-story-scoped touch).
-3. Route S10 re-review to Iris-QC now (fresh spawn or continuation,
-   reviewer's choice), BaseHead = current worktree HEAD `6496c4f5`. Use the
-   same BaseHead-derivation caution as S9 (verify `git-story-boundary.sh
-   status` `base_head` hasn't drifted near HEAD before trusting the
-   auto-derived value; explicit
-   `b58afbe073eff4e1ebb9151735221532a9cf5a82` remains the correct
-   pre-implementation baseline unless a later reviewer pass explicitly
-   rebases it). Scope for S10: verify B-1a + B-7 + N-7 are actually closed;
-   do not re-open B-2..B-6 (already CLEAN in S9).
-4. On `Outcome: CLEAN`/`DEFERRED_ONLY`: `git-story-boundary.sh complete`, merge
-   to `codex/REQ-016_solo_stage1_relationship_assistant-integration`, mark
-   DONE, route the ux-spec header gap (Design-Surface/Design-Screen lines) to
-   Brainstormer/Pink-Designer, N-2 to DevOps, and the test-capture-name
-   follow-up (item 2 above) separately, then continue the REQ-016 wave /
-   close toward requirement integration review.
+3. **DONE 2026-09-26** — Iris-QC S10 `full-story-review`: **Outcome
+   DEFERRED_ONLY**, 0 blocking. Independently re-verified B-1a/B-7/N-7 closed
+   (own screenshot inspection + own old-name/new-name control run of
+   `visual_fidelity.py`), AC9 PASS all 7 screens, B-2..B-6 unregressed. Two
+   new non-blocking: **N-10** (capture harness hard-codes old
+   `implemented-*.png` names, same routing as the item 2 follow-up above) and
+   **N-11** (`test/features/activity_cards` suite unconditionally overwrites
+   STORY-002 PNGs, already reverted by reviewer via `git checkout --`, fold
+   into the same follow-up pass). Sealed `282454df`. `story_master.md` Review
+   ticked, Status: DONE.
+4. **NEXT** — Run `.claude/hooks/git-story-boundary.sh complete --req
+   REQ-016_solo_stage1_relationship_assistant --story
+   STORY-012_phase_status_and_widget`, merge to
+   `codex/REQ-016_solo_stage1_relationship_assistant-integration`, confirm
+   `master_requirements_list.md`/`req_master.md` story tracking reflects DONE.
+   Then route separately (NOT blocking DONE): the ux-spec header gap
+   (Design-Surface/Design-Screen lines) to Brainstormer/Pink-Designer, N-2 to
+   DevOps, and a standalone `mobile/test/**` WriteScope pass for N-10+N-11 to
+   mobile-dev. After that, check REQ-016 for remaining non-DONE stories; if
+   none, proceed toward requirement integration review.
 
 Do Not Re-read:
 - The full Alan-Techlead/Alex-Mobile-Dev dispatch narrative, crash/recovery,

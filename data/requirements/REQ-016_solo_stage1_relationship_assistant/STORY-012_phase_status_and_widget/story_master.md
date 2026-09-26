@@ -1,6 +1,6 @@
 # Story Master: STORY-012 Trạng thái theo pha, widget, và bộ đếm "của cải đang lớn"
 
-Status: IN_PROGRESS
+Status: DONE
 Complexity: complex
 Story-Class: standard
 Implementation Lane: shared (backend + mobile) — trên thực tế chỉ mobile-dev
@@ -40,20 +40,22 @@ Design-Screen: ngan-da-hen-ngay-dang-doi (alias: hub-waiting, hub-upcoming),
   `architecture/solution.md` §8b. P6/P9-P12 history unchanged, see
   `coding-plan/phase-P6..P12-*.md` and
   `visual-fidelity/visual-fidelity-report.md` "Lượt P12"/"Lượt patch #4".
-- [ ] Review (Reviewer) — S9 `full-story-review` (Iris-QC) Outcome:
-  **PATCH_REQUIRED** (`review/review-report.md`, `review/scope-gate.md`).
-  Both blockers now closed: **B-1a** (chip shape) and **B-7** (canvas-id
-  rename, settled by Tech Lead `architecture/solution.md` §8, mechanical
-  rename done) — commit `6496c4f5`. **N-7** (missing "Lượt patch #4" note)
-  also closed same commit; N-2 (DevOps buildCommand) stays deferred. The
-  earlier B-3 `minWidth` routing item is stale/moot — already fixed in
-  `a8aa1ff4`. **New non-blocking item for Scrum Master routing (not a review
-  blocker)**: `mobile/test/features/phase_status/phase_status_line_test.dart:627`
-  and the P12 capture harness hard-code the OLD `implemented-*.png` names —
-  out of this pass's WriteScope (`mobile/test/**`) — so a future
-  `CAPTURE_VISUALS=true` run regenerates old names and would re-red the
-  gate; needs a small standalone follow-up pass with `mobile/test/**`
-  WriteScope, tracked separately from S10. Next: S10 re-review by Iris-QC.
+- [x] Review (Reviewer) — S10 `full-story-review` (Iris-QC) Outcome:
+  **DEFERRED_ONLY**, 0 blocking findings (`review/review-report.md`,
+  `review/scope-gate.md`). Independently re-verified: **B-1a** (chip shape,
+  own screenshot inspection), **B-7** (own old-name/new-name control run of
+  `visual_fidelity.py`), **N-7** (patch note content) all closed for real;
+  AC9 PASS across all 7 canvas screen ids; B-2..B-6 unregressed. Two new
+  non-blocking findings for separate routing (NOT part of this story's DONE
+  gate): **N-10** — capture harness hard-codes OLD `implemented-*.png` names
+  at `mobile/test/features/phase_status/phase_status_line_test.dart:627` and
+  in the P12 widget harness, needs a standalone follow-up pass with
+  `mobile/test/**` WriteScope or a future `CAPTURE_VISUALS=true` run will
+  re-red this story's fidelity gate; **N-11** — `test/features/activity_cards`
+  suite overwrites STORY-002's visual-fidelity PNGs unconditionally (already
+  reverted by reviewer via `git checkout --`), same family as N-10, route to
+  the same follow-up pass. N-1..N-6, N-8, N-9, N-2 (DevOps), and S7's R-2/D-*
+  items remain open, unchanged ownership. Sealed `282454df`.
 
 ## Depends On
 - STORY-001 — mọi pha đọc từ trạng thái thẻ trong kho chung.
