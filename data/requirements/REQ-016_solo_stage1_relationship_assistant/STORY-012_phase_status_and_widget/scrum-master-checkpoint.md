@@ -70,30 +70,42 @@ Next Valid Step:
    table at §8b (7 labels -> 5 canvas ids -> 10 new `implemented-*.png`
    names). Sealed `802b3fa6` (worktree) + `4108ac86` (main, Design Ruling Log
    row B-7) + `story_master.md` `Design-Screen:` fixed to canvas ids.
-2. Dispatch one mobile-dev pass (code-writer, BaseHead = current worktree
-   HEAD `802b3fa6ad68e400791e3448154d7e3eed7f2e84`) for:
-   - **B-1a**: rounded-pill chip in `phase_status_line.dart`'s
-     `_PhaseStatusAction`, per `ux/uiux-spec.md` §1's 2026-09-26 B-1 patch.
-   - **B-7 mechanical part**: `git mv` the 10 `implemented-*.png` files per
-     `architecture/solution.md` §8b's exact table, update the pairing table
-     at `visual-fidelity-report.md:85-93`, recapture cell 1 under the new
-     name. Evidence must be a control run (old name red / new name green) of
-     `.claude/hooks/lib/visual_fidelity.py`, not `verify-story-visual-fidelity-gate.sh`
-     (silently exits 0 regardless — see §8d).
-   - **N-7**: add "Lượt patch #4" note to `coding-plan/test-results.md`.
-   WriteScope: `mobile/lib/features/phase_status/presentation/phase_status_line.dart`,
-   `coding-plan/test-results.md`, `visual-fidelity/`.
-3. Then S10 re-review by Iris-QC (fresh spawn or continuation, reviewer's
-   choice) using the same BaseHead-derivation caution as S9 (verify
-   `git-story-boundary.sh status` `base_head` hasn't drifted near HEAD before
-   trusting the auto-derived value; explicit `b58afbe073eff4e1ebb9151735221532a9cf5a82`
-   remains the correct pre-implementation baseline unless a later reviewer
-   pass explicitly rebases it).
+2. **DONE 2026-09-26** — Alex-Mobile-Dev closed B-1a (rounded-pill chip in
+   `_PhaseStatusAction`, drops `left: md` indent, `colorText` not
+   `colorAccentPink` for ADR-004b contrast), the B-7 mechanical rename (10
+   files per §8b, pairing table updated, cell 1 recaptured post-fix,
+   contrastive old-name-red/new-name-green evidence recorded via
+   `.claude/hooks/lib/visual_fidelity.py`, NOT the always-green
+   `verify-story-visual-fidelity-gate.sh`), and N-7 (test-results.md "Lượt
+   patch #4" note, also corrected the S9 diff line count to +225/-2 per
+   `git show --numstat`). Local verification run: `flutter test
+   test/features/phase_status` all green, `flutter analyze
+   lib/features/phase_status` 0 error/0 warning. Sealed `6496c4f5`
+   (14 files, WriteScope-clean per `git status` check before commit).
+   - **New non-blocking routing item (not a review blocker for S10)**:
+     `mobile/test/features/phase_status/phase_status_line_test.dart:627` and
+     the P12 capture harness hard-code the OLD `implemented-*.png` names —
+     out of this pass's WriteScope. A future `CAPTURE_VISUALS=true` run would
+     regenerate old names and re-red the fidelity gate. Needs a small
+     standalone follow-up pass with `mobile/test/**` WriteScope AFTER S10
+     closes this story — do not fold into S10, do not block DONE on it,
+     track separately (e.g. as a small hot-fix or a queued item once
+     REQ-016 wave allows a non-story-scoped touch).
+3. Route S10 re-review to Iris-QC now (fresh spawn or continuation,
+   reviewer's choice), BaseHead = current worktree HEAD `6496c4f5`. Use the
+   same BaseHead-derivation caution as S9 (verify `git-story-boundary.sh
+   status` `base_head` hasn't drifted near HEAD before trusting the
+   auto-derived value; explicit
+   `b58afbe073eff4e1ebb9151735221532a9cf5a82` remains the correct
+   pre-implementation baseline unless a later reviewer pass explicitly
+   rebases it). Scope for S10: verify B-1a + B-7 + N-7 are actually closed;
+   do not re-open B-2..B-6 (already CLEAN in S9).
 4. On `Outcome: CLEAN`/`DEFERRED_ONLY`: `git-story-boundary.sh complete`, merge
    to `codex/REQ-016_solo_stage1_relationship_assistant-integration`, mark
    DONE, route the ux-spec header gap (Design-Surface/Design-Screen lines) to
-   Brainstormer/Pink-Designer and N-2 to DevOps separately, then continue the
-   REQ-016 wave / close toward requirement integration review.
+   Brainstormer/Pink-Designer, N-2 to DevOps, and the test-capture-name
+   follow-up (item 2 above) separately, then continue the REQ-016 wave /
+   close toward requirement integration review.
 
 Do Not Re-read:
 - The full Alan-Techlead/Alex-Mobile-Dev dispatch narrative, crash/recovery,

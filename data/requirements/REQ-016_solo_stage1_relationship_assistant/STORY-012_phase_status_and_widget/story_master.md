@@ -28,34 +28,32 @@ Design-Screen: ngan-da-hen-ngay-dang-doi (alias: hub-waiting, hub-upcoming),
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
 - [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
 - [x] Coding Plan (Tech Lead) — `coding-plan/master-plan.md`, `coding-plan/coding-agent-guide.md`, P1–P8
-- [ ] Implementation (Development) — mobile-dev P1-P12 complete per
+- [x] Implementation (Development) — mobile-dev P1-P12 complete per
   `coding-plan/master-plan.md` Phases Overview (all Status: DONE, BaseHead
   `536d47cb92ff747505e7b6f1ac0469aac254cb55`). S8 found AC9 FAIL with 6
   blocking visual-fidelity findings B-1..B-6; Tech Lead architecture rework
   (B-2/B-5/B-6, action_label) then one mobile-dev pass closed 5 of 6 for real
-  (B-2..B-6), commit `a8aa1ff4` (2026-09-26). S9 re-review reopened work:
-  **B-1a** (new blocking) — `action_label` data flows correctly but
-  `_PhaseStatusAction` in `phase_status_line.dart` renders bare pink text,
-  not the rounded-pill chip `ux/uiux-spec.md` §1's 2026-09-26 B-1 patch and
-  the canvas both require. Unchecked pending one more mobile-dev pass. P6/P9-
-  P12 history unchanged, see `coding-plan/phase-P6..P12-*.md` and
+  (B-2..B-6), commit `a8aa1ff4` (2026-09-26). S9 re-review reopened B-1a +
+  B-7; a further mobile-dev pass closed both for real: `_PhaseStatusAction`
+  now renders the rounded-pill chip (commit `6496c4f5`, 2026-09-26), and the
+  10 `implemented-*.png` files are renamed to canvas content-slug ids per
+  `architecture/solution.md` §8b. P6/P9-P12 history unchanged, see
+  `coding-plan/phase-P6..P12-*.md` and
   `visual-fidelity/visual-fidelity-report.md` "Lượt P12"/"Lượt patch #4".
 - [ ] Review (Reviewer) — S9 `full-story-review` (Iris-QC) Outcome:
-  **PATCH_REQUIRED** (`review/review-report.md`, `review/scope-gate.md`). 2
-  blocking: **B-1a** (chip shape, see Implementation note above) and **B-7**
-  — **SETTLED 2026-09-26 by Tech Lead** (`architecture/solution.md` §8, no
-  gate/config change, no product code): canvas id is the sole canonical
-  screen id; build labels are alias suffixes only. Remaining action is
-  mechanical: `git mv` 10 `implemented-*.png` files per §8b's table, update
-  the pairing table at `visual-fidelity-report.md:85-93`, recapture cell 1
-  under the new name. 9 non-blocking, incl. **N-7** ("Lượt patch #4" missing
-  from `coding-plan/test-results.md`) and N-2 (DevOps buildCommand, deferred).
-  The earlier B-3 `minWidth` routing item is stale/moot — already fixed in
-  `a8aa1ff4`. Next: one mobile-dev pass for B-1a + B-7 rename + N-7 +
-  cell-1 recapture, with old-name-vs-new-name control evidence from
-  `visual_fidelity.py` (see §8d). WriteScope for that pass:
-  `phase_status_line.dart`, `coding-plan/test-results.md`,
-  `visual-fidelity/`.
+  **PATCH_REQUIRED** (`review/review-report.md`, `review/scope-gate.md`).
+  Both blockers now closed: **B-1a** (chip shape) and **B-7** (canvas-id
+  rename, settled by Tech Lead `architecture/solution.md` §8, mechanical
+  rename done) — commit `6496c4f5`. **N-7** (missing "Lượt patch #4" note)
+  also closed same commit; N-2 (DevOps buildCommand) stays deferred. The
+  earlier B-3 `minWidth` routing item is stale/moot — already fixed in
+  `a8aa1ff4`. **New non-blocking item for Scrum Master routing (not a review
+  blocker)**: `mobile/test/features/phase_status/phase_status_line_test.dart:627`
+  and the P12 capture harness hard-code the OLD `implemented-*.png` names —
+  out of this pass's WriteScope (`mobile/test/**`) — so a future
+  `CAPTURE_VISUALS=true` run regenerates old names and would re-red the
+  gate; needs a small standalone follow-up pass with `mobile/test/**`
+  WriteScope, tracked separately from S10. Next: S10 re-review by Iris-QC.
 
 ## Depends On
 - STORY-001 — mọi pha đọc từ trạng thái thẻ trong kho chung.
