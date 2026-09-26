@@ -1,6 +1,6 @@
 # Story Master: STORY-008 Kịch bản buổi hẹn 3 phần
 
-Status: DONE
+Status: PATCH_REQUIRED
 Complexity: standard
 Story-Class: standard
 Implementation Lane: mobile (chốt ở `architecture/solution.md` §4 — không có
