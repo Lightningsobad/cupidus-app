@@ -134,60 +134,62 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 - Round 1-35 narrative in git history of this file — superseded by the table
   and "Current cursor" sections above.
 
-## Current cursor (Round 43, F-M1 implemented, verified, sealed — fresh Iris-QC review next)
+## Current cursor (Round 44, F-I4 seam-A re-capture dispatched — evidence-only patch, no code change needed)
 
-- `Alex-Mobile-Dev` (`Mode: mobile-implementation`, RunId
-  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-mobile-dev-fm1wiring`)
-  returned `MOBILE_COMPLETE: NO` with a structured `PREEXISTING_TEST_FAILURE`
-  blocker (pre-existing, out-of-scope — see below) but the F-M1 implementation
-  itself is complete. 3-part verification passed: agent releasable
-  (`list-releasable-agents.sh`); worktree `git diff --stat` against BaseHead
-  `9aadd52f` showed exactly the declared WriteScope (`home_screen.dart` +
-  `activity_card_hub_view_test.dart`, 447+/37-, HEAD unchanged — no
-  self-commit); full diff content of both files read and eyeballed — genuine,
-  well-documented, spec-compliant (destination-list-block widgets per
-  `fm1-solo-tabs-solution.md` §2-§3, 3 optional seam callbacks, correct l10n
-  key reuse, `Muốn làm`/`Ý tưởng`/paired-mode code untouched, AC-21/SC-1'
-  assertion preserved verbatim for every tab).
-- **3rd-import deviation accepted.** The doc's "exactly 2 imports" line was
-  scoped to preventing journal/notebook *internal* imports into
-  `home_screen.dart` (AC-17 boundary), not an absolute new-import cap.
-  Grep-verified: the file's pre-existing `_label` helper only ever used
-  framework `Localizations.localeOf`, never `AppL10n.of` — reusing the
-  existing l10n keys as the doc itself required genuinely needs the 3rd import
-  (`lib/l10n/generated/app_l10n.dart`, a shared app-wide resource, not a
-  journal/notebook internal). No other new import was added. Decision recorded
-  in the commit message; not to be re-litigated by a later reviewer as a
-  boundary violation.
-- **Blocker 1 (non-blocking to REQ-016) filed as a bug, not re-dispatched.**
-  `context_content_gate_test.dart:159` (BR-16) fails on a banned pack-phrase
-  doc comment in `zodiac_shell_resolver.dart:157`; proven pre-existing at the
-  run's own BaseHead `9aadd52f` (both files byte-identical); root cause
-  STORY-011 P2 (commit `27700367`), outside this run's WriteScope. Filed as
-  `BUG-20260927-001_context_content_gate_zodiac_pack_phrase_leak`
-  (`data/bugs/master_bugs_list.md` + `bug_master.md`). No bug-fixer dispatch
-  needed to unblock REQ-016; no mobile-dev re-dispatch needed either — the
-  F-M1 implementation itself is finished and its own required tests are green
-  apart from this one pre-existing, out-of-scope case.
-- Committed in the integration worktree as `3b51172f` (parent `9aadd52f`).
-  `Alex-Mobile-Dev` released via `TaskStop`.
-- **Next resume action:** dispatch a FRESH `Iris-QC`
-  requirement-integration-review (new RunId — prior terminal one is
-  `PATCH_REQUIRED`) scoped to: the F-M1 wiring fix
-  (`home_screen.dart` + `activity_card_hub_view_test.dart`, diff against
-  `753d2a86`..`3b51172f`), the accepted 3rd-import deviation (cite this
-  cursor's reasoning, do not re-litigate as a boundary violation), the new
-  `BUG-20260927-001` citation as an accepted non-blocking pre-existing
-  exclusion, plus the already-Round-41-closed F-I2/F-I3 evidence
-  (`stage1_wipe_registry.dart`, parity test, configuration guide,
-  `build-runtime-evidence.md`, `mobile-visual-audit.md`) — the 9
-  previously-PASS cross-story contracts do not need re-verification. On
-  `Outcome: CLEAN`/`DEFERRED_ONLY`: re-sync `main` if moved,
+- Fresh `Iris-QC` (RunId
+  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-reviewer-fm1review`)
+  returned `REVIEW_COMPLETE: YES`, `Outcome: PATCH_REQUIRED`. 3-part
+  verification passed: agent releasable; worktree diff matched declared
+  WriteScope exactly (`review-report.md` + `scope-gate.md`, HEAD unchanged at
+  `3b51172f`); full Round 43 section of the report read directly (offset/limit,
+  file is 32KB) — genuine, detailed, evidence-grounded (independently re-opened
+  PNGs, ran `git log -S`/`git merge-base --is-ancestor` for the BR-16
+  pre-existing proof, re-ran the 28/28 test suite, checked the 3rd-import
+  deviation against the AC-17 rule's actual purpose rather than trusting the
+  prior cursor's framing).
+- **Verdict: all F-M1 code/architecture/devops work from Rounds 40-43 is
+  correct and PASS** (14/14 verification rows PASS or accepted-exclusion). The
+  **sole blocking finding is F-I4**: `mobile-visual-audit.md` seam A still
+  reads `FAIL on content — see F-M1` because no post-fix screenshot of the
+  `Sổ tay`/`Nhật ký` tab bodies was ever taken — `fm1-solo-tabs-solution.md`
+  §5.4 asked for exactly this capture "để đóng lại seam A" and it was skipped
+  during the Round 43 implementation. This is an evidence gap, not a code
+  defect: the passing widget tests only assert presence (keys/labels), not the
+  new `_SoloDestinationBlock` composition's actual on-screen appearance inside
+  the shell's `IndexedStack`.
+- Committed review artifacts as `893c3649` (parent `3b51172f`). `Iris-QC`
+  released via `TaskStop`.
+- **Item 9 decided (Scrum Master, non-delegable):** the audit's 18 seam PNGs
+  stay `/tmp`-only, not committed to the repo. These are seam-closure captures
+  with no design-canvas id (`fm1-solo-tabs-solution.md` §5.4 explicitly: "not
+  fidelity-gate artifacts"), unlike the checked-in visual-fidelity PNG
+  pipeline used for design-matched screens elsewhere in REQ-016. The other 17
+  seams in this same audit file already used `/tmp`-only evidence and
+  Iris-QC's Round 43 review independently re-opened and accepted two of them
+  (seamA3, seamC1) without objection — same precedent applies to the new seam
+  A capture. The durable artifact is the prose verdict in
+  `mobile-visual-audit.md`, already tracked in git.
+- **Next resume action (action item 8, in flight):** dispatched
+  `Alex-Mobile-Dev` fresh (`Mode: requirement-mobile-visual-audit`, RunId
+  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-mobile-dev-seamArecapture`,
+  `BaseHead 893c3649`, `WriteScope`/`OutputPath` =
+  `integration-review/mobile-visual-audit.md` only) to re-run the existing
+  harness (`/tmp/req016-visual-audit/solo_shell_seam_capture_test.dart`,
+  already written) at current HEAD, look at the `Sổ tay`/`Nhật ký` captures,
+  and update seam A's verdict line from `FAIL on content` to its post-fix
+  result. Do NOT ask it to touch code — F-M1 implementation is done; this is
+  evidence-only. After `MOBILE_COMPLETE: YES` + 3-part verify + seal + commit:
+  dispatch a FRESH `Iris-QC` requirement-integration-review (new RunId) scoped
+  ONLY to re-checking F-I4's closure (does seam A's new verdict match the
+  actual screenshot?) — rows 1-14 of the Round 43 report do not need
+  re-verification, nothing in this span touches them. On
+  `Outcome: CLEAN`/`DEFERRED_ONLY`: re-sync `main` if moved (D-I1 still open —
+  integration branch behind `main`, `req_master.md` registry table stale),
   `cleanup-requirement`, `git-story-boundary.sh land-integration --req
   REQ-016_solo_stage1_relationship_assistant`, flip `req_master.md` +
   `master_requirements_list.md` to `DONE`.
 
-## Superseded history (Rounds 37-42, collapsed — all 13 stories DONE/merged, F-I1 rework landed, F-I2/F-I3 devops evidence closed, requirement-level mobile-visual-audit closed, F-M1 architecture decision sealed)
+## Superseded history (Rounds 37-43, collapsed — all 13 stories DONE/merged, F-I1 rework landed, F-I2/F-I3 devops evidence closed, requirement-level mobile-visual-audit closed, F-M1 architecture decision sealed, F-M1 implementation shipped)
 
 All 13 REQ-016 stories DONE/merged by Round 38 (integration HEAD `e9519243`).
 Round 39 `Iris-QC` integration review → `Outcome: PATCH_REQUIRED` (F-I1/F-I2/
