@@ -170,3 +170,26 @@
 |---|---|---|---|
 | Sổ ghi thành viên riêng (`chapter_closure_items`) | Giữ trạng thái đóng ở tầng của chính story (BR-3), ảnh chụp tại thời điểm đóng, mở lại là xoá một hàng | ACCEPTED | Một chỗ duy nhất biết "cái gì đã đóng"; story tương lai chỉ đăng ký thêm `item_kind` |
 | Cột `closed_at` trên từng bảng gắn người | Lọc rẻ hơn, không cần join | Rejected | Mỗi story tương lai phải tự thêm cột + tự nhớ lọc; sai sót là **im lặng**, và nó sửa hình dạng dữ liệu của STORY-001/004 đúng thứ BR-3 cấm |
+
+## 7. Addendum 2026-09-26 — `calendar_event_state` thuộc phạm vi xoá sạch (F-I1)
+
+**Decision: REGISTER.** `calendar_event_state` là bảng chặng 1 và phải có mặt
+trong `Stage1WipeRegistry.tables`; không được loại trừ qua `nonReq016Tables()`.
+
+Rationale: bảng chỉ lưu *lựa chọn của chính người dùng* với gợi ý mồi chuyện
+(`state` = `converted` | `dismissed`, khoá `(ownerKey, eventId)`), tức dữ liệu
+chặng 1 do người dùng tạo theo câu mở đầu AC-26 — danh sách liệt kê sau đó
+("trạng thái bộ đếm" …) là minh hoạ cho nguyên tắc đó, không phải danh sách
+đóng. Để lại các hàng này thì sau khi xoá sạch một gợi ý từng bị `dismissed`
+vẫn còn dấu vết hành vi trước đó, đúng thứ AC-27 cấm. Đường (b) cũng không dùng
+được: `nonReq016Tables()` chỉ nhận bảng đệm đọc-xuyên do máy chủ làm chủ, thuộc
+yêu cầu trước, lấy lại được và bị xoá khi đăng xuất — bảng này không thoả tiêu
+chí nào.
+
+Việc mobile-dev phải làm (chỉ 1 file code):
+`mobile/lib/features/chapter_closure/data/stage1_wipe_registry.dart` — thêm một
+`Stage1WipeTable` cho `_db.calendarEventState` với `ownerWhere` dựng từ
+metadata Drift sinh ra (`ownerKey`), không viết tay tên cột. Kèm theo đó,
+`mobile/test/features/chapter_closure/stage1_wipe_registry_parity_test.dart`
+phải cập nhật `expect(expected, hasLength(...))` cho đúng tổng số bảng REQ-016
+sau khi cả ba bảng còn thiếu được đăng ký. Không sửa `nonReq016Tables()`.
