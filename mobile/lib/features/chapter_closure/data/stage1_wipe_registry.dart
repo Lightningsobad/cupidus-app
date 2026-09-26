@@ -111,6 +111,12 @@ class Stage1WipeRegistry {
         table: journalEntries,
         ownerWhere: _ownedBy(journalEntries.ownerUserId),
       ),
+      // `portrait_answers.notebook_entry_id` points at a notebook row, so it
+      // goes first for the same reason the declared foreign-key children do.
+      Stage1WipeTable(
+        table: _db.portraitAnswers,
+        ownerWhere: _ownedBy(_db.portraitAnswers.ownerKey),
+      ),
       Stage1WipeTable(
         table: _db.notebookEntries,
         ownerWhere: _ownedBy(_db.notebookEntries.ownerKey),
@@ -122,6 +128,14 @@ class Stage1WipeRegistry {
       Stage1WipeTable(
         table: _db.askPromptState,
         ownerWhere: _ownedBy(_db.askPromptState.ownerKey),
+      ),
+      Stage1WipeTable(
+        table: _db.relationshipLabels,
+        ownerWhere: _ownedBy(_db.relationshipLabels.ownerKey),
+      ),
+      Stage1WipeTable(
+        table: _db.calendarEventState,
+        ownerWhere: _ownedBy(_db.calendarEventState.ownerKey),
       ),
       Stage1WipeTable(
         table: _db.chapterClosureItems,

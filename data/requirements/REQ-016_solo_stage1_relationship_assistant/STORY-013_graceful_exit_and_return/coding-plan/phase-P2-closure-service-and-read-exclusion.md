@@ -166,5 +166,5 @@ minh được cùng nhau: "đóng một thẻ, thẻ đó rời khỏi pane, th�
 
 ## 7. Status
 
-- Status: COMPLETE
+- Status: DONE
 - Last updated: 2026-09-16
