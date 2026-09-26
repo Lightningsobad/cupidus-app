@@ -104,7 +104,7 @@ do quay lại mà không cần ai trả lời gì cả.
    then từng màn khớp đúng design screen id tương ứng — `hub-waiting`,
    `hub-upcoming`, `hub-date_day`, `hub-quiet`, `evening-check-in-sheet`,
    `quiet-surfaces`, `widget-phases` — không lệch thấy được về bố cục, khoảng
-   cách, màu sắc, và typography.
+   cách, màu sắc, typography, và trạng thái.
 
 ## System Integration And Discoverability
 - UI-facing story: YES (gồm cả bề mặt widget của hệ điều hành).

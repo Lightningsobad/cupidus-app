@@ -201,3 +201,57 @@ spec, và giữ AC-28 chạy được offline.
 |---|---|---|---|
 | Dart dựng chuỗi hiển thị rồi đẩy chuỗi đã xong sang native | Cách duy nhất giữ mã native **không** chứa chuỗi nội dung nào | ACCEPTED | Thoả AC-37/BR-15 tuyệt đối; đổi sang CMS ngoài repo chỉ đổi asset |
 | Native giữ bảng chuỗi và chọn theo `phase_id` | Ít dữ liệu qua ranh giới hơn, widget tự lo bản địa hoá | REJECTED | Đặt chuỗi nội dung đúng vào mã widget — vi phạm trực tiếp AC-37, chỗ BR-15 nói là "cắn mạnh nhất" |
+| B-6: thêm vai trò token thứ năm cho nhãn-mí `date_day`, giữ glyph hồng | Cho nhãn-mí và glyph hai màu độc lập | REJECTED | §3a cấm vai trò thứ năm; và glyph hồng trên nền hồng là 1.00:1 nên vẫn không giải quyết được B-6 |
+| B-6: đổi giá trị vai trò `--dot-today` sang `colorOnAccent` `#F7EEFB` | Một thay đổi giá trị, không thêm vai trò/asset | ACCEPTED | `colorOnAccent` là vai trò "glyph trên `gradientHot`" theo đúng dartdoc của nó; kéo theo nhãn-mí `date_day` cũng sáng lên, đúng hướng |
+| B-5: tách `primary_line` thành nhiều `TextView` bên Android | Không cần span, dễ đọc layout | REJECTED | Đặt ranh giới ngắt dòng vào layout → hai nền tảng ngắt dòng khác nhau trên cùng một chuỗi |
+| B-5: span trên chính chuỗi payload, tỉ lệ 34/14 so với cỡ của `TextView` | Giữ một chuỗi, một chỗ định nghĩa cỡ thân | ACCEPTED | Span thuộc `ParcelableSpan` nên sống sót qua `RemoteViews`; tỉ lệ (không phải dp tuyệt đối) thừa hưởng hệ số phóng chữ |
+| Ngân sách 28 ký tự cưỡng chế trong `phase_content_gate.dart` qua `InvariantRule` | Gom mọi luật nội dung về một cổng | REJECTED | `InvariantRule` là danh sách **từ ngữ** dùng chung nhiều họ gói; độ dài là luật hình dạng dữ liệu, và đầu `phase_content_gate.dart` cấm luật riêng của họ gói |
+| Ngân sách 28 ký tự cưỡng chế trong `phaseContentItemFromJson` | `requirements.md` B-3 nói "như mọi vi phạm lược đồ khác" | ACCEPTED | Dùng lại `ContentPackageFormatException` đã có; không cơ chế cổng mới |
+
+## 7. Bổ sung 2026-09-26 — B-2 / B-5 / B-6 và `action_label`
+
+Ba mục S8 còn lại đều là **lệch giữa hai nền tảng**, không phải thiết kế mới:
+iOS đã ship đúng hợp đồng D-11/D-12, Android chưa. Hợp đồng đầy đủ nằm ở
+`architecture/contract-summary.md` §3b (nền pha, B-2), §3c (số cỡ lớn, B-5), khối
+"Giá trị của `--dot-today`" trong §3a (B-6), và §4a (`action_label` + ngân sách
+độ dài). Ở đây chỉ ghi phần mức-giải-pháp mà hợp đồng không nói.
+
+- **Thứ tự bắt buộc: B-2 trước hoặc cùng B-6, không bao giờ B-6 một mình.**
+  Ràng buộc này do Iris-QC đặt và nó có cơ sở đo được: glyph `#F7EEFB` chỉ đúng
+  khi nền đã là gradient. Nếu B-6 vào trước B-2, pha `date_day` bên Android sẽ có
+  glyph gần-trắng trên nền `#241B42` — vẫn đọc được (tương phản cao), nên **không
+  có test nào đỏ**, nhưng nó lệch canvas theo một hướng mới. Hai mục vào **một**
+  lượt sửa.
+- **`res/drawable/` là chỗ của nền gradient mới, và nó đã trong write scope**
+  (story này đã thêm `dot_today_bolt.xml`). Provider đổi nền bằng
+  `setInt(<root>, "setBackgroundResource", <res>)`: `View.setBackgroundResource`
+  là `@RemotableViewMethod` nên đây là đường hợp lệ qua `RemoteViews`, không phải
+  phản chiếu tuỳ tiện. Giữ `android:background="#241B42"` trong XML làm mặc định
+  cho trạng thái chưa-có-payload.
+- **Cảnh báo bản dựng, đã từng xảy ra trong chính story này:** file XML mới
+  **không** được chứa chuỗi ký tự `--dot-...` (hay bất kỳ token dấu-gạch-đôi nào)
+  kể cả **trong comment**. Một comment như vậy trong `dot_today_bolt.xml` đã làm
+  vỡ toàn bộ bản dựng Android một lần. Viết tên vai trò không có tiền tố `--`.
+- **`res/values/colors.xml` vẫn ngoài phạm vi.** Màu vẫn là literal, ở đúng hai
+  chỗ đã là nhà của D-12 (`CupidWidgetPalette` bên Kotlin và bên Swift) — nền
+  gradient khai báo literal trong drawable XML, cùng lý do đã ghi ở đầu
+  `cupid_phase_widget.xml`.
+- **Rủi ro chiều cao hàng khi số phóng to (B-5).** `cupid_phase_widget_primary`
+  đang `maxLines="2"` ở `14sp`; một cụm số ~2.4× sẽ nâng chiều cao dòng đầu trong
+  một ô widget cao cố định. iOS dùng `lineLimit(3)` nên không gặp. Giữ
+  `maxLines="2"` (đúng ngân sách một hàng của B-3) và kiểm bằng ảnh chụp ô mặc
+  định ở pha `upcoming` **và** `quiet` — `quiet` là pha dễ bị bỏ sót vì S8 chỉ
+  nêu `upcoming`.
+
+| Risk Surface | Source Of Truth | Mitigation | Verification Gate | Blocker If Gate Cannot Run |
+|---|---|---|---|---|
+| `WIDGET-PLATFORM-DRIFT` — Android và iOS vẽ khác nhau cho cùng `phase_id` | `contract-summary.md` §3a/§3b/§3c | ba quyết định B-2/B-5/B-6 chốt **một** giá trị/hình cho cả hai nền tảng; giá trị token nằm ở đúng một chỗ mỗi nền tảng | ảnh chụp widget Android bốn pha đặt cạnh ảnh iOS tương ứng; nền, màu glyph, màu nhãn-mí và cỡ cụm số phải khớp | `ARCH_BLOCKER: WIDGET_PARITY_CAPTURE_UNAVAILABLE` |
+| `CONTENT-LENGTH` — chuỗi vượt ngân sách 28 ký tự lọt vào bản dựng | `requirements.md` vá B-3/B-1, `contract-summary.md` §4a | ngân sách cưỡng chế trong `phaseContentItemFromJson` bằng `ContentPackageFormatException`, **không** thêm cơ chế cổng mới | test nạp asset thật + fixture 29 ký tự cho `secondary` (mục `both`) và cho `action_label`, khẳng định ném lỗi; thêm fixture `action_label` trên mục `surface: widget` cũng ném | `ARCH_BLOCKER: CONTENT_LENGTH_GATE_UNVERIFIED` |
+| `CHIP-LABEL-GATE` — nhãn chip không đi qua cổng bất biến AC-39 | AC-39/BR-17, `contract-summary.md` §4a | `actionLabel` phải nằm trong `displayStrings` của `PhaseContentItem` — đó là móc duy nhất cổng đo | test đặt một `action_label` vi phạm (ví dụ chứa từ tâng bốc trong `invariantDeniedTerms`) và khẳng định `validatePhaseContentPackages` báo vi phạm | `ARCH_BLOCKER: CHIP_LABEL_GATE_UNVERIFIED` |
+
+**Ghi nhận mở, không phải blocker của story:** `colorOnAccent` `#F7EEFB` trên
+`gradientHot` đo được 2.07:1 (đầu hồng) / 2.30:1 (đầu tím), dưới 3:1. Đây là
+thuộc tính của `gradientHot` ở tầng design system — cặp này đang là cặp chuẩn của
+mọi nút chính trong app và `test/design_system/contrast_test.dart` không đặt
+ngưỡng cho nó. Widget không được tự chọn đáp án khác phần còn lại của app; nếu
+cần siết, đó là quyết định UX/design-system ở mức yêu cầu.

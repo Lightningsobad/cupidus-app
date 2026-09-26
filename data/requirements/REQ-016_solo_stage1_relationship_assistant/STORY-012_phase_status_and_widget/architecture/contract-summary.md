@@ -98,7 +98,7 @@ năm và không có logic nội suy:
 |---|---|---|---|
 | `waiting` | `--dot-waiting` | chấm màu đặc | trung tính |
 | `upcoming` | `--dot-upcoming` | chấm màu đặc | nhóm "đã xác nhận" (`--mint`/`--green`) |
-| `date_day` | `--dot-today` | **glyph tia chớp** | nhóm hành động chính (`--pink`/`--grad`) |
+| `date_day` | `--dot-today` | **glyph tia chớp** | vai trò **trên-nền-nhấn** (`colorOnAccent`) — B-6 dưới; `--pink`/`--grad` chuyển sang nền pha (§3b) |
 | `quiet` | `--dot-quiet` | chấm màu đặc | biến thể tối/desaturated cùng bảng |
 
 - Bốn tên vai trò này là **định danh ổn định** implementation phải dùng
@@ -132,6 +132,111 @@ năm và không có logic nội suy:
   `ux/uiux-spec.md` §2). Không dùng glyph cho ba pha còn lại và không dùng chấm
   cho `date_day`.
 
+**Giá trị của `--dot-today` (B-6, 2026-09-26).** Vai trò `--dot-today` **đổi
+giá trị** từ `colorAccentPink` `#FF7FB6` sang vai trò **`colorOnAccent`**
+`#F7EEFB`. Ba vai trò còn lại không đổi.
+
+- Lý do là hệ quả trực tiếp của §3b, không phải một lựa chọn thẩm mỹ rời: ở pha
+  `date_day` nền là chính `gradientHot` (`#FF7FB6` → `#B78CF5`), nên một glyph
+  `#FF7FB6` nằm **đúng trên màu của chính nó**. Đo theo WCAG trên hai đầu
+  gradient: `#FF7FB6` cho **1.00:1** ở đầu hồng và **1.11:1** ở đầu tím — tức
+  vô hình, khớp đúng nhận định "gần như mất tương phản" của D-13. `#F7EEFB` cho
+  **2.07:1** ở đầu hồng và **2.30:1** ở đầu tím.
+- `colorOnAccent` là vai trò **đúng về ngữ nghĩa**, không phải một token tiện
+  tay: dartdoc của nó (`lib/design_system/tokens/cupid_color_tokens.dart`, khai
+  báo `colorOnAccent`) định nghĩa nó là "text/icon glyph rendered on top of
+  `gradientHot`" — chính xác tình huống ở đây. Trong theme tối `colorOnAccent`
+  và `colorText` **trùng giá trị** `#F7EEFB`; widget chỉ có **một** theme (nó
+  không đọc theme thiết bị, xem đầu `res/layout/cupid_phase_widget.xml`), nên
+  hai token này không bao giờ phân kỳ trên bề mặt này. Implementation phải khai
+  báo thành viên `onAccent` tường minh trong cả hai bảng màu native và gán
+  `DOT_TODAY = onAccent`, **không** gán trực tiếp từ `text`: giá trị trùng là
+  tình cờ của theme tối, còn vai trò mới là điều hợp đồng cố định.
+- **Không có vai trò/asset thứ năm.** Đây là đổi *giá trị* của vai trò đã có, nên
+  mọi câu ở trên về "`--dot-today` không đổi tên" và "glyph lấy tint từ chính
+  `dot_today`" vẫn nguyên hiệu lực.
+- **Cả hai nền tảng đổi cùng lúc, cùng một giá trị.** Android:
+  `CupidWidgetPalette.DOT_TODAY` (`CupidPhaseWidgetProvider.kt`). iOS:
+  `CupidWidgetPalette.dotToday` (`CupidPhaseWidget.swift`). Lệch một bên là lỗi
+  hợp đồng, không phải khác biệt nền tảng.
+- **Tác dụng kèm theo là có chủ đích, không phải rò phạm vi:** cả hai nền tảng
+  đang tô **chữ nhãn-mí** bằng cùng `dotColor` (Android `setTextColor` trên
+  `cupid_phase_widget_eyebrow`; iOS `.foregroundColor(entry.dotColor)`). Vì vậy
+  ở pha `date_day` nhãn-mí cũng chuyển từ hồng-trên-hồng sang `#F7EEFB`. Đó là
+  đúng hướng và **không** cần vai trò riêng cho nhãn-mí: tách ra sẽ là vai trò
+  thứ năm mà §3a cấm.
+- **Phần hụt còn lại được ghi nhận, không được tuyên bố là đạt AA.** 2.07:1 vẫn
+  dưới ngưỡng 3:1 (phi-văn-bản) và 4.5:1 (văn bản nhỏ). Nhưng đây là **thuộc
+  tính của `gradientHot` ở tầng design system**, không phải điều story này tạo
+  ra hay sửa được cục bộ: cặp `colorOnAccent`-trên-`gradientHot` đang là cặp
+  chuẩn của mọi nút chính và bong bóng chat trong app, và
+  `test/design_system/contrast_test.dart` **không** đặt ngưỡng nào cho cặp này
+  (nó chỉ khẳng định `gradientHot.colors` không rỗng). Widget **không** được tự
+  bịa một đáp án khác với phần còn lại của app. Nếu cần siết, đó là quyết định
+  UX/design-system ở mức yêu cầu (ứng viên cho Design Ruling Log), không phải
+  việc của STORY-012.
+
+### 3b. Nền theo pha (B-2) — cũng là token, cùng một hình ở hai nền tảng
+
+D-12 cho pha `date_day` nền gradient thương hiệu riêng; ba pha còn lại dùng
+`colorSurface` `#241B42` phẳng. iOS **đã** giao đúng hợp đồng này
+(`CupidPhaseBackground` trong `CupidPhaseWidget.swift` rẽ nhánh theo
+`isDateDay`). Android **chưa**: `res/layout/cupid_phase_widget.xml` đặt
+`android:background="#241B42"` cứng cho mọi pha. B-2 là **lệch nền tảng**, không
+phải quyết định thiết kế mới.
+
+| Pha | Nền | Nguồn token |
+|---|---|---|
+| `waiting`, `upcoming`, `quiet` | màu phẳng | `colorSurface` `#241B42` |
+| `date_day` | gradient hai chặng | `gradientHot`: `#FF7FB6` → `#B78CF5` |
+
+- **Hướng gradient chốt là ngang, trái→phải, ở cả hai nền tảng.** `gradientHot`
+  trong Dart là gradient CSS 95deg, nhưng `<gradient android:angle>` của
+  `GradientDrawable` chỉ nhận **bội số của 45**, nên 95deg không biểu diễn được
+  trong XML. iOS đã ship `.leading` → `.trailing` (tức 90deg). Chốt ngang cho cả
+  hai (`android:angle="0"` theo quy ước Android là trái→phải) để hai nền tảng vẽ
+  **một** hình; chênh 5deg trên một hàng widget thấp là không thấy được và không
+  đáng để hai bên phân kỳ.
+- **Chỉ đổi màu, không đổi hình học.** Nền mới giữ đúng hình chữ nhật không bo
+  góc như nền phẳng hiện tại. Không thêm `corners`/radius, không chạm
+  `@android:id/background`: bo góc widget do launcher cắt, và thay đổi hình học ở
+  đây sẽ mở rộng diff thị giác ra ngoài phạm vi B-2.
+- RTL: `android:angle="0"` là tuyệt đối trái→phải, còn `.leading` của iOS đảo
+  chiều theo hướng đọc. App chỉ có `vi`, nên hai bên không bao giờ phân kỳ trong
+  thực tế; ghi nhận là giới hạn được chấp nhận, không phải việc phải bù.
+- Nền theo pha là **token tra theo `phase_id`** giống §3a: không đọc từ payload,
+  không màu hệ điều hành, không nhánh logic nào khác bảng hai dòng trên.
+
+### 3c. Số cỡ lớn trong `primary_line` (B-5) — xử lý hiển thị, không phải nội dung
+
+D-11 cho phép native vẽ **cụm chữ số đầu tiên** của `primary_line` ở cỡ hiển thị
+trong khi phần còn lại giữ cỡ thân. iOS **đã** giao (`CupidPhaseSplit` +
+`.font(.system(size: 34, weight: .heavy))`). Android **chưa**: provider đẩy
+`primary` thành một chuỗi phẳng qua `setTextViewText`. B-5 là lệch nền tảng.
+
+- **Luật áp dụng cho mọi pha có chữ số, không riêng `upcoming`.** S8 nêu
+  `upcoming` vì đó là pha được chụp, nhưng iOS không rẽ nhánh theo pha — nó rẽ
+  theo "dòng có chữ số hay không". Một bản vá chỉ-`upcoming` bên Android sẽ làm
+  hai nền tảng phân kỳ ở pha `quiet` (dòng `Bạn đang giữ {n} kỷ niệm`). Android
+  phải dùng **cùng** quy tắc: cụm chữ số **đầu tiên**, không chữ số thì cả dòng
+  giữ cỡ thân.
+- **Không một ký tự nào bị bỏ, đổi thứ tự, hay viết lại** (AC-37/BR-15). Đây là
+  *đổi cỡ một đoạn con của chuỗi payload*, không phải native dựng chuỗi. Vì vậy
+  nó **không** thêm khoá payload và **không** thêm mục nội dung.
+- Cơ chế Android chốt là **span trên chính `primary_line`**, đẩy qua
+  `setTextViewText` (span thuộc `ParcelableSpan` sống sót qua `RemoteViews`);
+  **không** tách thành nhiều `TextView`, vì tách ra sẽ đặt ranh giới ngắt dòng
+  vào layout và làm hai nền tảng ngắt dòng khác nhau.
+- **Tỉ lệ cỡ chữ biểu diễn bằng tỉ lệ, không bằng con số tuyệt đối thứ hai.**
+  `primary` trong layout là `14sp`; iOS dùng `34` trên nền `.headline`. Android
+  dùng hệ số **34/14** so với chính cỡ của `TextView` đó, để (a) chỉ có một chỗ
+  định nghĩa cỡ thân, (b) thừa hưởng hệ số phóng chữ của người dùng như phần còn
+  lại của layout (một `AbsoluteSizeSpan` theo dp sẽ không phóng theo).
+- Màu cụm số đi theo pha, khớp iOS đã ship: `date_day` dùng `colorText`
+  `#F7EEFB` (đồng nhất với nền gradient §3b), ba pha còn lại dùng
+  `colorAccentPink` `#FF7FB6`. `primary` đã `textStyle="bold"` nên cụm số
+  **không** cần span đậm thêm.
+
 ## 4. Lược đồ gói nội dung (R-15a / AC-37)
 
 Ba gói, cùng `ContentPackage` ở `mobile/lib/core/content/content_package.dart`
@@ -139,7 +244,7 @@ Ba gói, cùng `ContentPackage` ở `mobile/lib/core/content/content_package.dar
 
 | Asset | `schema_id` | Mỗi item mang |
 |---|---|---|
-| `assets/data/req016/phase_content.v1.json` | `req016.phase_content.v1` | `phase_id`, `primary`, `secondary?`, `eyebrow` (MỚI, D-10: chuỗi khái quát tên pha, nguồn của `eyebrow_line` §3), `surface` (`widget` \| `screen` \| `both`) |
+| `assets/data/req016/phase_content.v1.json` | `req016.phase_content.v1` | `phase_id`, `primary`, `secondary?`, `eyebrow` (MỚI, D-10: chuỗi khái quát tên pha, nguồn của `eyebrow_line` §3), `surface` (`widget` \| `screen` \| `both`), `action_label?` (MỚI, B-1: nhãn chip hành động phụ, §4a) |
 | `assets/data/req016/drip.v1.json` | `req016.drip.v1` | `body` |
 | `assets/data/req016/nudges.v1.json` | `req016.nudges.v1` | `slot` (`evening_check_in` \| `countdown` \| `counter` \| `milestone` \| `gift_progress` \| `neutral`), `title?`, `body` |
 
@@ -149,6 +254,63 @@ Ba gói, cùng `ContentPackage` ở `mobile/lib/core/content/content_package.dar
   gốc `thresholds`, không phải hằng số Dart và **không** phải giá trị backend.
 - Số mục mỗi gói là thuộc tính dữ liệu (R-15b). Không mã nào được đọc `length`
   để suy ra hành vi, và không AC nào được suy từ bộ seed.
+
+### 4a. `action_label` (B-1) và cổng ngân sách độ dài (B-3 + B-1)
+
+**Tên trường chốt là `action_label`.** Product Owner đề xuất tên này và cho Tech
+Lead quyền đổi (`requirements/requirements.md`, vá B-1 2026-09-26); quyền đó
+**không dùng** — tên đã nằm nguyên văn trong AC-5/AC-37 đã vá, đúng nghĩa, và
+đổi tên bây giờ chỉ tạo hai từ vựng cho một trường.
+
+- Kiểu: **tuỳ chọn**, chuỗi. Vắng trường = mục đó **không có chip**. Mã **không**
+  được mang nhãn mặc định để lấp chỗ (AC-5/AC-37).
+- Chỉ có nghĩa trên màn (1). Widget **không** đọc trường này và tập khoá payload
+  §2/§3 **không đổi** vì nó — đây là lý do §2 không cần thêm dòng nào.
+- Implementation target: thêm `actionLabel` vào `PhaseContentItem`
+  (`mobile/lib/features/phase_status/domain/phase_content.dart`), đọc bằng
+  `optionalContentString(json, 'action_label', source)` — hàm đó đã từ chối
+  chuỗi rỗng/sai kiểu, nên không cần luật mới cho hai trường hợp đó.
+- **Phải thêm vào `displayStrings` của `PhaseContentItem`.** Đây là móc duy nhất
+  cần thiết để cổng bất biến AC-39 tự phủ nhãn chip: `phase_content_gate.dart`
+  đo đúng `displayStrings`, nên một trường hiển thị không nằm trong đó là một
+  chuỗi lọt cổng mà không ai thấy. **Không** thêm cơ chế cổng thứ hai.
+
+**Cổng ngân sách độ dài — nằm ở tầng lược đồ, KHÔNG ở `phase_content_gate.dart`.**
+
+| Trường | Ngân sách | Phạm vi áp dụng |
+|---|---|---|
+| `secondary` | ≤ 28 ký tự | mục có `surface` là `widget` hoặc `both` (B-3) |
+| `action_label` | ≤ 28 ký tự | mọi mục có trường này |
+
+- Chỗ cưỡng chế là `phaseContentItemFromJson`, ném
+  `ContentPackageFormatException` — **không** phải `InvariantRule` /
+  `phase_content_gate.dart`. Hai lý do cụ thể, không phải sở thích: (a)
+  `requirements.md` vá B-3 nói mục vượt ngân sách bị từ chối "**như mọi vi phạm
+  lược đồ khác**", và vi phạm lược đồ trong repo này đã có đúng một cơ chế là
+  `ContentPackageFormatException`; (b) `phase_content_gate.dart` ghi rõ ở đầu
+  file rằng họ gói này **không thêm luật riêng** và một enum song song ở đó là
+  thứ `core/content/invariant_terms.dart` tồn tại để ngăn — ngân sách độ dài là
+  luật *hình dạng dữ liệu*, không phải luật *từ ngữ*, nên nó không thuộc
+  `InvariantRule`.
+- Vì vậy **không cơ chế cổng mới nào được tạo**: cả hai ngân sách dùng lại đúng
+  đường ném lỗi lúc nạp asset mà `ContentPackage.fromJson` đã có, và asset thật
+  đã được đọc từ đĩa trong test nên vi phạm làm **đỏ bản dựng** (AC-39/BR-17).
+- Cách đếm: đếm theo **ký tự Unicode đã dựng, dạng NFC** (`requirements.md` vá
+  B-3). Asset được soạn UTF-8 NFC; đo bằng `String.characters.length`. Dart SDK
+  **không** có hàm chuẩn hoá Unicode, và ta **không** thêm dependency cho việc
+  này: chuỗi soạn ở dạng NFD sẽ đo *dài hơn* và bị cổng **từ chối**, tức hướng
+  sai lệch là hướng an toàn (từ chối, không phải cho qua) và tác giả nội dung
+  thấy lỗi ngay lúc dựng.
+- Một con số `28` duy nhất, khai báo **một** hằng số dùng cho cả hai trường. Lý
+  do của hai trường khác nhau (`secondary`: bề rộng một hàng widget; `action_label`:
+  bề rộng chip trong khối hướng-chuẩn-bị của màn (1)) nhưng giá trị trùng, và hai
+  hằng số cùng giá trị là hai con số thần bí phải sửa song song về sau.
+- **`action_label` trên mục `surface: widget` là lỗi nạp, không phải trường bị bỏ
+  qua.** Chip chỉ tồn tại trên màn (1), nên một mục chỉ-widget mang nhãn chip là
+  nội dung tác giả viết mà không người đọc nào thấy — cùng lý do `NudgeSlot` lạ
+  là lỗi parse chứ không phải giá trị mặc định. Từ chối lúc nạp.
+- Mã **không** được cắt ngầm, rút gọn, hay thay chuỗi để lách ngân sách.
+  `ellipsize` trên widget chỉ là lưới an toàn cho lưới ô hẹp hơn mặc định.
 
 ## 5. Deploy / rollout order
 
@@ -168,6 +330,12 @@ Story này **không** đổi `CupidDatabase.schemaVersion` và **không** thêm 
 - Không chọn màu **hoặc hình dạng** chỉ báo pha ngoài bảng tra bốn vai trò ở
   §3a — không màu/icon mặc định hệ điều hành, không suy bằng logic riêng theo
   ngày/ngôn ngữ/số.
+- Không chọn **nền pha** ngoài bảng hai dòng ở §3b, và không đổi hình học nền
+  (bo góc, inset) khi đưa gradient vào Android.
+- Không rẽ nhánh cỡ số theo `phase_id` (§3c): quy tắc là "có cụm chữ số hay
+  không", giống iOS đã ship.
+- Không mang nhãn chip mặc định khi `action_label` vắng, và không cắt/rút gọn
+  chuỗi để lách ngân sách 28 ký tự (§4a).
 - Không thêm hành động thứ hai lên widget (không nút "đã xong") — widget có đúng
   một vùng chạm mở deep link (`ux/uiux-spec.md` §2).
 - Không đọc `activity_cards` hay `cupid.sqlite` từ native; native chỉ đọc §2.

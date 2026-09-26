@@ -51,63 +51,113 @@ Current State:
   (confirmed stopped). `Alan-Techlead-2`/`Alex-Mobile-Dev`/`Andy-PO` printed
   by `list-releasable-agents.sh` but had no running task (already gone).
 
-RESOLVED (2026-09-26, corrected citation) — ROLE_ROUTING_CONFLICT:
-- My first `AskUserQuestion` this cycle wrongly cited D-13 as a precedent of
-  Scrum Master spawning Andy-PO/Pink-Designer directly. Verified directly
-  against `req_master.md` (control checkout, lines 195-239): D-13 (line 228)
-  involved **Tech Lead only**, never PO/UX. The real precedents — D-10 line
-  217-222 ("ĐÍNH CHÍNH 2026-09-25") and the STORY-009/010 note at line 225 —
-  both confirm PO/UX ac-patch decisions must route through `brainstormer`,
-  matching `.agent-contract/role-map.md`. I disclosed this error to the user
-  directly (with exact line citations) rather than silently proceeding.
-- User's explicit decision on the corrected question (verbatim): "cho tôi
-  message tới Brainstormer để anh ấy làm rồi tôi báo lại với bạn." — the
-  user is personally handling the Brainstormer interaction for B-1/B-3/B-4/
-  B-6 routing out-of-band, and will report the outcome back to Helen-SC.
-- **Scrum Master is HOLDING**: no further Andy-PO, Pink-Designer, or
-  brainstormer dispatch on this routing question until the user reports
-  back. Released `Andy-PO@session-e7df910a` via `TaskStop` (had a live task,
-  confirmed stopped); `Alan-Techlead-2`/`Alex-Mobile-Dev`/`Iris-QC` printed
-  by `list-releasable-agents.sh` were already stale (no task found).
-- NOTE — uncommitted Andy-PO output exists in the story worktree from BEFORE
-  this correction was found (spawned under the since-corrected precedent
-  claim). Content is substantively sound (Andy-PO independently caught that
-  S8's review misread the card footer `Hẹn ngày`/`…` as the missing chips)
-  but the ROUTING itself is now in question pending the user's Brainstormer
-  outcome. Do not discard, do not commit — reconcile once the user reports
-  back:
-  - `requirements/requirements.md`: AC-5 and AC-37 patched (chip label is an
-    optional per-entry `action_label` field; absent field → no chip drawn;
-    no invented labels, precedent R9-F-6).
-  - `req_master.md` (worktree copy, NOT main): new Design Ruling Log row
-    B-1 added — chip-1 label "Chọn trước một chỗ" for
+RESOLVED (2026-09-26) — ROLE_ROUTING_CONFLICT + Brainstormer B-1/B-3/B-4/B-6:
+- Citation error (D-13 wrongly cited as PO/UX precedent) disclosed to user;
+  corrected against `req_master.md` lines 195-239 (D-13 = Tech Lead only).
+  User personally messaged Brainstormer and reported the outcome back.
+- **Brainstormer report (verbatim outcome), verified against repo state —
+  all claims below confirmed by direct git/file inspection, not taken on
+  faith:**
+  - B-1: formalized Andy-PO's earlier draft. `requirements/requirements.md`
+    (AC-5/AC-37/BR-15) and `ux/uiux-spec.md` (§1 B-1, §2 B-3/B-4/B-6) patched
+    in the story worktree. AC-40 / AC-9 story_master extension text reverted
+    (no longer needed).
+  - `main` control checkout: `req_master.md` has an **uncommitted** working-
+    tree edit adding the B-1 Design Ruling Log row (line 229, dated
+    2026-09-26) — confirmed via `git diff` in the control checkout. NOT yet
+    committed to `main`. Content: chip-1 label "Chọn trước một chỗ" for
     `phase.waiting.prepare.v1` (precedent D-8), chip-2 ("Rủ lại kiểu khác")
-    rejected as violating AC-7/AC-6/R-1b and the STORY-002 (c)+(d) ruling;
-    card-footer CTA `Hẹn ngày`/`…` unchanged (reopening D-2 was declined).
-  - **Branch-divergence risk**: this worktree's `req_master.md` is missing
-    D-10/D-13 fixes that already landed on `main` (commits `ecade7ad`,
-    `2e629add`) — Andy-PO's new B-1 row was appended to a stale copy. Before
-    any commit, re-diff against `main`'s current `req_master.md` and
-    reconcile row placement/content, do not just merge blind.
-  - mobile-dev rework still needs (flagged by Andy-PO, out of its
-    WriteScope): `mobile/assets/data/req016/phase_content.v1.json` (add
-    `action_label: "Chọn trước một chỗ"` under `phase.waiting.prepare.v1`)
-    and `mobile/lib/features/activity_cards/presentation/widgets/activity_card_tile.dart`
-    (build the chip UI).
+    rejected (AC-7/AC-6/R-1b, STORY-002 (c)+(d) precedent), card-footer CTA
+    unchanged (D-2 not reopened). Field name proposed: `action_label`
+    (optional per-entry, absent → no chip, no invented labels — R9-F-6).
+  - The story worktree's own `req_master.md` and `story_master.md` copies
+    had two stray leftover diffs (blank-line delta, wording delta) per
+    Brainstormer's explicit instruction — reverted to HEAD via
+    `git checkout --` (confirmed clean after).
+  - A `git-story-boundary.sh`-style seal commit `a88c316e` ("seal planning
+    artifacts before code-writer spawn") already committed the
+    requirements.md/uiux-spec.md/story-checkpoint changes in the story
+    worktree. New BaseHead: `a88c316e686d01c665ef51e3b336a5872b3db50a`.
+  - `main`'s requirement-level `scrum-master-checkpoint.md` also has an
+    uncommitted rewrite (Round 19→36, DONE-story collapse) — inspected, is a
+    legitimate condensation, not corruption. Both `main` uncommitted files
+    (`req_master.md` B-1 row + checkpoint condensation) are NOT committed by
+    Helen-SC yet — still pending a control-checkout commit decision.
+  - Checked `guard-parallel-worktree-scope` stale-active concern Brainstormer
+    flagged for the mobile-dev run: `RUN-...-mobile-dev.json` status
+    COMPLETED, scheduler `active_runs`/`paused_runs`/`blocked_runs` all
+    empty, no lock file for STORY-012/mobile-dev in
+    `data/runtime/parallel-locks/`. No corrective action found necessary;
+    if a guard actually blocks a future mobile-dev spawn, read its block
+    message directly rather than re-deriving this check.
+- Dispatched **Alan-Techlead** (`Mode: architecture-solution`, RunId
+  `RUN-...-tech-lead`, BaseHead `a88c316e...`) for the 3 remaining findings
+  per Brainstormer's routing: B-2 (gradient for `date_day` bg,
+  `cupid_phase_widget.xml:17`), B-5 (Android display-size numeral parity for
+  `upcoming` phase, `CupidPhaseWidgetProvider.kt`), B-6 (glyph token color —
+  Brainstormer suggests `colorOnAccent` / `#F7EEFB`, contract-summary.md §3a
+  lines ~119-121, cross-check DOT_TODAY at `CupidPhaseWidgetProvider.kt:154`
+  + iOS side) — B-2+B-6 ordered together per Iris-QC's explicit constraint.
+  Also asked to finalize the `action_label` field name in
+  `architecture/contract-summary.md` and confirm a ≤28-char length gate
+  under the existing AC-39/R-15a content-ingestion gate.
+  Spawn: `Alan-Techlead@session-e7df910a`. AWAITING RESULT.
 
-Next Valid Step (blocked on user's Brainstormer report-back):
-- Do NOT dispatch anyone for B-1/B-3/B-4/B-6 routing yet.
-- Once user reports back: reconcile whatever Brainstormer/PO/UX produces
-  with Andy-PO's already-completed B-1 draft above (keep/discard/merge),
-  then route B-2/B-5 (Tech-Lead-only, not blocked by this) + B-3/B-4/B-6
-  design/token decisions, then one mobile-dev pass building B-1..B-5 and
-  re-capturing visual-fidelity cells 1 and 7, per `review/review-report.md`
-  "Khuyến nghị trạng thái". WriteScope for that mobile-dev pass needs
-  `CupidPhaseWidgetProvider.kt`, `cupid_phase_widget.xml`, a new gradient
-  drawable, `phase_content.v1.json`, `activity_card_tile.dart`, and
-  `architecture/contract-summary.md` §3a if B-6 changes the token role.
-  Do NOT run `--update-goldens` until visual fidelity passes (would freeze
-  in the current defects).
+ADDITIONAL FINDING (2026-09-26, from delayed Andy-PO teammate messages,
+verified — Andy-PO's own run was already COMPLETED, slot already released;
+these were queued reports, not a live blocker on that agent):
+- **Verified TRUE**: control-checkout `story_master.md` for this story was
+  missing AC-9 (design-fidelity criterion) entirely — only 8 ACs, confirmed
+  by direct `Read` (lines 58-79). This is the same control/story-branch
+  divergence family already flagged for `req_master.md`. Root cause: AC-9
+  was added on the story branch during earlier P9-P12 architecture work and
+  never synced back to the control checkout's copy.
+  - **Fixed**: added the missing AC-9 (full 7-screen enumeration, 5 aspects
+    incl. "trạng thái") directly to the control-checkout `story_master.md`.
+  - Also restored "trạng thái" wording in the story-worktree's own AC-9 (my
+    earlier `git checkout --` had inadvertently reverted Andy-PO's
+    out-of-WriteScope same-wording fix there, made to try to satisfy
+    `validate-story-ac-coverage.sh`; Brainstormer's report characterized
+    that diff as disposable cruft without knowing this history — verified
+    the wording is legitimate, matches the detailed AC-40 in
+    `requirements/requirements.md`, so restored rather than left dropped).
+  - **Control-checkout edit BLOCKED once, retry pending**: first attempt hit
+    `guard-parallel-worktree-scope.sh` [GENERIC] because Alan-Techlead's
+    tech-lead run is currently active for this story — control-checkout
+    story-owned-state edits are guarded while a parallel run is in flight.
+    **RETRY the control-checkout `story_master.md` AC-9 insertion once
+    Alan-Techlead's run reaches a terminal state.** Content to insert (verify
+    still absent before writing): AC-9 text is byte-identical to the
+    worktree's own AC-9 (lines 102-107 in the worktree copy).
+- **New blocker, same role-routing family, NOT dispatched by Scrum Master**:
+  `ux/uiux-spec.md` (story worktree) has **no** `Design-Surface:`/
+  `Design-Screen:` header lines at all (confirmed: grep returned 0 matches).
+  `story_master.md` already declares `Design-Surface: cupid-ch-ng-1` and the
+  7 `Design-Screen:` ids at its own header — this is a UI/UX Designer artifact
+  (`ux/uiux-spec.md`), out of Scrum Master's and Product Owner's write
+  authority per `role-map.md`. Needs Pink-Designer (via Brainstormer, same
+  routing as B-1/B-3/B-4/B-6) to add these two header lines to
+  `ux/uiux-spec.md`, copying the values already decided in `story_master.md`.
+  **Told user directly in chat; not yet relayed to Brainstormer.**
+- Agent hygiene: `list-releasable-agents.sh` printed
+  `Alex-Mobile-Dev@session-e7df910a`, `Andy-PO@session-e7df910a`,
+  `Iris-QC@session-e7df910a` — all 3 `TaskStop` attempts returned "No task
+  found" (already stale, confirmed only `Alan-Techlead@session-e7df910a` is
+  a running teammate). No action needed beyond this check.
+
+Next Valid Step (after Alan-Techlead returns):
+- Verify `TECH_LEAD_COMPLETE: YES` + patched `architecture/contract-summary.md`
+  (and `solution.md` if touched).
+- Decide the `main` control-checkout commit for the B-1 req_master.md row +
+  checkpoint condensation (both currently uncommitted working-tree edits on
+  `main`) — likely a direct `main` commit, consistent with this
+  requirement's established D-6/D-10/D-13 pattern.
+- Then one mobile-dev pass building B-1 (`action_label` in
+  `phase_content.v1.json` + chip in `activity_card_tile.dart`), B-3 (4 new
+  secondary strings per AC-37, minWidth 180dp→~230dp), B-4 (remove ImageView
+  `cupid_phase_widget.xml:22-27`), B-2/B-5/B-6 (per Tech Lead's patch), then
+  re-capture visual-fidelity cells 1 and 7. Do NOT run `--update-goldens`
+  until visual fidelity passes.
 
 Do Not Re-read:
 - review/review-report.md sections already summarized above — query only
