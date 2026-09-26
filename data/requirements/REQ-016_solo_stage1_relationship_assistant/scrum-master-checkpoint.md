@@ -134,62 +134,48 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 - Round 1-35 narrative in git history of this file — superseded by the table
   and "Current cursor" sections above.
 
-## Current cursor (Round 44, F-I4 seam-A re-capture dispatched — evidence-only patch, no code change needed)
+## Current cursor (Round 45, F-I4 seam-A re-capture sealed, narrow Iris-QC closure review dispatched)
 
-- Fresh `Iris-QC` (RunId
-  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-reviewer-fm1review`)
-  returned `REVIEW_COMPLETE: YES`, `Outcome: PATCH_REQUIRED`. 3-part
-  verification passed: agent releasable; worktree diff matched declared
-  WriteScope exactly (`review-report.md` + `scope-gate.md`, HEAD unchanged at
-  `3b51172f`); full Round 43 section of the report read directly (offset/limit,
-  file is 32KB) — genuine, detailed, evidence-grounded (independently re-opened
-  PNGs, ran `git log -S`/`git merge-base --is-ancestor` for the BR-16
-  pre-existing proof, re-ran the 28/28 test suite, checked the 3rd-import
-  deviation against the AC-17 rule's actual purpose rather than trusting the
-  prior cursor's framing).
-- **Verdict: all F-M1 code/architecture/devops work from Rounds 40-43 is
-  correct and PASS** (14/14 verification rows PASS or accepted-exclusion). The
-  **sole blocking finding is F-I4**: `mobile-visual-audit.md` seam A still
-  reads `FAIL on content — see F-M1` because no post-fix screenshot of the
-  `Sổ tay`/`Nhật ký` tab bodies was ever taken — `fm1-solo-tabs-solution.md`
-  §5.4 asked for exactly this capture "để đóng lại seam A" and it was skipped
-  during the Round 43 implementation. This is an evidence gap, not a code
-  defect: the passing widget tests only assert presence (keys/labels), not the
-  new `_SoloDestinationBlock` composition's actual on-screen appearance inside
-  the shell's `IndexedStack`.
-- Committed review artifacts as `893c3649` (parent `3b51172f`). `Iris-QC`
-  released via `TaskStop`.
-- **Item 9 decided (Scrum Master, non-delegable):** the audit's 18 seam PNGs
-  stay `/tmp`-only, not committed to the repo. These are seam-closure captures
-  with no design-canvas id (`fm1-solo-tabs-solution.md` §5.4 explicitly: "not
-  fidelity-gate artifacts"), unlike the checked-in visual-fidelity PNG
-  pipeline used for design-matched screens elsewhere in REQ-016. The other 17
-  seams in this same audit file already used `/tmp`-only evidence and
-  Iris-QC's Round 43 review independently re-opened and accepted two of them
-  (seamA3, seamC1) without objection — same precedent applies to the new seam
-  A capture. The durable artifact is the prose verdict in
-  `mobile-visual-audit.md`, already tracked in git.
-- **Next resume action (action item 8, in flight):** dispatched
-  `Alex-Mobile-Dev` fresh (`Mode: requirement-mobile-visual-audit`, RunId
-  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-mobile-dev-seamArecapture`,
-  `BaseHead 893c3649`, `WriteScope`/`OutputPath` =
-  `integration-review/mobile-visual-audit.md` only) to re-run the existing
-  harness (`/tmp/req016-visual-audit/solo_shell_seam_capture_test.dart`,
-  already written) at current HEAD, look at the `Sổ tay`/`Nhật ký` captures,
-  and update seam A's verdict line from `FAIL on content` to its post-fix
-  result. Do NOT ask it to touch code — F-M1 implementation is done; this is
-  evidence-only. After `MOBILE_COMPLETE: YES` + 3-part verify + seal + commit:
-  dispatch a FRESH `Iris-QC` requirement-integration-review (new RunId) scoped
-  ONLY to re-checking F-I4's closure (does seam A's new verdict match the
-  actual screenshot?) — rows 1-14 of the Round 43 report do not need
-  re-verification, nothing in this span touches them. On
-  `Outcome: CLEAN`/`DEFERRED_ONLY`: re-sync `main` if moved (D-I1 still open —
-  integration branch behind `main`, `req_master.md` registry table stale),
-  `cleanup-requirement`, `git-story-boundary.sh land-integration --req
-  REQ-016_solo_stage1_relationship_assistant`, flip `req_master.md` +
-  `master_requirements_list.md` to `DONE`.
+- `Alex-Mobile-Dev` (RunId
+  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-mobile-dev-seamArecapture`)
+  returned `MOBILE_COMPLETE: YES`. 3-part verification passed: releasable
+  (`list-releasable-agents.sh`, then confirmed via successful `TaskStop`);
+  worktree diff showed exactly the declared WriteScope (`mobile-visual-audit.md`
+  only, HEAD unchanged at `893c3649` before commit — no self-commit); full
+  `git diff` of the file read directly — genuine, detailed, matches the
+  teammate's prose exactly (seamA3 `Sổ tay` 2-row block, seamA4 `Nhật ký` 1-row
+  block, badge/radius/row-height/chevron parity with `seamC1`'s
+  `_PrivateStorageBlock`, no overflow/clipping, correct Vietnamese diacritics,
+  AC-21/SC-1' preserved, `seamA2` `Ý tưởng` placeholder confirmed spec-correct
+  per OQ-1). Committed in the integration worktree as `35723ed2` (parent
+  `893c3649`). `Alex-Mobile-Dev` released via `TaskStop`.
+- **Item 9 decided (Scrum Master, non-delegable, Round 44):** the audit's 18+
+  seam PNGs stay `/tmp`-only, not committed to the repo — seam-closure
+  captures with no design-canvas id, distinct from the checked-in
+  visual-fidelity PNG pipeline (`fm1-solo-tabs-solution.md` §5.4). Durable
+  artifact is the prose verdict in `mobile-visual-audit.md`, tracked in git.
+- **Next resume action:** dispatched a FRESH, narrow `Iris-QC`
+  requirement-integration-review (RunId
+  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-reviewer-fi4close`,
+  `BaseHead 893c3649`) scoped ONLY to re-checking F-I4's closure — does the new
+  seam A verdict in `35723ed2` genuinely match the re-opened PNGs? Explicitly
+  told not to re-verify rows 1-14 from the Round 43 report (untouched by this
+  diff). On this round's `Outcome: CLEAN`/`DEFERRED_ONLY`: re-sync `main` if
+  moved (D-I1 still open — integration branch behind `main`, `req_master.md`
+  registry table stale), `cleanup-requirement`, `git-story-boundary.sh
+  land-integration --req REQ-016_solo_stage1_relationship_assistant`, flip
+  `req_master.md` + `master_requirements_list.md` to `DONE`.
 
-## Superseded history (Rounds 37-43, collapsed — all 13 stories DONE/merged, F-I1 rework landed, F-I2/F-I3 devops evidence closed, requirement-level mobile-visual-audit closed, F-M1 architecture decision sealed, F-M1 implementation shipped)
+## Superseded history (Rounds 37-44, collapsed — all 13 stories DONE/merged, F-I1 rework landed, F-I2/F-I3 devops evidence closed, requirement-level mobile-visual-audit closed, F-M1 architecture decision sealed, F-M1 implementation shipped, fresh Round 43 review PATCH_REQUIRED on F-I4 evidence-only gap)
+
+Round 43 fresh `Iris-QC` review (RunId `...-reviewer-fm1review`) found all
+F-M1 code/architecture/devops work correct (14/14 rows PASS or
+accepted-exclusion); sole blocking finding F-I4: `mobile-visual-audit.md`
+seam A recorded `FAIL on content` because no post-fix screenshot existed of
+the wired `Sổ tay`/`Nhật ký` tab bodies (evidence gap, not a code defect —
+passing widget tests only assert presence, not on-screen composition).
+Review artifacts committed `893c3649` (parent `3b51172f`). Full run file:
+`data/runtime/parallel-runs/RUN-REQ-016_solo_stage1_relationship_assistant-NONE-reviewer-fm1review.json`.
 
 All 13 REQ-016 stories DONE/merged by Round 38 (integration HEAD `e9519243`).
 Round 39 `Iris-QC` integration review → `Outcome: PATCH_REQUIRED` (F-I1/F-I2/
