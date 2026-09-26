@@ -357,7 +357,11 @@ từ test `mọi bảng trong registry về 0 hàng cho chủ sở hữu`:
 | `chapter_closure_items` | 3 | 0 |
 | `chapter_closures` | 1 | 0 |
 
-Đúng 10 bảng — bằng toàn bộ bảng REQ-016 trong `CupidDatabase.allTables`.
+Đúng 10 bảng — bằng toàn bộ bảng REQ-016 **có mặt trong lược đồ ở ngày chạy
+2026-09-17**. Con số đó không còn là tổng REQ-016: sau khi các story song song
+nhập vào nhánh integration, lược đồ có **14** bảng REQ-016 và registry đã được
+bổ sung cho đủ 14 — xem mục 12. Bảng số hàng ở trên là ảnh chụp lịch sử của 10
+bảng đã đo, không phải danh sách registry hiện tại.
 Cùng phép đếm chạy cho tài khoản thứ hai (`user-2`) trên cùng máy cho kết quả
 **không đổi** trước/sau, nên phạm vi xoá đúng bằng một chủ sở hữu.
 
@@ -418,7 +422,7 @@ bốn cặp khoá ngoại.
 | AC-14 | Gốc media biến mất khỏi đĩa, không còn tệp mồ côi | `gốc media biến mất khỏi đĩa...`, `không còn tệp ảnh mồ côi...` | PASS |
 | AC-14 | Khoá tuỳ chọn của REQ-016 bị xoá, khoá tính năng khác ở lại | `khoá tuỳ chọn của REQ-016 bị xoá, khoá tính năng khác ở lại (AC-27)` | PASS |
 | AC-14 | `hasAnyClosure()` false và mọi đường đọc rỗng mà không ném lỗi | `hasAnyClosure về false và mọi đọc đều rỗng, không ném lỗi` | PASS |
-| AC-27 | Không dư lượng hàng: 0 hàng cho chủ sở hữu ở cả 10 bảng registry (số hàng trước/sau ở mục 3) | `mọi bảng trong registry về 0 hàng cho chủ sở hữu` | PASS |
+| AC-27 | Không dư lượng hàng: 0 hàng cho chủ sở hữu ở **cả 14 bảng REQ-016** của registry (số hàng trước/sau của 10 bảng đo ngày 2026-09-17 ở mục 3; 4 bảng còn lại được phủ bởi vòng vá ở mục 12) | `mọi bảng trong registry về 0 hàng cho chủ sở hữu` (vòng lặp trên `registry.tables`, nên tự phủ bảng mới), `mọi bảng REQ-016 trong lược đồ đều có mặt trong registry` | PASS |
 | AC-27 | Không file ảnh mồ côi: gốc media biến mất khỏi đĩa và `journal_media/` chỉ còn segment của tài khoản khác (mục 4) | `gốc media biến mất khỏi đĩa...`, `không còn tệp ảnh mồ côi...` | PASS |
 | AC-27 | Không dư lượng khoá prefs: mọi khoá REQ-016 — kể cả `req016.last_opened_at` do P6 tạo — không còn sau `wipeAll()` | `khoá tuỳ chọn của REQ-016 bị xoá, khoá tính năng khác ở lại (AC-27)` | PASS (vá F1, xem mục 11) |
 | AC-27 | Không hàng đợi hoàn tác/bản nháp sót: `wipeAll()` chạy hai lần liên tiếp vẫn im lặng và vẫn rỗng | `xoá hai lần liên tiếp vẫn im lặng và vẫn rỗng` | PASS |
@@ -515,6 +519,56 @@ Nền analyze của repo không bao giờ exit 0 (xem P6 mục 1).
 Nhãn AC-27: mục 3, mục 4 và bảng AC coverage mục 7 đã gắn lại đúng AC-27 cho
 bằng chứng dư lượng đã có sẵn (F3 phần AC-27). AC-13, AC-31, AC-32 của F3 vẫn là
 DEFERRED, không thuộc vá này.
+
+### 12. Vòng vá sau integration review — F-I1 (registry thiếu 3 bảng, AC-14/AC-27)
+
+Ngày chạy: 2026-09-26, sau `integration-review/review-report.md`
+`Outcome: PATCH_REQUIRED`. Registry được viết khi lược đồ chỉ có 10 bảng
+REQ-016; các story song song nhập thêm bảng vào `CupidDatabase` sau đó, nên
+đúng thứ mà tripwire parity sinh ra để bắt đã xảy ra thật. Quyết định của Tech
+Lead (`architecture/solution.md` §7 phần bổ sung F-I1): `REGISTER` cả ba bảng,
+kể cả `calendar_event_state`.
+
+Tổng đã đếm thật trên lược đồ của worktree này (sau khi `sync-target` nhập nhánh
+integration, `BaseHead: d95d1eee`): `@DriftDatabase.tables` trong
+`mobile/lib/core/database/cupid_database.dart` liệt kê **19** bảng, trừ đúng 5
+bảng đệm máy chủ trong `nonReq016Tables()` → **14** bảng REQ-016. Registry
+trước vá có 11 entry (10 ban đầu + `thank_you_activations` do một story khác
+thêm), thiếu đúng 3.
+
+Sửa:
+
+- `mobile/lib/features/chapter_closure/data/stage1_wipe_registry.dart` — thêm ba
+  `Stage1WipeTable`, mỗi bảng khoá trên chính cột `ownerKey` của nó qua helper
+  `_ownedBy(...)`, tức vị từ vẫn sinh từ metadata Drift (`GeneratedColumn.name`)
+  chứ không gõ tay tên cột:
+  `portrait_answers`, `relationship_labels`, `calendar_event_state`.
+  `portrait_answers` đặt **trước** `notebook_entries` vì
+  `portrait_answers.notebook_entry_id` trỏ sang bảng đó, cùng quy ước con-trước-
+  cha mà bốn cặp khoá ngoại đang theo. `nonReq016Tables()` không bị chạm.
+- `mobile/test/features/chapter_closure/stage1_wipe_registry_parity_test.dart` —
+  không cần sửa: `expect(expected, hasLength(14))` đã là con số đúng của lược đồ
+  sau nhập, và chính nó là phép khẳng định chặn một bảng REQ-016 thứ 15 lọt vào
+  mà không ai đăng ký. Trước vá phép so sánh `registeredTables() == expected`
+  đỏ (11 ≠ 14); sau vá xanh.
+
+| # | Lệnh | Kết quả |
+|---|---|---|
+| 1 | `flutter test test/features/chapter_closure/stage1_wipe_registry_parity_test.dart --reporter expanded` | `00:00 +6: All tests passed!` — exit 0 |
+| 2 | `flutter analyze --no-fatal-infos --no-fatal-warnings lib/features/chapter_closure/data/stage1_wipe_registry.dart test/features/chapter_closure/stage1_wipe_registry_parity_test.dart` | `2 issues found` — 0 error, 0 warning |
+
+Lệnh 1 chạy `--reporter expanded` để mỗi case hiện tên, trong đó có
+`mỗi vị từ chủ sở hữu chạy được trên lược đồ thật` — vòng lặp `SELECT COUNT(*)
+... WHERE <vị từ>` chạy thật trên cả 14 bảng, nên ba vị từ mới được xác nhận
+hợp lệ trên SQLite chứ không chỉ biên dịch được. Lệnh 2: cả 2 issue đều là
+`info • prefer_initializing_formals` có sẵn trên constructor
+`Stage1WipeRegistry` (dòng 58, 59), không issue nào rơi vào dòng mới.
+
+Bằng chứng dư lượng: `mọi bảng trong registry về 0 hàng cho chủ sở hữu` trong
+`stage1_wipe_service_test.dart` duyệt `registry.tables` bằng vòng lặp, nên ba
+bảng mới tự nằm trong phép khẳng định đó mà không cần sửa test. Test đó không
+được chạy lại ở vòng này (ngoài phạm vi lệnh được cấp cho vòng vá — chỉ tệp
+parity); lần chạy xanh gần nhất là lệnh 2 của mục 11.
 
 ## Phase P4 — Lối vào đóng ngăn và hộp thoại xác nhận
 
