@@ -2368,3 +2368,137 @@ chưa đóng.
 `DONE` — §3.1 → §3.4 và §3.6 đã chạy; §3.5 (iOS) `SKIPPED` theo diện tuỳ chọn.
 Ba tồn dư mới R-6/R-7/R-8 và lệch registry buildCommand chuyển về Scrum Master,
 không sửa mã ở P12.
+
+## Lượt patch #4 — B-1..B-6 (2026-09-26, commit `a8aa1ff4`)
+
+Mục này **ghi bù** cho khoản N-7 của `full-story-review` S9: lượt patch #4 đổi
+mã native, thêm hai drawable và sửa bốn tệp test, nhưng chưa từng có mục nào
+trong file này — bằng chứng test khi đó chỉ sống ở thông điệp commit,
+`story_master.md:31` và `visual-fidelity/visual-fidelity-report.md`.
+
+**Nguồn của mục này, nói thẳng:** nó được dựng lại từ ba hiện vật đã tồn tại
+(`git show a8aa1ff4`, `story_master.md:31`, báo cáo thị giác), **không** phải
+từ một lượt chạy lại ở lượt #5. Không con số nào dưới đây do lượt #5 đo; xem
+mục "Lượt patch #5" bên dưới cho các lệnh lượt này thật sự chạy.
+
+Phạm vi: sáu khoản chặn B-1..B-6 của S8 (AC-9).
+
+| Khoản | Nội dung đã dựng |
+|---|---|
+| B-1 | trường tuỳ chọn `action_label` trên `PhaseContentItem.displayStrings`; không nhãn mặc định ở bất kỳ tầng nào |
+| B-3 | 4 chuỗi `secondary` mới theo AC-37; `minWidth` 180dp → 250dp; ngân sách 28 grapheme ép lúc nạp gói qua `ContentPackageFormatException` |
+| B-4 | bỏ `ImageView` biểu tượng ứng dụng khỏi layout widget |
+| B-2 | nền theo pha (`gradientHot` cho `date_day`, phẳng cho ba pha kia), đẩy mỗi lượt cập nhật bằng `setBackgroundResource` |
+| B-6 | vai trò `--dot-today` chuyển `colorAccentPink` → thành viên palette native `onAccent` mới trên cả hai nền |
+| B-5 | `RelativeSizeSpan(34/14)` + `ForegroundColorSpan` cho cụm chữ số đầu của `primary_line`, áp cho mọi pha có chữ số |
+
+Kèm theo: sửa tương phản dòng phụ ở `date_day` (`TEXT_ON_GRADIENT`, cho Android
+bằng với luật iOS sẵn có) — hệ quả trực tiếp của B-2.
+
+### Diff thật của commit
+
+`git show --stat a8aa1ff4`: **24 file, +820 / −36**. Mã sản phẩm và tài nguyên:
+`CupidPhaseWidgetProvider.kt` (+111), `phase_content.dart` (+73),
+`phase_status_line.dart` (+72), `cupid_phase_widget.xml`,
+`cupid_phase_widget_info.xml`, `phase_content.v1.json`,
+`CupidPhaseWidget.swift`, `phase_status_cubit.dart`,
+`activity_card_hub_view.dart`, cộng hai drawable mới
+`widget_bg_phase_date_day.xml` (+17) và `widget_bg_phase_flat.xml` (+15).
+
+Bốn tệp test sửa, **+225 / −2** theo `git show --numstat`:
+`phase_content_repository_test.dart` (+138 −0),
+`phase_status_line_test.dart` (+50 −0),
+`phase_content_gate_test.dart` (+25 −1),
+`native_copy_scan_test.dart` (+12 −1). (S9 ước "+226 dòng" từ cột `--stat`,
+vốn đếm cả dòng xoá; số chuẩn là +225 thêm, 227 dòng đổi.)
+
+### Test đơn vị/widget — PASS (bằng chứng gián tiếp)
+
+```
+flutter test test/features/phase_status
++103 ~4: All tests passed!
+```
+
+Lượt chạy này do **Scrum Master chạy độc lập**, ghi ở `story_master.md:31` và
+trong thông điệp commit `a8aa1ff4` cho bốn tệp
+`phase_content_repository_test.dart`, `phase_content_gate_test.dart`,
+`phase_status_line_test.dart`, `native_copy_scan_test.dart`. Lượt #4 không
+chạy lại (rule 18), nên đây là bằng chứng gián tiếp — đúng như S9 xếp loại.
+
+Đối chiếu số đếm: `+103 ~4` là lượt chạy bốn tệp nêu trên, không phải cả thư
+mục `test/features/phase_status` (cả thư mục cho `+263 ~6` ở lượt #5).
+
+### Bằng chứng thị giác
+
+Ô 1 và ô 7 chụp lại và soi mắt; verdict `PASS` cho cả bảy ô. Chi tiết từng
+thuộc tính nằm ở `visual-fidelity/visual-fidelity-report.md`, mục "Lượt patch
+#4". Bảy file PNG đổi nội dung trong chính commit này (ba ảnh hub, bốn ảnh
+widget).
+
+### Hai khoản cố ý để mở cho vai sở hữu
+
+Không thuộc cổng của story: Tech Lead phân xử xung đột quy ước tên màn giữa
+`visual_fidelity.py` và `validate-dev-design-render.sh` (đã chốt sau đó ở
+`architecture/solution.md` §8, thi hành ở lượt #5); DevOps giữ khoản N-2, thiếu
+`--flavor local` trong `buildCommand` của registry runtime.
+
+## Lượt patch #5 — B-1a, B-7, N-7 (2026-09-26)
+
+Phạm vi: ba việc của S9, không mở quyết định kiến trúc/hợp đồng nào.
+
+### B-1a — hình khối chip
+
+Sửa duy nhất `phase_status_line.dart`: `_PhaseStatusAction` chuyển từ chữ hồng
+trần sang chip bo tròn (nền `colorSurface`, viền `colorLine`, bo
+`platform.radiusButton` = 999, đệm `md`/`sm`, caption `w700`, chữ `colorText`).
+Quy cách lấy nguyên từ `Cupid Chặng 1.dc.html:236`; bảng đối chiếu từng thuộc
+tính CSS → token nằm ở báo cáo thị giác, mục "Lượt patch #5".
+
+Hai điều chỉnh kèm theo: bỏ thụt lề `left: md` (thuộc cách đọc "text button"
+mà vá B-1 đã thay), và chữ `colorAccentPink` → `colorText` (hồng ở cỡ caption
+vi phạm ADR-004b, ~3.4:1 trên nền trắng của theme sáng).
+
+```
+flutter test test/features/phase_status --reporter failures-only
++263 ~6: All other tests passed!   (263 pass, 6 skipped, 0 fail)
+```
+
+Riêng `phase_status_line_test.dart`: `+17 ~4`. Hai khẳng định đáng nêu vẫn
+xanh sau khi đổi hình khối — `getSize(phaseStatusLineActionKey).height >= 44`
+(chip vẫn đủ vùng chạm) và cổng "không ký tự có dấu tiếng Việt nào trong
+`phase_status_line.dart`" (dartdoc mới nằm ở dòng `///`, bị bộ lọc `//` của
+cổng loại ra trước khi quét).
+
+Chụp lại ô 1:
+
+```
+flutter test test/features/phase_status/phase_status_line_test.dart \
+  --dart-define=CAPTURE_VISUALS=true \
+  --plain-name "captures screen (1) in the waiting phase" --reporter expanded
+00:00 +1: All tests passed!
+```
+
+`git status` ngay sau đó: đúng một PNG đổi, không ảnh của story khác bị ghi đè.
+Soi mắt ảnh mới: chip hiện đúng hình viên thuốc trong khối chuẩn-bị, dấu tiếng
+Việt đủ, không tofu.
+
+### B-7 — đổi tên 10 ảnh `implemented-*`
+
+`git mv` theo đúng bảng §8b của `architecture/solution.md`; không đụng
+`design-reference-*`. Bằng chứng **đối chứng** (bắt buộc, không nhận một lần
+xanh): tên mới → `visual_fidelity.py` exit 0; bản `cp -R` sang
+`/tmp/vf-oldname-control/` với 10 tên cũ phục hồi, ảnh y hệt → exit 1 kèm đúng
+thông điệp "no screen has BOTH renders" mà Iris-QC gặp ở S9. Hai lượt chỉ khác
+nhau ở tên file. Không dùng `verify-story-visual-fidelity-gate.sh`: gọi tay nó
+trả exit 0 im lặng bất kể bằng chứng đúng hay sai.
+
+### N-7 — mục "Lượt patch #4" ở ngay trên
+
+### Tồn dư mở
+
+Tên file chụp do mã test sinh:
+`mobile/test/features/phase_status/phase_status_line_test.dart:627` nối chuỗi
+`'implemented-hub-${phase.wireValue}.png'`. Lượt này chụp dưới tên cũ rồi
+`git mv`, vì `mobile/test/**` ngoài WriteScope được giao. Lần sau ai bật
+`CAPTURE_VISUALS=true` sẽ sinh lại tên cũ và cổng đỏ trở lại. Cần một lượt nhỏ
+sửa hằng tên trong hai harness chụp — việc định tuyến của Scrum Master.

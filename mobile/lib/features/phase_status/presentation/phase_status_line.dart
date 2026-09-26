@@ -99,20 +99,28 @@ class PhaseStatusLine extends StatelessWidget {
               style: type.caption.copyWith(color: colors.colorTextMuted),
             ),
           ],
-          if (action != null && action.isNotEmpty)
+          if (action != null && action.isNotEmpty) ...<Widget>[
+            const SizedBox(height: CupidSpacing.sm),
             _PhaseStatusAction(label: action, onTap: onActionTap),
+          ],
         ],
       ),
     );
   }
 }
 
-/// The secondary action of the waiting phase (AC-5/SB-83), drawn from the
-/// `hành động phụ` column of the action-tier table
-/// (`ux/requirement-ux-survey.md` §4): a text button, no solid fill, caption at
-/// regular weight, indented `md` from the block edge, and still a full tap
-/// target. It is deliberately not the card's own pill — the card action stays
-/// one visual tier above anything nested inside this block.
+/// The secondary action of the waiting phase (AC-5/SB-83), a rounded pill inside
+/// the preparation block rather than bare accent text (`ux/uiux-spec.md` §1,
+/// 2026-09-26 patch B-1). Shape comes from the `cupid-ch-ng-1` canvas chip:
+/// surface fill against the block's `colorSurfaceAlt`, hairline `colorLine`
+/// border, fully rounded, `md`/`sm` padding, caption at bold weight. Text uses
+/// `colorText` and not `colorAccentPink` because pink fails AA at caption size
+/// in the light theme (ADR-004b).
+///
+/// It sits flush with the block's left edge and hugs its label — the earlier
+/// `md` indent belonged to the text-button reading that patch B-1 replaced. It
+/// is still deliberately not the card's own CTA pill: the card action keeps one
+/// visual tier above anything nested inside this block (D-2).
 class _PhaseStatusAction extends StatelessWidget {
   const _PhaseStatusAction({required this.label, required this.onTap});
 
@@ -125,23 +133,33 @@ class _PhaseStatusAction extends StatelessWidget {
     final CupidPlatformTokens platform = context.cupidPlatform;
     final CupidTypographyTokens type = context.cupidType;
 
-    return Padding(
-      padding: const EdgeInsets.only(left: CupidSpacing.md),
-      child: Semantics(
-        button: true,
-        child: GestureDetector(
-          key: phaseStatusLineActionKey,
-          behavior: HitTestBehavior.opaque,
-          onTap: onTap,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: platform.tapTarget),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                label,
-                style: type.caption.copyWith(
-                  color: colors.colorAccentPink,
-                  fontWeight: FontWeight.w400,
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        key: phaseStatusLineActionKey,
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: platform.tapTarget),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: colors.colorSurface,
+              borderRadius: BorderRadius.circular(platform.radiusButton),
+              border: Border.all(color: colors.colorLine),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: CupidSpacing.md,
+                vertical: CupidSpacing.sm,
+              ),
+              child: Center(
+                widthFactor: 1,
+                child: Text(
+                  label,
+                  style: type.caption.copyWith(
+                    color: colors.colorText,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),

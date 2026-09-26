@@ -82,36 +82,70 @@ gate `validate-dev-design-render.sh` không tra được screen trên surface
 đổi (kích thước byte trùng khớp từng file), nên mọi so sánh đã ghi vẫn còn giá
 trị.
 
+Tên `implemented-*` dưới đây là tên **sau** lượt đổi tên B-7 (lượt patch #5):
+id canvas đứng ngay sau tiền tố, nhãn bản dựng lùi về hậu tố trạng thái, theo
+bảng §8b của `architecture/solution.md`. Không ảnh `design-reference-*` nào bị
+đổi tên hay nhân bản.
+
+Các mục "Lượt patch #1"…"#4" bên dưới giữ nguyên tên file **tại thời điểm lượt
+đó chạy** (`implemented-hub-*`, `-evening-*`, `-quiet-*`, `-widget-*`): đó là
+biên bản đã ghi, không phải đường dẫn còn sống. Tra tên hiện tại qua bảng ngay
+trên hoặc bảng §8b.
+
 | implemented | design-reference | id canvas |
 |---|---|---|
-| `implemented-hub-waiting.png` | `design-reference-ngan-da-hen-ngay-dang-doi-ios.png` | `ngan-da-hen-ngay-dang-doi` |
-| `implemented-hub-upcoming.png` | `design-reference-ngan-da-hen-ngay-dang-doi-ios.png` | `ngan-da-hen-ngay-dang-doi` |
-| `implemented-hub-date_day.png` | `design-reference-man-goc-muon-lam-ios.png` | `man-goc-muon-lam` |
-| `implemented-hub-quiet.png` | `design-reference-man-goc-muon-lam-ios.png` | `man-goc-muon-lam` |
-| `implemented-evening-check-in-sheet.png` | `design-reference-23h-vua-ve-j8-ios.png` | `23h-vua-ve-j8` |
-| `implemented-quiet-surfaces.png` | `design-reference-j12-nhan-ra-cot-moc-ios.png` | `j12-nhan-ra-cot-moc` |
-| `implemented-widget-date-day.png` (+ `-waiting`, `-upcoming`, `-quiet`) | `design-reference-sb-84-widget-bon-pha-ios.png` | `sb-84-widget-bon-pha` |
+| `implemented-ngan-da-hen-ngay-dang-doi-waiting.png` | `design-reference-ngan-da-hen-ngay-dang-doi-ios.png` | `ngan-da-hen-ngay-dang-doi` |
+| `implemented-ngan-da-hen-ngay-dang-doi-upcoming.png` | `design-reference-ngan-da-hen-ngay-dang-doi-ios.png` | `ngan-da-hen-ngay-dang-doi` |
+| `implemented-man-goc-muon-lam-date-day.png` | `design-reference-man-goc-muon-lam-ios.png` | `man-goc-muon-lam` |
+| `implemented-man-goc-muon-lam-quiet.png` | `design-reference-man-goc-muon-lam-ios.png` | `man-goc-muon-lam` |
+| `implemented-23h-vua-ve-j8-check-in-sheet.png` | `design-reference-23h-vua-ve-j8-ios.png` | `23h-vua-ve-j8` |
+| `implemented-j12-nhan-ra-cot-moc-quiet-surfaces.png` | `design-reference-j12-nhan-ra-cot-moc-ios.png` | `j12-nhan-ra-cot-moc` |
+| `implemented-sb-84-widget-bon-pha-date-day.png` (+ `-waiting`, `-upcoming`, `-quiet`) | `design-reference-sb-84-widget-bon-pha-ios.png` | `sb-84-widget-bon-pha` |
 
-### Hai cổng đang đòi hai quy ước tên trái nhau (chưa tự ý gỡ)
+### B-7 đã gỡ: một tên màn duy nhất cho cả hai cổng
 
 `visual_fidelity.py` ghép ảnh theo **token đầu tiên sau tiền tố**: nó đòi
 `implemented-<screen>-*.png` và `design-reference-<screen>-*.png` trùng
-`<screen>`. Với bộ ảnh hiện tại nó báo *"no screen has BOTH renders …
-running-app renders exist for ['evening', 'hub', 'quiet', 'widget'] and design
-renders for ['23h', 'j12', 'man', 'ngan']"* và exit 1.
+`<screen>`. Bộ tên cũ (`implemented-hub-*`, `-evening-*`, `-quiet-*`,
+`-widget-*`) không trùng token nào với `design-reference-*`, nên cổng exit 1.
 
-Đổi tên ảnh design cho khớp là **không làm được**: tên đó do
+Đổi tên phía **design** vẫn là không làm được: tên đó do
 `render-design-canvas.js` sinh theo id canvas, và lượt trước đã thử chèn nhãn
 vào giữa — `validate-dev-design-render.sh` lập tức không tra được screen trên
 surface `cupid-ch-ng-1` nên phải xoá và render lại (xem đoạn ngay trên bảng).
-Một canvas id không phải là một `<screen>` của lane mobile, và ở REQ-016 còn có
-chuyện một frame canvas phục vụ **hai** trạng thái implemented — quan hệ
-nhiều-một mà quy tắc ghép một-một của cổng không diễn đạt được.
 
-Lane mobile vì thế **không** đổi tên file, không nhân bản ảnh design kèm nhãn,
-và không sửa cổng. Verdict `PASS` ở trên dựa trên bảng đối chiếu từng thuộc
-tính trong mục "Lượt patch #4"; việc hoà giải hai quy ước là quyết định của
-Tech Lead / chủ sở hữu cổng, ghi lại ở đây để định tuyến.
+Tech Lead đã chốt hướng ngược lại ở `architecture/solution.md` §8: **id canvas
+là id màn chuẩn duy nhất**, nhãn bản dựng chỉ được đứng ở hậu tố. Lượt này thi
+hành đúng bảng §8b — `git mv` 10 file `implemented-*`, giữ nguyên toàn bộ
+`design-reference-*`, không sửa cổng. Quan hệ nhiều-một (một frame canvas phục
+vụ hai trạng thái implemented) không cần cổng diễn đạt: cổng đòi **ít nhất
+một** màn có đủ hai bên, và §8a dẫn năm tiền lệ story DONE cùng requirement đã
+ghép nhiều-một qua đúng cổng này.
+
+#### Bằng chứng đối chứng (không phải một lần xanh)
+
+`verify-story-visual-fidelity-gate.sh` **không** được dùng: gọi tay nó trả
+exit 0 im lặng bất kể bằng chứng đúng hay sai. Chạy trực tiếp bộ kiểm:
+
+```bash
+python3 .claude/hooks/lib/visual_fidelity.py \
+  --dir <story dir> --project <worktree root> \
+  --stage review --stack mobile --lane mobile
+```
+
+| Lượt | Bộ tên trong `visual-fidelity/` | Kết quả |
+|---|---|---|
+| A — tên mới (thư mục thật của story) | 10 file theo bảng §8b | **exit 0, không in gì → PASS** |
+| B — đối chứng tên cũ (`cp -R` sang `/tmp/vf-oldname-control/`, phục hồi 10 tên cũ, ảnh y hệt) | `implemented-hub-*`, `-evening-*`, `-quiet-*`, `-widget-*` | **exit 1** |
+
+Thông điệp lỗi nguyên văn của lượt B, trùng từng chữ với lần Iris-QC chạy ở S9:
+
+> no screen has BOTH renders, so nothing was actually compared: running-app
+> renders exist for `['evening', 'hub', 'quiet', 'widget']` and design renders
+> for `['23h', 'j12', 'man', 'ngan']`.
+
+Hai lượt chỉ khác nhau ở tên file — nội dung ảnh, story dir, cờ và bộ kiểm đều
+giống hệt — nên chính việc đổi tên là thứ làm cổng chuyển đỏ sang xanh.
 
 `ngan-da-hen-ngay-dang-doi` dùng cho **hai** trạng thái vì chính frame đó vẽ cả
 thẻ "đang đợi" lẫn thẻ "chốt rồi · còn 4 ngày" trong một khung.
@@ -803,4 +837,86 @@ sips -c 396 814 --cropOffset 362 12 <ảnh gốc> --out implemented-widget-<pha>
 adb shell dumpsys activity activities            # xác nhận MainActivity sau khi chạm widget
 flutter test test/features/phase_status/native_copy_scan_test.dart   # 38/38 xanh
 python3 .claude/hooks/lib/visual_fidelity.py --dir <thư mục này> --stage review --stack mobile
+```
+
+## Lượt patch #5 — B-1a (hình khối chip) và B-7 (đổi tên 10 ảnh implemented)
+
+Vào sau `full-story-review` S9 của Iris-QC (`Outcome: PATCH_REQUIRED`, hai
+khoản chặn). Lượt này đóng cả hai.
+
+### B-1a — chip hành động phụ đã là chip, không còn text trần
+
+Dữ liệu đã đúng từ lượt #4 (`action_label` đi qua `displayStrings`, cổng bất
+biến AC-39 đo được), chỉ **hình khối** là sai: `_PhaseStatusAction` vẽ nhãn
+thành chữ hồng trần. `ux/uiux-spec.md` §1 vá B-1 đòi chip bo tròn theo canvas.
+
+Quy cách lấy nguyên từ canvas, không suy đoán — `Cupid Chặng 1.dc.html:236`,
+chip `Chọn quán dự phòng` của màn `ngan-da-hen-ngay-dang-doi`:
+
+| Thuộc tính canvas | Giá trị CSS | Token đã dùng trong Dart |
+|---|---|---|
+| nền | `background:var(--surf)` | `colors.colorSurface` (`--surf` = `#241B42` dark / `#FFFFFF` light, khớp từng byte với bảng biến CSS dòng 24-25) |
+| viền | `1px solid var(--line)` | `Border.all(color: colors.colorLine)` |
+| bo góc | `border-radius:999px` | `platform.radiusButton` (= `999`) |
+| đệm | `9px 14px` | `horizontal: CupidSpacing.md` (16), `vertical: CupidSpacing.sm` (8) — ô lưới 8pt gần nhất |
+| chữ | `font-size:12.5px; font-weight:700` | `type.caption` (13) + `FontWeight.w700` |
+| màu chữ | mặc định `var(--tx)` | `colors.colorText` |
+
+Hai điều chỉnh kèm theo, đều có lý do nêu tại chỗ trong mã:
+
+- Bỏ thụt lề `left: md`. Thụt lề đó thuộc cách đọc "text button" của
+  `ux/requirement-ux-survey.md` §4 mà vá B-1 đã thay; canvas đặt chip sát mép
+  trái khối chuẩn-bị.
+- Màu chữ chuyển `colorAccentPink` → `colorText`. Canvas dùng `--tx`, và hồng
+  ở cỡ caption vi phạm ADR-004b (hồng light `#E8558F` trên trắng ~3.4:1, dưới
+  ngưỡng AA 4.5:1 cho chữ nhỏ). Hồng vẫn giữ nguyên ở CTA `Hẹn ngày`.
+
+Chip vẫn là bậc hành động phụ, không phải CTA thứ hai (D-2): nền `--surf` đặt
+trên nền khối `--surf2`, không phải nền hồng đặc của CTA chính.
+
+Ô 1 đã chụp lại **sau** khi sửa mã, dưới tên mới. Soi bằng mắt ảnh mới: chip
+"Chọn trước một chỗ" hiện thành viên thuốc bo tròn có nền và viền nằm trong
+khối "Chuẩn bị dần cho buổi tới"; mọi dấu tiếng Việt hiện đúng, không tofu.
+
+Kiểm thử: `flutter test test/features/phase_status` — **263 xanh, 6 skip, 0
+đỏ**. Riêng `phase_status_line_test.dart` 17 xanh / 4 skip, gồm cả khẳng định
+`getSize(phaseStatusLineActionKey).height >= 44` (chip vẫn là vùng chạm đủ) và
+cổng "không chuỗi tiếng Việt nào trong `phase_status_line.dart`".
+
+### B-7 — 10 ảnh `implemented-*` đã đổi tên
+
+Thi hành bảng §8b của `architecture/solution.md` bằng `git mv`; bảng "Đặt cặp
+ảnh" ở đầu file đã cập nhật. Không đụng `design-reference-*`, không sửa cổng,
+không đổi một dòng mã sản phẩm nào vì khoản này.
+
+Bằng chứng đối chứng (tên mới xanh / tên cũ đỏ) ghi ở mục "Bằng chứng đối
+chứng" ngay dưới bảng đặt cặp.
+
+### Tồn dư mở sau lượt này
+
+Tên file chụp **do mã test sinh ra**, không do người đặt:
+`mobile/test/features/phase_status/phase_status_line_test.dart:627` nối chuỗi
+`'implemented-hub-${phase.wireValue}.png'`, và harness chụp widget ở P12 ghi
+`implemented-widget-<pha>.png`. Lượt này chụp dưới tên cũ rồi `git mv`, vì
+`mobile/test/**` nằm ngoài WriteScope được giao. Hệ quả: lần sau ai chạy
+`--dart-define=CAPTURE_VISUALS=true` sẽ sinh lại **tên cũ** bên cạnh tên mới và
+cổng đỏ trở lại. `architecture/solution.md` §8d kết luận "không mở WriteScope
+`mobile/` cho khoản B-7" dựa trên tiền đề không còn đúng — tiền đề đó chỉ xét
+mã sản phẩm, không xét mã test. Cần một lượt nhỏ sửa hằng tên trong hai harness
+chụp; đây là việc định tuyến cho Scrum Master, không phải quyết định của lane
+mobile.
+
+### Lệnh đã chạy ở lượt #5
+
+```
+flutter test test/features/phase_status --reporter failures-only
+flutter test test/features/phase_status/phase_status_line_test.dart \
+  --dart-define=CAPTURE_VISUALS=true \
+  --plain-name "captures screen (1) in the waiting phase" --reporter expanded
+git mv implemented-<tên cũ>.png implemented-<tên mới>.png     # 10 lần, theo §8b
+python3 .claude/hooks/lib/visual_fidelity.py --dir <thư mục này> \
+  --project <gốc worktree> --stage review --stack mobile --lane mobile   # exit 0
+cp -R <thư mục story> /tmp/vf-oldname-control/ && <phục hồi 10 tên cũ>
+python3 .claude/hooks/lib/visual_fidelity.py --dir /tmp/vf-oldname-control/... \
+  --project <gốc worktree> --stage review --stack mobile --lane mobile   # exit 1
 ```
