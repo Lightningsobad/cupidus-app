@@ -315,3 +315,76 @@ per this whole session's established discipline), confirm the 4
 previously-unlisted files are legitimate in-scope changes, confirm cell 7 now
 covers all 4 native phases, confirm tests pass, then route to Iris-QC for
 S9 re-review of the B-1..B-6 rework before this story can move toward DONE.
+
+## Alex-Mobile-Dev RESULT, independently verified (2026-09-26)
+
+Report came in truncated mid-message ("[result truncated — ask the agent for
+the rest via SendMessage]"); asked for the tail via a proper
+`handoff-build.sh continue` handoff. Before the tail arrived, the
+`ACTIVE-SCOPE STALE-WAIT GUARD` fired: the run file was already `COMPLETED`
+(`completion_marker: "MOBILE_COMPLETE: YES"`, `updated_at: 2026-09-26T09:49:57Z`,
+`worktree_head` unchanged at `0cf0abd7`), so verification proceeded directly
+from the worktree instead of waiting on chat text:
+
+- `git status`/`git diff --stat` in the worktree: 22 tracked files + 2 new
+  untracked drawables changed, no STORY-002 (or any other story's) files
+  touched this time — the prior out-of-scope PNG churn was not repeated.
+- Visual-fidelity cell 7 now has all 4 native captures
+  (`implemented-widget-{date-day,waiting,upcoming,quiet}.png`); the earlier
+  concern about a missing `quiet` capture is resolved.
+- Diffed `mobile/android/app/src/main/res/xml/cupid_phase_widget_info.xml`
+  directly: the out-of-WriteScope edit is `minWidth 180dp -> 250dp` with an
+  inline comment citing the AppWidget launcher grid's `70*n-30` quantization
+  formula (250dp is the real 4-column value; ~230dp from the UX spec estimate
+  would land in the same bucket but off the grid). Judged legitimate and
+  necessary to close B-3 — accepted as in-scope, not drift.
+- The 3 other previously-unlisted files
+  (`cupid_phase_widget_info.xml` already covered above,
+  `phase_status_cubit.dart`, `phase_status_line.dart`,
+  `activity_card_hub_view.dart` in place of the originally-cited
+  `activity_card_tile.dart`) are exactly where the action_label chip (B-1) and
+  secondary-line wiring naturally live — accepted as in-scope, not drift.
+- Read `visual-fidelity-report.md`'s new "Lượt patch #4 — B-1..B-6" section in
+  full: closes each of B-1/B-2/B-3/B-4/B-5/B-6 with a named mechanism and
+  evidence image, states the B-2+B-6 ship-together constraint was honored, and
+  documents (not silently overrides) a real gate conflict — `visual_fidelity.py`
+  pairs images by filename token while `validate-dev-design-render.sh` forbids
+  relabelling canvas exports, so the two gates want incompatible naming; mobile
+  correctly did not rename/duplicate/patch either gate and flagged it for Tech
+  Lead to arbitrate.
+- Eyeballed 3 of the recaptured PNGs directly (not just read the report's
+  claim): `implemented-widget-date-day.png` (pink->purple gradient, near-white
+  lightning-bolt glyph, readable secondary line, no ellipsis/tofu),
+  `implemented-widget-upcoming.png` (flat dark bg, large pink "4" digit span,
+  no icon square), `implemented-hub-waiting.png` (new "Chọn trước một chỗ"
+  action_label chip under the secondary line). All match the report's claims.
+- Independently re-ran (not trusted from the report) the 4 changed test files:
+  `flutter test test/features/phase_status/phase_content_repository_test.dart
+  test/features/phase_status/phase_content_gate_test.dart
+  test/features/phase_status/phase_status_line_test.dart
+  test/features/phase_status/native_copy_scan_test.dart` ->
+  `+103 ~4: All tests passed!` (own run, full untruncated output, not filtered).
+
+**Committed** (mobile-dev did not self-commit, per instruction): commit
+`a8aa1ff4` on `codex/REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget`
+(24 files, +820/-36). Boundary `refresh-base` run — new `BaseHead: a8aa1ff497a6a1fd7fdb5a74166b0beca6a3919e`.
+`story_master.md` (worktree) Implementation checkbox marked `[x]` with the
+commit sha and verification note; Review checkbox stays `[ ]` pending S9.
+`Alex-Mobile-Dev@session-e7df910a` released via `TaskStop` (mobile work for
+this cycle is done); `list-releasable-agents.sh` also named
+`Alan-Techlead`/`Andy-PO`/`Iris-QC` but all three were already gone (`No task
+found`) — only `Alex-Mobile-Dev` was actually live and is now stopped.
+
+Two items intentionally NOT resolved by Scrum Master, left for their owning
+roles (per mobile-dev's own routing, matches its `next_step`):
+1. Screen-naming convention conflict between `visual_fidelity.py` and
+   `validate-dev-design-render.sh` — routes to Tech Lead.
+2. N-2 (runtime registry `buildCommand` missing `--flavor local`) — routes to
+   DevOps, unrelated to this story's own gate.
+
+**Next step: dispatch Iris-QC for S9 `full-story-review` (re-review), scoped
+to the six now-closed B-1..B-6 findings** at `BaseHead: a8aa1ff497a6a1fd7fdb5a74166b0beca6a3919e`,
+against `review/review-report.md` (S8) and `visual-fidelity/visual-fidelity-report.md`
+"Lượt patch #4" section. This is a fresh review pass (S8's own report is
+already a complete, closed artifact), not a continuation of the S8 reviewer
+run, so a new `Iris-QC` spawn is correct here, not `SendMessage`.
