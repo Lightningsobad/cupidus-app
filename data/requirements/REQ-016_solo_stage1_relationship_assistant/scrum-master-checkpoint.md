@@ -134,9 +134,10 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 - Round 1-35 narrative in git history of this file — superseded by the table
   and "Current cursor" sections above.
 
-## Current cursor (Round 46 — REQ-016 DONE, landed into main)
+## Round 46 (superseded by Round 47 below — DONE gate blocked twice after this)
 
-**REQUIREMENT DONE. No further specialist dispatch needed for REQ-016.**
+**Declared DONE here; `validate-done-gate.sh` Stop hook then blocked it twice —
+see Round 47.**
 
 - Round 45 `Iris-QC` narrow closure review (RunId
   `...-reviewer-fi4close`, `BaseHead 893c3649`) returned `REVIEW_COMPLETE: YES`,
@@ -191,6 +192,73 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
   non-blocking items list above, OQ-1) are PO/Tech-Lead-owned follow-ups, not
   REQ-016 `DONE`-gate blockers — left open for a future requirement/PO pass,
   not re-litigated here.
+
+## Current cursor (Round 47 — STORY-012 DONE-gate evidence gap, rework dispatched)
+
+**REQ-016 NOT yet DONE. `validate-done-gate.sh --req
+REQ-016_solo_stage1_relationship_assistant` blocked twice after the Round 46
+DONE declaration:**
+
+1. `STORY-003_private_journal` not `merge_complete` — root cause: boundary was
+   genuinely `MERGE_COMPLETE: true` and merged, but keyed under the SHORT id
+   `STORY-003.json` instead of the full directory name the gate scans for
+   (`STORY-001_activity_card_hub` vs bare `STORY-001` checked and found
+   benign/already-correct by contrast). Fixed: verified `9f4555f8...` is an
+   ancestor of `main` via `merge-base --is-ancestor`, then
+   `repair-boundary --branch main --commit-sha 9f4555f8... --worktree
+   <control-checkout> --merge-target main` + `merge` created the correctly-
+   keyed `STORY-003_private_journal.json` (`MERGE_COMPLETE: true`,
+   `merge_sha` = `main` HEAD, unchanged before/after — bookkeeping only, no
+   new commit). Committed together with this checkpoint round.
+2. `STORY-012_phase_status_and_widget` missing delivery evidence: `##
+   Story Runtime Startup Smoke` in `STORY-012.../coding-plan/test-results.md`
+   (line 1319) records "Kết quả một phần" (partial), not `Result: PASS`. Read
+   in full: iOS leg is genuine PASS with real `xcrun simctl` install/launch/
+   screenshot/crash-scan evidence. Android leg's entry explicitly disclaims
+   real device evidence — only a build-config fix
+   (`isCoreLibraryDesugaringEnabled` for `flutter_local_notifications`) and a
+   successful `flutter build apk` were verified at that point, no install/
+   launch. A LATER section in the same file, `## P12 – lượt khắc phục
+   2026-09-25` (~line 2233), DOES contain genuine Android `adb install`/
+   launch/widget-tap/`dumpsys` `ResumedActivity`/logcat-clean evidence — not
+   yet determined whether that can close gap G-3 by cross-reference or
+   whether fresh dedicated runtime-smoke evidence is required; left to
+   `Alex-Mobile-Dev` to determine and record, not Scrum Master, since it is a
+   mobile-domain evidence-sufficiency judgment.
+   - STORY-012's git boundary was already correctly keyed and
+     `MERGE_COMPLETE: true` (`merge_sha: e9519243`, contained in `main`) — NOT
+     a bookkeeping problem, a genuine content/evidence gap requiring real
+     specialist work.
+   - Old boundary's `worktree`/`branch` (`codex/...-STORY-012_phase_status_and_widget`)
+     and `merge_target` (`codex/...-integration`) were already cleaned up/
+     retired, so `start --inline` (`INLINE_BOUNDARY_MISMATCH`) and plain
+     `start` (`BOUNDARY_STATE_MISMATCH`) were both rejected. Fix: created a
+     brand-new worktree + branch from `main` HEAD directly with `git worktree
+     add -b
+     codex/REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-rework1
+     .../story-...-STORY-012_phase_status_and_widget-rework1 main`, then
+     `repair-boundary --branch <new-branch> --commit-sha <main HEAD
+     16ca2be7...> --worktree <new-worktree> --merge-target main` to re-point
+     the existing (already-`MERGE_COMPLETE`) boundary at the new worktree/
+     branch/merge-target without disturbing its completion state.
+   - New Git Boundary for the rework:
+     `Worktree: /Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-rework1`
+     `Branch: codex/REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-rework1`
+     `MergeTarget: main`, `BaseHead: 16ca2be71a2363411ca816e601854c13fd130340`,
+     `BoundaryState:
+     .git/ai-team-story-boundaries/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget.json`.
+   - `Alex-Mobile-Dev` dispatched into this worktree to close gap G-3 for real
+     (cross-reference P12 evidence if it genuinely satisfies the Runtime
+     Startup Smoke check, or capture fresh Android install/launch evidence),
+     update `## Story Runtime Startup Smoke` to a genuine overall `Result:
+     PASS`, and stop — no self-commit (Scrum Master commits/merges).
+
+**Next step after Alex-Mobile-Dev returns:** verify the evidence update is
+real (not asserted), route through a narrow `Iris-QC` closure review (mirrors
+the Round 44-45 F-I4 pattern), `git-story-boundary.sh merge` the rework branch
+into `main`, then re-run `validate-done-gate.sh --req
+REQ-016_solo_stage1_relationship_assistant` directly before re-declaring
+`REQUIREMENT_DONE`.
 
 ## Superseded history (Rounds 37-45, collapsed — all 13 stories DONE/merged, F-I1 rework landed, F-I2/F-I3 devops evidence closed, requirement-level mobile-visual-audit closed, F-M1 architecture decision sealed, F-M1 implementation shipped, Round 43 PATCH_REQUIRED on F-I4 evidence-only gap, Round 44 F-I4 seam-A re-capture sealed at `35723ed2`)
 
