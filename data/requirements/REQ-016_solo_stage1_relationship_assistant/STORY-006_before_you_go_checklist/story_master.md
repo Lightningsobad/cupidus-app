@@ -1,21 +1,33 @@
 # Story Master: STORY-006 "Trước giờ đi" — checklist tất định (SB-211)
 
-Status: TODO
+Status: DONE
 Complexity: standard
 Story-Class: standard
-Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
+Implementation Lane: mobile (Tech Lead chốt 2026-09-11 — không AC nào cần
+server và AC-22/AC-23 cấm mạng, nên backend lane không tham gia)
 Requirement: REQ-016
 Screen: Khối mở rộng trên chi tiết thẻ ở màn (1). **Không phải màn hình thứ 12**
 — tổng vẫn là 11 màn hình.
+Design-Screen: sb-211-truoc-gio-di (ios, resolved P2 — see
+`visual-fidelity/visual-fidelity-report.md`; canvas frame has 6 logged
+DESIGN_SPEC_CONFLICT items vs. binding ACs, ACs govern per standing
+canvas-vs-AC precedent, not re-litigated)
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục E (SB-211),
 A (J6), C.1
 
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`,
+      `architecture/contract-summary.md`, `coding-plan/` (P1, P2)
+- [x] Implementation (Development) — P1 + P2 DONE; F-1/F-2 patch round
+      2026-09-11 closed both PATCH_REQUIRED findings (Story Runtime Startup
+      Smoke PASS, Entry Point Reachability `Reachable: YES`), independently
+      verified on disk incl. runtime-smoke capture; no source change made.
+- [x] Review (Reviewer) — Round 2 re-review 2026-09-11: `Outcome: DEFERRED_ONLY`
+      (0 blocking, 2 deferred: D-1 schemaId/schema_id doc-only, D-2
+      `scheduledOn: '2026-10-01'` fixture time bomb — both routed to
+      requirement backlog, not gating). `review/review-report.md`.
 
 ## Depends On
 - STORY-001 — khối gắn trên chi tiết thẻ trạng thái *Đã hẹn ngày*.

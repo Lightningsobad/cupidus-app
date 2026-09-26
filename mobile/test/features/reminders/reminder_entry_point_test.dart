@@ -20,10 +20,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Always returns `{}`; mirrors `test/app/feature_flags_test.dart` and
-/// `test/widget_test.dart`. This suite only checks Home-tab reachability, so
-/// `ChatPartnerStore`/`CouplePairingStore` never need a real `/users/me`
-/// payload -- just a non-throwing one.
+/// Mirrors `test/app/feature_flags_test.dart` and `test/widget_test.dart`.
+///
+/// `/users/me` answers with a partner id on purpose: the assertions below are
+/// about the couple dashboard's reminder entry card, and `HomeScreen` picks
+/// its branch from `getIt<CouplePairingStore>()`. An empty `{}` there would
+/// report unpaired and (post-REQ-016 P9) mount the solo card hub instead.
+/// Every other path keeps the non-throwing empty payload.
 class _FakeHttpClientAdapter implements HttpClientAdapter {
   @override
   Future<ResponseBody> fetch(
@@ -31,8 +34,12 @@ class _FakeHttpClientAdapter implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
+    final String body = options.path == '/users/me'
+        ? '{"partnerId":"partner-1","displayName":"Partner One",'
+              '"isGhostModeEnabled":false}'
+        : '{}';
     return ResponseBody.fromString(
-      '{}',
+      body,
       200,
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],

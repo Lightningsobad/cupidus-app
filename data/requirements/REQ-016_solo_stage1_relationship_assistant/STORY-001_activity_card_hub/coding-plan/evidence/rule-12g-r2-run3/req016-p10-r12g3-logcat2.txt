@@ -1,0 +1,176 @@
+--------- beginning of main
+09-08 20:07:19.823 13349 13349 I snapsofts.cupid: Late-enabling -Xcheck:jni
+09-08 20:07:20.331 13349 13349 I snapsofts.cupid: Using CollectorTypeCMC GC.
+09-08 20:07:21.175 13349 13349 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+09-08 20:07:22.725 13349 13349 D ApplicationLoaders: Returning zygote-cached class loader: /system_ext/framework/androidx.window.extensions.jar
+09-08 20:07:22.725 13349 13349 D ApplicationLoaders: Returning zygote-cached class loader: /system_ext/framework/androidx.window.sidecar.jar
+09-08 20:07:24.093 13349 13349 D nativeloader: Configuring clns-9 for other apk /data/app/~~cbGcYmRS_MT-x6exaliS8A==/com.snapsofts.cupid-I2vlTxcpvSEqSbk8fjpljQ==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~cbGcYmRS_MT-x6exaliS8A==/com.snapsofts.cupid-I2vlTxcpvSEqSbk8fjpljQ==/lib/arm64:/data/app/~~cbGcYmRS_MT-x6exaliS8A==/com.snapsofts.cupid-I2vlTxcpvSEqSbk8fjpljQ==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/com.snapsofts.cupid
+09-08 20:07:24.137 13349 13349 I snapsofts.cupid: AssetManager2(0xb40000733aaa1a78) locale list changing from [] to [en-US]
+09-08 20:07:24.363 13349 13349 V GraphicsEnvironment: Currently set values for:
+09-08 20:07:24.363 13349 13349 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+09-08 20:07:24.363 13349 13349 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+09-08 20:07:24.363 13349 13349 V GraphicsEnvironment: com.snapsofts.cupid is not listed in per-application setting
+09-08 20:07:24.365 13349 13349 V GraphicsEnvironment: ANGLE allowlist from config: com.dreamgames.royalmatch com.dts.freefiremax com.dxx.firenow com.gramgames.mergedragons com.ludo.king com.mojang.minecraftpe com.my.defense com.nintendo.zaka com.os.airforce com.playrix.fishdomdd.gplay io.teslatech.callbreak jp.konami.prospia net.peakgames.toonblas
+09-08 20:07:24.366 13349 13349 V GraphicsEnvironment: com.snapsofts.cupid is not listed in ANGLE allowlist or settings, returning defaul
+09-08 20:07:24.366 13349 13349 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+09-08 20:07:24.672 13349 13349 I FirebaseApp: Device unlocked: initializing all Firebase APIs for app [DEFAULT]
+09-08 20:07:24.760 13349 13349 I FirebaseInitProvider: FirebaseApp initialization successful
+09-08 20:07:24.809 13349 13349 D FLTFireContextHolder: received application context.
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: Failed to auto initialize the Facebook SDK
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: A valid Facebook app id must be set in the AndroidManifest.xml or set by calling FacebookSdk.setApplicationId before initializing the sdk.
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at com.facebook.FacebookSdk.sdkInitialize(FacebookSdk.kt:452)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at com.facebook.FacebookSdk.sdkInitialize(FacebookSdk.kt:412)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at com.facebook.internal.FacebookInitProvider.onCreate(FacebookInitProvider.kt:28)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at android.content.ContentProvider.attachInfo(ContentProvider.java:2649)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at android.content.ContentProvider.attachInfo(ContentProvider.java:2618)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at android.app.ActivityThread.installProvider(ActivityThread.java:8642)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at android.app.ActivityThread.installContentProviders(ActivityThread.java:8157)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at android.app.ActivityThread.handleBindApplication(ActivityThread.java:7814)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at android.app.ActivityThread.-$$Nest$mhandleBindApplication(Unknown Source:0)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2546)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at android.os.Handler.dispatchMessage(Handler.java:110)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at android.os.Looper.loopOnce(Looper.java:248)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at android.os.Looper.loop(Looper.java:338)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at java.lang.reflect.Method.invoke(Native Method)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+09-08 20:07:25.115 13349 13349 I FacebookInitProvider: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+--------- beginning of system
+09-08 20:07:25.271 13349 13388 I DisplayManager: Choreographer implicitly registered for the refresh rate.
+09-08 20:07:25.338 13349 13349 I snapsofts.cupid: AssetManager2(0xb40000733aaa84b8) locale list changing from [] to [en-US]
+09-08 20:07:25.406 13349 13349 E ashmem  : Pinning is deprecated since Android Q. Please use trim or other methods.
+09-08 20:07:25.631 13349 13391 D FlutterJNI: Beginning load of flutter...
+09-08 20:07:25.736 13349 13388 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-08 20:07:25.736 13349 13388 I EGL_emulation: Opening libGLESv2_emulation.so
+09-08 20:07:25.791 13349 13388 W HWUI    : Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+09-08 20:07:25.792 13349 13388 W HWUI    : Failed to initialize 101010-2 format, error = EGL_SUCCESS
+09-08 20:07:25.793 13349 13392 I ResourceExtractor: Found extracted resources res_timestamp-1-1788872377660
+09-08 20:07:25.794 13349 13392 I ResourceExtractor: Resource version mismatch res_timestamp-1-1788872833513
+09-08 20:07:26.042 13349 13391 D nativeloader: Load /data/app/~~cbGcYmRS_MT-x6exaliS8A==/com.snapsofts.cupid-I2vlTxcpvSEqSbk8fjpljQ==/base.apk!/lib/arm64-v8a/libflutter.so using class loader ns clns-9 (caller=/data/app/~~cbGcYmRS_MT-x6exaliS8A==/com.snapsofts.cupid-I2vlTxcpvSEqSbk8fjpljQ==/base.apk!classes18.dex): ok
+09-08 20:07:26.052 13349 13391 D FlutterJNI: flutter (null) was loaded normally!
+09-08 20:07:26.069 13349 13393 D skia    : [SkFontMgr Android Parser] '/product/etc/fonts_customization.xml' could not be opened
+09-08 20:07:26.952 13349 13389 W snapsofts.cupid: Verification of androidx.core.util.Pair com.google.android.gms.common.wrappers.PackageManagerWrapper.getApplicationLabelAndIcon(java.lang.String) took 175.250ms (188.30 bytecodes/s) (0B arena alloc)
+09-08 20:07:29.269 13349 13392 I ResourceExtractor: Extracted baseline resource assets/flutter_assets/kernel_blob.bin
+09-08 20:07:29.291 13349 13392 I ResourceExtractor: Extracted baseline resource assets/flutter_assets/vm_snapshot_data
+09-08 20:07:29.567 13349 13392 I ResourceExtractor: Extracted baseline resource assets/flutter_assets/isolate_snapshot_data
+09-08 20:07:29.700 13349 13349 I snapsofts.cupid: AssetManager2(0xb40000733aaa6ed8) locale list changing from [] to [en-US]
+09-08 20:07:29.967 13349 13349 W snapsofts.cupid: type=1400 audit(0.0:1970): avc:  denied  { read } for  name="max_map_count" dev="proc" ino=1613345 scontext=u:r:untrusted_app:s0:c217,c256,c512,c768 tcontext=u:object_r:proc_max_map_count:s0 tclass=file permissive=0 app=com.snapsofts.cupid
+09-08 20:07:30.148 13349 13349 D DesktopModeFlags: Toggle override initialized to: OVERRIDE_UNSET
+09-08 20:07:30.686 13349 13399 I flutter : [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(104)] Using the Impeller rendering backend (OpenGLES).
+09-08 20:07:31.389 13349 13405 I flutter : The Dart VM service is listening on http://127.0.0.1:45797/cJVaxRa2EXc=/
+09-08 20:07:33.512 13349 13349 D FLTFireContextHolder: received application context.
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: Error registering plugin flutter_facebook_auth, app.meedu.flutter_facebook_auth.FlutterFacebookAuthPlugin
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: The SDK has not been initialized, make sure to call FacebookSdk.sdkInitialize() first.
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at com.facebook.internal.Validate.sdkInitialized(Validate.kt:117)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at com.facebook.login.LoginManager.<init>(LoginManager.kt:1386)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at com.facebook.login.LoginManager$Companion.getInstance(LoginManager.kt:1307)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at com.facebook.login.LoginManager.getInstance(Unknown Source:2)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at app.meedu.flutter_facebook_auth.FacebookAuth.<init>(FacebookAuth.java:29)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at app.meedu.flutter_facebook_auth.FlutterFacebookAuthPlugin.<init>(FlutterFacebookAuthPlugin.java:20)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at io.flutter.plugins.GeneratedPluginRegistrant.registerWith(GeneratedPluginRegistrant.java:34)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at java.lang.reflect.Method.invoke(Native Method)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister.registerGeneratedPlugins(GeneratedPluginRegister.java:80)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at io.flutter.embedding.android.FlutterActivity.configureFlutterEngine(FlutterActivity.java:1355)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at io.flutter.embedding.android.FlutterActivityAndFragmentDelegate.onAttach(FlutterActivityAndFragmentDelegate.java:228)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at io.flutter.embedding.android.FlutterActivity.onCreate(FlutterActivity.java:645)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at android.app.Activity.performCreate(Activity.java:9155)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at android.app.Activity.performCreate(Activity.java:9133)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1521)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4262)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4467)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:222)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:133)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:103)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2823)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at android.os.Handler.dispatchMessage(Handler.java:110)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at android.os.Looper.loopOnce(Looper.java:248)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at android.os.Looper.loop(Looper.java:338)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at java.lang.reflect.Method.invoke(Native Method)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+09-08 20:07:33.576 13349 13349 E GeneratedPluginRegistrant: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+09-08 20:07:33.720 13349 13349 D nativeloader: Load /data/app/~~cbGcYmRS_MT-x6exaliS8A==/com.snapsofts.cupid-I2vlTxcpvSEqSbk8fjpljQ==/base.apk!/lib/arm64-v8a/libdartjni.so using class loader ns clns-9 (caller=/data/app/~~cbGcYmRS_MT-x6exaliS8A==/com.snapsofts.cupid-I2vlTxcpvSEqSbk8fjpljQ==/base.apk!classes8.dex): ok
+09-08 20:07:35.199 13349 13349 I snapsofts.cupid: hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityNodeInfo;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported,test-api) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app) using reflection: allowed
+09-08 20:07:35.199 13349 13349 I snapsofts.cupid: hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityRecord;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app) using reflection: allowed
+09-08 20:07:35.199 13349 13349 I snapsofts.cupid: hiddenapi: Accessing hidden field Landroid/view/accessibility/AccessibilityNodeInfo;->mChildNodeIds:Landroid/util/LongArray; (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app) using reflection: allowed
+09-08 20:07:35.201 13349 13349 I snapsofts.cupid: hiddenapi: Accessing hidden method Landroid/util/LongArray;->get(I)J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app) using reflection: allowed
+09-08 20:07:35.459 13349 13349 D FlutterRenderer: Width is zero. 0,0
+09-08 20:07:35.634 13349 13349 D CompatChangeReporter: Compat change id reported: 377864165; UID 10217; state: ENABLED
+09-08 20:07:36.352 13349 13349 W HWUI    : Unknown dataspace 0
+09-08 20:07:37.349 13349 13349 I Choreographer: Skipped 40 frames!  The application may be doing too much work on its main thread.
+09-08 20:07:37.363 13349 13419 D ProfileInstaller: Installing profile for com.snapsofts.cupid
+09-08 20:07:37.373 13349 13349 I WindowExtensionsImpl: Initializing Window Extensions, vendor API level=9, activity embedding enabled=true
+09-08 20:07:37.560 13349 13349 D FlutterRenderer: Width is zero. 0,0
+09-08 20:07:37.704 13349 13349 D FlutterJNI: Sending viewport metrics to the engine.
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: Failed to get FIS auth token
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: java.util.concurrent.ExecutionException: com.google.firebase.installations.FirebaseInstallationsException: Firebase Installations Service is unavailable. Please try again later.
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.android.gms.tasks.Tasks.zza(com.google.android.gms:play-services-tasks@@18.1.0:5)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.android.gms.tasks.Tasks.await(com.google.android.gms:play-services-tasks@@18.1.0:9)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.messaging.GmsRpc.setDefaultAttributesToBundle(GmsRpc.java:280)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.messaging.GmsRpc.startRpc(GmsRpc.java:242)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.messaging.GmsRpc.getToken(GmsRpc.java:192)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.messaging.FirebaseMessaging.lambda$blockingGetToken$14$com-google-firebase-messaging-FirebaseMessaging(FirebaseMessaging.java:650)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.messaging.FirebaseMessaging$$ExternalSyntheticLambda9.start(D8$$SyntheticClass:0)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.messaging.RequestDeduplicator.getOrStartGetTokenRequest(RequestDeduplicator.java:67)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.messaging.FirebaseMessaging.blockingGetToken(FirebaseMessaging.java:646)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.messaging.SyncTask.maybeRefreshToken(SyncTask.java:123)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.messaging.SyncTask.run(SyncTask.java:93)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:524)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at java.util.concurrent.FutureTask.run(FutureTask.java:317)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:348)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1156)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:651)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.android.gms.common.util.concurrent.zza.run(com.google.android.gms:play-services-basement@@18.9.0:2)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at java.lang.Thread.run(Thread.java:1119)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: Caused by: com.google.firebase.installations.FirebaseInstallationsException: Firebase Installations Service is unavailable. Please try again later.
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.installations.remote.FirebaseInstallationServiceClient.createFirebaseInstallation(FirebaseInstallationServiceClient.java:209)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.installations.FirebaseInstallations.registerFidWithServer(FirebaseInstallations.java:533)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.installations.FirebaseInstallations.doNetworkCallIfNecessary(FirebaseInstallations.java:387)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.installations.FirebaseInstallations.lambda$doRegistrationOrRefresh$3$com-google-firebase-installations-FirebaseInstallations(FirebaseInstallations.java:372)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.installations.FirebaseInstallations$$ExternalSyntheticLambda1.run(D8$$SyntheticClass:0)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.concurrent.SequentialExecutor$1.run(SequentialExecutor.java:117)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.concurrent.SequentialExecutor$QueueWorker.workOnQueue(SequentialExecutor.java:229)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.concurrent.SequentialExecutor$QueueWorker.run(SequentialExecutor.java:174)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1156)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:651)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.concurrent.CustomThreadFactory.lambda$newThread$0$com-google-firebase-concurrent-CustomThreadFactory(CustomThreadFactory.java:47)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	at com.google.firebase.concurrent.CustomThreadFactory$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)
+09-08 20:07:38.034 13349 13384 E FirebaseMessaging: 	... 1 more
+09-08 20:07:38.458 13349 13364 I snapsofts.cupid: Background concurrent mark compact GC freed 4272KB AllocSpace bytes, 16(428KB) LOS objects, 49% free, 3320KB/6641KB, paused 51.201ms,18.532ms total 541.143ms
+09-08 20:07:38.495 13349 13384 W snapsofts.cupid: Verification of void com.google.android.gms.cloudmessaging.zzk.<init>(com.google.android.gms.cloudmessaging.zzp) took 137.759ms (43.55 bytecodes/s) (0B arena alloc)
+09-08 20:07:40.999 13349 13349 I Choreographer: Skipped 206 frames!  The application may be doing too much work on its main thread.
+09-08 20:07:41.121 13349 13349 D WindowLayoutComponentImpl: Register WindowLayoutInfoListener on Context=com.snapsofts.cupid_mobile.MainActivity@14d103a, of which baseContext=android.app.ContextImpl@eaf6db7
+09-08 20:07:41.156 13349 13349 D FlutterJNI: Sending viewport metrics to the engine.
+09-08 20:07:45.853 13349 13363 I snapsofts.cupid: Compiler allocated 5111KB to compile void android.view.ViewRootImpl.performTraversals()
+09-08 20:07:46.086 13349 13349 I Choreographer: Skipped 278 frames!  The application may be doing too much work on its main thread.
+09-08 20:07:46.115 13349 13384 E FirebaseMessaging: Topic sync or token retrieval failed on hard failure exceptions: java.util.concurrent.ExecutionException: java.io.IOException: SERVICE_NOT_AVAILABLE. Won't retry the operation.
+09-08 20:07:47.669 13349 13349 I flutter : *** Request ***
+09-08 20:07:47.719 13349 13349 I flutter : uri: http://10.0.2.2:21020/users/me
+09-08 20:07:47.719 13349 13349 I flutter : method: GET
+09-08 20:07:47.719 13349 13349 I flutter : responseType: ResponseType.json
+09-08 20:07:47.720 13349 13349 I flutter : followRedirects: true
+09-08 20:07:47.720 13349 13349 I flutter : persistentConnection: true
+09-08 20:07:47.721 13349 13349 I flutter : connectTimeout: 0:00:10.000000
+09-08 20:07:47.721 13349 13349 I flutter : sendTimeout: null
+09-08 20:07:47.721 13349 13349 I flutter : receiveTimeout: 0:00:10.000000
+09-08 20:07:47.721 13349 13349 I flutter : transformTimeout: null
+09-08 20:07:47.721 13349 13349 I flutter : receiveDataWhenStatusError: true
+09-08 20:07:47.728 13349 13349 I flutter : extra: {}
+09-08 20:07:47.728 13349 13349 I flutter :
+09-08 20:07:47.731 13349 13349 D InsetsController: hide(ime(), fromIme=false)
+09-08 20:07:47.731 13349 13349 I ImeTracker: com.snapsofts.cupid:b40a3e4a: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+09-08 20:07:48.607 13349 13349 W WindowOnBackDispatcher: sendCancelIfRunning: isInProgress=false callback=io.flutter.embedding.android.FlutterActivity$1@c79a0c0
+09-08 20:07:48.667 13349 13349 I flutter : *** Response ***
+09-08 20:07:48.670 13349 13349 I flutter : uri: http://10.0.2.2:21020/users/me
+09-08 20:07:48.670 13349 13349 I flutter : statusCode: 200
+09-08 20:07:48.670 13349 13349 I flutter : statusMessage: OK
+09-08 20:07:48.670 13349 13349 I flutter : headers:
+09-08 20:07:48.674 13349 13349 I flutter :  x-powered-by: Express
+09-08 20:07:48.674 13349 13349 I flutter :  connection: keep-alive
+09-08 20:07:48.674 13349 13349 I flutter :  keep-alive: timeout=5
+09-08 20:07:48.674 13349 13349 I flutter :  date: Tue, 08 Sep 2026 13:07:48 GMT
+09-08 20:07:48.674 13349 13349 I flutter :  content-length: 562
+09-08 20:07:48.674 13349 13349 I flutter :  etag: W/"232-OlxybKfDvIRc4N9hqcJeSn6FtbE"
+09-08 20:07:48.674 13349 13349 I flutter :  content-type: application/json; charset=utf-8
+09-08 20:07:48.674 13349 13349 I flutter :

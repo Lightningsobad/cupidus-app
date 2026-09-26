@@ -1,20 +1,54 @@
 # Story Master: STORY-005 Mồi chuyện — kho câu thường xanh và sự kiện có lịch
 
-Status: TODO
+Status: DONE
 Complexity: standard
 Story-Class: standard
-Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
+Implementation Lane: mobile-only (Tech Lead chốt: toàn bộ bề mặt nằm trong
+  tiến trình Dart + Drift cục bộ; AC-15/AC-16 cấm gọi mạng nên không có lane
+  backend — xem `architecture/solution.md` §1 Key Discovery 1)
 Requirement: REQ-016
 Screen: Mồi chuyện — màn (6), nhóm CỬA VÀO
+Design-Screen: `6-moi-chuyen-a-a` (surface `cupid-ch-ng-1`, biến thể ios; xem
+  `visual-fidelity/visual-fidelity-report.md`). Báo cáo đó mang
+  `DESIGN_ANCHOR_ADJUDICATION_REQUIRED: NO` (cập nhật 2026-09-24 qua patch
+  `36966472`) — cả 6 chỗ canvas-vs-lời-văn-spec đã được phán quyết ở §7: mục 2
+  → P5 `ae908e93`, mục 3/4/5/6b → P6 `9ab00f48`, mục 7 → P7 `fa9c0ad5`.
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục C.6, D (SC-2),
 F (3c, C1, C7)
+Runtime-Smoke: WAIVED — no phase changes the app startup path (per
+  `review/review-report.md` D-3, 2026-09-24)
 
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`,
+      `architecture/contract-summary.md`
+- [x] Implementation (Development) — mobile-dev P1-P4 complete, committed
+      3ff29be43d1e754548767a87246df3e0c1e181a2. **Rework round (Design
+      Ruling Log 2026-09-20, "Neo thiết kế") added P5-P7 on the same story
+      branch**: P5 `ae908e93`, P6 `9ab00f48`, P7 `fa9c0ad5` (own scoped
+      tests green, `flutter analyze` 0 error), status-flip doc commit
+      `353c648e` (P7 blocked→DONE, citing `BUG-20260923-001` — pre-existing
+      Drift schemaVersion drift in `test/core/database/`, out of this
+      story's scope). Run
+      `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-005_conversation_starters-mobile-dev`
+      is `status: COMPLETED`, `completion_marker: MOBILE_COMPLETE: YES`.
+- [x] Review (Reviewer) — final-synthesis (2026-09-24,
+      `review/review-report.md`, current body, 134 lines) returned
+      **`Outcome: CLEAN`**. History: P1-P4 DEFERRED_ONLY (2026-09-17,
+      merge `2b5d841f`, re-merged `2406c82e`); P5-P7 rework review returned
+      `Outcome: PATCH_REQUIRED` (2026-09-24) with one blocking finding B-1
+      (stale `visual-fidelity/visual-fidelity-report.md`, not updated after
+      the rework); fixed via a documentation-only patch (`36966472`, no code
+      change, no re-capture); re-verified independently by a scoped-slice
+      reviewer (`review/slice-b1-visual-fidelity-doc.md`, PASS) via diff
+      scope + PNG commit-history cross-check; a fresh final-synthesis
+      reviewer then closed B-1 and recorded the final `CLEAN` outcome. D-1..D-6
+      remain deferred, non-blocking. Note for whoever re-verifies
+      `BUG-20260923-002` (D-4): its 3 assertions are already green on this
+      story's own branch (fixed by P7); only re-check after this story merges
+      into the requirement integration branch before dispatching a
+      bug-fixer, since the `take(5)` prefix behavior is intentional here.
 
 ## Depends On
 - STORY-001 — bản A+ đổi thẳng thành thẻ trong kho chung.

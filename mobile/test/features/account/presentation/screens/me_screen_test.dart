@@ -201,6 +201,8 @@ void main() {
         await tester.pumpWidget(_harness(repository));
         await tester.pumpAndSettle();
 
+        await tester.ensureVisible(find.text('Theme store'));
+        await tester.pumpAndSettle();
         await tester.tap(find.text('Theme store'));
         await tester.pumpAndSettle();
 
@@ -216,12 +218,16 @@ void main() {
         await tester.pumpWidget(_harness(repository));
         await tester.pumpAndSettle();
 
+        await tester.ensureVisible(find.text('Typing Ghost'));
+        await tester.pumpAndSettle();
         await tester.tap(find.text('Typing Ghost'));
         await tester.pumpAndSettle();
         expect(find.text('Typing Ghost'), findsOneWidget);
         expect(find.byType(PrivacyScreen), findsNothing);
         expect(find.byType(NotificationSettingsScreen), findsNothing);
 
+        await tester.ensureVisible(find.text('Love Contract'));
+        await tester.pumpAndSettle();
         await tester.tap(find.text('Love Contract'));
         await tester.pumpAndSettle();
         expect(find.text('Love Contract'), findsOneWidget);
@@ -291,7 +297,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Both sit below the default test viewport's fold.
-      await tester.drag(find.byType(ListView), const Offset(0, -400));
+      await tester.drag(find.byType(ListView), const Offset(0, -800));
       await tester.pumpAndSettle();
 
       expect(find.text('Digital Divorce'), findsOneWidget);

@@ -1,0 +1,333 @@
+{
+  "id": "zodiac_outcomes",
+  "version": "1",
+  "schema_id": "req016.zodiac_outcomes.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "out.nhip.nhanh.v1",
+      "insight": "Bạn hay bắt nhịp trước rồi mới ngồi lại cân nhắc.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.di_bo_chieu.v1", "title": "Rủ đi bộ một vòng vào chiều mát", "note": "Mười lăm phút là đủ.", "notebook_tags": ["di_bo"] },
+        { "id": "sg.quan_moi_gan.v1", "title": "Thử một quán mới trong bán kính đi bộ", "note": null, "notebook_tags": ["ca_phe"] },
+        { "id": "sg.chuyen_di_trong_ngay.v1", "title": "Lên một chuyến đi gần trong ngày", "note": null, "notebook_tags": ["du_lich"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.nhip.cham.v1",
+      "insight": "Bạn thích để mọi thứ ngấm dần trước khi quyết.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.sach_doc_chung.v1", "title": "Chọn một cuốn sách hai người cùng đọc", "note": null, "notebook_tags": ["sach"] },
+        { "id": "sg.ca_phe_sang.v1", "title": "Hẹn một buổi cà phê sáng trước giờ làm", "note": "Ba mươi phút cũng đáng.", "notebook_tags": ["ca_phe"] },
+        { "id": "sg.chau_cay_ban_cong.v1", "title": "Trồng thêm một chậu cây nhỏ ở ban công", "note": null, "notebook_tags": ["cay_coi"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.nhip.tuy_luc.v1",
+      "insight": "Bạn đổi nhịp theo hoàn cảnh nhiều hơn theo thói quen.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.khung_gio_trong.v1", "title": "Chốt sớm một khung giờ trống cuối tuần", "note": null, "notebook_tags": ["ke_hoach"] },
+        { "id": "sg.di_cho_cung.v1", "title": "Đi chợ cùng nhau, mỗi người chọn một món", "note": null, "notebook_tags": ["nau_an"] },
+        { "id": "sg.di_bo_sau_bua_toi.v1", "title": "Đi bộ một vòng quanh khu sau bữa tối", "note": null, "notebook_tags": ["di_bo"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.cach_ke.ke_ngay.v1",
+      "insight": "Chuyện vui của bạn cần một người nghe ngay lúc nó còn nóng.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.hoi_ve_tuan.v1", "title": "Hỏi bạn ấy tuần này có gì đáng nhớ", "note": null, "notebook_tags": ["tro_chuyen"] },
+        { "id": "sg.ca_phe_sang.v1", "title": "Hẹn một buổi cà phê sáng trước giờ làm", "note": "Ba mươi phút cũng đáng.", "notebook_tags": ["ca_phe"] },
+        { "id": "sg.dien_thoai_sang_phong.v1", "title": "Để điện thoại sang phòng khác lúc ăn tối", "note": null, "notebook_tags": [] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.cach_ke.ke_khi_gap.v1",
+      "insight": "Bạn để dành chuyện cho lúc gặp mặt, nghe mới ra chuyện.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.bua_sang_muon.v1", "title": "Làm bữa sáng muộn vào cuối tuần", "note": null, "notebook_tags": ["nau_an"] },
+        { "id": "sg.quan_cu.v1", "title": "Quay lại quán hai người từng thích", "note": null, "notebook_tags": ["ca_phe"] },
+        { "id": "sg.di_bo_chieu.v1", "title": "Rủ đi bộ một vòng vào chiều mát", "note": "Mười lăm phút là đủ.", "notebook_tags": ["di_bo"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.cach_ke.giu_rieng.v1",
+      "insight": "Bạn cần một quãng cho riêng mình trước khi chia cho ai đó.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.mau_giay_ngan.v1", "title": "Viết tay một mẩu giấy ngắn để trên bàn", "note": null, "notebook_tags": ["ky_niem"] },
+        { "id": "sg.gian_co_toi.v1", "title": "Tập giãn cơ mười phút trước khi ngủ", "note": null, "notebook_tags": ["the_thao"] },
+        { "id": "sg.sach_doc_chung.v1", "title": "Chọn một cuốn sách hai người cùng đọc", "note": null, "notebook_tags": ["sach"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.khoang_lang.de_chiu.v1",
+      "insight": "Bạn ngồi được trong im lặng mà không thấy cần lấp vào.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.dap_xe_ven_song.v1", "title": "Mượn xe đạp đi một vòng ven sông", "note": null, "notebook_tags": ["the_thao"] },
+        { "id": "sg.album_cu.v1", "title": "Mở lại album ảnh cũ và kể lại một chuyến đi", "note": null, "notebook_tags": ["ky_niem"] },
+        { "id": "sg.nhac_don_nha.v1", "title": "Mở chung một danh sách nhạc khi dọn nhà", "note": null, "notebook_tags": ["am_nhac"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.khoang_lang.muon_noi.v1",
+      "insight": "Khoảng trống làm bạn muốn bắc một nhịp cầu bằng lời.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.muoi_phut_nghe.v1", "title": "Dành mười phút chỉ để nghe bạn ấy kể", "note": null, "notebook_tags": ["tro_chuyen"] },
+        { "id": "sg.hoi_ve_tuan.v1", "title": "Hỏi bạn ấy tuần này có gì đáng nhớ", "note": null, "notebook_tags": ["tro_chuyen"] },
+        { "id": "sg.van_co_sau_bua.v1", "title": "Bày một ván cờ sau bữa tối", "note": null, "notebook_tags": ["tro_choi"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.cuoi_tuan.ra_khoi_nha.v1",
+      "insight": "Cuối tuần của bạn nhẹ nhất khi có một lý do để ra khỏi cửa.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.cho_hoa.v1", "title": "Ghé chợ hoa cuối tuần rồi cắm một bình nhỏ", "note": null, "notebook_tags": ["hoa"] },
+        { "id": "sg.chuyen_di_trong_ngay.v1", "title": "Lên một chuyến đi gần trong ngày", "note": null, "notebook_tags": ["du_lich"] },
+        { "id": "sg.cho_dem.v1", "title": "Ghé chợ đêm gần nhà rồi ăn một món vặt", "note": null, "notebook_tags": ["an_vat"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.cuoi_tuan.o_nha.v1",
+      "insight": "Bạn nạp lại bằng một buổi sáng không có việc gì phải kịp.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.bua_sang_muon.v1", "title": "Làm bữa sáng muộn vào cuối tuần", "note": null, "notebook_tags": ["nau_an"] },
+        { "id": "sg.phim_toi_ranh.v1", "title": "Chọn sẵn một bộ phim cho tối rảnh gần nhất", "note": null, "notebook_tags": ["phim"] },
+        { "id": "sg.don_mot_goc.v1", "title": "Dọn chung một góc nhà trong ba mươi phút", "note": null, "notebook_tags": ["nha_cua"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.mon_qua.tu_tay_lam.v1",
+      "insight": "Bạn gửi lòng mình qua thứ có dấu tay của bạn trong đó.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.nau_mon_quen.v1", "title": "Nấu thử một món bạn ấy hay nhắc", "note": null, "notebook_tags": ["nau_an"] },
+        { "id": "sg.mau_giay_ngan.v1", "title": "Viết tay một mẩu giấy ngắn để trên bàn", "note": null, "notebook_tags": ["ky_niem"] },
+        { "id": "sg.chau_cay_ban_cong.v1", "title": "Trồng thêm một chậu cây nhỏ ở ban công", "note": null, "notebook_tags": ["cay_coi"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.mon_qua.mot_buoi_di.v1",
+      "insight": "Với bạn, một buổi đi cùng nhau đáng giữ hơn một món đồ.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.chuyen_di_trong_ngay.v1", "title": "Lên một chuyến đi gần trong ngày", "note": null, "notebook_tags": ["du_lich"] },
+        { "id": "sg.quan_moi_gan.v1", "title": "Thử một quán mới trong bán kính đi bộ", "note": null, "notebook_tags": ["ca_phe"] },
+        { "id": "sg.nhom_ban_chung.v1", "title": "Hẹn một buổi gặp với nhóm bạn chung", "note": null, "notebook_tags": ["ban_be"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.sap_xep.len_lich.v1",
+      "insight": "Có lịch rõ thì bạn thả lỏng được phần còn lại của chuyến đi.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.khung_gio_trong.v1", "title": "Chốt sớm một khung giờ trống cuối tuần", "note": null, "notebook_tags": ["ke_hoach"] },
+        { "id": "sg.phim_toi_ranh.v1", "title": "Chọn sẵn một bộ phim cho tối rảnh gần nhất", "note": null, "notebook_tags": ["phim"] },
+        { "id": "sg.di_cho_cung.v1", "title": "Đi chợ cùng nhau, mỗi người chọn một món", "note": null, "notebook_tags": ["nau_an"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.sap_xep.toi_dau_tinh.v1",
+      "insight": "Bạn để chuyến đi tự mở ra và thấy vậy mới đáng đi.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.cho_dem.v1", "title": "Ghé chợ đêm gần nhà rồi ăn một món vặt", "note": null, "notebook_tags": ["an_vat"] },
+        { "id": "sg.dap_xe_ven_song.v1", "title": "Mượn xe đạp đi một vòng ven sông", "note": null, "notebook_tags": ["the_thao"] },
+        { "id": "sg.mon_moi_trong_bep.v1", "title": "Rủ nhau học thử một món mới trong bếp", "note": null, "notebook_tags": ["nau_an"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.gan_gui.loi_noi.v1",
+      "insight": "Bạn thấy gần khi có người nói thành lời điều họ nghĩ.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.muoi_phut_nghe.v1", "title": "Dành mười phút chỉ để nghe bạn ấy kể", "note": null, "notebook_tags": ["tro_chuyen"] },
+        { "id": "sg.hoi_ve_tuan.v1", "title": "Hỏi bạn ấy tuần này có gì đáng nhớ", "note": null, "notebook_tags": ["tro_chuyen"] },
+        { "id": "sg.ghi_so_tay.v1", "title": "Ghi vào sổ tay một điều bạn ấy vừa kể", "note": null, "notebook_tags": ["so_tay"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.gan_gui.viec_lam.v1",
+      "insight": "Bạn đọc tình cảm qua những việc người ta lẳng lặng làm.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.trai_cay_ve.v1", "title": "Mua trái cây bạn ấy hay ăn trên đường về", "note": null, "notebook_tags": [] },
+        { "id": "sg.don_mot_goc.v1", "title": "Dọn chung một góc nhà trong ba mươi phút", "note": null, "notebook_tags": ["nha_cua"] },
+        { "id": "sg.nau_mon_quen.v1", "title": "Nấu thử một món bạn ấy hay nhắc", "note": null, "notebook_tags": ["nau_an"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.gan_gui.pha_tron.v1",
+      "insight": "Bạn cần cả lời lẫn việc, tuỳ hôm nào cần cái nào hơn.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.bai_hat_hoi_moi_quen.v1", "title": "Mở lại bài hát hai người nghe hồi mới quen", "note": null, "notebook_tags": ["am_nhac"] },
+        { "id": "sg.di_bo_sau_bua_toi.v1", "title": "Đi bộ một vòng quanh khu sau bữa tối", "note": null, "notebook_tags": ["di_bo"] },
+        { "id": "sg.mau_giay_ngan.v1", "title": "Viết tay một mẩu giấy ngắn để trên bàn", "note": null, "notebook_tags": ["ky_niem"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.giai_toa.ra_ngoai.v1",
+      "insight": "Bạn nhẹ đi khi đổi chỗ ngồi và có ai đó đi cùng.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.di_bo_chieu.v1", "title": "Rủ đi bộ một vòng vào chiều mát", "note": "Mười lăm phút là đủ.", "notebook_tags": ["di_bo"] },
+        { "id": "sg.cho_dem.v1", "title": "Ghé chợ đêm gần nhà rồi ăn một món vặt", "note": null, "notebook_tags": ["an_vat"] },
+        { "id": "sg.nhom_ban_chung.v1", "title": "Hẹn một buổi gặp với nhóm bạn chung", "note": null, "notebook_tags": ["ban_be"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.giai_toa.o_yen.v1",
+      "insight": "Bạn lấy lại sức bằng một chỗ yên và không ai giục.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.gian_co_toi.v1", "title": "Tập giãn cơ mười phút trước khi ngủ", "note": null, "notebook_tags": ["the_thao"] },
+        { "id": "sg.sach_doc_chung.v1", "title": "Chọn một cuốn sách hai người cùng đọc", "note": null, "notebook_tags": ["sach"] },
+        { "id": "sg.dien_thoai_sang_phong.v1", "title": "Để điện thoại sang phòng khác lúc ăn tối", "note": null, "notebook_tags": [] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.giai_toa.linh_hoat.v1",
+      "insight": "Cách bạn thả lỏng đổi theo hôm, không theo một công thức.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.nhac_don_nha.v1", "title": "Mở chung một danh sách nhạc khi dọn nhà", "note": null, "notebook_tags": ["am_nhac"] },
+        { "id": "sg.di_bo_sau_bua_toi.v1", "title": "Đi bộ một vòng quanh khu sau bữa tối", "note": null, "notebook_tags": ["di_bo"] },
+        { "id": "sg.mon_moi_trong_bep.v1", "title": "Rủ nhau học thử một món mới trong bếp", "note": null, "notebook_tags": ["nau_an"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.bat_chuyen.mo_truoc.v1",
+      "insight": "Bạn là người phá băng, kể cả khi trong bụng chưa sẵn.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.nhom_ban_chung.v1", "title": "Hẹn một buổi gặp với nhóm bạn chung", "note": null, "notebook_tags": ["ban_be"] },
+        { "id": "sg.quan_moi_gan.v1", "title": "Thử một quán mới trong bán kính đi bộ", "note": null, "notebook_tags": ["ca_phe"] },
+        { "id": "sg.hoi_ve_tuan.v1", "title": "Hỏi bạn ấy tuần này có gì đáng nhớ", "note": null, "notebook_tags": ["tro_chuyen"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.bat_chuyen.doi_hoi.v1",
+      "insight": "Bạn mở lòng chậm, và mở hẳn khi chỉ còn vài người quanh bàn.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.van_co_sau_bua.v1", "title": "Bày một ván cờ sau bữa tối", "note": null, "notebook_tags": ["tro_choi"] },
+        { "id": "sg.album_cu.v1", "title": "Mở lại album ảnh cũ và kể lại một chuyến đi", "note": null, "notebook_tags": ["ky_niem"] },
+        { "id": "sg.ca_phe_sang.v1", "title": "Hẹn một buổi cà phê sáng trước giờ làm", "note": "Ba mươi phút cũng đáng.", "notebook_tags": ["ca_phe"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.bat_chuyen.tuy_khong_khi.v1",
+      "insight": "Bạn dò không khí trước rồi mới chọn nói nông hay nói sâu.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.ghi_so_tay.v1", "title": "Ghi vào sổ tay một điều bạn ấy vừa kể", "note": null, "notebook_tags": ["so_tay"] },
+        { "id": "sg.bai_hat_hoi_moi_quen.v1", "title": "Mở lại bài hát hai người nghe hồi mới quen", "note": null, "notebook_tags": ["am_nhac"] },
+        { "id": "sg.cho_hoa.v1", "title": "Ghé chợ hoa cuối tuần rồi cắm một bình nhỏ", "note": null, "notebook_tags": ["hoa"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.phong_doan.cung_yen.v1",
+      "insight": "Bạn đoán hai người cùng nghiêng về một buổi tối yên; phần đoán này vẫn là của bạn.",
+      "about_other": true,
+      "ask_line": "Tối rảnh gần nhất, bạn ấy muốn ở yên hay ra ngoài?",
+      "suggestions": [
+        { "id": "sg.phim_toi_ranh.v1", "title": "Chọn sẵn một bộ phim cho tối rảnh gần nhất", "note": null, "notebook_tags": ["phim"] },
+        { "id": "sg.mon_moi_trong_bep.v1", "title": "Rủ nhau học thử một món mới trong bếp", "note": null, "notebook_tags": ["nau_an"] },
+        { "id": "sg.dien_thoai_sang_phong.v1", "title": "Để điện thoại sang phòng khác lúc ăn tối", "note": null, "notebook_tags": [] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.phong_doan.cung_dong.v1",
+      "insight": "Bạn đoán cả hai đều thích chỗ đông; đoán xong thì vẫn phải hỏi.",
+      "about_other": true,
+      "ask_line": "Cuối tuần này bạn ấy muốn gặp nhóm bạn hay đi hai người?",
+      "suggestions": [
+        { "id": "sg.nhom_ban_chung.v1", "title": "Hẹn một buổi gặp với nhóm bạn chung", "note": null, "notebook_tags": ["ban_be"] },
+        { "id": "sg.cho_dem.v1", "title": "Ghé chợ đêm gần nhà rồi ăn một món vặt", "note": null, "notebook_tags": ["an_vat"] },
+        { "id": "sg.chuyen_di_trong_ngay.v1", "title": "Lên một chuyến đi gần trong ngày", "note": null, "notebook_tags": ["du_lich"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.phong_doan.khac_nhau.v1",
+      "insight": "Bạn đoán hai người muốn hai kiểu tối khác nhau, và đó mới là chỗ đáng hỏi.",
+      "about_other": true,
+      "ask_line": "Một tối lý tưởng của bạn ấy trông ra sao?",
+      "suggestions": [
+        { "id": "sg.muoi_phut_nghe.v1", "title": "Dành mười phút chỉ để nghe bạn ấy kể", "note": null, "notebook_tags": ["tro_chuyen"] },
+        { "id": "sg.khung_gio_trong.v1", "title": "Chốt sớm một khung giờ trống cuối tuần", "note": null, "notebook_tags": ["ke_hoach"] },
+        { "id": "sg.ghi_so_tay.v1", "title": "Ghi vào sổ tay một điều bạn ấy vừa kể", "note": null, "notebook_tags": ["so_tay"] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "out.chung.v1",
+      "insight": "Lát cắt này chưa đủ để nói gì nhiều về bạn, nhưng vẫn đủ để rủ nhau làm một việc.",
+      "about_other": false,
+      "ask_line": null,
+      "suggestions": [
+        { "id": "sg.di_bo_chieu.v1", "title": "Rủ đi bộ một vòng vào chiều mát", "note": "Mười lăm phút là đủ.", "notebook_tags": ["di_bo"] },
+        { "id": "sg.quan_cu.v1", "title": "Quay lại quán hai người từng thích", "note": null, "notebook_tags": ["ca_phe"] },
+        { "id": "sg.nau_mon_quen.v1", "title": "Nấu thử một món bạn ấy hay nhắc", "note": null, "notebook_tags": ["nau_an"] },
+        { "id": "sg.trai_cay_ve.v1", "title": "Mua trái cây bạn ấy hay ăn trên đường về", "note": null, "notebook_tags": [] }
+      ],
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    }
+  ]
+}

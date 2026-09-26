@@ -1,0 +1,296 @@
+{
+  "id": "zodiac_quiz",
+  "version": "1",
+  "schema_id": "req016.zodiac_quiz.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "set.lat_nhip.v1",
+      "kind": "slice",
+      "title": "Lát nhịp",
+      "blurb": "Một lát cắt nhẹ để bắt chuyện, không phải một kết luận.",
+      "questions_per_round": 1,
+      "questions": [
+        {
+          "id": "q.nhip_cua_ban.v1",
+          "prompt": "Bạn thấy mình hợp với nhịp nào hơn?",
+          "subject": "self",
+          "options": [
+            { "id": "o.nhip_nhanh.v1", "label": "Bắt nhịp nhanh", "outcome_key": "nhanh" },
+            { "id": "o.nhip_cham.v1", "label": "Đi chậm và chắc", "outcome_key": "cham" },
+            { "id": "o.nhip_tuy_luc.v1", "label": "Tuỳ lúc", "outcome_key": "tuy_luc" }
+          ]
+        }
+      ],
+      "mapping": [
+        { "key": "nhanh", "outcome_id": "out.nhip.nhanh.v1" },
+        { "key": "cham", "outcome_id": "out.nhip.cham.v1" },
+        { "key": "tuy_luc", "outcome_id": "out.nhip.tuy_luc.v1" }
+      ],
+      "fallback_outcome_id": "out.chung.v1",
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "set.lat_cach_ke.v1",
+      "kind": "slice",
+      "title": "Lát cách kể",
+      "blurb": "Bạn kể chuyện kiểu nào, chỉ vậy thôi.",
+      "questions_per_round": 1,
+      "questions": [
+        {
+          "id": "q.co_chuyen_vui.v1",
+          "prompt": "Khi có chuyện vui, bạn làm gì trước?",
+          "subject": "self",
+          "options": [
+            { "id": "o.ke_ngay.v1", "label": "Kể ngay cho người gần nhất", "outcome_key": "ke_ngay" },
+            { "id": "o.ke_khi_gap.v1", "label": "Để lát gặp rồi kể", "outcome_key": "ke_khi_gap" },
+            { "id": "o.giu_rieng.v1", "label": "Giữ riêng một lúc cho đã", "outcome_key": "giu_rieng" }
+          ]
+        }
+      ],
+      "mapping": [
+        { "key": "ke_ngay", "outcome_id": "out.cach_ke.ke_ngay.v1" },
+        { "key": "ke_khi_gap", "outcome_id": "out.cach_ke.ke_khi_gap.v1" },
+        { "key": "giu_rieng", "outcome_id": "out.cach_ke.giu_rieng.v1" }
+      ],
+      "fallback_outcome_id": "out.chung.v1",
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "set.lat_khoang_lang.v1",
+      "kind": "slice",
+      "title": "Lát khoảng lặng",
+      "blurb": "Khoảng lặng giữa hai người nói được khá nhiều.",
+      "questions_per_round": 1,
+      "questions": [
+        {
+          "id": "q.im_lang.v1",
+          "prompt": "Khi hai người cùng im lặng, bạn thấy thế nào?",
+          "subject": "self",
+          "options": [
+            { "id": "o.de_chiu.v1", "label": "Dễ chịu, không cần lấp", "outcome_key": "de_chiu" },
+            { "id": "o.muon_noi.v1", "label": "Muốn nói gì đó cho đỡ trống", "outcome_key": "muon_noi" }
+          ]
+        }
+      ],
+      "mapping": [
+        { "key": "de_chiu", "outcome_id": "out.khoang_lang.de_chiu.v1" },
+        { "key": "muon_noi", "outcome_id": "out.khoang_lang.muon_noi.v1" }
+      ],
+      "fallback_outcome_id": "out.chung.v1",
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "set.lat_cuoi_tuan.v1",
+      "kind": "slice",
+      "title": "Lát cuối tuần",
+      "blurb": "Cuối tuần của bạn mở ra theo kiểu nào.",
+      "questions_per_round": 1,
+      "questions": [
+        {
+          "id": "q.cuoi_tuan.v1",
+          "prompt": "Cuối tuần của bạn hay bắt đầu ra sao?",
+          "subject": "self",
+          "options": [
+            { "id": "o.ra_khoi_nha.v1", "label": "Ra khỏi nhà sớm", "outcome_key": "ra_khoi_nha" },
+            { "id": "o.o_nha.v1", "label": "Ở nhà cho tới khi đói", "outcome_key": "o_nha" }
+          ]
+        }
+      ],
+      "mapping": [
+        { "key": "ra_khoi_nha", "outcome_id": "out.cuoi_tuan.ra_khoi_nha.v1" },
+        { "key": "o_nha", "outcome_id": "out.cuoi_tuan.o_nha.v1" }
+      ],
+      "fallback_outcome_id": "out.chung.v1",
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "set.lat_mon_qua.v1",
+      "kind": "slice",
+      "title": "Lát món quà",
+      "blurb": "Kiểu quà bạn nghiêng về, không phải kiểu quà đúng.",
+      "questions_per_round": 1,
+      "questions": [
+        {
+          "id": "q.mon_qua.v1",
+          "prompt": "Bạn nghiêng về kiểu quà nào hơn?",
+          "subject": "self",
+          "options": [
+            { "id": "o.tu_tay_lam.v1", "label": "Thứ tự tay làm", "outcome_key": "tu_tay_lam" },
+            { "id": "o.mot_buoi_di.v1", "label": "Một buổi đi cùng nhau", "outcome_key": "mot_buoi_di" }
+          ]
+        }
+      ],
+      "mapping": [
+        { "key": "tu_tay_lam", "outcome_id": "out.mon_qua.tu_tay_lam.v1" },
+        { "key": "mot_buoi_di", "outcome_id": "out.mon_qua.mot_buoi_di.v1" }
+      ],
+      "fallback_outcome_id": "out.chung.v1",
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "set.lat_sap_xep.v1",
+      "kind": "slice",
+      "title": "Lát sắp xếp",
+      "blurb": "Một chuyến đi gần là đủ để thấy nhịp của bạn.",
+      "questions_per_round": 1,
+      "questions": [
+        {
+          "id": "q.chuyen_di_gan.v1",
+          "prompt": "Một chuyến đi gần, bạn muốn gì hơn?",
+          "subject": "self",
+          "options": [
+            { "id": "o.len_lich.v1", "label": "Có lịch rõ từ trước", "outcome_key": "len_lich" },
+            { "id": "o.toi_dau_tinh.v1", "label": "Tới đâu tính đó", "outcome_key": "toi_dau_tinh" }
+          ]
+        }
+      ],
+      "mapping": [
+        { "key": "len_lich", "outcome_id": "out.sap_xep.len_lich.v1" },
+        { "key": "toi_dau_tinh", "outcome_id": "out.sap_xep.toi_dau_tinh.v1" }
+      ],
+      "fallback_outcome_id": "out.chung.v1",
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "set.quiz_kieu_gan_gui.v1",
+      "kind": "quiz",
+      "title": "Bạn thấy gần qua điều gì",
+      "blurb": "Hai câu ngắn, rồi tới phần đáng làm.",
+      "questions_per_round": 2,
+      "questions": [
+        {
+          "id": "q.gan_gui_1.v1",
+          "prompt": "Bạn thấy mình gần một người qua điều gì nhất?",
+          "subject": "self",
+          "options": [
+            { "id": "o.qua_loi_noi.v1", "label": "Qua lời nói", "outcome_key": "loi_noi" },
+            { "id": "o.qua_viec_lam.v1", "label": "Qua việc làm", "outcome_key": "viec_lam" }
+          ]
+        },
+        {
+          "id": "q.gan_gui_2.v1",
+          "prompt": "Một ngày mệt, bạn muốn được gì hơn?",
+          "subject": "self",
+          "options": [
+            { "id": "o.duoc_nghe.v1", "label": "Được nghe", "outcome_key": "duoc_nghe" },
+            { "id": "o.de_yen.v1", "label": "Được để yên một lúc", "outcome_key": "de_yen" }
+          ]
+        }
+      ],
+      "mapping": [
+        { "key": "loi_noi+duoc_nghe", "outcome_id": "out.gan_gui.loi_noi.v1" },
+        { "key": "viec_lam+de_yen", "outcome_id": "out.gan_gui.viec_lam.v1" },
+        { "key": "loi_noi+de_yen", "outcome_id": "out.gan_gui.pha_tron.v1" },
+        { "key": "viec_lam+duoc_nghe", "outcome_id": "out.gan_gui.pha_tron.v1" }
+      ],
+      "fallback_outcome_id": "out.chung.v1",
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "set.quiz_giai_toa.v1",
+      "kind": "quiz",
+      "title": "Cách bạn thả lỏng",
+      "blurb": "Sau một tuần căng, mỗi người nhẹ đi một kiểu.",
+      "questions_per_round": 2,
+      "questions": [
+        {
+          "id": "q.giai_toa_1.v1",
+          "prompt": "Sau một tuần căng, bạn thả lỏng bằng cách nào?",
+          "subject": "self",
+          "options": [
+            { "id": "o.ra_ngoai_cho_thoang.v1", "label": "Ra ngoài cho thoáng", "outcome_key": "ra_ngoai" },
+            { "id": "o.o_yen_mot_cho.v1", "label": "Ở yên một chỗ", "outcome_key": "o_yen" }
+          ]
+        },
+        {
+          "id": "q.giai_toa_2.v1",
+          "prompt": "Lúc đó bạn muốn có người bên cạnh không?",
+          "subject": "self",
+          "options": [
+            { "id": "o.co_nguoi_canh.v1", "label": "Có, ngồi cạnh là đủ", "outcome_key": "co_nguoi" },
+            { "id": "o.mot_minh_truoc.v1", "label": "Một mình trước đã", "outcome_key": "mot_minh" }
+          ]
+        }
+      ],
+      "mapping": [
+        { "key": "ra_ngoai+co_nguoi", "outcome_id": "out.giai_toa.ra_ngoai.v1" },
+        { "key": "o_yen+mot_minh", "outcome_id": "out.giai_toa.o_yen.v1" },
+        { "key": "ra_ngoai+mot_minh", "outcome_id": "out.giai_toa.linh_hoat.v1" },
+        { "key": "o_yen+co_nguoi", "outcome_id": "out.giai_toa.linh_hoat.v1" }
+      ],
+      "fallback_outcome_id": "out.chung.v1",
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "set.quiz_bat_chuyen.v1",
+      "kind": "quiz",
+      "title": "Cách bạn mở lời",
+      "blurb": "Mở lời là một thói quen, không phải một tài năng.",
+      "questions_per_round": 2,
+      "questions": [
+        {
+          "id": "q.bat_chuyen_1.v1",
+          "prompt": "Ở chỗ đông người, bạn mở lời thế nào?",
+          "subject": "self",
+          "options": [
+            { "id": "o.mo_loi_truoc.v1", "label": "Mở lời trước", "outcome_key": "mo_truoc" },
+            { "id": "o.doi_duoc_hoi.v1", "label": "Đợi được hỏi", "outcome_key": "doi_hoi" }
+          ]
+        },
+        {
+          "id": "q.bat_chuyen_2.v1",
+          "prompt": "Bạn hợp với câu chuyện kiểu nào hơn?",
+          "subject": "self",
+          "options": [
+            { "id": "o.chuyen_hang_ngay.v1", "label": "Chuyện nhỏ hằng ngày", "outcome_key": "chuyen_nho" },
+            { "id": "o.chuyen_dai.v1", "label": "Chuyện dài và sâu", "outcome_key": "chuyen_sau" }
+          ]
+        }
+      ],
+      "mapping": [
+        { "key": "mo_truoc+chuyen_nho", "outcome_id": "out.bat_chuyen.mo_truoc.v1" },
+        { "key": "doi_hoi+chuyen_sau", "outcome_id": "out.bat_chuyen.doi_hoi.v1" },
+        { "key": "mo_truoc+chuyen_sau", "outcome_id": "out.bat_chuyen.tuy_khong_khi.v1" },
+        { "key": "doi_hoi+chuyen_nho", "outcome_id": "out.bat_chuyen.tuy_khong_khi.v1" }
+      ],
+      "fallback_outcome_id": "out.chung.v1",
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    },
+    {
+      "id": "set.quiz_phong_doan.v1",
+      "kind": "quiz",
+      "title": "Bạn đoán, rồi đi hỏi",
+      "blurb": "Phần đoán là của bạn; câu trả lời vẫn nằm ở người kia.",
+      "questions_per_round": 2,
+      "questions": [
+        {
+          "id": "q.phong_doan_1.v1",
+          "prompt": "Bạn đoán bạn ấy thích một buổi tối thế nào?",
+          "subject": "guess_about_other",
+          "options": [
+            { "id": "o.doan_yen_tinh.v1", "label": "Yên tĩnh", "outcome_key": "doan_yen" },
+            { "id": "o.doan_dong_vui.v1", "label": "Đông vui", "outcome_key": "doan_dong" }
+          ]
+        },
+        {
+          "id": "q.phong_doan_2.v1",
+          "prompt": "Còn buổi tối bạn muốn thì sao?",
+          "subject": "self",
+          "options": [
+            { "id": "o.ban_yen_tinh.v1", "label": "Yên tĩnh", "outcome_key": "ban_yen" },
+            { "id": "o.ban_dong_vui.v1", "label": "Đông vui", "outcome_key": "ban_dong" }
+          ]
+        }
+      ],
+      "mapping": [
+        { "key": "doan_yen+ban_yen", "outcome_id": "out.phong_doan.cung_yen.v1" },
+        { "key": "doan_dong+ban_dong", "outcome_id": "out.phong_doan.cung_dong.v1" },
+        { "key": "doan_yen+ban_dong", "outcome_id": "out.phong_doan.khac_nhau.v1" },
+        { "key": "doan_dong+ban_yen", "outcome_id": "out.phong_doan.khac_nhau.v1" }
+      ],
+      "fallback_outcome_id": "out.chung.v1",
+      "editorial_review": { "layer1": "content.editor.vi.a", "layer2": "content.editor.vi.b", "approved_at": "2026-09-24" }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- REQ-016 STORY-003 P2 / AC-9: Auto Backup rules for Android 11 (API 30) and
+     lower, referenced from AndroidManifest as android:fullBackupContent.
+     Android 12+ uses the different data-extraction-rules schema in
+     data_extraction_rules.xml; both files are required for an app targeting 12+.
+
+     domain="file"  -> getFilesDir(), which is what path_provider's
+                       getApplicationSupportDirectory returns on Android
+                       (Flutter PathUtils.getFilesDir). Holds journal_media.
+     domain="root"  -> the app's private-file root. app_flutter is
+                       Context.getDir("flutter"), which is what
+                       getApplicationDocumentsDirectory returns
+                       (Flutter PathUtils.getDataDirectory); it holds
+                       cupid.sqlite plus its -wal/-shm sidecars, so the
+                       directory is excluded rather than the file, because
+                       path takes no wildcards.
+
+     These are exclude-only rules, so every other app file stays backed up.
+     Doc: https://developer.android.com/identity/data/autobackup -->
+<full-backup-content>
+    <exclude domain="file" path="journal_media" />
+    <exclude domain="root" path="app_flutter" />
+</full-backup-content>

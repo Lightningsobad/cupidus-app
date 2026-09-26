@@ -1,20 +1,23 @@
 # Story Master: STORY-011 Vỏ hoàng đạo / trắc nghiệm
 
-Status: TODO
+Status: DONE
 Complexity: standard
 Story-Class: standard
-Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
+Implementation Lane: mobile (chốt ở `architecture/solution.md` — AC-22/AC-23
+cấm mọi API ngoài và bắt buộc chạy ngoại tuyến, nên không tồn tại bề mặt
+backend nào)
 Requirement: REQ-016
 Screen: Vỏ hoàng đạo / trắc nghiệm — màn (7), nhóm CỬA VÀO
+Design-Screen: 7-vo-hoang-dao-3-viec
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục C.7, D (SC-2),
 F (Tầng 4); `req_master.md` SB-174, R-10
 
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
+- [x] Implementation (Development) — P1-P4 DONE, commit `5c757d685417b1d54ee6255512911705e95028b0`
+- [x] Review (Reviewer) — `review/review-report.md`, Outcome: DEFERRED_ONLY
 
 ## Depends On
 - STORY-001 — kết quả ra 3 thẻ hoạt động đẩy vào kho chung.

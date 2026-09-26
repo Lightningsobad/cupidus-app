@@ -6,12 +6,13 @@ import '../../features/auth/presentation/auth_strings.dart';
 import '../../features/chat/data/chat_partner_store.dart';
 import '../../features/chat/data/chat_repository.dart';
 import '../../features/chat/data/ghost_consent_store.dart';
+import '../../features/home/presentation/home_screen.dart';
 import '../../features/pairing/data/pairing_repository.dart';
 import '../../features/pairing/presentation/invite_cubit.dart';
 import '../../features/pairing/presentation/joincode_cubit.dart';
 import '../../features/pairing/presentation/pair_gate_cubit.dart';
-import '../../features/pairing/presentation/screens/pairing_choice_screen.dart';
 import '../../features/reminders/presentation/reminder_overlay_host.dart';
+import '../couple/couple_pairing_store.dart';
 import '../di/service_locator.dart';
 import '../realtime/backend_user_id_store.dart';
 import '../realtime/cupid_realtime.dart';
@@ -26,12 +27,13 @@ import 'session_termination_listener.dart';
 /// here). Tests supply a fake fetcher instead so the gate can be driven
 /// without a live/mocked `Dio`.
 ///
-/// [createInviteCubit] and [createJoincodeCubit] are threaded through
-/// [PairingChoiceScreen] to the screens it pushes (mirrors
-/// [createPairGateCubit]'s seam): both otherwise default to a `getIt`-backed
-/// cubit, which is unavailable in widget tests that never call
-/// `setupServiceLocator()`. [router] is threaded the same way, for the
-/// `paired` edge at the end of that leg.
+/// REQ-016 STORY-001 P9: the unpaired branch below now renders the solo
+/// stage-1 [HomeScreen] instead of [PairingChoiceScreen] (`coding-plan/
+/// master-plan.md` §8.4), so [createInviteCubit], [createJoincodeCubit], and
+/// [router] no longer reach any screen this shell builds. They stay as
+/// accepted, unstored constructor parameters only so
+/// `test/features/pairing/presentation/pair_gate_cubit_test.dart` — pinned
+/// unchanged by §8.7 rule 4 — keeps compiling against its existing call site.
 ///
 /// STORY-009 P4: [ReminderOverlayHost] is mounted exactly once here, wrapping
 /// the entire gated tree below, so the Synced Reminder firing overlay can
@@ -59,9 +61,6 @@ class PairGateShell extends StatelessWidget {
     BackendUserIdStore? backendUserIdStore,
     GhostConsentStore? consentStore,
   }) : _createPairGateCubit = createPairGateCubit,
-       _createInviteCubit = createInviteCubit,
-       _createJoincodeCubit = createJoincodeCubit,
-       _router = router,
        _partnerStore = partnerStore,
        _chatRepository = chatRepository,
        _coordinator = coordinator,
@@ -69,9 +68,6 @@ class PairGateShell extends StatelessWidget {
        _consentStore = consentStore;
 
   final PairGateCubit Function()? _createPairGateCubit;
-  final InviteCubit Function()? _createInviteCubit;
-  final JoincodeCubit Function()? _createJoincodeCubit;
-  final OnboardingRouter? _router;
   final ChatPartnerStore? _partnerStore;
   final ChatRepository? _chatRepository;
   final RealtimeCoordinator? _coordinator;
@@ -90,9 +86,6 @@ class PairGateShell extends StatelessWidget {
         child: BlocProvider<PairGateCubit>(
           create: (_) => (_createPairGateCubit ?? _defaultPairGateCubit)(),
           child: _AppShellView(
-            createInviteCubit: _createInviteCubit,
-            createJoincodeCubit: _createJoincodeCubit,
-            router: _router,
             partnerStore: _partnerStore,
             chatRepository: _chatRepository,
             coordinator: _coordinator,
@@ -107,31 +100,32 @@ class PairGateShell extends StatelessWidget {
 
 class _AppShellView extends StatelessWidget {
   const _AppShellView({
-    required InviteCubit Function()? createInviteCubit,
-    required JoincodeCubit Function()? createJoincodeCubit,
-    required OnboardingRouter? router,
     required ChatPartnerStore? partnerStore,
     required ChatRepository? chatRepository,
     required RealtimeCoordinator? coordinator,
     required BackendUserIdStore? backendUserIdStore,
     required GhostConsentStore? consentStore,
-  }) : _createInviteCubit = createInviteCubit,
-       _createJoincodeCubit = createJoincodeCubit,
-       _router = router,
-       _partnerStore = partnerStore,
+  }) : _partnerStore = partnerStore,
        _chatRepository = chatRepository,
        _coordinator = coordinator,
        _backendUserIdStore = backendUserIdStore,
        _consentStore = consentStore;
 
-  final InviteCubit Function()? _createInviteCubit;
-  final JoincodeCubit Function()? _createJoincodeCubit;
-  final OnboardingRouter? _router;
   final ChatPartnerStore? _partnerStore;
   final ChatRepository? _chatRepository;
   final RealtimeCoordinator? _coordinator;
   final BackendUserIdStore? _backendUserIdStore;
   final GhostConsentStore? _consentStore;
+
+  /// Pins the unpaired root's [HomeScreen] straight to
+  /// [PairingStatus.unpaired] rather than [HomeScreen]'s default
+  /// `getIt<CouplePairingStore>()` resolver, a second independent status
+  /// source that can return [PairingStatus.unknown]. See `coding-plan/
+  /// master-plan.md` §8.5: without the pin, `_SoloHomeGateState` would map
+  /// that `unknown` read onto the couple dashboard inside an unpaired
+  /// session.
+  static Future<PairingStatus> _soloPairingStatus() async =>
+      PairingStatus.unpaired;
 
   @override
   Widget build(BuildContext context) {
@@ -139,10 +133,8 @@ class _AppShellView extends StatelessWidget {
       builder: (context, state) => switch (state) {
         PairGateChecking() => const _PairGateChecking(),
         PairGateNetworkError() => const _NetworkErrorView(),
-        PairGateUnpaired() => PairingChoiceScreen(
-          router: _router,
-          createInviteCubit: _createInviteCubit,
-          createJoincodeCubit: _createJoincodeCubit,
+        PairGateUnpaired() => HomeScreen(
+          resolvePairingStatus: _soloPairingStatus,
         ),
         PairGatePaired() => AppShell(
           partnerStore: _partnerStore,

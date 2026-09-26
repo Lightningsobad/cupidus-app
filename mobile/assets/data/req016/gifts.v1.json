@@ -1,0 +1,80 @@
+{
+  "id": "req016.gifts",
+  "version": "1.0.0",
+  "schema_id": "req016.gifts.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "gift.thu_tay_ke_ky_uc.v1",
+      "title": "Thư tay kể lại một kỷ niệm chung",
+      "description": "Viết tay một trang kể lại buổi mà hai người vẫn còn nhắc, rồi gấp vào phong bì bạn tự gấp.",
+      "branch_id": "handmade",
+      "effort_tier_id": "effort.1_2_gio.v1",
+      "is_handmade": true
+    },
+    {
+      "id": "gift.playlist_theo_buoi.v1",
+      "title": "Danh sách nhạc cho một buổi cụ thể",
+      "description": "Chọn các bài hợp một buổi hai người sắp có, sắp thứ tự rồi gửi kèm một dòng lý do cho từng bài.",
+      "branch_id": "no_cost",
+      "effort_tier_id": "effort.30_phut.v1",
+      "is_handmade": false
+    },
+    {
+      "id": "gift.bua_com_nau_tai_nha.v1",
+      "title": "Bữa cơm bạn tự nấu ở nhà",
+      "description": "Nấu đúng món người ấy từng kể là hợp miệng, dọn bàn tử tế rồi ngồi ăn chậm với nhau.",
+      "branch_id": "handmade",
+      "effort_tier_id": "effort.mot_buoi.v1",
+      "is_handmade": true
+    },
+    {
+      "id": "gift.album_anh_tu_dan.v1",
+      "title": "Cuốn album ảnh tự dán",
+      "description": "In những tấm hai người đã chụp, dán vào một cuốn sổ và viết chú thích dưới từng tấm.",
+      "branch_id": "handmade",
+      "effort_tier_id": "effort.1_2_gio.v1",
+      "is_handmade": true
+    },
+    {
+      "id": "gift.do_thu_cong_theo_nghe_tay.v1",
+      "title": "Món đồ nhỏ làm bằng chính nghề tay của bạn",
+      "description": "Lấy đúng thứ bạn vốn làm được, làm một món cỡ nhỏ rồi bọc lại bằng giấy bạn tự trang trí.",
+      "branch_id": "handmade",
+      "effort_tier_id": "effort.mot_buoi.v1",
+      "is_handmade": true
+    },
+    {
+      "id": "gift.buoi_hen_dung_dip.v1",
+      "title": "Một buổi hẹn dựng quanh dịp đang tới",
+      "description": "Dựng trọn một buổi đi chơi xoay quanh dịp đang tới, chốt giờ và chỗ gặp trước một hôm.",
+      "branch_id": "by_occasion",
+      "effort_tier_id": "effort.mot_buoi.v1",
+      "is_handmade": false
+    },
+    {
+      "id": "gift.bo_hoa_gan_voi_dip.v1",
+      "title": "Bó hoa gắn với dịp",
+      "description": "Chọn loại hoa hợp dịp đang tới, kèm một mẩu thiệp viết tay nói vì sao bạn chọn loại đó.",
+      "branch_id": "by_occasion",
+      "effort_tier_id": "effort.30_phut.v1",
+      "is_handmade": false
+    },
+    {
+      "id": "gift.phieu_doi_thoi_gian.v1",
+      "title": "Tập phiếu đổi lấy thời gian của bạn",
+      "description": "Tự viết vài tấm phiếu, mỗi tấm đổi lấy một việc bạn sẽ làm cùng người ấy khi họ đưa phiếu.",
+      "branch_id": "no_cost",
+      "effort_tier_id": "effort.30_phut.v1",
+      "is_handmade": true
+    },
+    {
+      "id": "gift.lam_gium_viec_dang_ngai.v1",
+      "title": "Làm giúp một việc người ấy đang ngại",
+      "description": "Nhận làm trọn một việc nhà người ấy từng kể là ngại, làm xong rồi mới nói cho họ biết.",
+      "branch_id": "no_cost",
+      "effort_tier_id": "effort.1_2_gio.v1",
+      "is_handmade": false
+    }
+  ]
+}

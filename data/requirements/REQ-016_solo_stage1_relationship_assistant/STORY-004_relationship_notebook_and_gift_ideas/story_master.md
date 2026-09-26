@@ -1,6 +1,6 @@
 # Story Master: STORY-004 Gợi ý quà, và sổ tay / hồ sơ kỹ năng thu thập tại chỗ
 
-Status: TODO
+Status: DONE
 Complexity: complex
 Story-Class: shared-foundation
 Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
@@ -9,13 +9,16 @@ Screen: Gợi ý quà — màn (5), nhóm CỬA VÀO · Sổ tay người yêu �
 kỹ năng "phiên bản tôi" — màn (3), cả hai thuộc nhóm KHO
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục C.2, C.3, C.5,
 D (SC-2, SC-3), B (Ngày 1), F (3a/3b, SB-129, SB-197, SB-206)
+Design-Screen: `2-so-tay-nguoi-yeu`, `3-ho-so-ky-nang-phien-ban-toi`,
+`5-goi-y-qua-thang-cong-suc` (surface `cupid-ch-ng-1`, platform `ios`; phân
+giải và khoá trong P4/P7 — xem `visual-fidelity/visual-fidelity-report.md`)
 
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
+- [x] Implementation (Development)
+- [x] Review (Reviewer) — `review/review-report.md`, `Outcome: DEFERRED_ONLY`
 
 ## Depends On
 - STORY-001 — đầu ra của gợi ý quà là một thẻ đẩy vào kho chung (SC-1'/SC-2).

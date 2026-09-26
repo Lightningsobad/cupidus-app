@@ -1,0 +1,40 @@
+{
+  "id": "drip",
+  "version": "1.0.0",
+  "schema_id": "req016.drip.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "drip.keepsake.v1",
+      "body": "Những gì bạn đã cất lại vẫn ở đó, kể cả những ngày bạn không mở app."
+    },
+    {
+      "id": "drip.handmade.v1",
+      "body": "Một món bạn tự làm cần thời gian, và thời gian đó là phần bạn đang góp."
+    },
+    {
+      "id": "drip.notebook.v1",
+      "body": "Sổ tay của bạn dày lên mỗi lần bạn ghi thêm một điều nhỏ."
+    },
+    {
+      "id": "drip.no_pressure.v1",
+      "body": "Không có gì phải đuổi kịp ở đây. Bạn quay lại lúc nào cũng được."
+    },
+    {
+      "id": "drip.small_step.v1",
+      "body": "Một việc mười lăm phút cũng là một việc đã làm xong."
+    },
+    {
+      "id": "drip.memory_count.v1",
+      "body": "Bạn đã cất lại {n} kỷ niệm cho tới giờ."
+    },
+    {
+      "id": "drip.own_pace.v1",
+      "body": "Khoảng lặng là khoảng lặng, không phải một chỗ trống cần lấp."
+    },
+    {
+      "id": "drip.keeps_growing.v1",
+      "body": "Kho của bạn chỉ lớn thêm khi bạn cất thêm, và nó không tự nhỏ đi."
+    }
+  ]
+}

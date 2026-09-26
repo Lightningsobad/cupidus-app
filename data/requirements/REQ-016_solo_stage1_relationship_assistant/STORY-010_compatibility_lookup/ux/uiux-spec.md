@@ -48,23 +48,31 @@ full-screen, nút quay lại trả về đúng luồng nguồn, giữ nguyên tr
    khối nào cho phép mắt "đọc" ra một vị trí tương đối. DẢI là MỘT NHÃN,
    không phải một điểm trên một thang — nếu component có thể trả lời câu
    "cái này đầy bao nhiêu phần?", nó SAI (AC-16/AC-17).
-2. **Khối "Chỗ dễ hợp"** — khối `--r-sm`, tiêu đề phụ `600` + đoạn văn `body
-   17pt`.
+2. **Khối "Chỗ dễ hợp"** — khối `--r-sm`, tiêu đề khối kiểu **`caption` IN
+   HOA** (token `caption`, không thêm `600` thủ công) + đoạn văn `body 17pt`.
+   Chỉ glyph hiển thị mới IN HOA: chuỗi nguồn l10n giữ nguyên sentence case và
+   là nhãn mà trình đọc màn hình đọc lên.
 3. **Khối "Chỗ dễ va"** (điểm cọ xát, R-7) — đặt **NGAY SAU** khối "Chỗ dễ
-   hợp", dùng **ĐÚNG HỆT** kiểu container, cỡ chữ, độ đậm tiêu đề, và bề rộng
-   với khối "Chỗ dễ hợp" (cùng `--r-sm`, cùng `body 17pt`, cùng tiêu đề phụ
-   `600`). **Cấm**: đặt khối này ở cuối màn, thu nhỏ cỡ chữ xuống `caption`,
-   gập vào accordion "xem thêm"/"chi tiết", hay tô nhạt màu hơn khối "hợp".
-   Luật đo được để nghiệm thu: che tiêu đề đi và đưa cho người khác xem, họ
-   không được đoán ra khối nào là "điểm mạnh" và khối nào là "điểm cọ xát"
-   chỉ bằng kiểu chữ/khung — hai khối đối xứng thị giác tuyệt đối, khác nhau
-   CHỈ ở icon đầu tiêu đề (ví dụ `favorite` line cho "hợp" và `bolt` line cho
-   "va" — icon khác, trọng lượng khung giống).
+   hợp", dùng **ĐÚNG HỆT** kiểu container, cỡ chữ, kiểu tiêu đề, và bề rộng
+   với khối "Chỗ dễ hợp" (cùng `--r-sm`, cùng `body 17pt` cho đoạn văn, cùng
+   tiêu đề `caption` IN HOA). **Cấm**: đặt khối này ở cuối màn, cho tiêu đề
+   hoặc đoạn văn của nó nhỏ hơn/nhạt hơn khối "hợp", gập vào accordion "xem
+   thêm"/"chi tiết", hay tô nhạt màu hơn khối "hợp". Hai khối dùng **chung một
+   kiểu tiêu đề `caption` IN HOA, đối xứng tuyệt đối** — điều bị cấm là lệch
+   nhau, không phải bản thân cỡ `caption`. Luật đo được để nghiệm thu: che
+   tiêu đề đi và đưa cho người khác xem, họ không được đoán ra khối nào là
+   "điểm mạnh" và khối nào là "điểm cọ xát" chỉ bằng kiểu chữ/khung — khác
+   nhau CHỈ ở icon đầu tiêu đề (ví dụ `favorite` line cho "hợp" và `bolt` line
+   cho "va" — icon khác, trọng lượng khung giống).
 4. **Khối "1 hoạt động nên thử"** — khối `--r-sm`, đoạn văn ngắn + hành động
-   phụ (không phải hành động chính SC-4) "Thêm vào kho của tôi" (text
-   button/outline chip, `body 17pt/400`, đúng cột "hành động phụ" ở mục 4
-   survey — không tô đặc `--grad` vì đây không phải hành động chính cấp
-   thẻ).
+   phụ (không phải hành động chính SC-4) "Thêm vào kho của tôi" dựng thành
+   **nút tròn `(+)` chỉ-icon** (viền outline `--r-full`, icon `add` line,
+   **không** chữ hiển thị — đúng cột "hành động phụ" ở mục 4 survey, không tô
+   đặc `--grad` vì đây không phải hành động chính cấp thẻ). Vì bỏ chữ nên hai
+   luật đi kèm là bắt buộc: vùng chạm tối thiểu **44x44** điểm ảnh logic (đệm
+   quanh nút tròn, không chỉ dựa vào đường viền), và nhãn trợ năng giữ nguyên
+   chuỗi đầy đủ "Thêm vào kho của tôi" qua `Semantics(button: true)` để nút
+   vẫn có tên đọc được.
 5. **Khối "1 câu để hỏi"** — LUÔN đứng cuối cùng (AC-19), dùng đúng kiểu khối
    ở `STORY-009/ux/uiux-spec.md` mục 3.4 (nền tách lớp, icon `help_outline`,
    khác tông so với 3 khối trên).

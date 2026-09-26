@@ -6,18 +6,30 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:cupid_mobile/app/cupid_app.dart';
 import 'package:cupid_mobile/core/auth/cupid_auth.dart';
 import 'package:cupid_mobile/core/couple/couple_pairing_store.dart';
+import 'package:cupid_mobile/core/database/cupid_database.dart';
+import 'package:cupid_mobile/core/database/daos/activity_card_dao.dart';
 import 'package:cupid_mobile/core/di/service_locator.dart';
 import 'package:cupid_mobile/core/network/cupid_api.dart';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
+import 'package:cupid_mobile/features/activity_cards/data/activity_card_repository_impl.dart';
+import 'package:cupid_mobile/features/activity_cards/domain/activity_card_repository.dart';
 import 'package:cupid_mobile/features/auth/presentation/session_gate_cubit.dart';
 import 'package:cupid_mobile/features/chat/data/chat_partner_store.dart';
 import 'package:cupid_mobile/features/pairing/data/partner_link.dart';
 import 'package:cupid_mobile/features/pairing/presentation/pair_gate_cubit.dart';
 import 'package:dio/dio.dart';
+import 'package:drift/native.dart';
 
 /// Fake [HttpClientAdapter] so `ChatEntryGate`'s best-effort
 /// `refreshFromServer()` call (`chat_entry_gate.dart:38`) never reaches a
 /// real network; mirrors `test/core/navigation/app_shell_test.dart`.
+///
+/// `/users/me` answers with a partner id on purpose. This test declares a
+/// paired session through `PairGateCubit`, but `HomeScreen` resolves pairing a
+/// second time through its own `getIt<CouplePairingStore>()`; an empty `{}`
+/// there would report unpaired and (post-REQ-016 P9) mount the solo card hub
+/// instead of the couple dashboard this test asserts on. Same shape as
+/// `app_shell_test.dart`'s paired harness.
 class _FakeHttpClientAdapter implements HttpClientAdapter {
   @override
   Future<ResponseBody> fetch(
@@ -25,8 +37,12 @@ class _FakeHttpClientAdapter implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
+    final String body = options.path == '/users/me'
+        ? '{"partnerId":"partner-1","displayName":"Partner One",'
+              '"isGhostModeEnabled":false}'
+        : '{}';
     return ResponseBody.fromString(
-      '{}',
+      body,
       200,
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
@@ -51,6 +67,24 @@ void main() {
       CouplePairingStore(
         api: CupidApi(dio: dio, interceptors: const []),
         backendUserIdStore: BackendUserIdStore(),
+      ),
+    );
+    // REQ-016 STORY-001 P9: the fake adapter answers `/users/me` with `{}`, so
+    // `HomeScreen`'s own resolver reports unpaired and mounts the solo card
+    // hub, which resolves its repository through the composition root. An
+    // in-memory database keeps that off disk and off the network; mirrors
+    // `test/core/navigation/app_shell_test.dart`.
+    final backendUserIdStore = BackendUserIdStore()
+      ..updateFromLoginResponse(<String, Object?>{'id': 'u1'});
+    final activityDatabase = CupidDatabase(NativeDatabase.memory());
+    getIt.registerSingleton<CupidDatabase>(
+      activityDatabase,
+      dispose: (CupidDatabase database) => database.close(),
+    );
+    getIt.registerSingleton<ActivityCardRepository>(
+      ActivityCardRepositoryImpl(
+        dao: ActivityCardDao(activityDatabase),
+        ownerKeyStore: backendUserIdStore,
       ),
     );
   });

@@ -1,21 +1,82 @@
 # Story Master: STORY-012 Trạng thái theo pha, widget, và bộ đếm "của cải đang lớn"
 
-Status: TODO
+Status: DONE
 Complexity: complex
 Story-Class: standard
-Implementation Lane: shared (backend + mobile; ranh giới chính xác do Tech Lead chốt)
+Implementation Lane: shared (backend + mobile) — trên thực tế chỉ mobile-dev
+  thực thi mã, không có lane backend nào chạy trong story này (ranh giới đã
+  chốt 2026-09-11 — `architecture/solution.md` §1 Key Discovery: handoff ghi
+  `shared (backend + mobile)`, không có lane backend, xem STORY-001
+  contract-summary §1 + system memory R9)
 Requirement: REQ-016
 Screen: Trạng thái đặc biệt của màn (1) + widget màn hình chính hệ điều hành.
 Không phải màn hình thứ 12.
 Spec reference: `idea.md` → `## Đặc tả sản phẩm (vòng 9-10)` mục A (J4, J5,
 J10, J12), B (Ngày 7, Ngày 30), F (SB-83/84/85, SB-87, SB-99)
+Design-Surface: cupid-ch-ng-1
+Design-Screen: ngan-da-hen-ngay-dang-doi, man-goc-muon-lam, 23h-vua-ve-j8,
+  j12-nhan-ra-cot-moc, sb-84-widget-bon-pha
+
+Ghi chú alias (văn xuôi, ngoài trường máy đọc ở trên — S10 review B-8): id canvas
+là id màn chuẩn duy nhất (Design Ruling Log hàng B-7, `req_master.md`); các nhãn
+bản dựng cũ chỉ là alias mô tả trạng thái, không phải id: `ngan-da-hen-ngay-dang-doi`
+= hub-waiting/hub-upcoming, `man-goc-muon-lam` = hub-date_day/hub-quiet,
+`23h-vua-ve-j8` = evening-check-in-sheet, `j12-nhan-ra-cot-moc` = quiet-surfaces,
+`sb-84-widget-bon-pha` = widget-phases (bốn pha waiting/upcoming/date_day/quiet).
+Xem `architecture/solution.md` §8.
 
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md`
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
-- [ ] Implementation (Development)
-- [ ] Review (Reviewer)
+- [x] Architecture (Tech Lead) — `architecture/solution.md`, `architecture/contract-summary.md`
+- [x] Coding Plan (Tech Lead) — `coding-plan/master-plan.md`, `coding-plan/coding-agent-guide.md`, P1–P8
+- [x] Implementation (Development) — mobile-dev P1-P12 complete per
+  `coding-plan/master-plan.md` Phases Overview (all Status: DONE, BaseHead
+  `536d47cb92ff747505e7b6f1ac0469aac254cb55`). S8 found AC9 FAIL with 6
+  blocking visual-fidelity findings B-1..B-6; Tech Lead architecture rework
+  (B-2/B-5/B-6, action_label) then one mobile-dev pass closed 5 of 6 for real
+  (B-2..B-6), commit `a8aa1ff4` (2026-09-26). S9 re-review reopened B-1a +
+  B-7; a further mobile-dev pass closed both for real: `_PhaseStatusAction`
+  now renders the rounded-pill chip (commit `6496c4f5`, 2026-09-26), and the
+  10 `implemented-*.png` files are renamed to canvas content-slug ids per
+  `architecture/solution.md` §8b. P6/P9-P12 history unchanged, see
+  `coding-plan/phase-P6..P12-*.md` and
+  `visual-fidelity/visual-fidelity-report.md` "Lượt P12"/"Lượt patch #4".
+- [x] Review (Reviewer) — S10 `full-story-review` (Iris-QC) + S11 narrow
+  confirmation, final Outcome: **DEFERRED_ONLY**, 0 blocking findings
+  (`review/review-report.md` line 3 + "Phụ lục S11", `review/scope-gate.md`).
+  S10 second pass independently re-verified **B-1a** (chip shape, own
+  screenshot inspection), **B-7 pairing/pixel half** (own old-name/new-name
+  control run of `visual_fidelity.py`), and **N-7** (patch note content)
+  closed for real, but found **B-8** (blocking): this file's `Design-Screen:`
+  field mixed parenthetical aliases and Vietnamese prose into the
+  comma-parsed value, so `verify-story-visual-fidelity-gate.sh` parsed a
+  garbage first id and hard-blocked — Scrum Master owned (outside reviewer's
+  `review/` WriteScope per SKILL rule 7). Scrum Master applied the
+  reviewer's proposed one-line fix, commit `0c50a0e5` (bare canonical ids
+  only, alias note moved to separate prose above). S11 narrow re-check
+  (2026-09-26, same reviewer session, `Flow: story` continuation) confirmed
+  the field form is correct and lossless, confirmed the 4-file delta since
+  the last screenshot-inspected commit is markdown-only (no code/image/gate
+  config change, so B-1a/N-7/pairing/AC9 stand without rebuild), re-ran
+  `visual_fidelity.py --stage review --stack mobile` (exit 0), and
+  independently confirmed the real stop-gate does not re-block at
+  `0c50a0e5` — **B-8 closed**. Known residual limitation, carried forward not
+  blocking: only `23h-vua-ve-j8` was directly certified against the gate's
+  own (truncated) printed valid-id list in S10; the other 4 ids are
+  format-correct and the gate's clean pass at `0c50a0e5` is indirect
+  confirmation for all five, but if any future gate run ever names one of
+  them as invalid, correct it against that run's own printed valid list.
+  Two non-blocking findings for separate routing (NOT part of this story's
+  DONE gate): **N-10** — capture harness hard-codes OLD `implemented-*.png`
+  names at `mobile/test/features/phase_status/phase_status_line_test.dart:627`
+  and in the P12 widget harness, needs a standalone follow-up pass with
+  `mobile/test/**` WriteScope or a future `CAPTURE_VISUALS=true` run will
+  re-red this story's fidelity gate; **N-11** — `test/features/activity_cards`
+  suite overwrites STORY-002's visual-fidelity PNGs unconditionally (already
+  reverted by reviewer via `git checkout --`), same family as N-10, route to
+  the same follow-up pass. N-1..N-6, N-8, N-9, N-2 (DevOps), and S7's R-2/D-*
+  items remain open, unchanged ownership. Sealed `0c50a0e5`+ (S11 addendum).
 
 ## Depends On
 - STORY-001 — mọi pha đọc từ trạng thái thẻ trong kho chung.
@@ -77,6 +138,12 @@ do quay lại mà không cần ai trả lời gì cả.
 8. Given người dùng không mở app trong nhiều ngày, when họ mở lại, then app
    **không** hiển thị bất kỳ nội dung trách móc, đếm ngày vắng, hay chuỗi bị
    đứt nào.
+9. Given màn (1) ở từng pha, sheet nhắc tối, các bề mặt khoảng lặng, và widget
+   màn hình chính, when so khớp với thiết kế tham chiếu bề mặt `cupid-ch-ng-1`,
+   then từng màn khớp đúng design screen id tương ứng — `hub-waiting`,
+   `hub-upcoming`, `hub-date_day`, `hub-quiet`, `evening-check-in-sheet`,
+   `quiet-surfaces`, `widget-phases` — không lệch thấy được về bố cục, khoảng
+   cách, màu sắc, typography, và trạng thái.
 
 ## System Integration And Discoverability
 - UI-facing story: YES (gồm cả bề mặt widget của hệ điều hành).
