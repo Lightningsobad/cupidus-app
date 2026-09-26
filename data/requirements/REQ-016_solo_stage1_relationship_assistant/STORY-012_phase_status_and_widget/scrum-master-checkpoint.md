@@ -64,17 +64,23 @@ of truth):
   already has the correct values (`cupid-ch-ng-1`, 7 screen ids) to copy from.
 
 Next Valid Step:
-1. Dispatch **Alan-Techlead** (`Mode: architecture-solution` or
-   `compact-story-plan`, whichever the template calls for a naming-convention
-   decision only) to settle **B-7**: reconcile `story_master.md` build-label
-   screen ids vs. the `cupid-ch-ng-1` canvas's content-slug ids (`evening`/
-   `hub`/`quiet`/`widget` vs `23h`/`j12`/`man`/`ngan`) so
-   `.claude/hooks/lib/visual_fidelity.py --stage review --stack mobile`
-   can pass. No product code in this pass.
-2. After Tech Lead returns, one mobile-dev pass for **B-1a** (rounded-pill
-   chip in `phase_status_line.dart`'s `_PhaseStatusAction`, per
-   `ux/uiux-spec.md` §1) + **N-7** (add "Lượt patch #4" note to
-   `coding-plan/test-results.md`) + recapture visual-fidelity cell 1.
+1. **DONE 2026-09-26** — Alan-Techlead settled B-7 (`architecture/solution.md`
+   §8): canvas content-slug id is the sole canonical screen id; build labels
+   are alias suffixes only. No gate/config change, no product code. Mapping
+   table at §8b (7 labels -> 5 canvas ids -> 10 new `implemented-*.png`
+   names). Sealed `802b3fa6` (worktree) + `4108ac86` (main, Design Ruling Log
+   row B-7) + `story_master.md` `Design-Screen:` fixed to canvas ids.
+2. Dispatch one mobile-dev pass (code-writer, BaseHead = current worktree
+   HEAD `802b3fa6ad68e400791e3448154d7e3eed7f2e84`) for:
+   - **B-1a**: rounded-pill chip in `phase_status_line.dart`'s
+     `_PhaseStatusAction`, per `ux/uiux-spec.md` §1's 2026-09-26 B-1 patch.
+   - **B-7 mechanical part**: `git mv` the 10 `implemented-*.png` files per
+     `architecture/solution.md` §8b's exact table, update the pairing table
+     at `visual-fidelity-report.md:85-93`, recapture cell 1 under the new
+     name. Evidence must be a control run (old name red / new name green) of
+     `.claude/hooks/lib/visual_fidelity.py`, not `verify-story-visual-fidelity-gate.sh`
+     (silently exits 0 regardless — see §8d).
+   - **N-7**: add "Lượt patch #4" note to `coding-plan/test-results.md`.
    WriteScope: `mobile/lib/features/phase_status/presentation/phase_status_line.dart`,
    `coding-plan/test-results.md`, `visual-fidelity/`.
 3. Then S10 re-review by Iris-QC (fresh spawn or continuation, reviewer's
