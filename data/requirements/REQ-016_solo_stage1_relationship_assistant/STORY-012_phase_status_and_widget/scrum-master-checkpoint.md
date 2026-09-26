@@ -459,3 +459,24 @@ still qualifies — it does not, per `Story-Class: standard` /
 `RunId: RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-reviewer`.
 The story worktree itself is clean and fully committed (`8d568b9c`); nothing
 here needs redoing.
+
+## Re-verification (2026-09-26, fresh `continue parallel` session, no re-spawn attempted)
+
+Independently re-checked before touching the spawn again: mobile-dev run file
+still `status: COMPLETED` / `completion_marker: "MOBILE_COMPLETE: YES"` /
+`worktree_head: 0cf0abd7...` (unchanged, still stale vs current branch HEAD
+`71c39666...`); reviewer run file for STORY-012 still only the closed S8
+`PATCH_REQUIRED` report; scheduler `active_runs`/`paused_runs`/`blocked_runs`
+still all `[]`; `list-releasable-agents.sh` printed the same 4 stale names,
+all `TaskStop` -> "No task found" (confirmed nothing actually running).
+`guard-codes.md` `## PARALLEL SPAWN GUARD` re-read via the sanctioned
+`grep -A 15 "PARALLEL SPAWN GUARD" .claude/hooks/guard-codes.md` plus a
+targeted `implementation lane` grep (0 matches) — still no documented subcode
+for "no completed implementation lane... found". Nothing in repo state changed
+since the prior session's 3x block, so the identical spawn was NOT re-attempted
+a 4th time (would reproduce the same block with no new information). Blocker
+stands as `GUARD_FEEDBACK_INSUFFICIENT`; `data/runtime/scrum-master-active-scope.json`
+already reflects it accurately. Resumption path unchanged: needs an explicit
+user decision to (a) authorize reading/patching `guard-parallel-spawn.sh`, or
+(b) name an alternate route (none qualifies today — story is
+`Story-Class: standard` / `Complexity: complex`, so Reviewer stays required).
