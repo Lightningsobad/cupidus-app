@@ -134,39 +134,65 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 - Round 1-35 narrative in git history of this file — superseded by the table
   and "Current cursor" sections above.
 
-## Current cursor (Round 45, F-I4 seam-A re-capture sealed, narrow Iris-QC closure review dispatched)
+## Current cursor (Round 46 — REQ-016 DONE, landed into main)
 
-- `Alex-Mobile-Dev` (RunId
-  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-mobile-dev-seamArecapture`)
-  returned `MOBILE_COMPLETE: YES`. 3-part verification passed: releasable
-  (`list-releasable-agents.sh`, then confirmed via successful `TaskStop`);
-  worktree diff showed exactly the declared WriteScope (`mobile-visual-audit.md`
-  only, HEAD unchanged at `893c3649` before commit — no self-commit); full
-  `git diff` of the file read directly — genuine, detailed, matches the
-  teammate's prose exactly (seamA3 `Sổ tay` 2-row block, seamA4 `Nhật ký` 1-row
-  block, badge/radius/row-height/chevron parity with `seamC1`'s
-  `_PrivateStorageBlock`, no overflow/clipping, correct Vietnamese diacritics,
-  AC-21/SC-1' preserved, `seamA2` `Ý tưởng` placeholder confirmed spec-correct
-  per OQ-1). Committed in the integration worktree as `35723ed2` (parent
-  `893c3649`). `Alex-Mobile-Dev` released via `TaskStop`.
-- **Item 9 decided (Scrum Master, non-delegable, Round 44):** the audit's 18+
-  seam PNGs stay `/tmp`-only, not committed to the repo — seam-closure
-  captures with no design-canvas id, distinct from the checked-in
-  visual-fidelity PNG pipeline (`fm1-solo-tabs-solution.md` §5.4). Durable
-  artifact is the prose verdict in `mobile-visual-audit.md`, tracked in git.
-- **Next resume action:** dispatched a FRESH, narrow `Iris-QC`
-  requirement-integration-review (RunId
-  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-reviewer-fi4close`,
-  `BaseHead 893c3649`) scoped ONLY to re-checking F-I4's closure — does the new
-  seam A verdict in `35723ed2` genuinely match the re-opened PNGs? Explicitly
-  told not to re-verify rows 1-14 from the Round 43 report (untouched by this
-  diff). On this round's `Outcome: CLEAN`/`DEFERRED_ONLY`: re-sync `main` if
-  moved (D-I1 still open — integration branch behind `main`, `req_master.md`
-  registry table stale), `cleanup-requirement`, `git-story-boundary.sh
-  land-integration --req REQ-016_solo_stage1_relationship_assistant`, flip
-  `req_master.md` + `master_requirements_list.md` to `DONE`.
+**REQUIREMENT DONE. No further specialist dispatch needed for REQ-016.**
 
-## Superseded history (Rounds 37-44, collapsed — all 13 stories DONE/merged, F-I1 rework landed, F-I2/F-I3 devops evidence closed, requirement-level mobile-visual-audit closed, F-M1 architecture decision sealed, F-M1 implementation shipped, fresh Round 43 review PATCH_REQUIRED on F-I4 evidence-only gap)
+- Round 45 `Iris-QC` narrow closure review (RunId
+  `...-reviewer-fi4close`, `BaseHead 893c3649`) returned `REVIEW_COMPLETE: YES`,
+  `Outcome: DEFERRED_ONLY` — confirmed F-I4's new seam A verdict genuinely
+  matches the re-opened PNGs (independently re-examined, not read from prose),
+  WriteScope-clean, D-I1 re-checked narrower (11 commits behind `main`, all
+  `data/`-only), two new non-blocking residuals (R44-N1 `/tmp`-only evidence
+  durability, R44-N2 `pixelRatio: 1` not real device density). 3-part
+  verification passed (releasable, worktree diff = declared WriteScope only,
+  HEAD unchanged before commit). Committed `bcb2af0d` (parent `35723ed2`).
+  `Iris-QC` released via `TaskStop`.
+- `git-story-boundary.sh sync-integration` merged `main`'s 11 ahead commits
+  into the integration branch — `data/`-only (3 files: `BUG-20260927-001`
+  artifacts + a `scrum-master-checkpoint.md`), zero source touched (confirmed
+  via `git diff --stat`) — no re-run of build/runtime verification needed.
+  Committed `a7136103`.
+- `land-integration` blocked twice on `LAND_STORIES_UNMERGED`, naming three
+  stale/orphaned Git story-boundary JSONs whose `status` field lagged reality.
+  Each repaired only after independently confirming via
+  `git merge-base --is-ancestor <commit> <target>` that no actual work was
+  missing (ground truth is ancestry, never the JSON `status` field):
+  - `STORY-001`: commit already an ancestor; closed via plain `merge` (self-
+    detected "already contained", no new commit). `merge_sha: a7136103`.
+  - `BUG-20260910-001_activity_card_location_dropped_on_edit`: no
+    `commit_sha` recorded; `repair-boundary --branch
+    codex/REQ-016_solo_stage1_relationship_assistant-integration --commit-sha
+    e5b37417 --worktree <integration-worktree> --merge-target
+    codex/REQ-016_solo_stage1_relationship_assistant-integration`, then
+    `merge`. `merge_sha: a7136103`.
+  - Orphaned `NONE` boundary (abandoned 2026-09-17 devops setup attempt,
+    branch/worktree long gone, `base_head 7955477e` already an ancestor of
+    both `main` and integration — no work ever happened): `repair-boundary
+    --branch main --commit-sha 7955477e --worktree <control-checkout>
+    --merge-target main`, then `merge`. `merge_sha: 2a678398`.
+  - No target branch HEAD was altered by any of these three repairs —
+    bookkeeping-only fixes.
+- `land-integration` succeeded: merged the full REQ-016 integration branch
+  into `main` as `8742a22a` (current `main` HEAD), retired the integration
+  branch.
+- `cleanup-requirement` blocked once on `STORY-012`'s worktree having one
+  uncommitted file (`STORY-012/scrum-master-checkpoint.md`, +35 lines of
+  already-superseded Round 38 narrative) — read directly, confirmed safe/
+  redundant, discarded via `git checkout --`, then `cleanup-requirement`
+  succeeded: all 13 story worktrees/branches removed.
+- `req_master.md` `Status:` and `master_requirements_list.md` REQ-016 row both
+  flipped to `DONE`, committed on `main` as `5cb452f5`.
+- Item 9 (Scrum Master, Round 44, non-delegable): the audit's 18+ seam PNGs
+  stay `/tmp`-only, not committed — seam-closure captures with no
+  design-canvas id, distinct from the checked-in visual-fidelity PNG pipeline.
+  Durable artifact is the prose verdict in `mobile-visual-audit.md`, in git.
+- Remaining non-blocking items (Open user decisions 4/5, Still-open
+  non-blocking items list above, OQ-1) are PO/Tech-Lead-owned follow-ups, not
+  REQ-016 `DONE`-gate blockers — left open for a future requirement/PO pass,
+  not re-litigated here.
+
+## Superseded history (Rounds 37-45, collapsed — all 13 stories DONE/merged, F-I1 rework landed, F-I2/F-I3 devops evidence closed, requirement-level mobile-visual-audit closed, F-M1 architecture decision sealed, F-M1 implementation shipped, Round 43 PATCH_REQUIRED on F-I4 evidence-only gap, Round 44 F-I4 seam-A re-capture sealed at `35723ed2`)
 
 Round 43 fresh `Iris-QC` review (RunId `...-reviewer-fm1review`) found all
 F-M1 code/architecture/devops work correct (14/14 rows PASS or
