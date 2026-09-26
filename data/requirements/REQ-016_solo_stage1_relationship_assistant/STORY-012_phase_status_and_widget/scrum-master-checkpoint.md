@@ -51,40 +51,58 @@ Current State:
   (confirmed stopped). `Alan-Techlead-2`/`Alex-Mobile-Dev`/`Andy-PO` printed
   by `list-releasable-agents.sh` but had no running task (already gone).
 
-BLOCKER (2026-09-25, ROLE_ROUTING_CONFLICT) — rework routing not dispatched:
-- Iris-QC's recommended routing needs Product Owner (B-1) and UI/UX Designer
-  (B-3/B-4/B-6, alongside Tech Lead) decisions before mobile-dev can do the
-  rework pass.
-- `.agent-contract/role-map.md` "Backlog Shaping Workers" section (loaded
-  this segment) now states plainly: "`scrum-master` never spawns them [
-  product-owner, ui-ux-designer] — only `brainstormer` does... If a
-  requirement or story reaches `scrum-master` missing their artifacts, that
-  is a backlog-shaping defect: `scrum-master` stops and routes the
-  requirement back through `brainstormer`, it does not spawn these roles
-  itself." No mode carve-out is stated.
-- This conflicts with (a) `.agent-contract/handoff-schema.md`, which forbids
-  only PO `Mode: requirement-breakdown`/`story-requirements` and UX
-  `Mode: ux-requirement-batch` inside a scrum-master wave — implying other
-  modes (e.g. an ac-patch/design-decision mode) are fine for scrum-master to
-  spawn; and (b) this exact story's own history, where Andy-PO (ac-patch)
-  and Alan-Techlead were already spawned directly by Scrum Master mid-story
-  to rule D-13, already independently verified and sealed.
-- Tech-Lead-only findings (B-2, B-5) are NOT blocked by this — Tech Lead is
-  an ordinary delivery worker Scrum Master may spawn. But B-2 is
-  order-coupled to B-6 (UI/UX decision), so dispatching Tech Lead alone for
-  B-2 first risks shipping half the coupled pair.
-- STOPPING for user decision rather than guessing which contract doc wins.
-  Need one of: (1) confirm Scrum Master may spawn Andy-PO/Pink-Designer
-  directly for this rework (as it did for D-13), (2) explicit instruction to
-  route this batch through `brainstormer` instead, or (3) an amendment to
-  `role-map.md` clarifying the mode carve-out.
+RESOLVED (2026-09-26, corrected citation) — ROLE_ROUTING_CONFLICT:
+- My first `AskUserQuestion` this cycle wrongly cited D-13 as a precedent of
+  Scrum Master spawning Andy-PO/Pink-Designer directly. Verified directly
+  against `req_master.md` (control checkout, lines 195-239): D-13 (line 228)
+  involved **Tech Lead only**, never PO/UX. The real precedents — D-10 line
+  217-222 ("ĐÍNH CHÍNH 2026-09-25") and the STORY-009/010 note at line 225 —
+  both confirm PO/UX ac-patch decisions must route through `brainstormer`,
+  matching `.agent-contract/role-map.md`. I disclosed this error to the user
+  directly (with exact line citations) rather than silently proceeding.
+- User's explicit decision on the corrected question (verbatim): "cho tôi
+  message tới Brainstormer để anh ấy làm rồi tôi báo lại với bạn." — the
+  user is personally handling the Brainstormer interaction for B-1/B-3/B-4/
+  B-6 routing out-of-band, and will report the outcome back to Helen-SC.
+- **Scrum Master is HOLDING**: no further Andy-PO, Pink-Designer, or
+  brainstormer dispatch on this routing question until the user reports
+  back. Released `Andy-PO@session-e7df910a` via `TaskStop` (had a live task,
+  confirmed stopped); `Alan-Techlead-2`/`Alex-Mobile-Dev`/`Iris-QC` printed
+  by `list-releasable-agents.sh` were already stale (no task found).
+- NOTE — uncommitted Andy-PO output exists in the story worktree from BEFORE
+  this correction was found (spawned under the since-corrected precedent
+  claim). Content is substantively sound (Andy-PO independently caught that
+  S8's review misread the card footer `Hẹn ngày`/`…` as the missing chips)
+  but the ROUTING itself is now in question pending the user's Brainstormer
+  outcome. Do not discard, do not commit — reconcile once the user reports
+  back:
+  - `requirements/requirements.md`: AC-5 and AC-37 patched (chip label is an
+    optional per-entry `action_label` field; absent field → no chip drawn;
+    no invented labels, precedent R9-F-6).
+  - `req_master.md` (worktree copy, NOT main): new Design Ruling Log row
+    B-1 added — chip-1 label "Chọn trước một chỗ" for
+    `phase.waiting.prepare.v1` (precedent D-8), chip-2 ("Rủ lại kiểu khác")
+    rejected as violating AC-7/AC-6/R-1b and the STORY-002 (c)+(d) ruling;
+    card-footer CTA `Hẹn ngày`/`…` unchanged (reopening D-2 was declined).
+  - **Branch-divergence risk**: this worktree's `req_master.md` is missing
+    D-10/D-13 fixes that already landed on `main` (commits `ecade7ad`,
+    `2e629add`) — Andy-PO's new B-1 row was appended to a stale copy. Before
+    any commit, re-diff against `main`'s current `req_master.md` and
+    reconcile row placement/content, do not just merge blind.
+  - mobile-dev rework still needs (flagged by Andy-PO, out of its
+    WriteScope): `mobile/assets/data/req016/phase_content.v1.json` (add
+    `action_label: "Chọn trước một chỗ"` under `phase.waiting.prepare.v1`)
+    and `mobile/lib/features/activity_cards/presentation/widgets/activity_card_tile.dart`
+    (build the chip UI).
 
-Next Valid Step (once the above is resolved):
-- Dispatch Product Owner for B-1 (phase_content.v1.json strings) and
-  Tech Lead + UI/UX jointly for B-2/B-3/B-4/B-6 (design/token decisions),
-  then one mobile-dev pass building B-1..B-5 and re-capturing
-  visual-fidelity cells 1 and 7, per `review/review-report.md` "Khuyến nghị
-  trạng thái". WriteScope for that mobile-dev pass needs
+Next Valid Step (blocked on user's Brainstormer report-back):
+- Do NOT dispatch anyone for B-1/B-3/B-4/B-6 routing yet.
+- Once user reports back: reconcile whatever Brainstormer/PO/UX produces
+  with Andy-PO's already-completed B-1 draft above (keep/discard/merge),
+  then route B-2/B-5 (Tech-Lead-only, not blocked by this) + B-3/B-4/B-6
+  design/token decisions, then one mobile-dev pass building B-1..B-5 and
+  re-capturing visual-fidelity cells 1 and 7, per `review/review-report.md`
+  "Khuyến nghị trạng thái". WriteScope for that mobile-dev pass needs
   `CupidPhaseWidgetProvider.kt`, `cupid_phase_widget.xml`, a new gradient
   drawable, `phase_content.v1.json`, `activity_card_tile.dart`, and
   `architecture/contract-summary.md` §3a if B-6 changes the token role.

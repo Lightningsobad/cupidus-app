@@ -24,9 +24,16 @@ kế tiếp không hiện cho tới khi dữ liệu thật đổi.
 
 Tại màn (1): mỗi pha hiện thành đúng **một dòng trạng thái** ngay trên thẻ
 gần nhất liên quan — icon (Material Symbols, biến thể `line`) + nhãn ngắn +
-(riêng pha "Đang đợi") một CTA hành động phụ dẫn tới việc chuẩn bị cụ thể
-(AC-5, SB-83) — dùng đúng cột "hành động phụ" ở bảng action-tier (survey mục
-4): text button, không nền đặc, `caption 13pt`.
+(riêng pha "Đang đợi") tối đa một chip hành động phụ dẫn tới việc chuẩn bị cụ
+thể (AC-5, SB-83). Vá 2026-09-26 (B-1): chip nằm **trong** khối
+hướng-chuẩn-bị của thẻ, hình khối theo canvas `cupid-ch-ng-1` màn `hub-waiting`
+(chip bo tròn, không phải text button trần); nhãn lấy từ trường nhãn hành động
+của mục nội dung đang hiển thị (AC-37, tên đề xuất `action_label`), vắng trường
+thì không vẽ chip; chạm chip mở màn chi tiết A4 của chính thẻ đang đợi. Chip
+không phải CTA chính thứ hai; CTA `Hẹn ngày` và ô tràn `…` ở chân thẻ giữ
+nguyên (D-2). Canvas vẽ hai chip — chip `Rủ lại kiểu khác` bị bác (AC-6/AC-7),
+chữ `Chọn quán dự phòng` là nội dung mẫu (D-8); xem `req_master.md` →
+`## Design Ruling Log` hàng B-1.
 
 ## 2. Widget hệ điều hành — bề mặt công cộng (BR-11)
 
@@ -71,6 +78,55 @@ app:
   vì nền gradient hồng→tím của D-12 làm chấm hồng đặc gần như mất tương phản.
   Đây là vai trò ngữ nghĩa/UX; định nghĩa kỹ thuật của hình dạng token nằm ở
   `architecture/contract-summary.md` §3a, không lặp lại ở đây.
+- Vá 2026-09-26 (B-6): màu tô (tint) của glyph tia chớp **không** dùng lại giá
+  trị hồng đặc `--pink` (`#FF7FB6`) của nhóm ngữ nghĩa "hành động chính" —
+  glyph nằm đè lên chính nền gradient hồng→tím đó (mục "Nền theo pha" bên
+  dưới), nên phải dùng token **chữ/glyph-trên-gradient** gần trắng đã có sẵn
+  trong hệ thống (`colorOnAccent` = `#F7EEFB`, đã định nghĩa cho đúng mục đích
+  "glyph rendered on top of gradientHot" —
+  `mobile/lib/design_system/tokens/cupid_color_tokens.dart:230-233`), khớp
+  tia chớp gần-trắng của canvas `sb-84-widget-bon-pha`. Vai trò ngữ nghĩa
+  `--dot-today` ("hành động chính") không đổi — chỉ hex nó tra ra cho **hình
+  bolt** đổi từ hồng sang gần-trắng; không thêm resource màu thứ năm. **Ràng
+  buộc thứ tự (Iris-QC, review-report.md dòng 95-98):** B-6 và B-2 (nền
+  gradient `gradientHot`/hồng→tím cho thẻ pha hôm nay, phạm vi Tech Lead) phải
+  ship **cùng một lượt** — tách riêng B-6 (đổi màu glyph) mà chưa có B-2 (nền
+  vẫn phẳng `#241B42`) sẽ dựng lại đúng lỗi "hồng-trên-hồng" D-13 từng chặn
+  ở hướng ngược lại: gần-trắng trên nền tím đặc `#241B42` cũng sai tương phản
+  ngữ nghĩa dù không sai contrast-ratio kỹ thuật. `architecture/contract-summary.md`
+  §3a dòng 119-121 hiện khoá "glyph lấy màu từ chính `dot_today`" — câu đó
+  không còn đúng sau quyết định này (giá trị `dot_today` cho hình bolt đổi
+  thành gần-trắng, không còn là màu hồng của nhóm) và cần Tech Lead sửa lại
+  cho khớp; không tự sửa `contract-summary.md` ở đây (ngoài WriteScope UX).
+- Vá 2026-09-26 (B-4): thẻ widget **không** vẽ biểu tượng ứng dụng bên trong —
+  bỏ hẳn `ImageView` `@mipmap/ic_launcher` (`cupid_phase_widget.xml:22-27`),
+  khớp đúng canvas `sb-84-widget-bon-pha` (không màn nào trong bốn thẻ canvas
+  có icon app riêng — thẻ đã tự nhận diện thương hiệu qua bảng màu D-12 và
+  widget picker của hệ điều hành). Cột nội dung (nhãn-mí/dòng chính/dòng phụ)
+  bắt đầu sát lề trái của phần đệm (`padding`) thẻ, không còn slot icon phía
+  trước — đóng finding B-4. Không dựng bản đơn sắc thay thế: canvas không có
+  chỗ nào cho một icon dạng đó, thêm vào là bịa thêm một phần tử canvas không
+  vẽ. Phần rộng ~36dp (24dp icon + 12dp margin) được trả lại cho cột chữ, hỗ
+  trực tiếp cho B-3 bên dưới.
+- Vá 2026-09-26 (B-3): dòng phụ (`caption`) bị cắt "…" giữa từ ở ô widget
+  Android mặc định — `android:minHeight="40dp"` cố định trong
+  `cupid_phase_widget_info.xml:12` (chỉ `resizeMode="horizontal"`, không có
+  chiều dọc), nên **không** nới `maxLines` của dòng phụ
+  (`cupid_phase_widget.xml:86`) lên 2: 40dp một hàng không đủ chỗ cho thêm một
+  dòng, kết quả sẽ là chữ bị cắt cứng ở đáy thẻ — còn xấu hơn dấu "…" hiện tại.
+  Chốt hai lớp thay cho nhau:
+  1. Nới cỡ ô mặc định của widget từ ~3×1 lên ~4×1 — tăng `android:minWidth`
+     trong `cupid_phase_widget_info.xml:13` từ `180dp` lên khoảng `230dp` (mobile-
+     dev chọn giá trị đúng theo lưới 4 cột chuẩn của tài liệu widget Android).
+     `resizeMode="horizontal"` vẫn giữ nguyên nên người dùng vẫn co giãn được.
+  2. Đặt ngân sách độ dài cho `secondary_line` trong gói nội dung sao cho vừa
+     một dòng ở cỡ 4×1 mới (ước lượng ~28-32 ký tự tiếng Việt kể cả dấu cách,
+     mobile-dev/PO đo lại bằng chuỗi thật) — **đây là ràng buộc nội dung
+     (AC-37/BR-15), không sửa ở đây**; ghi thành yêu cầu gửi Product Owner
+     trong báo cáo bàn giao.
+  `ellipsize="end" maxLines="1"` (`cupid_phase_widget.xml:86`) giữ nguyên
+  không đổi — vẫn là lưới an toàn cho thiết bị có lưới hẹp hơn hoặc chuỗi vượt
+  ngân sách, không phải cách hiển thị mặc định kỳ vọng.
 - Vá 2026-09-17: thêm nhãn-mí + chấm màu cho bốn pha; thiết kế là mốc chuẩn;
   đóng D-10. Vá 2026-09-25: đổi hình dạng chỉ báo pha *Đúng ngày hẹn* từ chấm
   màu đặc sang glyph tia chớp; ba pha còn lại giữ nguyên chấm; thiết kế là mốc

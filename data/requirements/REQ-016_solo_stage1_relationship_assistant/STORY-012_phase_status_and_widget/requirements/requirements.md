@@ -123,6 +123,23 @@ trường mới trên thẻ và **không** đổi hợp đồng thẻ.
 
 **AC-5.** Given có một thẻ đã rủ mà người dùng đánh dấu *chưa trả lời*, when họ
 mở màn (1), then app hướng họ sang **một việc chuẩn bị cụ thể, làm được ngay**.
+Vá 2026-09-26 (B-1, chính thức hoá draft 2026-09-25): việc chuẩn bị đó hiện
+thành **tối đa một chip hành động phụ** đặt **trong** khối hướng-chuẩn-bị của
+thẻ, và **nhãn chip lấy từ gói nội dung** theo đúng mục đang hiển thị (AC-37)
+— không phải chuỗi nghĩ trong mã. Mục nội dung không mang nhãn hành động thì
+**không vẽ chip**, không thay bằng nhãn mặc định tự nghĩ (tiền lệ R9-F-6:
+affordance không có đích đến là affordance chết). Chạm chip mở **màn chi tiết
+(A4) của chính thẻ đang đợi** — đường đi đã có, nơi người dùng tự điền các
+trường sẵn có của thẻ (STORY-001 AC-8: ghi chú, link nguồn, khoảng cách…);
+chip **không** kéo theo trường, route, hay màn mới (AC-4). Chip này **không**
+phải CTA chính thứ hai và **không** thay ô tràn `…`: CTA chính của thẻ (bảng
+nhãn SC-4, ở pha này là `Hẹn ngày`) và ô tràn `…` giữ nguyên đúng như D-2 đã
+đóng. Canvas `cupid-ch-ng-1` màn `hub-waiting` vẽ **hai** chip: chip thứ nhất
+được giữ về **cấu trúc**, nhưng chữ canvas `Chọn quán dự phòng` là nội dung
+mẫu, không phải nhãn chốt (tiền lệ D-8); chip thứ hai (`Rủ lại kiểu khác`) bị
+**BÁC** vì tự vi phạm AC-7 (gợi ý người dùng rủ/nhắn lại khi đang đợi) và AC-6
+(hàm ý đoán rằng người kia chưa ưng cách rủ) — xem `req_master.md` →
+`## Design Ruling Log` hàng B-1 (2026-09-26).
 
 **AC-6.** Given pha "đang đợi", when nội dung pha hiển thị, then **không** có
 bất kỳ suy đoán nào về người kia: không "có lẽ người ấy đang bận", không ước
@@ -300,6 +317,44 @@ theo pha, không phải nội dung — kể cả khi nó là glyph, nó vẫn l�
 phải một mục nội dung phải nằm trong gói. Vá 2026-09-17: thêm trường nhãn-mí
 pha và phân loại chấm màu là token; thiết kế là mốc chuẩn; đóng D-10.
 
+Vá 2026-09-26 (B-1, chính thức hoá draft 2026-09-25): **nhãn chip hành động
+phụ** (AC-5) là một trường **tuỳ chọn** của chính mục nội dung pha, có id bền
+cùng mục đó — tên đề xuất `action_label`; Tech Lead được đổi tên trường, nhưng
+nó **phải** là trường dữ liệu của mục trong gói, không bao giờ là chuỗi trong
+mã Dart/Android XML/iOS Swift. Vắng trường này nghĩa là mục đó **không có
+chip**; mã không được mang nhãn mặc định để lấp chỗ. Chuỗi nhãn đi qua đúng
+cổng nhập AC-39 như mọi chuỗi nội dung khác. Trường này chỉ có nghĩa trên màn
+(1); widget không đọc nó và hợp đồng payload widget không đổi vì nó. Giá trị
+chốt cho pha `waiting` của bộ seed REQ-016:
+
+| Mục nội dung | `action_label` | Lý do |
+|---|---|---|
+| `phase.waiting.prepare.v1` | `Chọn trước một chỗ` | Dạng rút gọn của chính dòng phụ đã ship ("Bạn có thể chọn trước một chỗ mà bạn thấy hay"); là việc người dùng tự làm được ngay, không nhắc gì tới người kia (AC-6), không đếm ngày (AC-7). Không dùng chữ `quán` của canvas: thẻ có thể là `Đi xem phim` hay `Làm bánh flan` (D-8). Đích đến: màn chi tiết A4 của chính thẻ đó (AC-5) |
+| `phase.waiting.notebook.v1` | *(không có)* | Dòng phụ của mục này dẫn sang **sổ tay** (STORY-004 — làm giàu tuỳ chọn, phải suy giảm êm khi vắng, BR-2). Canvas `hub-waiting` sau khi bác chip thứ hai chỉ còn chống lưng đúng một chip, và chip đó là việc chọn chỗ; một chip mở sổ tay sẽ là điểm vào chéo story mà không canvas hay AC nào đòi. Không vẽ chip, không bịa nhãn thay thế |
+| `phase.waiting.quiet_note.v1` | *(không có)* | `surface: widget` — mục chỉ hiện trên widget, còn chip chỉ tồn tại trong khối hướng-chuẩn-bị của màn (1) (AC-5) |
+
+Vá 2026-09-26 (B-3): **ngân sách độ dài dòng phụ trên widget.** Widget cao cố
+định một hàng và chỉ co giãn ngang (uiux-spec §2, B-3), nên dòng phụ phải vừa
+một dòng ở ô mặc định. Quy tắc: trường dòng phụ (`secondary`) của **mọi** mục
+có `surface` là `widget` hoặc `both` dài **tối đa 28 ký tự** — tính cả dấu cách
+và dấu câu, đếm theo ký tự Unicode đã dựng (dạng NFC; chữ có dấu tiếng Việt
+tính là một ký tự, dấu không tính thêm). Mục `surface: screen` không chịu ngân
+sách này. Đây là **điều kiện của cổng nhập AC-39**: mục vượt ngân sách bị cổng
+**từ chối và làm hỏng bản dựng**, như mọi vi phạm lược đồ khác — mã **không**
+được cắt ngầm, rút gọn, hay thay chuỗi để lách. `ellipsize` trên widget chỉ là
+lưới an toàn cho lưới ô hẹp hơn mặc định, không phải cách hiển thị kỳ vọng.
+Chuỗi mới vẫn qua đủ các luật hiện có: không suy đoán người kia (AC-6), không
+đếm ngày đợi hay nhắc thúc (AC-7), không nội dung riêng tư hay nhận định về
+người kia (AC-11), không tâng bốc (AC-39). Vì các mục dưới đây là `both`, chuỗi
+mới cũng là dòng phụ trên màn (1). Giá trị chốt cho bộ seed REQ-016:
+
+| Mục nội dung | `secondary` cũ (số ký tự) | `secondary` chốt | Số ký tự | Lý do |
+|---|---|---|---|---|
+| `phase.waiting.prepare.v1` | "Bạn có thể chọn trước một chỗ mà bạn thấy hay" (46) | `Chọn trước một chỗ bạn thích` | 28 | Giữ nguyên việc tự làm được ngay (BR-4, SB-83), không nhắc người kia. Nhãn chip B-1 `Chọn trước một chỗ` là **tiền tố nguyên văn** của dòng mới nên vẫn là dạng rút gọn của chính dòng phụ — không mâu thuẫn; câu trích trong cột "Lý do" của bảng B-1 là chuỗi trước B-3 |
+| `phase.upcoming.countdown.v1` | "Buổi này đã nằm trong lịch của bạn" (34) | `Đã nằm trong lịch của bạn` | 25 | Dòng chính (`Còn {n} ngày tới buổi đã hẹn`) đã nêu chủ ngữ; bỏ "Buổi này" không mất nghĩa. Không thêm con số nào ngoài bộ đếm ngược SB-86 của dòng chính |
+| `phase.date_day.today.v1` | "Mang theo máy ảnh nếu bạn muốn cất lại một tấm" (46) | `Mang máy ảnh nếu bạn muốn` | 25 | Giữ gợi ý tuỳ chọn ("nếu bạn muốn"), không thúc. Ý "cất lại một tấm" vẫn có trên màn (1) qua mục `phase.date_day.evening.v1` (`surface: screen`) |
+| `phase.quiet.gathering.v1` | "Kho của bạn dày thêm mỗi lần bạn cất một điều" (44) | `Kho dày thêm mỗi lần bạn cất` | 28 | Mô tả, không thúc, không đích (BR-7); không nhắc gì tới lúc vắng mặt (BR-6). Dòng chính (`Bạn đang giữ {n} kỷ niệm`) đã nói kho là của người dùng |
+
 **AC-38.** Given kho nội dung nhỏ giọt có **N mục bất kỳ** (N ≥ 0), when khoảng
 lặng kéo dài tới lúc duyệt hết kho, then hành vi hết-tập là **im lặng** — đúng
 trạng thái rỗng đã định ở AC-21 — **không** thông báo "đã hết", **không** màn
@@ -381,7 +436,10 @@ giữ story này ngoài phạm vi nội dung-nói-về-người-kia nay được
   dung — dù vẽ bằng chấm màu đặc hay bằng glyph tia chớp (pha *đúng ngày hẹn*,
   D-13), nó vẫn là token, nên không kéo theo mục nội dung mới nào trong gói. Vá
   2026-09-17: nhãn-mí pha là dữ liệu, chấm màu là token; thiết kế là mốc chuẩn;
-  đóng D-10.
+  đóng D-10. Vá 2026-09-26 (B-3): dòng phụ của mục có `surface` là `widget`
+  hoặc `both` dài tối đa 28 ký tự (NFC, tính cả dấu cách); cổng nhập AC-39 từ
+  chối mục vượt — độ dài là ràng buộc của dữ liệu, không phải việc mã cắt chuỗi
+  (AC-37).
 - **BR-16 (R-15b — N là thuộc tính dữ liệu).** Số mục kho nhỏ giọt và số biến
   thể nội dung mỗi pha là dữ liệu bản đầu, **không** phải hằng số của story; bộ
   seed 10 mục cho gói **xoay vòng** là giá trị bản đầu. Cấm mọi AC, BR, hay bố
