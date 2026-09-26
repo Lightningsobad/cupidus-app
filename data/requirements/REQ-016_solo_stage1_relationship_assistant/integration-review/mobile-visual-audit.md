@@ -44,7 +44,7 @@ and looked at.
 | # | Seam | Capture | Result |
 |---|------|---------|--------|
 | 0 | Cold launch on a real device instance | device screencap | NOTE — reaches `_NetworkErrorView`, no local backend; not a merge defect |
-| A | Solo stage-1 shell, all four tabs | widget-test PNG | PASS on shell/consistency; **FAIL on content — see F-M1** |
+| A | Solo stage-1 shell, all four tabs | widget-test PNG | PASS (re-captured at `893c3649` after the F-M1 fix; `Ý tưởng` placeholder is spec per OQ-1) |
 | B | Hub → Gợi ý quà → Chân dung → back → Bảng tra ăn khớp | widget-test PNG | PASS |
 | C | Me hub → Nhật ký riêng / Sổ tay người yêu / Những gì bạn giỏi | widget-test PNG | PASS |
 | D | Android permission declarations and prompts | manifest + call-site read | PASS with NOTE |
@@ -70,8 +70,34 @@ four tabs, the active-tab tint and icon treatment are consistent, the background
 layer is continuous, and Vietnamese diacritics render correctly throughout
 (`Muốn làm`, `Ý tưởng`, `Sổ tay`, `Nhật ký` — no tofu, no clipping). No orphaned
 or dead-end route: every tab is reachable and returns.
-Result on content: **FAIL — F-M1 below.** Three of the four tabs render
-`'<label> — sắp có'` (`home_screen.dart:364-370`).
+Result on content: **PASS.** Re-captured 2026-09-27 at merged HEAD `893c3649`,
+after the F-M1 fix (`3b51172f`) landed; `seamA1`–`seamA4` below are the post-fix
+PNGs and were opened and looked at, not inferred from a green test run.
+
+- `Sổ tay` (`seamA3`) renders the `_SoloDestinationBlock` of
+  `fm1-solo-tabs-solution.md` §2/§5.4: a small muted caption header `Sổ tay`
+  over one surface card holding exactly two rows — `Sổ tay người yêu`
+  (lilac `menuBook` badge) and `Những gì bạn giỏi` (butter `checklist` badge) —
+  each with a trailing chevron and a single hairline divider between them.
+- `Nhật ký` (`seamA4`) renders the same block with its one row,
+  `Nhật ký riêng` (mint `lock` badge) and a chevron, correctly with no divider.
+- Both blocks are visually identical in badge size/tint, radius, row height,
+  type scale, and chevron treatment to the `_PrivateStorageBlock` already
+  captured as PASS in `seamC1` — the shape the solution doc required. Nothing
+  heavier appears: no counts, no content preview, no large card, no floating
+  CTA, and no activity card (`Đi biển` asserted `findsNothing` on every
+  non-`Muốn làm` tab, preserving AC-21/SC-1').
+- No layout overflow, clipping, or text truncation at 412x915; all Vietnamese
+  diacritics render correctly (`Sổ tay người yêu`, `Những gì bạn giỏi`,
+  `Nhật ký riêng`) with no tofu.
+- `Ý tưởng` (`seamA2`) still renders `'Ý tưởng — sắp có'`. That is the
+  specified outcome, not a residual defect: it is the neutral placeholder
+  `ux/uiux-spec.md` §6 prescribes for an entry point whose owning story has not
+  shipped, deliberately left in place by `fm1-solo-tabs-solution.md` §2/§6 and
+  tracked for PO as non-blocking OQ-1.
+
+The F-M1 section below is kept as the historical finding record; this seam no
+longer fails.
 
 ### Seam B — cross-story push chain and back-stack
 
