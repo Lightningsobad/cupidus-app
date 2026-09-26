@@ -21,7 +21,7 @@ collapsed to one line; full trail lives in each story's own
 | STORY-010 | STORY-004 | DONE, merged |
 | STORY-011 | STORY-001, STORY-004, STORY-005, STORY-008 | DONE, merged (Round 34), merge `e346e147`. Final-synthesis `Outcome: DEFERRED_ONLY` (10 deferred, 0 blocking). |
 | STORY-012 | STORY-001 | DONE, merged (Round 38, merge `e9519243`). Final-synthesis `Outcome: DEFERRED_ONLY`. |
-| STORY-013 | STORY-001, STORY-004 | DONE, merged (Round 16) |
+| STORY-013 | STORY-001, STORY-004 | DONE, merged (Round 16); F-I1 rework re-merged into integration Round 40, merge `753d2a86` |
 
 ## Open user decisions
 
@@ -42,6 +42,41 @@ collapsed to one line; full trail lives in each story's own
    (confirmed non-blocking for STORY-007, not caused by it). Needs a PO/Tech
    Lead decision; root decision never escalated.
 
+6. **RESOLVED by user 2026-09-26 (Round 42): wire the 3 tabs to their
+   already-shipped screens** (not deferred; D-3 stands as originally written).
+   **Implementation complete and sealed (Round 43, commit `3b51172f`)** — see
+   Current cursor below. Was: F-I2 action item 6
+   (`integration-review/mobile-visual-audit.md`, Round 41, committed `c1c538ea`)
+   found **F-M1**: in solo/unpaired mode — REQ-016's own premise — 3 of the 4
+   solo stage-1 tabs (`Sổ tay`, `Nhật ký`, and the Me-hub path to `Hồ sơ kỹ
+   năng`) are dead ends. `home_screen.dart:281,323-332,364-370` renders
+   `'<label> — sắp có'` for them. The screens themselves
+   (`JournalScreen`/`NotebookScreen`/`SkillProfileScreen`) are fully built and
+   verified working (audit seam C), but their only production entry point is
+   `MeScreen` (`me_screen.dart:560/568/577`), and `MeScreen` mounts only via
+   `AppShell` (`app_shell.dart:182`), which is constructed only on
+   `PairGateShell`'s **paired** branch (`pair_gate_shell.dart`) — never reached
+   in solo/unpaired mode. This contradicts decision D-3 (`req_master.md:155`,
+   2026-09-07), which resolved the STORY-001 canvas-vs-AC conflict in favor of
+   the canvas and patched AC-22 + UX §1 to require the four-tab bar **and its
+   routes** for solo stage-1. The tab bar shipped; 3 of its 4 routes did not.
+   No single story's own gate could catch this — STORY-001, STORY-003, and
+   STORY-004 are each internally correct and each pass their own tests; the
+   gap exists only in composition, which is exactly what this requirement-level
+   audit is for. **User/PO decision needed between:** (a) wire the three solo
+   tabs to the already-shipped screens (implementation rework, scope/story
+   TBD), or (b) record an explicit PO deferral that supersedes D-3's "and its
+   routes" clause for stage 1 (i.e., ship the tabs as placeholders for now).
+   Scrum Master is not making this call unilaterally — it is a product-scope
+   decision that reverses a previously-explicit, previously-escalated decision
+   (D-3), not an implementation detail. Not routed to Reviewer for a verdict
+   first: the choice of AC-22 compliance scope must be settled before a fresh
+   integration review can even know what to check.
+   **Correction (Tech Lead, Round 42):** no tab is named/mapped to `Hồ sơ kỹ
+   năng` — the 4 D-3-locked labels are `Muốn làm · Ý tưởng · Sổ tay · Nhật
+   ký`, and the real fix uses 2 tabs, not 3. See Current cursor below for the
+   full corrected decision.
+
 ## Still-open non-blocking items
 
 - STORY-008: retry `runtime_smoke` now that host disk has 28Gi free; re-review
@@ -55,7 +90,11 @@ collapsed to one line; full trail lives in each story's own
   reds, root cause STORY-005 P6/P7 rework — but see STORY-005 row above, may
   already be resolved on integration branch), `BUG-20260924-001` (3
   pre-existing `test/design_system/` reds, confirmed pre-existing at STORY-007
-  P3's own BaseHead). Closed: `BUG-20260907-002`, `BUG-20260910-001`.
+  P3's own BaseHead), `BUG-20260927-001` (`context_content_gate_test.dart:159`
+  BR-16 pack-phrase leak in `zodiac_shell_resolver.dart:157`, root cause
+  STORY-011 P2, surfaced by the F-M1 mobile-dev run, confirmed pre-existing at
+  that run's BaseHead `9aadd52f`). Closed: `BUG-20260907-002`,
+  `BUG-20260910-001`.
 - Integration branch re-verification owed: re-run integration build/runtime
   verification and record under
   `REQ-016_solo_stage1_relationship_assistant/integration-review/` BEFORE any
@@ -67,6 +106,15 @@ collapsed to one line; full trail lives in each story's own
   `Outcome: DEFERRED_ONLY`). Not yet known to block anything post-merge; if any
   future gate scans STORY-013's own phase/plan files and rejects `COMPLETE`,
   this is the cause — fix is Scrum-Master-owned artifact wording, not rework.
+- **OQ-1 (Round 42, non-blocking, for PO):** solo stage-1 tab `Ý tưởng` maps to
+  no shipped screen. Its "sinh ý tưởng" content (Gợi ý quà/Mồi chuyện/trắc
+  nghiệm) already ships and is reachable via `Muốn làm`'s quick-entry rail
+  (audit seam B PASS); no story owns `Ý tưởng`'s own content. Per UX §1
+  lines 17-18/§6, keeping it a `sắp có` placeholder is correct spec, not an
+  F-M1 defect — full reasoning in
+  `architecture/fm1-solo-tabs-solution.md` §6. PO decides only whether to
+  assign it new content later or record an explicit deferral; out of scope
+  for this requirement's `DONE` gate.
 
 ## 3-part verification protocol (use before sealing any specialist's reported-complete work)
 
@@ -86,150 +134,65 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
 - Round 1-35 narrative in git history of this file — superseded by the table
   and "Current cursor" sections above.
 
-## Current cursor (Round 38, `continue parallel`, 2026-09-26 — all 13 stories merged, integration review not yet run)
+## Current cursor (Round 45, F-I4 seam-A re-capture sealed, narrow Iris-QC closure review dispatched)
 
-- **All 13 REQ-016 stories are now DONE and merged into
-  `codex/REQ-016_solo_stage1_relationship_assistant-integration`.**
-  Re-verified directly via `git-story-boundary.sh status --req
-  REQ-016_solo_stage1_relationship_assistant --story <STORY>` for every
-  story (not from any narrative or registry table) plus `git log --oneline
-  --grep="^merge("` on the integration worktree, which shows one
-  `merge(...): complete story` commit per story, HEAD `e9519243`
-  (STORY-012). Integration worktree is clean, no `MERGE_HEAD`, on branch
-  `codex/REQ-016_solo_stage1_relationship_assistant-integration`.
-- **Root cause of this round's near-miss:** `req_master.md`'s `## User
-  Stories` table still read `TODO` for STORY-005/007/008/010/011/013 even
-  though this same checkpoint file already knew (as of Round 36) that all
-  but STORY-012 were DONE/merged — the registry table and this checkpoint
-  had drifted apart over multiple rounds, independent of any concurrent
-  session. Trusting the stale registry row caused this round to spawn 4
-  redundant Tech Lead planning runs (STORY-005/008/010/013) against
-  already-merged, already-reviewed stories; a concurrent peer session
-  (`ListAgents` showed `cupid-apps-45`) may also have been merging some of
-  these at the same time. All 4 Tech Leads self-detected via the mandatory
-  3-probe check (architecture/solution.md, coding-plan phase Status,
-  review/review-report.md Outcome) and made ZERO writes; all were STOP-first
-  redirected and confirmed no-op via idle_notification before release.
-  **Fix applied:** synced `req_master.md`'s User Stories table to `DONE`
-  for all 6 stale rows, commit `323f4666`, keeping requirement `Status:
-  IN_PROGRESS` (integration review still pending). Lesson for future
-  rounds: `git-story-boundary.sh status` is the only authoritative merge
-  signal — Glob/Read the story's own `story_master.md` + boundary state
-  BEFORE any Tech Lead/PO/reviewer dispatch, never trust `req_master.md`'s
-  table alone.
-- 4 dispatched Tech Leads (Alan-Techlead, -2, -3, -4) released via
-  `TaskStop` after confirming idle + no-op. Scheduler `active_runs: []`,
-  `.claude/hooks/prune-parallel-runs.sh --apply --quiet` confirms all 13
-  run files current (0 prunable).
-- **Next resume action:** REQ-016 has no
-  `integration-review/review-report.md` yet
-  (`data/requirements/REQ-016_solo_stage1_relationship_assistant/integration-review/`
-  does not exist). Per `AGENTS.md` Stable Delivery Gates, the requirement
-  cannot be marked `DONE` until requirement integration review records
-  `Outcome: CLEAN` or `Outcome: DEFERRED_ONLY` there. Load
-  `.claude/skills/scrum-master/workflows/parallel-continue/merge-and-review.md`
-  (not yet reloaded this round) for the exact integration-review dispatch
-  template, then delegate `Iris-QC` with `ConcurrencyClass:
-  integration-review` scoped to the full integration branch diff against
-  REQ-016's pre-story base. Do NOT re-dispatch Tech Lead/PO/UX/mobile-dev for
-  any of the 13 stories — all are closed.
-- Still-open non-blocking items below (STORY-008 retry, open bugs, PO
-  questions 4/5) remain unresolved and do not block integration review.
+- `Alex-Mobile-Dev` (RunId
+  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-mobile-dev-seamArecapture`)
+  returned `MOBILE_COMPLETE: YES`. 3-part verification passed: releasable
+  (`list-releasable-agents.sh`, then confirmed via successful `TaskStop`);
+  worktree diff showed exactly the declared WriteScope (`mobile-visual-audit.md`
+  only, HEAD unchanged at `893c3649` before commit — no self-commit); full
+  `git diff` of the file read directly — genuine, detailed, matches the
+  teammate's prose exactly (seamA3 `Sổ tay` 2-row block, seamA4 `Nhật ký` 1-row
+  block, badge/radius/row-height/chevron parity with `seamC1`'s
+  `_PrivateStorageBlock`, no overflow/clipping, correct Vietnamese diacritics,
+  AC-21/SC-1' preserved, `seamA2` `Ý tưởng` placeholder confirmed spec-correct
+  per OQ-1). Committed in the integration worktree as `35723ed2` (parent
+  `893c3649`). `Alex-Mobile-Dev` released via `TaskStop`.
+- **Item 9 decided (Scrum Master, non-delegable, Round 44):** the audit's 18+
+  seam PNGs stay `/tmp`-only, not committed to the repo — seam-closure
+  captures with no design-canvas id, distinct from the checked-in
+  visual-fidelity PNG pipeline (`fm1-solo-tabs-solution.md` §5.4). Durable
+  artifact is the prose verdict in `mobile-visual-audit.md`, tracked in git.
+- **Next resume action:** dispatched a FRESH, narrow `Iris-QC`
+  requirement-integration-review (RunId
+  `RUN-REQ-016_solo_stage1_relationship_assistant-NONE-reviewer-fi4close`,
+  `BaseHead 893c3649`) scoped ONLY to re-checking F-I4's closure — does the new
+  seam A verdict in `35723ed2` genuinely match the re-opened PNGs? Explicitly
+  told not to re-verify rows 1-14 from the Round 43 report (untouched by this
+  diff). On this round's `Outcome: CLEAN`/`DEFERRED_ONLY`: re-sync `main` if
+  moved (D-I1 still open — integration branch behind `main`, `req_master.md`
+  registry table stale), `cleanup-requirement`, `git-story-boundary.sh
+  land-integration --req REQ-016_solo_stage1_relationship_assistant`, flip
+  `req_master.md` + `master_requirements_list.md` to `DONE`.
 
-## Superseded cursor (Round 37, `continue parallel`, 2026-09-25 — STORY-012 P9 implementation, story now DONE/merged)
+## Superseded history (Rounds 37-44, collapsed — all 13 stories DONE/merged, F-I1 rework landed, F-I2/F-I3 devops evidence closed, requirement-level mobile-visual-audit closed, F-M1 architecture decision sealed, F-M1 implementation shipped, fresh Round 43 review PATCH_REQUIRED on F-I4 evidence-only gap)
 
-- Round 36 closed out: Alan-Techlead's `Mode: coding-plan` continuation
-  returned `TECH_LEAD_COMPLETE: YES` — added Phase P9 (widget `eyebrow_line`
-  + phase_id color-dot install, D-10, merged with D-11/D-12
-  regression-only) and Phase P10 (AC-18 hide-together fix in
-  `evening_check_in_sheet.dart`) to `coding-plan/master-plan.md`. Both new
-  phase files verified read-in-full against declared WriteScope/output paths
-  before trusting. Also corrected two stale premises from Round 35/36's own
-  framing (see `master-plan.md` §6 Notes): the real D-3 gap was an
-  already-DONE ISO-date-format fix (not an `ActivityCard` clock-time gap);
-  the real remaining D-6/C-1 gap is narrowly AC-18 in
-  `evening_check_in_sheet.dart` (not a WriteScope-widen into
-  `activity_card_tile.dart`/hub/l10n as previously assumed).
-- Sealed via `git-story-boundary.sh refresh-base` → BaseHead now
-  `139739387aff283c24e1023d8f37ed1d71feb052`. Alan-Techlead released
-  (`TaskStop`) — its work for this story is done.
-- Dispatched Alex-Mobile-Dev (fresh `Agent()` spawn, RunId
-  `RUN-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-mobile-dev`)
-  `Mode: mobile-implementation` for Phase P9. Returned `MOBILE_COMPLETE: YES`
-  — independently verified (git diff matched WriteScope + 3 justified
-  extra files; phase file §7/master-plan/test-results all read DONE) and
-  sealed via `git-story-boundary.sh refresh-base` → BaseHead now
-  `23e7bb9e78311d1fabba65465af7dce1f28ef967`. `flutter test
-  test/features/phase_status` → `+245 ~6` (0 regressions vs P8's `+235 ~6`).
-  VISUAL_FIDELITY stays FAIL overall (pre-existing R-1 + new R-5, see below).
-  Reused the SAME agent via `SendMessage` (not a fresh spawn) to dispatch
-  Phase P10 next — **in flight**.
-- **Open decisions surfaced by P9, not yet resolved (see story checkpoint
-  "Current State" for full detail), do not guess these:**
-  - R-5: `phase-P9` §6 self-contradicts (requires widget screenshot capture,
-    forbids native build). The widget is an OS-level surface
-    (RemoteViews/WidgetKit) outside the Flutter render tree, so the
-    RepaintBoundary harness cannot reach it — Alex substituted a canvas↔code
-    attribute table backed by 34 green `native_copy_scan_test.dart` cases.
-    Needs a Scrum Master/Tech Lead call: accept that as `NOT_APPLICABLE` for
-    per-story capture, or open scope for a real native-build+device pass.
-  - D-13: `--dot-today` (`#FF7FB6`) sits on its own pink→purple gradient
-    background (D-12), near-zero contrast; canvas draws a lightning bolt
-    there instead. Contract `contract-summary.md` §3a locks the role/token
-    names — needs UI/UX + Tech Lead. Scrum Master cannot spawn Pink-Designer
-    directly (role-map: only `brainstormer` does).
-  - R-3 (pre-existing, not new): Android widget countdown digit sizing
-    (D-11) still needs a `SpannableString` fix, out of P9's file-open scope.
-- **Staleness caveat (still applies going forward):** a `SendMessage`
-  continuation to any specialist will NOT update that run's file
-  `status`/`mode` — only a fresh `Agent()` spawn does. Reconcile via
-  `ListAgents` / mailbox reply, not run-file status alone, before treating a
-  wait as resolved.
-- User resolved both R-5 and D-13 (2026-09-25): R-5 = open scope for a real
-  native-build+device widget capture; D-13 = replace the `date_day` dot with
-  a lightning-bolt glyph (canvas `sb-84-widget-bon-pha`), a §3a contract
-  shape change, not a color swap.
-- D-13 Design Ruling Log row added to this file's `## Design Ruling Log`
-  (commit `ecade7ad`), satisfying `guard-design-ruling-required.sh`. Andy-PO
-  `Mode: ac-patch` RETURNED `PRODUCT_OWNER_COMPLETE: YES` — patched
-  `requirements.md`/`uiux-spec.md` wording from "chấm màu" to shape-neutral
-  "chỉ báo pha" for the glyph exception; verified and committed `e04157b4`,
-  BaseHead resealed, Andy-PO released. Alan-Techlead (fresh spawn) now
-  dispatched `Mode: architecture-solution` (RunId `...-tech-lead`) for BOTH
-  D-13 (§3a glyph-shape contract) and the P10 blocker's (a)/(b)/(c) call —
-  awaiting `TECH_LEAD_COMPLETE`. A separate `Mode: coding-plan` follow-up
-  handoff will come after (guard `TECHLEAD_MODE_MIXED_OUTPUTS` forbids
-  combining the two modes in one handoff).
-- **New, separate blocker discovered 2026-09-25:** Alex-Mobile-Dev's P10 run
-  made ZERO edits and returned `p10_blocker` (`PHASE_SPEC_CONTRADICTS_CODE`)
-  — phase-P10's AC-18 gate (`widget.openJournal == null` as a proxy for
-  "STORY-003 not yet delivered") is inverted on the only production call
-  path (`openJournal` is always null in production; STORY-003 is always
-  delivered). Needs a Tech Lead call among 3 named options (a)/(b)/(c) — see
-  story checkpoint "P10 blocker" section for full evidence/options. Routed to
-  the SAME upcoming Tech Lead dispatch as D-13, not a separate escalation.
-- Confirmed constraint (reconfirmed this round): `git-story-boundary.sh
-  start` BLOCKS a new spawn (any concurrency class, including `planning`)
-  while the story worktree is dirty — committed the pending
-  checkpoint/test-results drift as `820d1912` and re-sealed BaseHead before
-  dispatching Andy-PO.
-- Next resume action: (1) on Alan-Techlead `TECH_LEAD_COMPLETE`
-  (architecture-solution only), independently verify (3-part protocol) + seal
-  + commit; (2) dispatch a SEPARATE `Mode: coding-plan` follow-up (same agent
-  via `SendMessage` if addressable, else fresh spawn) to patch/add phases:
-  corrected P10 (per Tech Lead's a/b/c choice), D-13 implementation, R-5
-  native-build/device capture (Depends-On the D-13 implementation phase); (3)
-  dispatch Alex-Mobile-Dev (FRESH spawn — prior instance already released) for
-  those 3 phases in sequence; (4) reconcile control-checkout `story_master.md`
-  Architecture/Implementation checkboxes (currently stale `[ ]` there); (5)
-  once all phases are terminal, route to Iris-QC (Story-Class `standard`, not
-  Tier 0-eligible).
-- Story Git Boundary: Worktree
-  `.ai-team-worktrees/cupid-apps/story-REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget`;
-  Branch `codex/REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget`;
-  MergeTarget `codex/REQ-016_solo_stage1_relationship_assistant-integration`;
-  BaseHead `e04157b42400ee7119235a4a3395c9ffbbc0cde5`; BoundaryState under
-  `.git/ai-team-story-boundaries/REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget.json`.
-- `pending_count: 0` stories for REQ-016 — all 13 DONE/merged. Requirement
-  itself stays `IN_PROGRESS` pending integration review (see "Current
-  cursor" above).
+Round 43 fresh `Iris-QC` review (RunId `...-reviewer-fm1review`) found all
+F-M1 code/architecture/devops work correct (14/14 rows PASS or
+accepted-exclusion); sole blocking finding F-I4: `mobile-visual-audit.md`
+seam A recorded `FAIL on content` because no post-fix screenshot existed of
+the wired `Sổ tay`/`Nhật ký` tab bodies (evidence gap, not a code defect —
+passing widget tests only assert presence, not on-screen composition).
+Review artifacts committed `893c3649` (parent `3b51172f`). Full run file:
+`data/runtime/parallel-runs/RUN-REQ-016_solo_stage1_relationship_assistant-NONE-reviewer-fm1review.json`.
+
+All 13 REQ-016 stories DONE/merged by Round 38 (integration HEAD `e9519243`).
+Round 39 `Iris-QC` integration review → `Outcome: PATCH_REQUIRED` (F-I1/F-I2/
+F-I3; 9 cross-story contracts PASS; report committed `55ade421`). Round 40
+resolved F-I1 (Tech Lead `calendar_event_state_decision: REGISTER`;
+mobile-dev patch2 `MOBILE_COMPLETE: YES`, merged `753d2a86`). Round 41:
+`Frank-Devops` closed F-I2/F-I3 action items 5/7 (build+smoke evidence,
+`BUG-20260923-001` reconfirmed version-lag-only now 104/104 passing;
+configuration-guide fix), committed `0a8f4214`; `Alex-Mobile-Dev` closed F-I2
+action item 6 (`mobile-visual-audit.md`, seam-by-seam PASS except F-M1),
+committed `c1c538ea`. F-M1 (solo stage-1 tabs unreachable in solo mode,
+contradicting D-3) escalated as Open user decisions item 6 — resolved
+2026-09-26 (wire the tabs). Round 42: Tech Lead (`Alan-Techlead`) produced and
+sealed `architecture/fm1-solo-tabs-solution.md` (committed `9aadd52f`) —
+corrected premise (2 tabs, not 3: `Sổ tay`→2 rows, `Nhật ký`→1 row via
+destination-list blocks), 2 hard constraints (AC-21/SC-1' assertion
+preservation; import-boundary discipline), `mobile-implementation-direct`
+mode. Full narrative, exact commands, and root-cause detail for all these
+rounds live in this file's own prior git history if ever needed — not
+reproduced here per checkpoint budget.
