@@ -126,19 +126,44 @@ DONE/COMPLETE. After sealing: commit (Scrum Master only), then
   finer-grained lock class exists for requirement-level integration-review
   artifacts) — NOT a bug, not retried with a workaround lock. No orphaned run
   file was created for this blocked attempt (confirmed via scheduler dump).
-- **Next resume action:** on Frank-Devops `DEVOPS_COMPLETE: YES` (or a typed
-  blocker), run the 3-part verification protocol, commit its two files inside
-  the integration worktree (Scrum-Master-owned, no self-commit by the
-  specialist), refresh `git-story-boundary.sh refresh-base` if needed, THEN
-  re-dispatch `Alex-Mobile-Dev` for F-I2 action item 6 (`BaseHead` re-derived
-  from the then-current integration HEAD via a fresh `handoff-build.sh
-  spawn`, not reused from the blocked attempt above). After both land,
-  dispatch a FRESH `Iris-QC` requirement-integration-review (new RunId) scoped
-  to: `stage1_wipe_registry.dart`, the parity test result, the configuration
-  guide section, and the two new integration-review evidence files (per the
-  prior review's own closing note — the 9 PASS rows do not need
-  re-verification). On `Outcome: CLEAN`/`DEFERRED_ONLY`: re-sync `main` if it
-  moved, `cleanup-requirement`, `land-integration`, flip `req_master.md` +
+- Frank-Devops returned `DEVOPS_COMPLETE: YES` (its own SubagentStop
+  transcript marker was missing — known failure mode — but the run file
+  itself carries the marker and full evidence directly). 3-part verification
+  passed: `list-releasable-agents.sh` showed it idle; worktree diff matched
+  WriteScope exactly (`build-runtime-evidence.md` new,
+  `configuration-guide.md` modified, nothing else); evidence content checked
+  by eye — real `flutter build apk --debug --split-per-abi` PASS (85.2s, 3
+  ABI split APKs), real `emulator-5554` app-launch smoke PASS (WARM launch,
+  `ResumedActivity` confirmed, clean `am force-stop`), D-I2 confirmed CLOSED
+  (`flutter test test/core/database/` now 104/104 passing —
+  `BUG-20260923-001`'s 11 tracked reds do not reproduce at this HEAD,
+  schemaVersion caught up by sibling merges), and `configuration-guide.md`
+  gained the requested Local Notifications section (init ~65-67, iOS
+  permission ~95-124, `tz.UTC` scheduling ~139-165,
+  `inexactAllowWhileIdle` rationale) plus the POST_NOTIFICATIONS
+  second-consumer correction. Committed in the integration worktree as
+  `0a8f4214`. `Frank-Devops` released via `TaskStop`.
+- Re-dispatched `Alex-Mobile-Dev` (FRESH spawn — prior patch1 instance
+  released) for F-I2 action item 6
+  (`integration-review/mobile-visual-audit.md`), RunId
+  `...-NONE-mobile-dev-visualaudit`, rebuilt with explicit
+  `--worktree/--branch/--merge-target/--base-head` (full-length sha
+  `0a8f421410e964ffec81033a7213adff35281858` — the integration worktree HEAD
+  after the devops commit; `handoff-build.sh`'s default `--req/--story`
+  derivation fails for `Story: NONE` requirement-level handoffs with
+  `BOUNDARY_WORKTREE_MISSING`, and a truncated short-sha `BaseHead` trips
+  `STALE_BASEHEAD` — always pass the full 40-char sha for these). **In
+  flight — awaiting SubagentStop/mailbox notification, not polling.**
+- **Next resume action:** on `Alex-Mobile-Dev` `MOBILE_COMPLETE: YES` (or a
+  typed blocker), run the 3-part verification protocol, commit
+  `mobile-visual-audit.md` inside the integration worktree (Scrum-Master-owned,
+  no self-commit by the specialist). After both F-I2/F-I3 land, dispatch a
+  FRESH `Iris-QC` requirement-integration-review (new RunId) scoped to:
+  `stage1_wipe_registry.dart`, the parity test result, the configuration guide
+  section, and the two new integration-review evidence files (per the prior
+  review's own closing note — the 9 PASS rows do not need re-verification).
+  On `Outcome: CLEAN`/`DEFERRED_ONLY`: re-sync `main` if it moved,
+  `cleanup-requirement`, `land-integration`, flip `req_master.md` +
   `master_requirements_list.md` to `DONE`.
 
 ## Superseded cursor (Round 40, `continue parallel`, 2026-09-26 — F-I1 tech-lead decision landed, mobile-dev patch1 BLOCKED, both blockers fixed, patch2 dispatched)
