@@ -13,7 +13,7 @@ Spec reference: `data/requirements/REQ-017_checkin_notebook_capture/requirements
 ## Artifacts
 - [x] Requirements (Product Owner) — `requirements/requirements.md` (story-level; breakdown requirement-level ở `../requirements/requirements.md`)
 - [x] UX Design (UI/UX Designer) — `ux/uiux-spec.md`
-- [ ] Architecture (Tech Lead)
+- [x] Architecture (Tech Lead) — `architecture/solution.md` + `coding-plan/` (master-plan, coding-agent-guide, P1-P4)
 - [ ] Implementation (Development)
 - [ ] Review (Reviewer)
 
