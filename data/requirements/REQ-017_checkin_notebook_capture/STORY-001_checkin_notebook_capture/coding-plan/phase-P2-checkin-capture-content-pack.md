@@ -119,5 +119,5 @@ nội dung REQ-017, và gói đó đi qua **đúng** cổng nhập của STORY-0
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-28

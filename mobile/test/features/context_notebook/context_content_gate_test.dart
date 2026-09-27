@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:cupid_mobile/core/content/content_package.dart';
 import 'package:cupid_mobile/core/content/invariant_terms.dart';
+import 'package:cupid_mobile/features/context_notebook/domain/checkin_capture_content.dart';
 import 'package:cupid_mobile/features/context_notebook/domain/context_content.dart';
 import 'package:cupid_mobile/features/context_notebook/domain/context_content_gate.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -65,6 +66,28 @@ String _seedPack({
       ],
     });
 
+ContentPackage<CheckinCaptureCopy> _parseCapture(String source,
+        {String label = '<fixture>'}) =>
+    ContentPackage.parse<CheckinCaptureCopy>(
+      source,
+      expectedSchemaId: checkinCaptureSchemaId,
+      itemParser: checkinCaptureCopyFromJson,
+      source: label,
+    );
+
+/// A capture pack carrying one clean line, so a test only has to describe the
+/// one thing it breaks.
+String _capturePack({String text = 'Hôm nay biết thêm gì về người ấy?'}) =>
+    jsonEncode(<String, Object?>{
+      'id': 'req017.capture.fixture',
+      'version': '1.0.0',
+      'schema_id': checkinCaptureSchemaId,
+      'locale': 'vi',
+      'items': <Map<String, Object?>>[
+        <String, Object?>{'id': checkinCaptureQuestionId, 'text': text},
+      ],
+    });
+
 List<ContextGateRule> _rulesFrom(List<ContextViolation> violations) =>
     violations.map((ContextViolation v) => v.rule).toList(growable: false);
 
@@ -76,13 +99,21 @@ List<ContextGateRule> _askRules({
       validateContextPacks(
         askQuestions: _parseAsk(_askPack(prompt: prompt, chips: chips)),
         skillSeeds: _parseSeeds(_seedPack()),
+        checkinCapture: _parseCapture(_capturePack()),
       ),
+    );
+
+List<ContextViolation> _captureViolations(String text) => validateContextPacks(
+      askQuestions: _parseAsk(_askPack()),
+      skillSeeds: _parseSeeds(_seedPack()),
+      checkinCapture: _parseCapture(_capturePack(text: text)),
     );
 
 void main() {
   group('shipped packs pass the gate from disk (AC-35/AC-36/BR-18)', () {
     late ContentPackage<AskQuestion> askQuestions;
     late ContentPackage<SkillSeed> skillSeeds;
+    late ContentPackage<CheckinCaptureCopy> checkinCapture;
 
     setUp(() {
       askQuestions = _parseAsk(
@@ -93,13 +124,19 @@ void main() {
         File(skillSeedsAssetKey).readAsStringSync(),
         label: skillSeedsAssetKey,
       );
+      checkinCapture = _parseCapture(
+        File(checkinCaptureAssetKey).readAsStringSync(),
+        label: checkinCaptureAssetKey,
+      );
     });
 
-    test('both packs exist on disk and are not empty', () {
+    test('all three packs exist on disk and are not empty', () {
       expect(File(askQuestionsAssetKey).existsSync(), isTrue);
       expect(File(skillSeedsAssetKey).existsSync(), isTrue);
+      expect(File(checkinCaptureAssetKey).existsSync(), isTrue);
       expect(askQuestions.items, isNotEmpty);
       expect(skillSeeds.items, isNotEmpty);
+      expect(checkinCapture.items, isNotEmpty);
     });
 
     test('the packs on disk report no violation', () {
@@ -107,6 +144,7 @@ void main() {
         validateContextPacks(
           askQuestions: askQuestions,
           skillSeeds: skillSeeds,
+          checkinCapture: checkinCapture,
         ).map((ContextViolation v) => v.toString()),
         isEmpty,
       );
@@ -314,6 +352,7 @@ void main() {
       final List<ContextViolation> violations = validateContextPacks(
         askQuestions: _parseAsk(_askPack()),
         skillSeeds: _parseSeeds(_seedPack(label: 'Xếp hạng bạn bè')),
+        checkinCapture: _parseCapture(_capturePack()),
       );
 
       expect(_rulesFrom(violations), contains(ContextGateRule.scoreOrRatio));
@@ -377,6 +416,7 @@ void main() {
       final List<ContextViolation> violations = validateContextPacks(
         askQuestions: _parseAsk(_askPack()),
         skillSeeds: _parseSeeds(_seedPack(ids: incomplete)),
+        checkinCapture: _parseCapture(_capturePack()),
       );
 
       expect(
@@ -398,12 +438,47 @@ void main() {
       final List<ContextViolation> violations = validateContextPacks(
         askQuestions: _parseAsk(_askPack()),
         skillSeeds: _parseSeeds(_seedPack(ids: const <String>[])),
+        checkinCapture: _parseCapture(_capturePack()),
       );
 
       expect(
         violations.map((ContextViolation v) => v.itemId),
         requiredSkillSeedIds,
       );
+    });
+  });
+
+  group('the check-in capture pack is gated too (REQ-017 AC-14)', () {
+    test('a denylisted term in capture copy is attributed to its own pack', () {
+      final List<ContextViolation> violations =
+          _captureViolations('Điểm số hôm nay của người ấy?');
+
+      expect(
+        violations.where(
+          (ContextViolation v) => v.packageId == 'req017.capture.fixture',
+        ),
+        isNotEmpty,
+      );
+      expect(_rulesFrom(violations), contains(ContextGateRule.scoreOrRatio));
+      expect(
+        violations
+            .where(
+              (ContextViolation v) => v.rule == ContextGateRule.scoreOrRatio,
+            )
+            .map((ContextViolation v) => v.itemId),
+        contains(checkinCaptureQuestionId),
+      );
+    });
+
+    test('a notebook-boundary probe in capture copy is a violation', () {
+      expect(
+        _rulesFrom(_captureViolations('Người ấy nhắn bao lâu một lần?')),
+        contains(ContextGateRule.frequencyProbe),
+      );
+    });
+
+    test('clean capture copy leaves the other two packs clean', () {
+      expect(_captureViolations('Hôm nay biết thêm gì về người ấy?'), isEmpty);
     });
   });
 }

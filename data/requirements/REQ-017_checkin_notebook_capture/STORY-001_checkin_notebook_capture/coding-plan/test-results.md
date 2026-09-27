@@ -244,3 +244,123 @@ vì repo có luật minh thị "một test đỏ không bao giờ được miễ
 Khi hai cách đọc đều bào chữa được, tiebreaker của repo là đẩy phán quyết lên
 Scrum Master. Nếu bạn chọn cách đọc B, việc cần làm là đổi `## 7. Status` và hàng
 P1 sang `DONE`, giữ bug cho xung đột chữ REQ-016, và release run slot.
+
+## P2 — Check-in capture content pack
+
+BaseHead: `72e551f19339286336053ab40e40a4ce4c085468` (P1 đã seal).
+
+### Kết luận
+
+`Phase: P2`
+`Result: PASS`
+`Blocker: NONE`
+
+### Gate 1 — parser + resolution của gói (AC-14, R-15a)
+
+```
+PATH="$HOME/flutter/bin:$PATH" flutter test test/features/context_notebook/checkin_capture_content_test.dart --no-pub --reporter failures-only
+```
+
+`Result: PASS` — `+16: All tests passed!`, exit 0.
+
+File mới `test/features/context_notebook/checkin_capture_content_test.dart` phủ:
+
+- Gói trên đĩa parse được và mang đủ chín id UX Part D đặt tên
+  (`requiredCheckinCaptureCopyIds`).
+- Chỉ đúng `notebook.origin.with_card.v1` khai báo tham số; tám item còn lại
+  `params` rỗng — một CMS không thể biến nhãn cố định thành template.
+- `{card}` được thay bởi `CheckinCaptureCopySet.originLabel`, không bởi UI; nhãn
+  trả về không còn dấu `{` nào.
+- Tên thẻ `null` và tên thẻ chỉ gồm khoảng trắng đều degrade về
+  `notebook.origin.fallback.v1` (AC-9/BR-6), và dòng degrade không chứa
+  placeholder.
+- Id copy lạ ném `ContentPackageFormatException`, không trả chuỗi rỗng.
+- Bảy dạng gói sai đều bị từ chối chứ không bị bỏ qua: id trùng, thiếu `id`,
+  thiếu `text`, tham số item không hỗ trợ, tên tham số không ai hỗ trợ,
+  placeholder dùng mà không khai báo, tham số khai báo mà text không dùng, và
+  gói mang schema id khác.
+
+### Gate 2 — repository nạp thuần asset (R-7/BR-8)
+
+```
+PATH="$HOME/flutter/bin:$PATH" flutter test test/features/context_notebook/checkin_capture_content_repository_test.dart --no-pub --reporter failures-only
+```
+
+`Result: PASS` — `+5: All tests passed!`, exit 0.
+
+`CheckinCaptureContentRepository` nhận `ContentPackageLoader` có `AssetBundle`
+tiêm được, nên test nạp gói thật qua một bundle giả: không HTTP, không model
+call trên đường này. Lần `load()` thứ hai trả về đúng cùng một instance
+(`same()`), asset hỏng ném `ContentPackageFormatException`, asset thiếu ném lỗi
+chứ không degrade thành gói rỗng (R-15a).
+
+### Gate 3 — content gate nhận gói REQ-017 làm tham số thứ ba
+
+```
+PATH="$HOME/flutter/bin:$PATH" flutter test test/features/context_notebook/context_content_gate_test.dart --no-pub --reporter failures-only
+```
+
+`Result: PASS` — `+31: All tests passed!`, exit 0.
+
+`validateContextPacks` giờ bắt buộc `checkinCapture:` và chạy `invariantHitsIn`
++ `notebookBoundaryHitsIn` trên `text` của từng item. Năm call site cũ trong
+test đã cập nhật; không có call site nào trong `lib/` (gate chỉ được gọi từ
+test, đúng như thiết kế REQ-016).
+
+Bằng chứng khẳng định §6 yêu cầu — một gói cố tình vi phạm sinh ra
+`ContextViolation` mang `packageId` của gói REQ-017:
+
+- `'Điểm số hôm nay của người ấy?'` → có violation với
+  `packageId == 'req017.capture.fixture'`, rule `scoreOrRatio`, và `itemId` là
+  `checkin.capture.question.v1`.
+- `'Người ấy nhắn bao lâu một lần?'` → rule `frequencyProbe` (ranh giới sổ tay
+  được canh cả trên copy capture, không chỉ trên câu hỏi ask).
+- Copy capture sạch thì hai gói kia vẫn sạch — gate không rò violation chéo.
+
+Test đĩa mở rộng: `assets/data/req017/checkin_capture.v1.json` được đọc từ đĩa
+cùng hai pack REQ-016, cả ba phải không-rỗng và tổng violation phải rỗng.
+
+### Gate 4 — AC-14 "không có chữ của story trong Dart/ARB"
+
+Quét `lib/**` (`.dart` + `.arb`) tìm wording của gói. Khoanh vùng theo id, có lý
+do đo được chứ không suy đoán: một lần chạy chẩn đoán trên toàn bộ chín item
+báo 21 collision, và tất cả đều rơi vào bốn item từ vựng UI chung —
+`optional_label`, `kind.interest`, `kind.event`, `retry` — đã tồn tại sẵn trong
+`lib/l10n/arb/app_vi.arb`, `lib/l10n/generated/`, và mười file screen không liên
+quan (`pet_screen.dart`, `invite_screen.dart`, `expense_strings.dart`, ...).
+
+Khẳng định vì thế phủ đúng wording story này thật sự tạo ra: câu hỏi capture,
+hint bắt buộc chọn loại, lỗi lưu, và cả hai nhãn origin. Bốn id kia liệt kê
+tường minh trong `_genericAppVocabularyIds` kèm lý do. Quét kiểu gộp cả chín id
+sẽ báo collision mà REQ-017 không gây ra — một khẳng định sai, không phải một
+gate chặt hơn.
+
+### Gate 5 — hồi quy toàn suite `context_notebook` (§6 targeted)
+
+```
+PATH="$HOME/flutter/bin:$PATH" flutter test test/features/context_notebook --no-pub --reporter failures-only
+```
+
+`Result: PASS` — `+130 ~4: All other tests passed!` (4 skipped có sẵn), exit 0.
+
+`git status --porcelain` trước và sau lần chạy giống nhau byte-for-byte: suite
+này chứa `visual_capture_test.dart`, nên đã kiểm tra rằng nó không ghi lại PNG
+visual-fidelity của story nào khác.
+
+### Gate 6 — static analysis
+
+```
+PATH="$HOME/flutter/bin:$PATH" flutter analyze --no-pub <6 file P2>
+```
+
+`Result: PASS` — `No issues found!`, exit 0, trên ba file `lib/` và ba file
+`test/` của P2. Khoanh vùng theo file có chủ ý: baseline `flutter analyze lib
+test` của repo này vốn non-zero (222 warning sẵn có, 0 error), nên exit code
+toàn repo không dùng làm bằng chứng được. Một lint `unnecessary_import` do tôi
+gây ra đã sửa rồi chạy lại.
+
+### Visual fidelity
+
+`NOT_APPLICABLE` theo §6 của chính phase file: P2 là gói dữ liệu, parser và
+repository, không dựng hay đổi màn nào. Phán quyết của Scrum Master ở P1 cũng
+xếp `design-reference-*.png` cho P3/P4.
