@@ -1,6 +1,6 @@
 # Story Master: STORY-012 Trạng thái theo pha, widget, và bộ đếm "của cải đang lớn"
 
-Status: PATCH_REQUIRED
+Status: DONE
 Complexity: complex
 Story-Class: standard
 Implementation Lane: shared (backend + mobile) — trên thực tế chỉ mobile-dev
