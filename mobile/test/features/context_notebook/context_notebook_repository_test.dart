@@ -111,6 +111,156 @@ void main() {
     });
   });
 
+  group('ghi từ check-in là idempotent theo lần check-in (AC-8/BR-12)', () {
+    const firstRef = 'req016.evening_check_in.card-1';
+    const secondRef = 'req016.evening_check_in.card-2';
+
+    test('the same check-in ref rewrites its one row instead of adding another',
+        () async {
+      final first = await repository.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Trà sữa',
+        originCheckInRef: firstRef,
+        cardId: 'card-1',
+        cardTitle: 'Đi ăn lẩu',
+      );
+      final second = await repository.recordFromCheckIn(
+        kind: NotebookKind.event,
+        value: 'Sinh nhật',
+        originCheckInRef: firstRef,
+        cardId: 'card-1',
+        cardTitle: 'Đi ăn lẩu',
+      );
+
+      final stored = await repository.entries();
+
+      expect(stored, hasLength(1));
+      expect(second.id, first.id);
+      expect(stored.single.kind, NotebookKind.event);
+      expect(stored.single.value, 'Sinh nhật');
+      expect(stored.single.originCheckInRef, firstRef);
+    });
+
+    test('two different check-ins recording the same interest are two rows',
+        () async {
+      await repository.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Trà sữa',
+        originCheckInRef: firstRef,
+        cardId: 'card-1',
+        cardTitle: 'Đi ăn lẩu',
+      );
+      await repository.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Trà sữa',
+        originCheckInRef: secondRef,
+        cardId: 'card-2',
+        cardTitle: 'Đi xem phim',
+      );
+
+      final stored = await repository.entries();
+
+      expect(stored, hasLength(2));
+      expect(
+        stored.map((entry) => entry.originCheckInRef).toSet(),
+        <String>{firstRef, secondRef},
+      );
+    });
+
+    test('an unreadable card title writes NULL and still succeeds (AC-9)',
+        () async {
+      final saved = await repository.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Trà sữa',
+        originCheckInRef: firstRef,
+        cardId: 'card-1',
+      );
+
+      expect(saved.originCardTitle, isNull);
+      expect(saved.originCardId, 'card-1');
+      expect(saved.originCheckInRef, firstRef);
+    });
+
+    test('the entry stays ask_on_the_spot, so no ContextEntrySource value is '
+        'added (KD-5/BR-11)', () async {
+      final saved = await repository.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Trà sữa',
+        originCheckInRef: firstRef,
+      );
+
+      expect(saved.source, ContextEntrySource.askOnTheSpot);
+      expect(ContextEntrySource.values, hasLength(2));
+    });
+
+    test('an entry written any other way carries no origin at all', () async {
+      final saved = await repository.addEntry(
+        kind: NotebookKind.interest,
+        value: 'Mèo',
+        source: ContextEntrySource.manual,
+      );
+
+      expect(saved.originCheckInRef, isNull);
+      expect(saved.originCardId, isNull);
+      expect(saved.originCardTitle, isNull);
+    });
+
+    test('editing the text of a check-in entry leaves its origin untouched '
+        '(AC-5)', () async {
+      final created = await repository.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Trà sữa',
+        originCheckInRef: firstRef,
+        cardId: 'card-1',
+        cardTitle: 'Đi ăn lẩu',
+      );
+
+      final edited = await repository.updateEntry(
+        id: created.id,
+        value: 'Trà sữa ít đường',
+        detail: 'size L',
+      );
+
+      expect(edited!.value, 'Trà sữa ít đường');
+      expect(edited.originCheckInRef, firstRef);
+      expect(edited.originCardId, 'card-1');
+      expect(edited.originCardTitle, 'Đi ăn lẩu');
+    });
+
+    test('deleting a check-in entry removes it like any other (AC-5)', () async {
+      final created = await repository.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Trà sữa',
+        originCheckInRef: firstRef,
+      );
+
+      expect(await repository.deleteEntry(created.id), 1);
+      expect(await repository.entries(), isEmpty);
+    });
+
+    test('a second owner on the same device never sees the first one\'s '
+        'check-in entry', () async {
+      await repository.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Trà sữa',
+        originCheckInRef: firstRef,
+      );
+
+      final otherOwner = repositoryFor(
+        BackendUserIdStore()..updateUserId('user-2'),
+      );
+      final saved = await otherOwner.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Cà phê',
+        originCheckInRef: firstRef,
+      );
+
+      expect(await otherOwner.entries(), hasLength(1));
+      expect(saved.ownerKey, 'user-2');
+      expect(await repository.entries(), hasLength(1));
+    });
+  });
+
   group('sửa và xoá có hiệu lực ngay (AC-9)', () {
     test('editing an entry rewrites value/detail and bumps updated_at only',
         () async {

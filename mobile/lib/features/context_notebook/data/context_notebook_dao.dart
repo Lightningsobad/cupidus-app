@@ -53,6 +53,23 @@ class ContextNotebookDao {
             ..where((t) => t.ownerKey.equals(ownerKey) & t.id.equals(id)))
           .getSingleOrNull();
 
+  /// The row one check-in already wrote, if any. Deliberately not filtered by
+  /// the closure gate: idempotency is about whether the check-in already wrote
+  /// something (AC-8/BR-12), and a closed-away row still occupies that slot.
+  Future<NotebookEntryRow?> notebookRowByOrigin({
+    required String ownerKey,
+    required String originCheckInRef,
+  }) =>
+      (_db.select(_db.notebookEntries)
+            ..where(
+              (t) =>
+                  t.ownerKey.equals(ownerKey) &
+                  t.originCheckInRef.equals(originCheckInRef),
+            )
+            ..orderBy([(t) => OrderingTerm.asc(t.createdAt)])
+            ..limit(1))
+          .getSingleOrNull();
+
   Future<void> insertNotebookRow(NotebookEntriesCompanion row) =>
       _db.into(_db.notebookEntries).insert(row);
 

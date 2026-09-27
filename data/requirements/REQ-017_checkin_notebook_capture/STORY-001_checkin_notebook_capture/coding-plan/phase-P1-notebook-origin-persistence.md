@@ -120,5 +120,16 @@ không đổi nghĩa bất kỳ dữ liệu sổ tay nào đang có.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-28
+- Toàn bộ tiêu chí nghiệm thu §4 đã được chứng minh xanh (migration cộng thêm,
+  idempotency theo `originCheckInRef`, `updateEntry` giữ xuất xứ, `cardTitle`
+  null, `ContextEntrySource` vẫn hai giá trị), cùng năm gate xanh và delta
+  analyze bằng 0. Bằng chứng: `coding-plan/test-results.md`.
+- Lịch sử: lần chạy đầu ở BaseHead `0198e32d` bị chặn bởi
+  `test/features/context_notebook/context_content_gate_test.dart:159` (BR-16)
+  đỏ sẵn vì `lib/features/zodiac_shell/domain/zodiac_shell_resolver.dart`,
+  ngoài WriteScope của P1. Đã truy về BUG-20260927-001; bug `DONE` và commit
+  sửa (`main 70ddb8b8`) được cherry-pick vào worktree thành `248e9179`. Chạy
+  lại `test/features/context_notebook` + `test/features/zodiac_shell`:
+  `+248 ~8: All other tests passed!`, exit 0.

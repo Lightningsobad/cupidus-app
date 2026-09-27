@@ -39,7 +39,7 @@ void main() {
 
     test('opens at the current schema version with the table present',
         () async {
-      expect(database.schemaVersion, 10);
+      expect(database.schemaVersion, 11);
       await database.select(database.portraitAnswers).get();
     });
 
@@ -143,6 +143,17 @@ void main() {
             ),
           );
       await seeded.customStatement('DROP TABLE portrait_answers');
+      // A real v6 `notebook_entries` has no origin columns, and the v11 step
+      // adds them with a plain `ADD COLUMN` that fails on one already there.
+      for (final column in const <String>[
+        'origin_check_in_ref',
+        'origin_card_id',
+        'origin_card_title',
+      ]) {
+        await seeded.customStatement(
+          'ALTER TABLE notebook_entries DROP COLUMN $column',
+        );
+      }
       // Also the closure ledger: its upgrade step builds an index, and
       // `Migrator.createIndex` emits a plain `CREATE INDEX` that fails on one
       // the fixture left behind. Items first — it holds the cascading key.
@@ -174,7 +185,7 @@ void main() {
           .customSelect("SELECT name FROM sqlite_master WHERE type = 'table'")
           .get();
 
-      expect(await readUserVersion(upgraded), 10);
+      expect(await readUserVersion(upgraded), 11);
       expect(
         tables.map((row) => row.read<String>('name')).toSet(),
         contains('portrait_answers'),

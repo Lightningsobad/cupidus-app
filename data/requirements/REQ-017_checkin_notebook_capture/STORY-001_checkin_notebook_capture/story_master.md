@@ -6,8 +6,8 @@ Story-Class: standard
 Implementation Lane: shared (mobile-only trên thực tế; màn check-in REQ-016 STORY-012, màn Sổ tay REQ-016 STORY-004 và kho sổ tay đều nằm trong app Flutter `mobile/`; không có lane backend nào chạy trong story này, không có backend đọc/ghi sổ tay)
 Requirement: REQ-017
 Screen: màn check-in modal 23h (REQ-016 STORY-012 AC-16) · Sổ tay người yêu — màn (2) (REQ-016 STORY-004). Không màn mới.
-Design-Surface: cupid-ch-ng-1 (theo REQ-016 STORY-012; UI/UX xác nhận)
-Design-Screen: 23h-vua-ve-j8 (khối hỏi phụ trên màn check-in), 2-so-tay-nguoi-yeu (nhãn xuất xứ trên màn Sổ tay, canvas id từ REQ-016 STORY-004 story_master.md; UI/UX xác nhận)
+Design-Surface: cupid-ch-ng-1
+Design-Screen: 23h-vua-ve-j8 (khối hỏi phụ trên màn check-in, surface cupid-ch-ng-1 theo REQ-016 STORY-012; UI/UX xác nhận), 2-so-tay-nguoi-yeu (nhãn xuất xứ trên màn Sổ tay, canvas id từ REQ-016 STORY-004 story_master.md; UI/UX xác nhận)
 Spec reference: `data/requirements/REQ-017_checkin_notebook_capture/requirements/requirements.md`
 
 ## Artifacts

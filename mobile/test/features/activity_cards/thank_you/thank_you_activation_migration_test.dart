@@ -38,6 +38,16 @@ void main() {
           ),
         );
     await seeded.customStatement('DROP TABLE thank_you_activations');
+    // A real v9 `notebook_entries` has no origin columns, and the v11 step adds
+    // them with a plain `ADD COLUMN` that fails on a column already there.
+    for (final column in const <String>[
+      'origin_check_in_ref',
+      'origin_card_id',
+      'origin_card_title',
+    ]) {
+      await seeded
+          .customStatement('ALTER TABLE notebook_entries DROP COLUMN $column');
+    }
     await seeded.customStatement('PRAGMA user_version = 9');
     await seeded.close();
   }
@@ -63,7 +73,7 @@ void main() {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
-      expect(await readUserVersion(upgraded), 10);
+      expect(await readUserVersion(upgraded), 11);
       expect(await upgraded.select(upgraded.thankYouActivations).get(), isEmpty);
     });
 
@@ -101,8 +111,8 @@ void main() {
 
       await fresh.select(fresh.thankYouActivations).get();
 
-      expect(await readUserVersion(fresh), 10);
-      expect(fresh.schemaVersion, 10);
+      expect(await readUserVersion(fresh), 11);
+      expect(fresh.schemaVersion, 11);
     });
 
     test('thank_you_activations is keyed by card_id, so a card can never hold '
