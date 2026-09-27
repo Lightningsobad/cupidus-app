@@ -154,10 +154,13 @@ const int _maxTagWords = 3;
 
 /// Every `notebook_tags` value [text] could stand for.
 ///
-/// The notebook holds whatever the user typed — "Cà phê sáng", "Đi bộ" — while
-/// the packages address it in ASCII slugs, so the two only meet after folding
-/// the diacritics away and emitting each contiguous run of up to [_maxTagWords]
-/// words. The caller unions these over the notebook and hands the result to
+/// The notebook holds whatever the user typed — free Vietnamese with its
+/// diacritics — while the packages address it in ASCII slugs (`di_bo`), so the
+/// two only meet after folding the diacritics away and emitting each contiguous
+/// run of up to [_maxTagWords] words. Keep display-form phrases out of this
+/// file: BR-16 bans any shipped pack wording from `lib/**` source (see
+/// `test/features/context_notebook/context_content_gate_test.dart`).
+/// The caller unions these over the notebook and hands the result to
 /// [ZodiacShellResolver.resolve], which then does a plain set intersection.
 Set<String> zodiacNotebookTagsIn(String text) {
   final Set<String> tags = <String>{};
