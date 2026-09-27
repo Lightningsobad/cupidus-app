@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/di/service_locator.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/generated/app_l10n.dart';
+import '../../../activity_cards/domain/activity_card_repository.dart';
+import '../../data/checkin_capture_content_repository.dart';
 import '../../data/context_notebook_repository.dart';
+import '../../domain/checkin_capture_content.dart';
+import '../../domain/checkin_origin_resolver.dart';
 import '../../domain/context_notebook_models.dart';
 import '../widgets/context_inline_add_row.dart';
 
@@ -46,16 +51,39 @@ Map<NotebookKind, List<NotebookEntry>> groupNotebookEntries(
 /// subtitle or progress, no share/export/copy-all in any menu, and no streak,
 /// badge or paywall (AC-9, AC-12, AC-25, `contract-summary.md` §6).
 class NotebookScreen extends StatefulWidget {
-  const NotebookScreen({super.key, required this.repository});
+  const NotebookScreen({
+    super.key,
+    required this.repository,
+    this.originCopy,
+    this.cardProbe,
+  });
 
   final ContextNotebookRepository repository;
+
+  /// Resolved origin wording. `null` means "read the shipped package", which is
+  /// what production does; a package that cannot be read leaves every row
+  /// without a label rather than failing the screen (KD-2).
+  final CheckinCaptureCopySet? originCopy;
+
+  /// Test seam for the card existence probe. `null` means the real card
+  /// repository.
+  final ReadableCardProbe? cardProbe;
 
   @override
   State<NotebookScreen> createState() => _NotebookScreenState();
 }
 
+/// Rows plus the origin label for each check-in row, resolved together so the
+/// list renders once with both.
+class _NotebookView {
+  const _NotebookView(this.entries, this.originLabels);
+
+  final List<NotebookEntry> entries;
+  final Map<String, String> originLabels;
+}
+
 class _NotebookScreenState extends State<NotebookScreen> {
-  late Future<List<NotebookEntry>> _entries = widget.repository.entries();
+  late Future<_NotebookView> _view = _load();
 
   /// The group whose add row is expanded, or `null`. One at a time, so the
   /// screen never shows two open composers.
@@ -68,8 +96,38 @@ class _NotebookScreenState extends State<NotebookScreen> {
     setState(() {
       _addingTo = null;
       _editingId = null;
-      _entries = widget.repository.entries();
+      _view = _load();
     });
+  }
+
+  Future<_NotebookView> _load() async {
+    final List<NotebookEntry> entries = await widget.repository.entries();
+    return _NotebookView(entries, await _originLabels(entries));
+  }
+
+  /// One resolve per screen load, so a list of check-in rows costs one probe
+  /// rather than one query per row.
+  Future<Map<String, String>> _originLabels(List<NotebookEntry> entries) async {
+    final bool anyFromCheckIn = entries.any(
+      (NotebookEntry entry) => entry.originCheckInRef != null,
+    );
+    if (!anyFromCheckIn) {
+      return const <String, String>{};
+    }
+
+    CheckinCaptureCopySet? copy = widget.originCopy;
+    if (copy == null) {
+      try {
+        copy = await _originContent.load();
+      } catch (_) {
+        return const <String, String>{};
+      }
+    }
+
+    return CheckinOriginResolver(
+      copy: copy,
+      probe: widget.cardProbe ?? _probeReadableCards,
+    ).labelsFor(entries);
   }
 
   Future<void> _add(NotebookKind kind, ContextInlineAddResult result) async {
@@ -118,19 +176,17 @@ class _NotebookScreenState extends State<NotebookScreen> {
       ),
       body: SafeArea(
         top: false,
-        child: FutureBuilder<List<NotebookEntry>>(
-          future: _entries,
-          builder: (
-            BuildContext context,
-            AsyncSnapshot<List<NotebookEntry>> snapshot,
-          ) {
+        child: FutureBuilder<_NotebookView>(
+          future: _view,
+          builder: (BuildContext context, AsyncSnapshot<_NotebookView> snapshot) {
             // A pending read renders as the empty list rather than a spinner:
             // a progress indicator on this screen is exactly the "tiến trình"
             // AC-25 forbids, and the read is one local query away.
+            final _NotebookView? view = snapshot.data;
             final Map<NotebookKind, List<NotebookEntry>> grouped =
-                groupNotebookEntries(
-                  snapshot.data ?? const <NotebookEntry>[],
-                );
+                groupNotebookEntries(view?.entries ?? const <NotebookEntry>[]);
+            final Map<String, String> originLabels =
+                view?.originLabels ?? const <String, String>{};
             return ListView(
               key: const Key('notebook-list'),
               padding: const EdgeInsets.all(CupidSpacing.md),
@@ -139,6 +195,7 @@ class _NotebookScreenState extends State<NotebookScreen> {
                   _NotebookGroup(
                     kind: kind,
                     entries: grouped[kind] ?? const <NotebookEntry>[],
+                    originLabels: originLabels,
                     isAdding: _addingTo == kind,
                     editingId: _editingId,
                     onStartAdd: () => setState(() {
@@ -170,6 +227,7 @@ class _NotebookGroup extends StatelessWidget {
   const _NotebookGroup({
     required this.kind,
     required this.entries,
+    required this.originLabels,
     required this.isAdding,
     required this.editingId,
     required this.onStartAdd,
@@ -182,6 +240,7 @@ class _NotebookGroup extends StatelessWidget {
 
   final NotebookKind kind;
   final List<NotebookEntry> entries;
+  final Map<String, String> originLabels;
   final bool isAdding;
   final String? editingId;
   final VoidCallback onStartAdd;
@@ -233,6 +292,7 @@ class _NotebookGroup extends StatelessWidget {
                   )
                 : _NotebookRow(
                     entry: entry,
+                    originLabel: originLabels[entry.id],
                     onEdit: () => onStartEdit(entry.id),
                     onDelete: () => onDelete(entry.id),
                   ),
@@ -272,6 +332,30 @@ class _NotebookGroup extends StatelessWidget {
   }
 }
 
+/// Caches the parsed package for the process, so reopening the screen does not
+/// re-read the asset.
+final CheckinCaptureContentRepository _originContent =
+    CheckinCaptureContentRepository();
+
+/// Production probe: one pass over the distinct card ids on screen. The card
+/// repository has no batch read, so this is as few reads as the contract allows
+/// — never one per row. A card that cannot be read is simply absent from the
+/// result, which is what degrades its label (AC-9).
+Future<Set<String>> _probeReadableCards(Set<String> cardIds) async {
+  final ActivityCardRepository cards = getIt<ActivityCardRepository>();
+  final Set<String> readable = <String>{};
+  for (final String id in cardIds) {
+    try {
+      if (await cards.cardById(id) != null) {
+        readable.add(id);
+      }
+    } catch (_) {
+      // Unreadable is the degrade path, not an error the screen shows.
+    }
+  }
+  return readable;
+}
+
 /// The group's own name, resolved from the closed [NotebookKind] set.
 String notebookGroupLabel(AppL10n l10n, NotebookKind kind) {
   return switch (kind) {
@@ -287,11 +371,16 @@ String notebookGroupLabel(AppL10n l10n, NotebookKind kind) {
 class _NotebookRow extends StatelessWidget {
   const _NotebookRow({
     required this.entry,
+    required this.originLabel,
     required this.onEdit,
     required this.onDelete,
   });
 
   final NotebookEntry entry;
+
+  /// The resolved origin line, or `null` for a row the user added themselves.
+  final String? originLabel;
+
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -302,6 +391,7 @@ class _NotebookRow extends StatelessWidget {
     final CupidTypographyTokens type = context.cupidType;
     final CupidPlatformTokens platform = context.cupidPlatform;
     final String? detail = entry.detail;
+    final String? label = originLabel;
 
     return Container(
       key: Key('notebook-entry-${entry.id}'),
@@ -328,6 +418,15 @@ class _NotebookRow extends StatelessWidget {
                   Text(
                     detail,
                     style: type.caption.copyWith(color: colors.colorTextMuted),
+                  ),
+                // A plain muted caption, not a chip, badge or icon: the origin
+                // is context for the line above it, and anything tappable here
+                // would be the "xem buổi hẹn gốc" surface AC-15 rules out.
+                if (label != null)
+                  Text(
+                    label,
+                    key: Key('notebook-entry-origin-${entry.id}'),
+                    style: type.caption.copyWith(color: colors.colorGhost),
                   ),
               ],
             ),

@@ -134,5 +134,11 @@ biến, sửa/xoá bằng đúng thao tác cũ, và nhãn đó không rò ra b�
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-28
+- Bằng chứng: `test-results.md` mục `P4 — Nhãn xuất xứ trên màn Sổ tay người yêu`
+  (Gate 1–6, tất cả exit 0) và `../visual-fidelity/visual-fidelity-report.md`
+  Phần II (`VISUAL_FIDELITY: PASS`).
+- Không cần mở rộng Write Scope: hai tham số mới của `NotebookScreen`
+  (`originCopy`, `cardProbe`) đều tuỳ chọn và tự giải mặc định phía trong màn,
+  nên `context_notebook_entry_point.dart` không phải sửa.

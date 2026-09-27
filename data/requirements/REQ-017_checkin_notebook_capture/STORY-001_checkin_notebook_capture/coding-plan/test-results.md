@@ -623,3 +623,164 @@ suite của nó và bằng chứng hình ảnh không đổi nội dung.
 
 `git status --porcelain` sau các lần chạy: chỉ các tệp của P3; không PNG của story
 khác bị bẩn.
+
+## P4 — Nhãn xuất xứ trên màn Sổ tay người yêu
+
+BaseHead: `b1f657b16c48eb4eef560960cf01f5c691423899`.
+
+### Kết luận
+
+`Phase: P4`
+`Result: PASS`
+
+Tất cả gate xanh ngay lượt đầu, không gate nào phải chạy lại. Nhãn xuất xứ được
+giải ở domain (`CheckinOriginResolver`) chứ không ở widget hàng, nên không bề mặt
+nào tự ghép tên thẻ vào chữ đã biên tập được (KD-2). Không phải sửa
+`context_notebook_entry_point.dart`: hai tham số mới của `NotebookScreen`
+(`originCopy`, `cardProbe`) đều tuỳ chọn và tự giải mặc định phía trong màn, nên
+`openNotebookScreen()` cùng mọi nơi gọi cũ biên dịch nguyên trạng.
+
+### Gate 1 — unit resolver + hai guard không-rò-nhãn (AC-4/5/9/13, BR-6/7/11)
+
+```
+cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter test test/features/context_notebook/checkin_origin_resolver_test.dart --no-pub --reporter failures-only
+```
+
+→ `+10: All tests passed!`, exit 0
+
+Bốn trường hợp phase file yêu cầu đều có bài riêng: thẻ còn dò được (nhãn mang
+ảnh chụp tên), ảnh chụp tên `null`, id thẻ không còn dò được, phép dò ném lỗi.
+Thêm ba bài siết hành vi lô: mục tự thêm không sinh nhãn nào, phép dò chạy đúng
+một lượt với tập id phân biệt, và không mục nào từ check-in thì không dò lần nào.
+
+Hai bài cuối là phần AC-13 mà story này nợ: `home_widget_bridge.dart` và
+`local_notification_scheduler.dart` (hai bề mặt ngoài app của STORY-012) không
+chứa `NotebookEntry`, `ContextNotebookReader`, bất kỳ cột `origin*` nào, và hai
+id chữ nhãn xuất xứ; đồng thời không tệp `lib/**` nào ngoài
+`lib/features/context_notebook/` chứa hai id chữ đó. Suite của STORY-012 nằm
+ngoài Write Scope của P4 nên assertion đặt ở đây, quét thẳng nguồn của chúng.
+Bài quét có `expect(file.existsSync(), isTrue)` để khỏi lặng lẽ quét rỗng nếu tệp
+bị đổi chỗ.
+
+### Gate 2 — widget test màn Sổ tay (AC-4/5/9/11/15)
+
+```
+cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter test test/features/context_notebook/notebook_screen_test.dart --reporter failures-only
+```
+
+→ `+21: All tests passed!`, exit 0
+
+Nhóm mới `nhãn xuất xứ từ check-in` gồm tám bài: nhãn đầy đủ (so đúng chuỗi do
+`CheckinCaptureCopySet.originLabel` dựng từ gói đã ship, không phải chữ chép
+tay), nhãn suy biến khi thẻ không dò được kèm khẳng định tên thẻ **không** còn
+sót trên màn, nhãn suy biến khi phép dò ném lỗi kèm `tester.takeException()` là
+`null`, mục tự thêm không có nhãn, mục sự kiện từ check-in rơi vào nhóm "Sự
+kiện" sẵn có và tổng số nhóm vẫn đúng hai, menu "..." vẫn đúng Sửa/Xoá, sửa tại
+chỗ vẫn lưu và nhãn còn nguyên, xoá vẫn xoá ngay không bước xác nhận.
+
+Kiểm AC-15 làm bằng cấu trúc chứ không bằng mắt: không có `InkWell` nào bên
+trong cây con của nhãn, và chuỗi `checkin-2026-09-27` không xuất hiện ở đâu trên
+màn.
+
+### Gate 3 — nhãn vắng mặt trên bề mặt gợi ý quà (AC-10)
+
+```
+cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter test test/features/gift_ideas/gift_repository_test.dart --reporter failures-only
+```
+
+→ `+12: All tests passed!`, exit 0
+
+Một mục do `recordFromCheckIn` ghi (có `cardId` + `cardTitle`) tới
+`GiftRepository.context()` đúng bằng chữ người dùng viết trên cả `key` lẫn
+`label`, không tên thẻ, không tham chiếu check-in. Kèm một bài quét nguồn:
+không tệp nào dưới `lib/features/gift_ideas` chạm tới cột `origin*`,
+`originLabel` hay `CheckinOriginResolver`.
+
+### Gate 4 — static analysis
+
+```
+cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter analyze --no-pub \
+  lib/features/context_notebook/domain/checkin_origin_resolver.dart \
+  lib/features/context_notebook/presentation/screens/notebook_screen.dart \
+  test/features/context_notebook/checkin_origin_resolver_test.dart \
+  test/features/context_notebook/notebook_screen_test.dart \
+  test/features/context_notebook/origin_label_visual_capture_test.dart \
+  test/features/gift_ideas/gift_repository_test.dart
+```
+
+→ `Analyzing 6 items... No issues found! (ran in 1.6s)`, exit 0
+
+Chấm theo delta trên tệp đã sửa: baseline toàn repo khác 0 nên `flutter analyze`
+trần không bao giờ dùng làm bằng chứng cổng được.
+
+### Gate 5 — hồi quy hai suite trong phạm vi
+
+```
+cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter test test/features/context_notebook --reporter failures-only --no-pub
+cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter test test/features/gift_ideas --reporter failures-only --no-pub
+```
+
+| Suite | Kết quả | Exit |
+|-------|---------|------|
+| `test/features/context_notebook` | `+148 ~5: All other tests passed!` | 0 |
+| `test/features/gift_ideas` | `+103 ~1: All other tests passed!` | 0 |
+
+Guard ranh giới import của `context_notebook` (trong
+`ask_on_the_spot_slot_test.dart`) nằm trong lượt chạy này và xanh: hai import mới
+của `notebook_screen.dart` (`core/di/service_locator.dart` và
+`activity_cards/domain/activity_card_repository.dart`) đều đi từ **trong**
+feature ra ngoài, chiều mà guard không chặn; `activity_cards` không có cổng
+entry point và đã được 100+ tệp khác import trực tiếp.
+
+Các bài `~` bị bỏ qua là bài chụp ảnh `skip: !kCaptureVisuals` — chúng chỉ chạy
+khi truyền `--dart-define=CAPTURE_VISUALS=true`, xem Gate 6.
+
+Chỉ chạy đúng hai suite này, không chạy `flutter test` trần: baseline repo đang
+đỏ ở `test/design_system/`.
+
+### Gate 6 — visual fidelity (`2-so-tay-nguoi-yeu`)
+
+```
+node .ai-team-bundle/runtime/tools/render-design-canvas.js \
+  --location=cupid-app-design-system --surface=cupid-ch-ng-1 \
+  --screen=2-so-tay-nguoi-yeu --platform=ios --out=<visual-fidelity dir>
+
+cd mobile && PATH="$HOME/flutter/bin:$PATH" FLUTTER_ROOT="$HOME/flutter" \
+  flutter test test/features/context_notebook/origin_label_visual_capture_test.dart \
+  --dart-define=CAPTURE_VISUALS=true --no-pub --reporter failures-only
+
+python3 .claude/hooks/lib/visual_fidelity.py --dir <STORY dir> --stage review --stack mobile
+```
+
+| Bước | Kết quả |
+|------|---------|
+| dựng thiết kế | `DESIGN_CANVAS: OK ... design-reference-2-so-tay-nguoi-yeu-ios.png 415x900`, exit 0 |
+| chụp triển khai | `+1: All tests passed!`, exit 0 — hai tệp `implemented-2-so-tay-nguoi-yeu-origin-{ios,md}.png` |
+| cổng fidelity | exit 0, không cảnh báo |
+
+`--theme=dark` bị canvas từ chối (`DESIGN_CANVAS_TOGGLE_MISSING: Available
+toggles: (none)`); canvas vốn nền tối nên bỏ cờ đó.
+
+Cổng chạy sạch không tự chứng minh được là nó có soi thật, nên kèm một lượt đối
+chứng trong `/tmp`: cùng hai ảnh, đổi tên ảnh triển khai thành
+`implemented-notebook-origin-label.png` → exit 1 với
+`running-app renders exist for ['notebook'] and design renders for ['2']`. Cổng
+ghép cặp bằng token đầu tiên sau tiền tố, và nó đang thực sự soi.
+
+Cả hai ảnh đã mở ra xem trực tiếp, không chỉ đọc mã thoát: không ô tofu, dấu
+tiếng Việt đủ, nền đục, icon "..." đúng hình, và hai nhánh nhãn hiện cùng lúc
+trên một màn ("từ buổi hẹn Đi cà phê tối" / "từ một buổi hẹn") trong khi hàng tự
+thêm "Đi bộ ven hồ" không có nhãn. Chi tiết và phán quyết
+`DESIGN_SPEC_CONFLICT` nằm ở Phần II của
+`../visual-fidelity/visual-fidelity-report.md`.
+
+Bài chụp đặt ở tệp riêng `origin_label_visual_capture_test.dart` thay vì thêm
+vào `visual_capture_test.dart`: tệp đó ghi vào thư mục bằng chứng của REQ-016
+STORY-004, chạy lại nó sẽ ghi đè ảnh của story khác.
+
+### Trạng thái cây làm việc
+
+`git status --porcelain` sau toàn bộ các lần chạy: chỉ tệp của P4 (resolver, màn
+Sổ tay, ba tệp test, ba PNG, báo cáo fidelity, ba tệp coding-plan). Không PNG của
+story khác bị bẩn. `scrum-master-checkpoint.md` cũng hiện `M` nhưng không do lane
+này sửa — nó nằm ngoài Write Scope của P4 và không được chạm tới.
