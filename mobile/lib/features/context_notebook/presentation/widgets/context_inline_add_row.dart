@@ -146,7 +146,7 @@ class _ContextInlineAddRowState extends State<ContextInlineAddRow> {
               ),
               if (widget.options.isNotEmpty) ...<Widget>[
                 const SizedBox(width: CupidSpacing.sm),
-                _InlineSegmented(
+                ContextInlineSegmented(
                   options: widget.options,
                   selectedId: _optionId,
                   onChanged: (String id) => setState(() => _optionId = id),
@@ -199,8 +199,14 @@ class _ContextInlineAddRowState extends State<ContextInlineAddRow> {
 
 /// The two-choice group picker that lives in the add row itself, so a user who
 /// opened the row under the wrong header can move the line without cancelling.
-class _InlineSegmented extends StatelessWidget {
-  const _InlineSegmented({
+///
+/// Public because the 23h check-in screen asks the same "which group" question
+/// about one typed line and must ask it with this control rather than a
+/// look-alike of it (`ux/uiux-spec.md` Phần A.2). It already draws a `null`
+/// [selectedId] as nothing selected, which is the state AC-3 needs there.
+class ContextInlineSegmented extends StatelessWidget {
+  const ContextInlineSegmented({
+    super.key,
     required this.options,
     required this.selectedId,
     required this.onChanged,

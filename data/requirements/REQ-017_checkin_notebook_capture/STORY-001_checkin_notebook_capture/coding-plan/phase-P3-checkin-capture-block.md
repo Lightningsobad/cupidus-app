@@ -150,5 +150,20 @@ câu nhật ký.
 
 ## 7. Status
 
-- Status: NOT_STARTED
+- Status: DONE
 - Last updated: 2026-09-28
+- Chi tiết: `coding-plan/test-results.md` mục "P3 — Khối hỏi phụ trong check-in
+  23h", Gate 1–8. Gate 6 từng đỏ vì guard kiến trúc
+  `ask_on_the_spot_slot_test.dart` cấm `phase_status` import nội bộ
+  `context_notebook`, trong khi hợp đồng tiêu thụ ở §1B lại yêu cầu đúng điều đó.
+  Scrum Master mở Write Scope cho `context_notebook_entry_point.dart`; P3 thêm
+  cửa ghi thứ ba `recordCheckInCapture` + `loadCheckInCaptureCopy` theo đúng tiền
+  lệ `recordAnsweredQuestion` của STORY-009, chuyển bảy import vi phạm sang cửa
+  đó, không sửa bài test guard. Gate 6 xanh (`+130 ~4`, exit 0), Gate 2 giữ
+  nguyên (`+282 ~7`, exit 0). Chi tiết ở Gate 8.
+- Sai lệch có chủ ý so với §3: hai điểm, ghi ở cuối mục P3 của
+  `coding-plan/test-results.md` (không thêm cờ `allowNoSelection`; điều kiện ẩn
+  khối là `capture == null`).
+- Mở rộng Write Scope so với §1B: thêm
+  `mobile/lib/features/context_notebook/context_notebook_entry_point.dart` và
+  `visual-fidelity/`, do Scrum Master cấp sau khi kiểm chứng độc lập 2026-09-28.

@@ -364,3 +364,262 @@ gây ra đã sửa rồi chạy lại.
 `NOT_APPLICABLE` theo §6 của chính phase file: P2 là gói dữ liệu, parser và
 repository, không dựng hay đổi màn nào. Phán quyết của Scrum Master ở P1 cũng
 xếp `design-reference-*.png` cho P3/P4.
+
+## P3 — Khối hỏi phụ trong check-in 23h
+
+BaseHead: `218d8bfe6c04d2f5451a15de9a504baca78e10a6`.
+
+### Kết luận
+
+`Phase: P3`
+`Result: PASS`
+
+Gate 1–5 và Gate 7 xanh ngay từ lượt đầu. Gate 6 từng đỏ vì một guard kiến trúc
+đã ship: `phase_status` không được phép import nội bộ của `context_notebook`, mà
+hợp đồng tiêu thụ của chính phase file lại yêu cầu đúng điều đó; cửa hợp lệ duy
+nhất nằm ngoài Write Scope ban đầu của P3. Scrum Master đã tự kiểm chứng lại rồi
+mở Write Scope cho `context_notebook_entry_point.dart`; ba bước sửa và kết quả
+chạy lại nằm ở Gate 8. Sau khi sửa, Gate 6 xanh và Gate 1–2 giữ nguyên số liệu.
+
+### Gate 1 — suite mới cho khối phụ (AC-1/2/3/7/8/9/12/16/17, BR-4, BR-10)
+
+```
+PATH="$HOME/flutter/bin:$PATH" flutter test test/features/phase_status/checkin_capture_block_test.dart --no-pub --reporter compact
+```
+
+`Result: PASS` — `+19 ~1: All other tests passed!`, exit 0 (1 skipped là test
+chụp ảnh, chỉ chạy khi có `--dart-define=CAPTURE_VISUALS=true`, xem Gate 5).
+
+File mới `test/features/phase_status/checkin_capture_block_test.dart` phủ:
+
+- Vị trí (AC-1/AC-7): khối nằm sau trường câu nhật ký và trước CTA, ngăn bằng
+  `Divider` chứ không phải thẻ nền riêng; hai chip STORY-012 giữ nguyên chữ và
+  vẫn nằm trên khối mới.
+- Nội dung là dữ liệu (AC-14): câu hỏi và nhãn "Tuỳ chọn" so khớp với chuỗi đọc
+  thẳng từ `assets/data/req017/checkin_capture.v1.json` trên đĩa, không phải
+  chuỗi viết tay trong test.
+- Build không có gói nội dung thì không có khối nào (`capture: null` → không
+  `TextField` thứ hai). Điều kiện hiển thị là nội dung, không phải seam ghi.
+- AC-3/BR-4: mở màn không ô nào được tô sẵn; gõ chữ cũng không tự chọn giúp.
+- AC-17: đúng hai `TextField` trên màn, trường mới `maxLines: 1`, đúng hai lựa
+  chọn, không trường ngày và không trường chi tiết.
+- AC-6/BR-3: gõ vào trường câu nhật ký không tràn sang trường mới.
+- AC-2: để nguyên khối (hoặc gõ toàn khoảng trắng) → không ghi sổ tay, nhật ký
+  vẫn chạy đúng một lần, màn đóng.
+- AC-16/BR-4: có ý nhưng chưa chọn loại → không ghi, nhật ký vẫn chạy một lần,
+  màn ở lại, hiện dòng nhắc; dòng nhắc chỉ xuất hiện sau khi chạm CTA, và biến
+  mất khi xoá ý. Chọn loại ngay sau đó thì ghi luôn, không cần chạm CTA lần hai.
+- AC-12/BR-10: repository ném lỗi → hiện lỗi + "Thử lại" ngay trong khối, giữ
+  nguyên chữ đã gõ và loại đã chọn, nhật ký vẫn đúng một lần, màn ở lại. Bấm
+  "Thử lại" ghi đúng một hàng và không gọi nhật ký thêm lần nào.
+- AC-8/BR-12: chạm CTA hai lần liên tiếp → đúng một lần ghi, một lần nhật ký.
+- AC-9/BR-6: thẻ không đọc được tên (`cardTitle: null`) vẫn ghi được ý, vẫn kèm
+  `cardId` và `originCheckInRef`.
+
+`Nhật ký chạy đúng một lần` được khẳng định ở cả bốn nhánh (không hỏi / đã ghi /
+thiếu loại / ghi lỗi) nhờ cờ `_journalHandedOff` trong `_save()`: vì KD-1 cho
+phép màn ở lại sau khi lưu, nếu không có cờ này thì cú chạm CTA thứ hai sẽ soạn
+một mục nhật ký thứ hai.
+
+### Gate 2 — hồi quy suite check-in STORY-012 (không hạ assertion nào)
+
+```
+PATH="$HOME/flutter/bin:$PATH" flutter test test/features/phase_status --no-pub --reporter compact
+```
+
+`Result: PASS` — `+282 ~7`, exit 0.
+
+`evening_check_in_sheet_test.dart` không sửa một dòng nào. Rủi ro "khối mới đẩy
+CTA ra ngoài khung 800x600" mà handoff cảnh báo không xảy ra: khối chỉ dựng khi
+`capture != null`, mà suite STORY-012 không truyền gói nội dung nên bố cục của
+nó không đổi.
+
+### Gate 3 — bề mặt test riêng của suite mới (ghi lại để người sau khỏi vấp)
+
+Suite mới chạy ở `Size(800, 1600)`, không phải khung tham chiếu 412x915. Lý do:
+font mặc định của `flutter_test` rộng hơn font thật, nên ở bề rộng 412 hàng hai
+chip STORY-012 (`evening_check_in_sheet.dart:362`) tràn 63px và làm mọi test đỏ
+vì lỗi layout — một hiện vật của font test, không phải lỗi sản phẩm. Ảnh chụp ở
+Gate 5 vẫn dùng 412x915 vì ở đó font thật đã được nạp. Giữ bề rộng 800 như suite
+STORY-012, chỉ nâng chiều cao để khối mới không nằm ngoài tầm chạm.
+
+### Gate 4 — static analysis
+
+```
+PATH="$HOME/flutter/bin:$PATH" flutter analyze --no-pub lib/features/phase_status/presentation/evening_check_in_sheet.dart lib/features/phase_status/presentation/widgets/checkin_capture_block.dart lib/features/context_notebook/presentation/widgets/context_inline_add_row.dart test/features/phase_status/checkin_capture_block_test.dart
+```
+
+`Result: PASS` — `No issues found!`, exit 0, trên đủ bốn file P3 chạm tới. Vẫn
+khoanh vùng theo file vì lý do đã ghi ở Gate 6 của P2 (baseline toàn repo
+non-zero).
+
+### Gate 5 — visual fidelity (`23h-vua-ve-j8`)
+
+```
+node .ai-team-bundle/runtime/tools/render-design-canvas.js --location=cupid-app-design-system --surface=cupid-ch-ng-1 --screen=23h-vua-ve-j8 --out=<visual-fidelity>
+PATH="$HOME/flutter/bin:$PATH" FLUTTER_ROOT="$HOME/flutter" flutter test test/features/phase_status/checkin_capture_block_test.dart --no-pub --dart-define=CAPTURE_VISUALS=true --plain-name "capture:"
+python3 .claude/hooks/lib/visual_fidelity.py --dir <STORY dir> --stage review --stack mobile
+```
+
+`Result: PASS` — cổng exit 0, không in gì.
+
+- `design-reference-23h-vua-ve-j8-ios.png` 415x900, `DESIGN_CANVAS: OK`.
+- `implemented-23h-vua-ve-j8-capture-block.png` 412x915, dựng bằng
+  `RepaintBoundary` trong chính widget test của phase (màn 23h chỉ tới được từ
+  thông báo, không có route nào trong app dẫn tới).
+- Đã soi bằng mắt: không tofu, nền đục, dấu tiếng Việt đủ, icon ô ảnh đúng hình,
+  nhóm hai lựa chọn đang ở trạng thái chưa chọn gì.
+- Đối chứng chống "xanh giả": copy thư mục sang `/tmp/vf-control/`, đổi tên ảnh
+  implemented thành `implemented-check-in-sheet-capture.png` (không mở đầu bằng
+  id canvas) → cổng exit 1 với "no screen has BOTH renders". Cổng có thật.
+- `--dir` phải là thư mục **story**, không phải thư mục `visual-fidelity/`: công
+  cụ tự nối thêm `visual-fidelity/`. Truyền nhầm thì thông báo lỗi trông y như
+  thiếu báo cáo.
+- `visual-fidelity/visual-fidelity-report.md` ghi `VISUAL_FIDELITY: PASS` và
+  ghi rõ `DESIGN_SPEC_CONFLICT`: canvas `23h-vua-ve-j8` vẽ trạng thái cuối của
+  REQ-016 nên không có khối hỏi phụ. Phần đã có trên canvas chấm theo canvas,
+  phần thêm mới chấm theo UX Phần A.2.
+
+### Gate 6 — hồi quy `context_notebook` (ĐỎ lượt đầu → đã giải quyết ở Gate 8)
+
+```
+PATH="$HOME/flutter/bin:$PATH" flutter test test/features/context_notebook --no-pub --reporter compact
+```
+
+`Result: FAIL` — `+129 ~4 -1: Some tests failed.`, exit 1.
+
+Đúng một test đỏ:
+`test/features/context_notebook/ask_on_the_spot_slot_test.dart:446` —
+`biên giới import của feature > no file outside features/context_notebook imports an internal`.
+
+Bảy vi phạm, tất cả do P3 tạo ra:
+
+```
+lib/features/phase_status/presentation/evening_check_in_sheet.dart -> ../../context_notebook/data/checkin_capture_content_repository.dart
+lib/features/phase_status/presentation/evening_check_in_sheet.dart -> ../../context_notebook/data/context_notebook_repository.dart
+lib/features/phase_status/presentation/evening_check_in_sheet.dart -> ../../context_notebook/domain/checkin_capture_content.dart
+lib/features/phase_status/presentation/evening_check_in_sheet.dart -> ../../context_notebook/domain/context_notebook_models.dart
+lib/features/phase_status/presentation/widgets/checkin_capture_block.dart -> ../../../context_notebook/domain/checkin_capture_content.dart
+lib/features/phase_status/presentation/widgets/checkin_capture_block.dart -> ../../../context_notebook/domain/context_notebook_models.dart
+lib/features/phase_status/presentation/widgets/checkin_capture_block.dart -> ../../../context_notebook/presentation/widgets/context_inline_add_row.dart
+```
+
+Guard cấm mọi file ngoài `lib/features/context_notebook/` import
+`data/`, `domain/`, `presentation/` của feature đó; ngoại lệ duy nhất là
+composition root `lib/core/di/service_locator.dart`. Cửa hợp lệ là
+`lib/features/context_notebook/context_notebook_entry_point.dart` — nó đã từng
+được mở rộng đúng kiểu này một lần (STORY-009 thêm cửa ghi thứ hai
+`recordAnsweredQuestion`, có ghi chú sửa đổi §6 ngay trong doc comment).
+
+Vì sao P3 không tự sửa được:
+
+- Write Scope của P3 (§1B) chỉ có ba file `lib/` và `mobile/test/features/phase_status/**`.
+  `context_notebook_entry_point.dart` không nằm trong đó.
+- Hợp đồng tiêu thụ trong chính §1B ("khối phụ chỉ ghi qua
+  `ContextNotebookRepository`") và `architecture/solution.md` §"New or changed
+  boundaries" đều mô tả `phase_status` gọi thẳng xuống `context_notebook`, và
+  không chỗ nào nhắc tới `context_notebook_entry_point.dart`. Đây là lỗ hổng của
+  bản thiết kế, không phải lựa chọn của lượt code này.
+- Sửa bài test guard để cho qua là hướng sai: nó là bằng chứng kiến trúc đang
+  hoạt động đúng như thiết kế.
+
+Việc cần mở scope (nhỏ và đúng tinh thần hợp đồng "một cửa ghi duy nhất"):
+
+1. Thêm vào `context_notebook_entry_point.dart`:
+   - `export 'domain/checkin_capture_content.dart' show CheckinCaptureCopy, CheckinCaptureCopySet;`
+   - một hàm nạp gói nội dung (bọc `CheckinCaptureContentRepository`)
+   - `Future<void> recordCheckInCapture({required NotebookKind kind, required String value, required String originCheckInRef, String? cardId, String? cardTitle})`
+     uỷ quyền xuống `ContextNotebookRepository.recordFromCheckIn`
+   - `export 'presentation/widgets/context_inline_add_row.dart' show ContextInlineAddOption, ContextInlineSegmented;`
+2. Đổi ba import trong `evening_check_in_sheet.dart` và ba import trong
+   `checkin_capture_block.dart` sang cửa đó.
+3. Cập nhật ghi chú hợp đồng cho cửa ghi thứ ba, giống cách STORY-009 đã làm.
+
+Không có bước nào trong ba bước trên đổi hành vi, nên Gate 1–5 sẽ giữ nguyên
+kết quả; chỉ cần chạy lại Gate 1, 2 và 6.
+
+### Sai lệch có chủ ý so với phase file
+
+1. **Không thêm cờ `allowNoSelection` vào `ContextInlineAddRow`.** §3 task 2 đề
+   nghị nới chỗ khởi tạo `_optionId` (`context_inline_add_row.dart:86-88`) bằng
+   một cờ do host truyền. Không host nào cần cờ đó: màn check-in **không** dùng
+   `ContextInlineAddRow` (UX A.2 đặt nhóm lựa chọn **dưới** trường, còn hàng
+   inline đặt nó **bên phải** và tự mang nút Lưu/Huỷ của riêng nó). Thay vào đó
+   `_InlineSegmented` được nâng thành `ContextInlineSegmented` công khai — nó vốn
+   đã vẽ `selectedId == null` thành "chưa chọn gì", đúng trạng thái AC-3 cần.
+   Hành vi mặc định của `ContextInlineAddRow` không đổi một byte, và khoá
+   `context-inline-add-segmented` / `context-inline-add-option-<id>` giữ nguyên
+   nên test của màn Sổ tay và màn kỹ năng không phải sửa.
+2. **`capture == null` là điều kiện ẩn khối, không phải `recordCapture == null`.**
+   Seam ghi là của test; nếu gắn điều kiện hiển thị vào seam thì một build thật
+   thiếu đăng ký DI sẽ âm thầm mất khối thay vì lỗi to. Đây cũng là bài học §7
+   của STORY-012.
+
+### Gate 7 — xác nhận lại suite database (do build-evidence gate viện dẫn)
+
+Build-evidence gate chặn stop với `BUILD_FAILED_BUT_COMPLETE` và trích dẫn một
+lần chạy **thất bại trong quá khứ** của lệnh dưới đây. Lệnh đó thuộc P1 (đợt
+nâng `schemaVersion`) và đã được xử lý trong chính phase đó — xem "Gate đỏ
+(LỊCH SỬ — đã giải quyết)" ở mục P1. Chạy lại nguyên văn tại HEAD hiện tại:
+
+```
+cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter test test/core/database --reporter failures-only
+```
+
+Kết quả: `+106: All tests passed!`, exit 0.
+
+Kết luận: không còn thất bại nào ở suite database tại HEAD của P3.
+
+### Gate 8 — sửa ranh giới kiến trúc sau khi Write Scope được mở
+
+Scrum Master kiểm chứng độc lập (đọc lại guard, tự chạy lại suite và tái hiện
+đúng 7 vi phạm, đọc `context_notebook_entry_point.dart` và tiền lệ STORY-009) rồi
+mở Write Scope cho `mobile/lib/features/context_notebook/context_notebook_entry_point.dart`.
+Ba bước sửa, không đổi hành vi:
+
+1. `context_notebook_entry_point.dart` mở cửa ghi thứ ba:
+   - `loadCheckInCaptureCopy()` bọc `CheckinCaptureContentRepository` (giữ nguyên
+     cache theo tiến trình, chuyển từ biến private của `evening_check_in_sheet.dart`
+     vào cửa vào).
+   - `recordCheckInCapture({kind, value, originCheckInRef, cardId, cardTitle})`
+     uỷ quyền xuống `ContextNotebookRepository.recordFromCheckIn`.
+   - `export 'domain/checkin_capture_content.dart' show CheckinCaptureCopy,
+     CheckinCaptureCopySet` + bảy hằng id của các dòng chữ trong gói. **Không**
+     xuất `checkinCaptureAssetKey`, `checkinCaptureSchemaId` hay hàm parser: host
+     không được ghim phiên bản gói khác hay tự dựng copy set từ chuỗi (AC-14).
+   - `export 'presentation/widgets/context_inline_add_row.dart' show
+     ContextInlineAddOption, ContextInlineSegmented`.
+   - Ghi chú hợp đồng cửa thứ ba, theo đúng khuôn ghi chú `recordAnsweredQuestion`
+     của STORY-009: nêu rõ vẫn không có bulk/import/pre-fill/update/delete/read-all,
+     và `originCheckInRef` là thứ giữ tính idempotent theo từng check-in.
+   - Dòng doc của `library` nay nêu thêm REQ-017 STORY-001 cùng hai hàm mới.
+2. Bảy import vi phạm biến thành **một** import cửa vào mỗi tệp:
+   - `evening_check_in_sheet.dart`: bốn import `context_notebook/data|domain/...`
+     → `import '../../context_notebook/context_notebook_entry_point.dart';`
+   - `checkin_capture_block.dart`: ba import `context_notebook/domain|presentation/...`
+     → `import '../../../context_notebook/context_notebook_entry_point.dart';`
+   - `_captureContent.load()` → `loadCheckInCaptureCopy()`; `_recordCapture` giờ
+     `return recordCheckInCapture(...)` thay vì gọi trực tiếp `getIt<...>()`.
+3. Không sửa một dòng nào của bài test guard.
+
+Chạy lại:
+
+```
+cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter analyze --no-pub <5 tệp đã sửa>
+cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter test test/features/context_notebook --no-pub --reporter compact
+cd mobile && PATH="$HOME/flutter/bin:$PATH" flutter test test/features/phase_status --no-pub --reporter failures-only
+```
+
+| Gate | Trước | Sau |
+|------|-------|-----|
+| analyze (5 tệp, thêm `context_notebook_entry_point.dart`) | `No issues found!` | `No issues found!`, exit 0 |
+| Gate 6 `test/features/context_notebook` | `+129 ~4 -1`, exit 1 | `+130 ~4: All other tests passed!`, exit 0 |
+| Gate 2 `test/features/phase_status` | `+282 ~7`, exit 0 | `+282 ~7`, exit 0 — không đổi một con số |
+
+Lượt analyze đầu sau khi chuyển import báo 7 lỗi `undefined_identifier` cho bảy
+hằng id chữ mà `checkin_capture_block.dart` dùng; đó là thiếu sót của danh sách
+`show`, đã bổ sung rồi analyze sạch. Không có gate nào khác phải chạy lại: khối,
+suite của nó và bằng chứng hình ảnh không đổi nội dung.
+
+`git status --porcelain` sau các lần chạy: chỉ các tệp của P3; không PNG của story
+khác bị bẩn.
