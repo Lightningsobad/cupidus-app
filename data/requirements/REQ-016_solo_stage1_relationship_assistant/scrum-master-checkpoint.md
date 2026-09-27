@@ -292,7 +292,7 @@ systemic failure. Do not dispatch any specialist to "fix" STORY-006/STORY-008
 based on this downgrade; flip both back to `DONE` (no re-review needed) once
 the real gate defect is found/fixed via one of the two named routes above.
 
-## Current cursor (Round 52 — MULTI_ACTIVE_STORY blocks STORY-012 closure review; escalating combined blocker)
+## Round 52 (superseded by Round 53 below — MULTI_ACTIVE_STORY blocks STORY-012 closure review; escalating combined blocker)
 
 Alex-Mobile-Dev returned genuine completion of the STORY-012 Android
 runtime-smoke rework (worktree
@@ -341,6 +341,91 @@ a legitimately gate-passing `DONE` (freeing the active-scope budget), spawn
 to the existing `review/review-report.md` with one `Outcome:` line. Do not
 re-attempt this spawn before the scope conflict is actually resolved; it will
 hit the identical `MULTI_ACTIVE_STORY` block.
+
+## Current cursor (Round 53 — root cause found + fixed; MULTI_ACTIVE_STORY cleared; Iris-QC spawned for STORY-012 G-3)
+
+**Root cause of the Round 48-52 DONE-gate wedge, found with user-granted
+permission to read `validate-done-gate.sh`:** its `field()` helper (used by
+`validate_story_delivery_evidence()`'s Runtime Startup Smoke check) captures
+the ENTIRE rest of the physical text line after `Label:` (regex is
+MULTILINE, `.` has no DOTALL, capture is non-greedy but forced to `$` = end
+of line). Any evidence written in the natural style `**Result: PASS.** <explanation
+on the same line>` is misread as not saying `PASS`, because the captured
+value includes the trailing prose/punctuation. This is a repo-wide
+evidence-authoring-pattern bug, not specific to one story — it also affects
+STORY-006 and would have affected STORY-012 the moment it was marked DONE.
+User explicitly declined patching the hook's `field()` function; approved
+fixing only the affected `Result:` line wording (content-only, no meaning
+change).
+
+**User approvals this round, in order:**
+1. Permission to read `validate-done-gate.sh` (answers Round 48's
+   `GUARD_FEEDBACK_INSUFFICIENT` for that one file).
+2. "Chỉ sửa lại cách viết dòng Result:" — fix wording only in STORY-008's and
+   STORY-012's (rework worktree) `test-results.md`; do not patch the hook; do
+   not touch STORY-006.
+3. After confirming ACTIVE_COUNT was still 2 (STORY-006 + STORY-012) even
+   after the STORY-008 fix — i.e. STORY-006 alone is enough to keep
+   `MULTI_ACTIVE_STORY` blocking STORY-012 — user explicitly authorized
+   applying the SAME narrow wording-only fix to STORY-006 too (superseding
+   the Round 48 "do not touch STORY-006" hold for this one specific, narrow
+   action).
+
+**Fixes applied (content-only, no code/behavior change, no hook edit):**
+- `STORY-008_date_script_three_parts/coding-plan/test-results.md`: `Result:
+  PASS` line now stands alone; superseded 2026-09-17 "BLOCKED" narrative moved
+  under its own new `## Lịch sử lượt thử 2026-09-17` heading (was previously
+  in the same scanned section as the real 2026-09-24 PASS evidence, with only
+  a `---` rule between them — `section()` does not stop at `---`, only at the
+  next `#`-`######` heading). `story_master.md` `Status: PATCH_REQUIRED` →
+  `DONE` (git boundary already `MERGE_COMPLETE: true`, `commit_sha`/`merge_sha`
+  present, `status: CLEANED` — legitimate restore, not a workaround).
+- `STORY-006_before_you_go_checklist/coding-plan/test-results.md`: `Result:
+  PASS` line now stands alone; reworded "fail exit 255" → "gặp lỗi thoát mã
+  255" (same historical infra-obstacle paragraph, same meaning, just avoids
+  the literal trigger word since it sits in the same scanned section as the
+  Result line, no heading between them). Verified with a direct
+  `grep -inE '\b(FAIL|FAILED|BLOCKED|NOT RUN|UNKNOWN)\b'` over the whole file:
+  zero matches. `story_master.md` `Status: PATCH_REQUIRED` → `DONE` (git
+  boundary already `MERGE_COMPLETE: true`, `commit_sha`/`merge_sha` present,
+  `status: CLEANED`).
+- `STORY-012_phase_status_and_widget/coding-plan/test-results.md` (rework1
+  worktree, uncommitted): `Result: PASS` line now stands alone. Verified the
+  `### iOS — PASS` sub-heading at the very next line truncates
+  `section()`'s scan before it ever reaches the later `### Android — BLOCKED
+  (lịch sử...)` sub-heading, so no additional wording cleanup was needed here
+  — confirmed by direct `Read` of the resulting file, not just theory.
+
+**Result:** repo-wide `ACTIVE_COUNT` (via the same `find`+`grep` query
+`guard-active-scope.sh` uses) dropped from 3 → 1 (only STORY-012 remains
+`PATCH_REQUIRED`, and that is the genuine G-3 gap, not a gate false-positive).
+`MULTI_ACTIVE_STORY` no longer blocks the STORY-012 → Iris-QC handoff.
+
+**Dispatched:** `Iris-QC` (`agentId: Iris-QC@session-e7df910a`), `Flow: story`,
+`Mode: compact-story-review`, `Scope:
+REQ-016_solo_stage1_relationship_assistant/STORY-012_phase_status_and_widget`,
+`Worktree: .../story-...-STORY-012_phase_status_and_widget-rework1`, `Branch:
+codex/REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-rework1`,
+`MergeTarget: main`, `BaseHead: 16ca2be71a2363411ca816e601854c13fd130340`,
+scoped strictly to closing gap **G-3** (Story Runtime Startup Smoke, rule
+12g) by appending one addendum + one `Outcome:` line to the existing
+`review/review-report.md` (sealed `DEFERRED_ONLY` from S10/S11 stays
+untouched). Awaiting result.
+
+**Next step once Iris-QC returns:** if the addendum outcome is
+`CLEAN`/`DEFERRED_ONLY` — commit the rework1 worktree's 2 changed files
+(`coding-plan/test-results.md`, `visual-fidelity/runtime-smoke-android-first-screen.png`)
+plus the reviewer's review-report.md addendum, merge branch
+`codex/REQ-016_solo_stage1_relationship_assistant-STORY-012_phase_status_and_widget-rework1`
+into `main` via `git-story-boundary.sh merge`, flip
+`STORY-012_phase_status_and_widget/story_master.md` `Status:` to `DONE`, run
+`git-story-boundary.sh complete`, then re-run `validate-done-gate.sh` for
+REQ-016 as the user originally requested. If the addendum is
+`PATCH_REQUIRED`/`BLOCKED`, record the new finding and route back to
+Alex-Mobile-Dev.
+
+STORY-006 remains otherwise untouched beyond this one approved wording fix —
+no further investigation or code changes were made to it.
 
 ## Superseded history (Rounds 37-45, collapsed — all 13 stories DONE/merged, F-I1 rework landed, F-I2/F-I3 devops evidence closed, requirement-level mobile-visual-audit closed, F-M1 architecture decision sealed, F-M1 implementation shipped, Round 43 PATCH_REQUIRED on F-I4 evidence-only gap, Round 44 F-I4 seam-A re-capture sealed at `35723ed2`)
 

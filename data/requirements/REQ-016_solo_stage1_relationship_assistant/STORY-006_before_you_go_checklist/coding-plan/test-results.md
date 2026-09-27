@@ -169,7 +169,9 @@ chi tiết thì các test đó đỏ.
 
 ## Story Runtime Startup Smoke
 
-**Result: PASS.** Chạy trên `main()` đã ship, không phải `main_preview.dart`.
+**Result: PASS**
+
+Chạy trên `main()` đã ship, không phải `main_preview.dart`.
 
 Runtime registry entry: `data/devops/system/runtime-command-registry.json` →
 `mobile-app` (`path: mobile`, `buildCommand: flutter build apk --debug`).
@@ -209,9 +211,9 @@ smoke dừng ở đó; khối "Trước giờ đi" đã được chứng minh b�
 Hai trở ngại hạ tầng gặp phải và cách xử lý, ghi lại để lần sau khỏi mất thời gian:
 
 1. **Đĩa máy chủ đầy.** Lần chạy đầu `flutter build apk --debug --flavor local`
-   fail exit 255 với `java.io.IOException: No space left on device`; `df -h /` khi
-   đó còn 250 MiB trên 460 GiB. Sau khi đĩa được giải phóng (còn 10 GiB) lệnh build
-   y nguyên chạy lại và PASS exit 0. Không sửa gì trong code để vượt qua.
+   gặp lỗi thoát mã 255 với `java.io.IOException: No space left on device`; `df -h /`
+   khi đó còn 250 MiB trên 460 GiB. Sau khi đĩa được giải phóng (còn 10 GiB) lệnh
+   build y nguyên chạy lại và PASS exit 0. Không sửa gì trong code để vượt qua.
 2. **Đĩa thiết bị đầy.** APK debug gộp mọi ABI nặng 521 MB, vượt chỗ trống
    `/data/user/0` (≈890 MB), nên `adb install` trả
    `INSTALL_FAILED_INSUFFICIENT_STORAGE`. `--target-platform android-arm64` không

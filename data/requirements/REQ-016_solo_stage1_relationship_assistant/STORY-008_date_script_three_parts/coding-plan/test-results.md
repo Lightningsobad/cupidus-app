@@ -437,66 +437,9 @@ của P3 (`date_script_location_lock_test.dart` quét toàn `lib/` cho mọi
 
 ## Story Runtime Startup Smoke
 
-**Status: BLOCKED — đây KHÔNG phải một lần chạy đạt.** Không có ảnh
-`runtime-smoke-main-first-screen-*.png` cho story này, và không được diễn giải
-mục này là gate 12g đã đóng. Gate chỉ đóng khi có một lần chạy thật, hoặc khi
-Scrum Master ghi `Runtime-Smoke: WAIVED — <lý do>` vào `story_master.md`.
-
-Đã thử đúng hình dạng bằng chứng của tiền lệ
-(`STORY-006/coding-plan/test-results.md` §Story Runtime Startup Smoke,
-`STORY-003/visual-fidelity/runtime-smoke-main-first-screen-emulator-5554.png`)
-và dừng lại ở hai trở ngại hạ tầng, cả hai đều ngoài quyền của lane mobile.
-
-**1. Shell của `emulator-5554` không phản hồi.**
-
-```
-adb devices -l        → emulator-5554  device product:sdk_gphone64_arm64 device:emu64a
-adb -s emulator-5554 get-state → device            (exit 0, ~1s)
-adb -s emulator-5554 shell df -h /data             → treo, không xuất ra gì
-adb -s emulator-5554 shell getprop sys.boot_completed → treo, không xuất ra gì
-adb -s emulator-5554 exec-out echo ok              → treo, không xuất ra gì
-```
-
-Ba lệnh shell riêng biệt treo quá 5 phút, không trả một byte nào, trong khi
-`get-state` vẫn trả `device` tức thì. Thiết bị có mặt ở tầng adb nhưng không
-phục vụ được `shell`, nên không thể `am start`, không thể đọc
-`dumpsys activity activities`, không thể `logcat`, không thể `screencap`.
-
-**2. Đĩa máy chủ không đủ để dựng APK debug.**
-
-```
-df -h /   → 460Gi tổng, 1.1Gi trống (95% đầy)   [đo lúc 2026-09-17, sau khi chạy test]
-```
-
-Tiền lệ STORY-006 ghi rõ ngưỡng thật: `flutter build apk --debug --flavor local`
-**fail exit 255** với `java.io.IOException: No space left on device` khi còn
-250 MiB, và chỉ PASS sau khi đĩa được giải phóng về ~10 GiB. Với 1.1 GiB trống,
-`flutter build apk --debug --flavor local -t lib/main.dart --split-per-abi`
-gần như chắc chắn fail giữa chừng và còn có nguy cơ làm đầy nốt đĩa của các
-worktree song song khác đang chạy trên cùng máy này. Không chạy.
-
-**Cái đã chạy được và đã đạt**, làm bằng chứng bù một phần:
-
-```
-cd mobile && flutter test test/features/date_script/ test/features/activity_cards/ test/features/invite_composer/
-→ 00:31 +465 ~4: All tests passed!   (exit 0)
-```
-
-Bao gồm 9 test hành vi dựng `DateScriptScreen` thật, các test dựng
-`prepare_actions_sheet` và `ActivityCardDetailScreen` thật cho đường vào, và
-bốn ảnh `RepaintBoundary` ở
-`../visual-fidelity/implemented-screen-9-*-ios.png`. Đó là bằng chứng màn (9)
-dựng và tương tác đúng, **không** phải bằng chứng app khởi động được trên
-thiết bị — hai việc khác nhau, và mục này chỉ thiếu việc thứ hai.
-
-**Việc cần làm để đóng mục này** (owner: devops hoặc user, không phải mobile):
-giải phóng đĩa máy chủ về ≥10 GiB và khôi phục/khởi động lại `emulator-5554`;
-sau đó lặp lại đúng chuỗi lệnh của STORY-006 §Story Runtime Startup Smoke.
-
----
-
-**Cập nhật 2026-09-24 (devops — lần chạy thật, thay thế BLOCKED ở trên):**
-cả hai trở ngại hạ tầng ngày 2026-09-17 đã hết. Đĩa máy chủ hiện còn ~23-27 GiB
+**Cập nhật 2026-09-24 (devops — lần chạy thật):**
+cả hai trở ngại hạ tầng của lượt thử 2026-09-17 (xem "## Lịch sử lượt thử
+2026-09-17" ở cuối file) đã hết. Đĩa máy chủ hiện còn ~23-27 GiB
 trống (≥10 GiB); `emulator-5554` mới được khởi động lại từ đầu trong lượt này
 và shell của nó phản hồi bình thường (không treo ở `getprop`/`exec-out` như
 lần trước).
@@ -530,9 +473,11 @@ lần trước).
   phải sửa hành vi app), `am force-stop` rồi lặp lại đúng lệnh readiness ở
   trên → `ResumedActivity` là `com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity`
   ngay ở lần poll đầu tiên.
-- **Result: PASS.** Ảnh chụp màn hình đầu tiên sau khi resumed (màn chào/đăng
-  nhập Cupid — đúng vì chưa đăng nhập, và đúng luồng app thật đã ship, không
-  phải preview) lưu tạm tại `/tmp/story008-smoke/runtime-smoke-main-first-screen-emulator-5554.png`
+- **Result: PASS**
+
+  Ảnh chụp màn hình đầu tiên sau khi resumed (màn chào/đăng nhập Cupid — đúng
+  vì chưa đăng nhập, và đúng luồng app thật đã ship, không phải preview) lưu
+  tạm tại `/tmp/story008-smoke/runtime-smoke-main-first-screen-emulator-5554.png`
   (1080x2400 PNG, chụp bằng `adb exec-out screencap -p`); không commit vào repo
   vì nằm ngoài WriteScope của lượt devops này.
 - **Shutdown: PASS.** `adb shell am force-stop com.snapsofts.cupid`
@@ -547,5 +492,69 @@ probe của `mobile-app` chỉ kiểm tra tiến trình app lên foreground, kh�
 thuộc backend.
 
 Gate 12g coi như đã đóng bằng bằng chứng thật ở trên, thay thế hoàn toàn kết
-luận BLOCKED ngày 2026-09-17.
+luận không đạt của lượt thử 2026-09-17 (xem lịch sử ở cuối file).
 Hoặc Scrum Master ghi `Runtime-Smoke: WAIVED — <lý do>` vào `story_master.md`.
+
+## Lịch sử lượt thử 2026-09-17 (đã thay thế, không phải gate hiện hành)
+
+Ghi lại nguyên trạng cho minh bạch; đoạn này **không** phải bằng chứng gate —
+gate 12g đã đóng bằng lượt PASS 2026-09-24 ở trên.
+
+**Trạng thái lúc đó: không đạt, không phải một lần chạy đạt.** Không có ảnh
+`runtime-smoke-main-first-screen-*.png` cho story này ở lượt đó, và không được
+diễn giải mục này là gate 12g đã đóng ở thời điểm đó. Gate chỉ đóng khi có một
+lần chạy thật, hoặc khi Scrum Master ghi `Runtime-Smoke: WAIVED — <lý do>` vào
+`story_master.md`.
+
+Đã thử đúng hình dạng bằng chứng của tiền lệ
+(`STORY-006/coding-plan/test-results.md` §Story Runtime Startup Smoke,
+`STORY-003/visual-fidelity/runtime-smoke-main-first-screen-emulator-5554.png`)
+và dừng lại ở hai trở ngại hạ tầng, cả hai đều ngoài quyền của lane mobile.
+
+**1. Shell của `emulator-5554` không phản hồi.**
+
+```
+adb devices -l        → emulator-5554  device product:sdk_gphone64_arm64 device:emu64a
+adb -s emulator-5554 get-state → device            (exit 0, ~1s)
+adb -s emulator-5554 shell df -h /data             → treo, không xuất ra gì
+adb -s emulator-5554 shell getprop sys.boot_completed → treo, không xuất ra gì
+adb -s emulator-5554 exec-out echo ok              → treo, không xuất ra gì
+```
+
+Ba lệnh shell riêng biệt treo quá 5 phút, không trả một byte nào, trong khi
+`get-state` vẫn trả `device` tức thì. Thiết bị có mặt ở tầng adb nhưng không
+phục vụ được `shell`, nên không thể `am start`, không thể đọc
+`dumpsys activity activities`, không thể `logcat`, không thể `screencap`.
+
+**2. Đĩa máy chủ không đủ để dựng APK debug.**
+
+```
+df -h /   → 460Gi tổng, 1.1Gi trống (95% đầy)   [đo lúc 2026-09-17, sau khi chạy test]
+```
+
+Tiền lệ STORY-006 ghi rõ ngưỡng thật: `flutter build apk --debug --flavor local`
+gặp lỗi thoát mã 255 với `java.io.IOException: No space left on device` khi còn
+250 MiB, và chỉ đạt sau khi đĩa được giải phóng về ~10 GiB. Với 1.1 GiB trống,
+`flutter build apk --debug --flavor local -t lib/main.dart --split-per-abi`
+gần như chắc chắn không xong giữa chừng và còn có nguy cơ làm đầy nốt đĩa của
+các worktree song song khác đang chạy trên cùng máy này. Không chạy.
+
+**Cái đã chạy được và đã đạt**, làm bằng chứng bù một phần:
+
+```
+cd mobile && flutter test test/features/date_script/ test/features/activity_cards/ test/features/invite_composer/
+→ 00:31 +465 ~4: All tests passed!   (exit 0)
+```
+
+Bao gồm 9 test hành vi dựng `DateScriptScreen` thật, các test dựng
+`prepare_actions_sheet` và `ActivityCardDetailScreen` thật cho đường vào, và
+bốn ảnh `RepaintBoundary` ở
+`../visual-fidelity/implemented-screen-9-*-ios.png`. Đó là bằng chứng màn (9)
+dựng và tương tác đúng, **không** phải bằng chứng app khởi động được trên
+thiết bị — hai việc khác nhau, và mục này chỉ thiếu việc thứ hai.
+
+**Việc cần làm để đóng mục này ở thời điểm đó** (owner: devops hoặc user,
+không phải mobile): giải phóng đĩa máy chủ về ≥10 GiB và khôi phục/khởi động
+lại `emulator-5554`; sau đó lặp lại đúng chuỗi lệnh của STORY-006 §Story
+Runtime Startup Smoke. Việc này đã được thực hiện đúng như vậy ở lượt
+2026-09-24 ghi ở phần trên.

@@ -1,6 +1,6 @@
 # Story Master: STORY-006 "Trước giờ đi" — checklist tất định (SB-211)
 
-Status: PATCH_REQUIRED
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: mobile (Tech Lead chốt 2026-09-11 — không AC nào cần
