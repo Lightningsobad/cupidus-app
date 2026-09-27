@@ -1318,9 +1318,14 @@ không phải điểm vào độc lập, ghi lại để reviewer không phải 
 
 ## Story Runtime Startup Smoke
 
-Ghi ngày 2026-09-17 để đóng gap `G-3` trong `review/review-report.md`
-(rule 12g). Kết quả **một phần**: iOS PASS bằng chứng thật, Android BLOCKED
-bởi một lỗi cấu hình build có thật.
+Mở ngày 2026-09-17 để đóng gap `G-3` trong `review/review-report.md`
+(rule 12g); chặng Android chạy thật bổ sung ngày 2026-09-27.
+
+**Result: PASS**
+
+Cả hai nền đã có bằng chứng thật cho đủ chuỗi build → cài → khởi chạy nguội →
+tới được màn đầu mà không crash: iOS PASS (2026-09-17), Android PASS
+(2026-09-27).
 
 ### iOS — PASS
 
@@ -1355,6 +1360,56 @@ Chưa đi được xa hơn màn đăng nhập trong lượt này: qua được n
 chạy và tới được màn đầu tiên mà không crash" — vế đó đã thoả.
 
 ### Android — PASS
+
+Chặng chạy thật ghi ngày **2026-09-27**. Nó bổ sung đúng phần mà lượt sửa
+2026-09-17 (bối cảnh ở mục con phía dưới) chưa có: cài đặt, khởi chạy nguội,
+tới màn đầu, quét crash. Thiết bị: thiết bị ảo Android `emulator-5554`,
+`sdk_gphone64_arm64`, ABI `arm64-v8a`.
+
+| Bước | Lệnh | Kết quả |
+|---|---|---|
+| Sinh l10n | `flutter gen-l10n` | exit code 0 |
+| Build | `flutter build apk --debug --flavor local --split-per-abi --target-platform android-arm64` | `Running Gradle task 'assembleLocalDebug'... 57.0s`, `✓ Built build/app/outputs/flutter-apk/app-arm64-v8a-local-debug.apk`, exit code 0 |
+| Cài | `adb shell cmd package uninstall -k com.snapsofts.cupid` rồi `adb install -r .../app-arm64-v8a-local-debug.apk` | cả hai trả `Success`; APK 114.4 MB |
+| Khởi chạy nguội | `adb shell am force-stop com.snapsofts.cupid` rồi `adb shell am start -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity` | `Starting: Intent { cmp=com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity }` |
+| Sống sót | `adb shell pidof com.snapsofts.cupid` | `7602` — tiến trình còn sống sau khi màn đầu dựng xong |
+| Foreground | `adb shell dumpsys activity activities` | `ResumedActivity: ActivityRecord{199322335 u0 com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity t183}` |
+| Ảnh màn | `adb exec-out screencap -p` | `../visual-fidelity/runtime-smoke-android-first-screen.png` |
+| Quét crash | `adb logcat -c` ngay trước khi khởi chạy, `adb logcat -d -v brief` ngay sau | 0 dòng khớp `FATAL EXCEPTION`/`AndroidRuntime`/`ANR in`/`E/flutter` trên 868 dòng log |
+
+Mười dòng `E/`-`W/` có mang tên gói đều đã soi từng dòng và đều **không** phải
+lỗi của app: bốn dòng thuộc vòng đời `t182` bị chính lệnh `am force-stop` của
+bước trên giết, bốn dòng `AppHibernationService` là đua trạng thái trong cửa sổ
+gỡ–cài, một dòng SELinux `avc: denied ... max_map_count` là hành vi nền tảng
+chung của ART, và một dòng `PackageConfigPersister` báo app chưa có cấu hình
+riêng theo gói. Không dòng nào là exception của `com.snapsofts.cupid`.
+
+Đã **mở ảnh ra nhìn**, không chỉ đọc exit code: màn đầu dựng đúng — nền
+gradient tím-hồng có sao, hàng ba thẻ hành động "Gợi ý quà" / "Mồi chuyện" /
+"Vỏ hoàng đạo", hàng chip lọc "Tất cả · 0" / "Mới nghĩ ra · 0" / "Đã hẹn ngày ·
+0", thanh điều hướng dưới "Muốn làm" / "Ý tưởng" / "Sổ tay" / "Nhật ký", dải
+DEBUG ở góc phải trên. **Không** màn đỏ lỗi Flutter, **không** màn trắng,
+**không** exception overlay, **không** khung splash đọng lại. Dấu tiếng Việt
+dựng đủ, không ô tofu, kể cả `ữ`, `ỗ`, `ạ`, `ậ`, `ý`, và dấu `·` (U+00B7)
+trong chip lọc.
+
+Màn này chính là `ActivityCardHubView` — bề mặt mà cả bốn thành phần theo pha
+của story này sống trên đó (xem mục "Reachability" phía trên), nên lượt smoke
+không dừng ở màn đăng nhập như chặng iOS mà đi thẳng tới đúng màn của story.
+Thân danh sách rỗng và `PhaseStatusLine` không hiện vì tài khoản local chưa có
+nội dung pha nào; đó là hành vi im lặng theo BR-2, không phải lỗi dựng.
+
+Một bước bắc cầu mạng, ghi lại để lượt sau khỏi mò: `CupidApiConfig.localBaseUrl`
+(`mobile/lib/core/config/cupid_api_config.dart:34`) là `http://localhost:3000`,
+còn devstack cấp cho API cổng `21020` (`.env.devstack`, `DEVSTACK_PORT_API`).
+Trên thiết bị, `localhost` trỏ về chính nó, nên khi chưa bắc cầu thì app dừng ở
+màn "Không thể kết nối máy chủ" — vẫn là một màn Flutter dựng đúng và không
+crash, đã quan sát trực tiếp ở lượt khởi chạy đầu, nhưng chưa phải màn đầu thật
+của luồng. `adb reverse tcp:3000 tcp:21020` là đủ để gỡ; **không** sửa một dòng
+mã sản xuất nào. Lệch cổng này thuộc chủ sở hữu DevOps, ghi lại chứ không sửa
+ở đây.
+
+#### Lượt 2026-09-17 — mở khoá build (bối cảnh)
 
 Gỡ ngày 2026-09-17. `BLOCKER: ANDROID_BUILD_DESUGARING_MISSING` đã đóng.
 
@@ -1391,9 +1446,10 @@ sạch. Cảnh báo KGP của `home_widget` / `mobile_scanner` /
 `sign_in_with_apple` vẫn còn nhưng là cảnh báo hướng tới phiên bản Flutter
 tương lai, không chặn build và không thuộc phạm vi story này.
 
-Phạm vi lượt sửa này là **build-config + xác minh build**, không phải cài đặt
-lên thiết bị hay chụp màn. Mục smoke khởi động phía Android vì thế vẫn chưa có
-bằng chứng chạy thật; phần iOS ở trên không đổi, vẫn PASS.
+Phạm vi lượt sửa 2026-09-17 là **build-config + xác minh build**, không phải
+cài đặt lên thiết bị hay chụp màn. Khoảng trống đó đã được lấp bằng lượt chạy
+thật 2026-09-27 ghi ở đầu mục `### Android — PASS`; phần iOS không đổi, vẫn
+PASS.
 
 ### Android — BLOCKED (lịch sử, đã khắc phục ở trên)
 
