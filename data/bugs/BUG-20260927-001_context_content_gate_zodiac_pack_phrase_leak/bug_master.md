@@ -1,9 +1,11 @@
 # Bug Master: BUG-20260927-001 `context_content_gate_test.dart` BR-16 Zodiac Pack-Phrase Leak
 
-Status: PENDING
-Severity: non-blocking to REQ-016 requirement-level delivery (pre-existing,
-confirmed byte-identical at the surfacing run's own BaseHead, out of that
-run's write scope); blocking to the
+Status: DONE
+Severity: BLOCKING to REQ-017_checkin_notebook_capture/STORY-001_checkin_notebook_capture
+Phase P1 completion (P1's own required `context_notebook` regression scope
+includes this suite); still non-blocking to REQ-016 requirement-level delivery
+(pre-existing, confirmed byte-identical at that surfacing run's own BaseHead,
+out of that run's write scope); blocking to the
 `mobile/test/features/context_notebook/context_content_gate_test.dart`
 combined-suite gate whenever a session executes it
 Source: Alex-Mobile-Dev (mobile-dev), REQ-016 requirement-level `Mode:
@@ -58,39 +60,78 @@ STORY-011, not to this requirement-level fix.
 
 ## Artifacts
 
-- [ ] Diagnosis (Bug Fixer)
-- [ ] Fix Evidence (Bug Fixer)
-- [ ] Review (Reviewer)
+- [x] Diagnosis (Bug Fixer)
+- [x] Fix Evidence (Bug Fixer)
+- [x] Review (Reviewer)
 
 ## Routing Notes
 
-- Current owner: scrum-master
-- Next role: bug-fixer, when queued via `fix bugs` (not required to unblock
-  the REQ-016 F-M1 fix or the requirement's `DONE` gate — see Resolution
-  below)
+- Current owner: scrum-master — bug closed; sequencing Deferred Finding D-1
+  (propagate the `main` fix commit into the REQ-017/STORY-001 worktree) before
+  continuing Alex-Mobile-Dev's P1 re-run
+- Next role: none for this bug; downstream is REQ-017/STORY-001 Phase P1
+  resume (Alex-Mobile-Dev), not bug-queue work
 - Bug Registry: `data/bugs/master_bugs_list.md`
-- Diagnosis: `diagnosis.md` (not created; needs bug-fixer triage — likely a
-  wording change to the doc comment, or a gate-scope adjustment to skip doc
-  comments)
-- Fix Evidence: `fix-evidence.md` (not created)
-- Review Report: `review/review-report.md` (not created)
+- Diagnosis: `diagnosis.md` (complete — root cause confirmed: display-form
+  pack literal `"Cà phê sáng"` in a doc comment, BR-16 gate itself is correct
+  and unchanged)
+- Fix Evidence: `fix-evidence.md` (complete — doc-comment-only patch on
+  `main`, all four gates PASS: Pre-Fix Reproduction, Original Failure
+  Recheck, Build, Runtime Startup)
+- Review Report: `review/review-report.md` (complete — `Outcome:
+  DEFERRED_ONLY`, 0 blocking findings, 1 deferred finding D-1: fix must be
+  propagated from `main` into the REQ-017/STORY-001 worktree/branch before
+  its P1 re-run, since both currently share the pre-fix blob for
+  `zodiac_shell_resolver.dart`)
 - Checkpoint: tracked in
   `data/requirements/REQ-016_solo_stage1_relationship_assistant/scrum-master-checkpoint.md`
+  and `data/bugs/BUG-20260927-001_context_content_gate_zodiac_pack_phrase_leak/scrum-master-checkpoint.md`
 - Origin: REQ-016 requirement-level F-M1 tab-wiring run
   (`data/runtime/parallel-runs/RUN-REQ-016_solo_stage1_relationship_assistant-NONE-mobile-dev-fm1wiring.json`)
 
-## Resolution (not yet started — non-blocking to REQ-016 delivery)
+## Second Occurrence — 2026-09-28, REQ-017_checkin_notebook_capture/STORY-001_checkin_notebook_capture P1
 
-- The F-M1 fix's own required tests
-  (`test/features/context_notebook/` per file) confirm this is the only
-  failure in that directory (61 passing, 1 pre-existing failure); the
-  requirement-integration review scoped to F-M1 may cite this bug id as the
-  tracked, pre-existing, out-of-scope justification instead of re-diagnosing
-  it.
-- No `bug-fixer` dispatch is required to unblock REQ-016 delivery or the
-  `DONE` gate. Queue this bug through `fix bugs` when repo-wide test health
-  work is prioritized.
+Reported by: Alex-Mobile-Dev (mobile-dev), RunId
+`RUN-REQ-017_checkin_notebook_capture-STORY-001_checkin_notebook_capture-mobile-dev`,
+`Mode: mobile-implementation`, returned `BLOCKER: MOBILE_TEST_BLOCKED`.
+
+Same failing suite/case (`context_content_gate_test.dart:159`, BR-16), same
+file (`mobile/lib/features/zodiac_shell/domain/zodiac_shell_resolver.dart`),
+matched phrase reported as `"Cà phê sáng"` (same phrase, this run's own
+report did not re-quote the ASCII-normalized form). Confirmed pre-existing at
+this run's own BaseHead `0198e32ddd3f8bad6a4d5274fd7b5ebeae9158b1` (`git
+diff --quiet` against both `zodiac_shell_resolver.dart` and
+`context_content_gate_test.dart` exit 0 — both untouched by P1's diff, which
+touched only the P1 `Write Scope` files). Unlike the first occurrence, this
+run's own required `## 6. Test Scope` regression coverage (phase file
+`coding-plan/phase-P1-notebook-origin-persistence.md`) explicitly includes
+the `test/features/context_notebook/` suite, so this bug now BLOCKS this
+phase's own completion — it cannot be cited as out-of-scope and deferred the
+way the F-M1 run did.
+
+## Resolution
+
+- First occurrence (F-M1, REQ-016): still not required to unblock REQ-016
+  delivery or its `DONE` gate (already merged/DONE); that citation stands.
+- Second occurrence (P1, REQ-017/STORY-001): `bug-fixer` dispatch is now
+  REQUIRED — this is the blocking path for
+  `REQ-017_checkin_notebook_capture/STORY-001_checkin_notebook_capture` Phase
+  P1 to reach `MOBILE_COMPLETE: YES`. Queue immediately via `fix bugs`.
+- Root-cause file (`zodiac_shell_resolver.dart`) belongs to REQ-016/STORY-011,
+  not REQ-017; the fix branch/worktree should be a bug-fixer-owned worktree
+  targeting `main` (or the currently active integration line for that file),
+  not the REQ-017 story worktree/branch, since the P1 story `WriteScope` does
+  not include this file.
+- Bugfix review (`Iris-QC`, 2026-09-28): `Outcome: DEFERRED_ONLY`, 0 blocking
+  findings, 1 deferred finding (D-1). Bug status set to `DONE` per the
+  review's State Recommendation. D-1 is Scrum-Master-owned sequencing, not
+  bug-fixer rework: the fix committed on `main` must be propagated into the
+  REQ-017/STORY-001 worktree/branch
+  (`codex/REQ-017_checkin_notebook_capture-STORY-001_checkin_notebook_capture`)
+  before Alex-Mobile-Dev's P1 re-run, since both currently hold the identical
+  pre-fix blob for `zodiac_shell_resolver.dart`.
 
 ## Blockers
 
-- N/A
+- N/A (resolved; D-1 propagation tracked at
+  `data/requirements/REQ-017_checkin_notebook_capture/STORY-001_checkin_notebook_capture/scrum-master-checkpoint.md`)
