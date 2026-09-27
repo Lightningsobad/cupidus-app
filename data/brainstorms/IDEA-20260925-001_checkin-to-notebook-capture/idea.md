@@ -3,7 +3,7 @@ Lifecycle: ACTIVE
 Development Status: EXPANDED
 Source: user (lựa chọn C, 2026-09-25 — tách từ chip canvas "+ ghi vào sổ tay" của REQ-016/STORY-012, ruling D-6)
 Created: 2026-09-25
-Last Updated: 2026-09-25
+Last Updated: 2026-09-27
 Linked Requirement: REQ-017
 
 ## Seed
@@ -28,3 +28,4 @@ Original idea: Canvas `23h-vua-ve-j8` (REQ-016/STORY-012, màn check-in "Về t�
 - Current owner: brainstormer
 - Next action: none (handed off)
 - Delivery handoff: handed off to REQ-017 on 2026-09-25 (user chốt O-1b; ưu tiên MEDIUM là giả định mặc định)
+- Delivery handoff completed 2026-09-27: REQ-017 Ready-For-Delivery YES (1 story, PO + UX done; user resolved OQ-1, A-5, priority MEDIUM)

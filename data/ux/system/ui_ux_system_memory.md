@@ -408,3 +408,22 @@ that survey, not here.
   REQ-016 STORY-002; consult that story's `ux/uiux-spec.md` and
   `mobile/lib/design_system/` for the realized component before re-deriving
   it from the §3 table alone.
+
+## 14. Per-Item Provenance/Origin Tag (from REQ-017 STORY-001)
+
+- When a list item's content originated from a passive/incidental capture
+  flow elsewhere in the app (not the item's own primary create action),
+  attach a short, non-interactive origin tag directly on that row: caption
+  size (13pt), muted/`--ghost` color, positioned right under the item's main
+  content line — never a chip/pill/badge shape, since a shape implies an
+  action or a quality signal, and this is neither.
+- The tag must degrade to a generic fallback string when its specific source
+  reference becomes unreadable or is later deleted, without hiding, blocking,
+  or otherwise gating the item itself.
+- The tag is metadata only: never use it to filter, sort, or visually rank
+  the item, and never style it more prominent than the item's own content.
+  Contrast with the "Sticky inference/origin label" pattern above (§9-family),
+  which pins a screen-level origin note as a sub-header for content inferred
+  from the user's own input; this pattern is per-row, system-authored
+  provenance for an item that was captured on a different screen, not an
+  inference note about the current screen's content.

@@ -1,6 +1,6 @@
 # Requirement Master: REQ-017 Ghi vào sổ tay từ màn check-in 23h
 Status: PENDING
-Ready-For-Delivery: NO
+Ready-For-Delivery: YES
 
 ## Deployment Status
 - Development Environment: NOT_DEPLOYED
@@ -16,6 +16,9 @@ Ready-For-Delivery: NO
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
+| STORY-001 | Ghi điều mới biết về người ấy vào sổ tay ngay trên màn check-in 23h | standard | TODO | `STORY-001_checkin_notebook_capture/story_master.md` |
+
+Breakdown: `requirements/requirements.md` (1 seed → 1 story; OQ-1 và OQ-2 đã giải quyết 2026-09-27, xem `## User Decisions`; không còn OQ chặn).
 
 ## Story Seeds
 | Seed | Source Idea | Serves Which User Outcome | Notes |
@@ -28,9 +31,18 @@ Ready-For-Delivery: NO
 - Rejected options: O-1a (chép nguyên câu nhật ký sang sổ tay) bị loại vì vi phạm REQ-016 R-1f và phá riêng tư nhật ký (STORY-003). O-1c (tự đề xuất mục sổ tay từ từ khoá trong câu nhật ký) hoãn vì nguy cơ trái R-7.
 - Binding constraints inherited from REQ-016 (`data/requirements/REQ-016_solo_stage1_relationship_assistant/req_master.md`): R-1f (sổ tay chỉ sở thích + sự kiện, không đánh giá con người, không xuất/chia sẻ), SC-3 (không luồng điền trước, chỉ hỏi-tại-chỗ), R-7 (tất định, không AI, không API ngoài), R-15 (nội dung là dữ liệu có id bền), STORY-012 BR-12 (thẻ STORY-001 chỉ đọc).
 - Delivery dependencies: REQ-016 STORY-003 (nhật ký), STORY-004 (sổ tay + cơ chế hỏi-tại-chỗ), STORY-012 (màn check-in toàn màn hình). REQ-017 không thể bắt đầu trước khi ba story này DONE.
-- Priority: MEDIUM, chạy sau REQ-016. Đây là giả định của brainstormer theo khuyến nghị, vì user chưa trả lời câu hỏi ưu tiên (2026-09-25); user có thể đổi.
+- Priority: MEDIUM, chạy sau REQ-016. User xác nhận ngày 2026-09-27 (xem `## User Decisions`).
+
+## User Decisions
+- 2026-09-27 — OQ-1: RESOLVED. User đồng ý diễn giải BR-8/AC-1: thông báo 23h và câu hỏi chính của màn check-in vẫn hướng vào người dùng. Lời hỏi O-1b "Hôm nay biết thêm gì về người ấy?" là khối phụ, tuỳ chọn, đứng sau phần ảnh và nhật ký, chỉ xin sở thích hoặc sự kiện/dịp. Hệ quả ngoài REQ-017: REQ-016 STORY-012 AC-19 cần một bản vá truy vết (`ac-patch`) ghi nhận diễn giải này. Việc đó thuộc Helen-SC, brainstormer không spawn `ac-patch`.
+- 2026-09-27 — A-5: CONFIRMED. Check-in chỉ ghi một ý và loại của nó. Ngày và chi tiết của mục "sự kiện/dịp" để người dùng bổ sung ở màn Sổ tay.
+- 2026-09-27 — OQ-2 (ưu tiên): RESOLVED. Giữ MEDIUM, chạy sau REQ-016.
 
 ## Handoff Blocker
 - 2026-09-25 — BLOCKED: `GIT_BOUNDARY_MISSING` (guard-git-story-boundary.sh). Guard chặn 3 lần liên tiếp lần spawn `Andy-PO` `Mode: requirement-breakdown`, `Scope: REQ-017_checkin_notebook_capture`, lần cuối với `Target: Andy-PO`. Guard đòi block Story Git Boundary. Nhưng `.agent-contract/handoff-schema.md` miễn Git-Boundary cho PO/UX, và REQ-017 chưa có story nào để `git-story-boundary.sh start --story` trỏ vào (chính requirement-breakdown là bước tạo story). Brainstormer không chạy `start --inline` với story giả, vì lệnh đó tạo worktree/branch thuộc Git state của Scrum Master.
 - Không có artifact PO/UX nào được tạo. `Status: PENDING`, `Ready-For-Delivery: NO` giữ nguyên.
+- 2026-09-27 — chạy lại từ bước 7, vẫn BLOCKED `GIT_BOUNDARY_MISSING`, 2 lần spawn `Andy-PO` (`Mode: requirement-breakdown`, `Flow: story`, `Scope: REQ-017_checkin_notebook_capture`, `Checkpoint: NONE`). Lần 2 đã bỏ toàn bộ tên thư mục story REQ-016 khỏi thân handoff, guard vẫn chặn. Vậy nguyên nhân là tổ hợp `Flow: story` + Target PO, không phải chữ trong thân handoff. Guard hook và handoff contract không thay đổi từ 2026-09-24. Không có parallel run nào đang active.
+- Mâu thuẫn contract: skeleton `requirement-breakdown` trong `.claude/skills/scrum-master/references/handoffs/product-owner.md` ghi `Flow: story`, còn `.agent-contract/handoff-schema.md` nói PO/UX "never receive a `Flow: story` handoff". Enum `Flow` lại không có giá trị nào cho backlog-shaping. Brainstormer không tự đặt ra giá trị `Flow` để lách guard.
 - Để gỡ: cần một exemption trong guard cho spawn backlog-shaping của brainstormer (`Mode: requirement-breakdown` / `story-requirements` / `ux-requirement-batch`), giống cách `Mode: ac-patch` hiện đang đi qua được. Sau đó chạy lại brainstormer `handoff-to-backlog` cho REQ-017, bắt đầu từ bước 7.
+- 2026-09-27 — RESOLVED: skeleton handoff PO/UX đã bỏ `Flow:`. Spawn `Andy-PO` (`requirement-breakdown`, rồi `story-requirements`) qua guard không bị chặn.
+- 2026-09-27 — Handoff hoàn tất: PO `requirement-breakdown` + `story-requirements` (STORY-001) và UX `ux-requirement-batch` đều COMPLETE. `Ready-For-Delivery: YES`. `Status` trả về `PENDING` (PO đã đổi thành IN_PROGRESS), để Scrum Master tự chuyển trạng thái khi `continue`.
