@@ -373,3 +373,93 @@ thật, và lần sau sẽ lặp nếu không ai thấy:
   **không** hoàn tác. Nhưng đường ghi đó nên đóng: nếu một actor khác sửa được
   báo cáo review, thì dòng kết luận mà cổng DONE tin cậy không còn chỉ do người
   review viết.
+
+## Phụ lục S12 · 2026-09-27 · gap G-3 (Story Runtime Startup Smoke) → ĐÓNG
+
+Kết luận phụ lục: **DEFERRED_ONLY** — trùng đúng giá trị dòng `Outcome:` ở đầu
+báo cáo, nên dòng đó giữ nguyên và tôi **không** thêm dòng `Outcome:` thứ hai
+(reviewer SKILL rule 8 cấm báo cáo có nhiều dòng `Outcome:`; cổng DONE và cổng
+stop đều đọc đúng một dòng). Toàn bộ kết luận S10/S11 (B-1a, B-7, B-8,
+N-1..N-11) giữ nguyên, không xét lại.
+
+### Scope Gate (S12, `compact-story-review`)
+
+- Loại review: đóng một gap duy nhất — G-3, rule 12g.
+- Worktree: `…-STORY-012_phase_status_and_widget-rework1`, `BaseHead`
+  `16ca2be7` = HEAD hiện tại, nên delta nằm ở working tree, không ở diff commit.
+- Delta thật đo bằng `git status --short` + `git diff --numstat`: **đúng 2 tệp**,
+  `coding-plan/test-results.md` (+62/−6) và tệp mới
+  `visual-fidelity/runtime-smoke-android-first-screen.png`. **Không** tệp mã
+  sản xuất, test, hay cấu hình nào bị đụng.
+- Bằng chứng đọc: `coding-plan/test-results.md:1319-1415`
+  (`## Story Runtime Startup Smoke`), tệp PNG nêu trên,
+  `mobile/lib/core/config/cupid_api_config.dart:34`.
+
+### Bốn điểm kiểm, từng điểm đo bằng phép của tôi
+
+| # | Điểm kiểm | Kết quả |
+|---|---|---|
+| 1 | Chặng Android là lượt chạy thật, không phải diễn lại bằng chứng build-only cũ | PASS |
+| 2 | Ảnh chụp có thật và là ảnh thiết bị thật | PASS |
+| 3 | Khai báo trung thực khoản hở cổng `localBaseUrl` thuộc DevOps | PASS |
+| 4 | G-3 (rule 12g) đã đóng | PASS |
+
+**(1)** Bảng bằng chứng mới mang đủ chuỗi mà lượt 2026-09-17 thiếu: `adb install`
+trả `Success`, `am force-stop` + `am start` khởi chạy nguội, `pidof` = `7602`
+(tiến trình sống sau khi màn dựng), `dumpsys activity activities` cho
+`ResumedActivity: …/MainActivity t183` (chứng minh **foreground**, không chỉ
+"tiến trình tồn tại"), `logcat -c` trước / `logcat -d` sau với 0 dòng khớp
+`FATAL EXCEPTION`/`AndroidRuntime`/`ANR in`/`E/flutter` trên 868 dòng. Mười dòng
+`E/`-`W/` còn lại được soi từng dòng và quy trách nhiệm cụ thể — đây là dấu hiệu
+của một lượt đọc log thật, không phải một dòng "no errors". Đoạn build-only cũ
+không bị xoá mà bị hạ xuống `#### Lượt 2026-09-17 — mở khoá build (bối cảnh)`,
+và câu "vẫn chưa có bằng chứng chạy thật" được sửa lại cho đúng hiện trạng thay
+vì để lại mâu thuẫn trong cùng một tệp.
+
+**(2)** `file` cho `PNG image data, 1080 x 2400, 8-bit/color RGBA`, 200.7 KB. Tôi
+**mở ảnh ra nhìn**, không đếm tệp: có thanh trạng thái Android thật (2:15, wifi,
+sóng, pin) và thanh cử chỉ dưới cùng — hai thứ mà một capture từ widget test
+không thể có, nên đây đúng là `screencap` trên thiết bị. Nội dung khớp từng
+khoản mô tả: dải DEBUG góc phải trên, ba thẻ "Gợi ý quà" / "Mồi chuyện" / "Vỏ
+hoàng đạo", chip lọc "Tất cả · 0" / "Mới nghĩ ra · 0" / "Đã hẹn ngày · 0", thanh
+điều hướng "Muốn làm" / "Ý tưởng" / "Sổ tay" / "Nhật ký" với tab "Muốn làm" đang
+chọn, nền gradient tím-hồng có sao, thân danh sách rỗng. **Không** màn đỏ,
+**không** màn trắng, **không** exception overlay, **không** khung splash. Dấu
+tiếng Việt dựng đủ (`ả`, `ỹ`, `ạ`, `ề`, `ưở`) và dấu `·` U+00B7 hiện đúng —
+không ô tofu. Đây là `ActivityCardHubView`, đúng bề mặt của story này, nên lượt
+smoke đi xa hơn chặng iOS (dừng ở màn đăng nhập).
+
+**(3)** Khai báo đúng và kiểm được: `mobile/lib/core/config/cupid_api_config.dart:34`
+thật sự là `static const String localBaseUrl = 'http://localhost:3000';`, trong
+khi devstack cấp cổng `21020`. Lượt smoke gỡ bằng `adb reverse tcp:3000
+tcp:21020` — một bước cầu nối ở phía thiết bị — và `git status` xác nhận
+**không một dòng mã sản xuất nào bị sửa** để lách. Khoản này được ghi lại và
+chuyển cho chủ sở hữu DevOps thay vì tự vá ngoài lane; đúng cách xử lý.
+
+**(4)** Rule 12g cho lane `mobile` đòi: app **khởi chạy** trên thiết bị/máy ảo
+được cấp và **tới được màn đầu** mà không crash hay màn lỗi. Cả hai nền nay đều
+có bằng chứng thật cho đủ chuỗi build → cài → khởi chạy nguội → màn đầu → quét
+crash. G-3 **ĐÓNG**.
+
+### Tồn dư mới, không chặn
+
+- **N-12 (Scrum Master, rủi ro cổng).** Trong chính mục
+  `## Story Runtime Startup Smoke` vẫn còn tiêu đề
+  `### Android — BLOCKED (lịch sử, đã khắc phục ở trên)`. Nội dung là lịch sử
+  đúng và tôi **không** đề nghị xoá, nhưng chuỗi đó nằm trong phạm vi mục mà
+  `validate-done-gate.sh` quét. Nếu cổng DONE chặn ở lượt tới, đây là ứng viên
+  đầu tiên cần nhìn, trước khi nghi ngờ dòng `**Result: PASS**`.
+- **N-13 (DevOps).** `CupidApiConfig.localBaseUrl` cứng `http://localhost:3000`
+  trong khi devstack cấp cổng động — cùng họ với N-2 (thiếu `--flavor local`
+  trong `buildCommand` của registry runtime). Mỗi lượt smoke Android về sau đều
+  phải `adb reverse` bằng tay cho tới khi khoản này đóng.
+- Khoản sửa hình thức của Scrum Master ngay trước lượt này (tách `**Result:
+  PASS**` ra dòng riêng) tôi có đối chiếu: nó chỉ ngắt dòng, không đổi một chữ
+  nào của nội dung bằng chứng.
+
+### Đề xuất trạng thái
+
+Không đổi so với S11: tập hoãn vẫn chỉ là hoãn, không khoản chặn nào mở.
+Story đủ điều kiện `DONE` theo `Outcome: DEFERRED_ONLY` ở đầu báo cáo. Dòng
+`Status:` của `story_master.md` nằm ngoài WriteScope của tôi (SKILL rule 7) —
+Scrum Master áp dụng.
