@@ -1,5 +1,5 @@
 # Requirement Master: REQ-017 Ghi vào sổ tay từ màn check-in 23h
-Status: PENDING
+Status: IN_PROGRESS
 Ready-For-Delivery: YES
 
 ## Deployment Status

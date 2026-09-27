@@ -3,7 +3,7 @@
 Status: TODO
 Complexity: standard
 Story-Class: standard
-Implementation Lane: mobile-only (màn check-in REQ-016 STORY-012, màn Sổ tay REQ-016 STORY-004 và kho sổ tay đều nằm trong app Flutter `mobile/`; không có backend đọc/ghi sổ tay)
+Implementation Lane: shared (mobile-only trên thực tế; màn check-in REQ-016 STORY-012, màn Sổ tay REQ-016 STORY-004 và kho sổ tay đều nằm trong app Flutter `mobile/`; không có lane backend nào chạy trong story này, không có backend đọc/ghi sổ tay)
 Requirement: REQ-017
 Screen: màn check-in modal 23h (REQ-016 STORY-012 AC-16) · Sổ tay người yêu — màn (2) (REQ-016 STORY-004). Không màn mới.
 Design-Surface: cupid-ch-ng-1 (theo REQ-016 STORY-012; UI/UX xác nhận)
