@@ -93,6 +93,36 @@ void main() {
     await seeded.close();
   }
 
+  /// Rewinds a current-schema database to v10 by dropping exactly the three
+  /// v11 origin columns, after seeding one notebook row the way a device
+  /// running v10 would hold it. Same idiom as [seedV5]: the fixture is derived
+  /// from the real table definition rather than retyped by hand.
+  Future<void> seedV10(File file) async {
+    final seeded = CupidDatabase(NativeDatabase(file));
+    await seeded.into(seeded.notebookEntries).insert(
+          NotebookEntriesCompanion.insert(
+            id: 'entry-from-v10',
+            ownerKey: 'user-1',
+            kind: 'event',
+            value: 'Sinh nhật người ấy',
+            source: 'manual',
+            eventOn: const Value('2026-11-02'),
+            createdAt: DateTime.utc(2026, 9, 20),
+            updatedAt: DateTime.utc(2026, 9, 20),
+          ),
+        );
+    for (final column in const <String>[
+      'origin_check_in_ref',
+      'origin_card_id',
+      'origin_card_title',
+    ]) {
+      await seeded
+          .customStatement('ALTER TABLE notebook_entries DROP COLUMN $column');
+    }
+    await seeded.customStatement('PRAGMA user_version = 10');
+    await seeded.close();
+  }
+
   late Directory tempDir;
   late File databaseFile;
 
@@ -116,7 +146,7 @@ void main() {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
-      expect(await readUserVersion(upgraded), 10);
+      expect(await readUserVersion(upgraded), 11);
       expect(
         await tableNames(upgraded),
         containsAll(<String>[
@@ -167,6 +197,42 @@ void main() {
     });
   });
 
+  group('v10 -> v11 (REQ-017 origin columns)', () {
+    setUp(() async {
+      await seedV10(databaseFile);
+    });
+
+    test('adds the three origin columns with ADD COLUMN only', () async {
+      final upgraded = CupidDatabase(NativeDatabase(databaseFile));
+      addTearDown(upgraded.close);
+
+      expect(await readUserVersion(upgraded), 11);
+      expect(
+        await columnNames(upgraded, 'notebook_entries'),
+        containsAll(<String>[
+          'origin_check_in_ref',
+          'origin_card_id',
+          'origin_card_title',
+        ]),
+      );
+    });
+
+    test('the pre-v11 row survives and reads back with all three columns null',
+        () async {
+      final upgraded = CupidDatabase(NativeDatabase(databaseFile));
+      addTearDown(upgraded.close);
+
+      final stored = (await upgraded.select(upgraded.notebookEntries).get())
+          .singleWhere((row) => row.id == 'entry-from-v10');
+
+      expect(stored.value, 'Sinh nhật người ấy');
+      expect(stored.eventOn, '2026-11-02');
+      expect(stored.originCheckInRef, isNull);
+      expect(stored.originCardId, isNull);
+      expect(stored.originCardTitle, isNull);
+    });
+  });
+
   group('v6 on a fresh install', () {
     test('onCreate emits all three tables without a migration', () async {
       final fresh = CupidDatabase(NativeDatabase(databaseFile));
@@ -176,8 +242,8 @@ void main() {
       await fresh.select(fresh.skillProfileEntries).get();
       await fresh.select(fresh.askPromptState).get();
 
-      expect(await readUserVersion(fresh), 10);
-      expect(fresh.schemaVersion, 10);
+      expect(await readUserVersion(fresh), 11);
+      expect(fresh.schemaVersion, 11);
     });
 
     test('ask_prompt_state is keyed by (owner_key, question_id)', () async {
@@ -249,6 +315,9 @@ void main() {
         'event_on',
         'source',
         'question_id',
+        'origin_check_in_ref',
+        'origin_card_id',
+        'origin_card_title',
         'created_at',
         'updated_at',
       });

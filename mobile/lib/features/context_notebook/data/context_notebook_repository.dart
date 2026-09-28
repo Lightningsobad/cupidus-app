@@ -79,12 +79,82 @@ class ContextNotebookRepository {
     return _toEntry(saved!);
   }
 
+  /// The one write path for an entry captured on the 23h check-in sheet.
+  ///
+  /// Idempotent per check-in, not per content (AC-8/BR-12): a second call with
+  /// the same [originCheckInRef] rewrites that row's kind/value instead of
+  /// adding a second one, so a double tap or a retry after a failed save leaves
+  /// exactly one entry. Two different check-ins recording the same interest are
+  /// two valid rows.
+  ///
+  /// [source] stays [ContextEntrySource.askOnTheSpot] — the check-in origin
+  /// lives in the origin columns, not in the source enum, so no existing reader
+  /// that switches on [ContextEntrySource] changes behavior (BR-11).
+  ///
+  /// A `null` [cardTitle] is a normal outcome, not a failure: the write still
+  /// succeeds and the label degrades at read time (AC-9).
+  Future<NotebookEntry> recordFromCheckIn({
+    required NotebookKind kind,
+    required String value,
+    required String originCheckInRef,
+    String? cardId,
+    String? cardTitle,
+  }) async {
+    final ownerKey = await _requireOwnerKey();
+    final checkInRef = _requireText(originCheckInRef, 'originCheckInRef');
+    final text = _requireText(value, 'value');
+    final timestamp = _now();
+
+    final existing = await _dao.notebookRowByOrigin(
+      ownerKey: ownerKey,
+      originCheckInRef: checkInRef,
+    );
+    if (existing != null) {
+      await _dao.updateNotebookRow(
+        ownerKey: ownerKey,
+        id: existing.id,
+        changes: NotebookEntriesCompanion(
+          kind: Value(kind.wireValue),
+          value: Value(text),
+          eventOn: Value(_eventOnFor(kind, existing.eventOn)),
+          updatedAt: Value(timestamp),
+        ),
+      );
+      final saved = await _dao.notebookRowById(
+        ownerKey: ownerKey,
+        id: existing.id,
+      );
+      return _toEntry(saved!);
+    }
+
+    final id = _newId();
+    await _dao.insertNotebookRow(
+      NotebookEntriesCompanion.insert(
+        id: id,
+        ownerKey: ownerKey,
+        kind: kind.wireValue,
+        value: text,
+        source: ContextEntrySource.askOnTheSpot.wireValue,
+        originCheckInRef: Value(checkInRef),
+        originCardId: Value(_optionalText(cardId)),
+        originCardTitle: Value(_optionalText(cardTitle)),
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      ),
+    );
+    final saved = await _dao.notebookRowById(ownerKey: ownerKey, id: id);
+    return _toEntry(saved!);
+  }
+
   /// Full snapshot of the user-editable fields (AC-9): passing `null` for
   /// [detail] or [eventOn] clears the column rather than leaving it alone,
   /// which is what an edit form that emptied the field means.
   ///
   /// Returns the stored entry, or `null` when the id does not belong to the
   /// current owner.
+  ///
+  /// The three origin columns are absent from the companion below on purpose:
+  /// editing the text must leave the origin label exactly where it was (AC-5).
   Future<NotebookEntry?> updateEntry({
     required String id,
     required String value,
@@ -247,6 +317,9 @@ class ContextNotebookRepository {
         eventOn: row.eventOn,
         source: ContextEntrySource.fromWireValue(row.source),
         questionId: row.questionId,
+        originCheckInRef: row.originCheckInRef,
+        originCardId: row.originCardId,
+        originCardTitle: row.originCardTitle,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
       );

@@ -1,5 +1,6 @@
 import '../../../core/content/content_package.dart';
 import '../../../core/content/invariant_terms.dart';
+import 'checkin_capture_content.dart';
 import 'context_content.dart';
 
 /// What a context-notebook pack can break. The first seven pair by wire value
@@ -41,13 +42,15 @@ class ContextViolation {
   String toString() => '$packageId/$itemId [${rule.wireValue}]: $detail';
 }
 
-/// Runs every invariant rule over both context packs and returns what they
+/// Runs every invariant rule over all three context packs and returns what they
 /// broke. An empty list is the only shippable result: the test that calls this
-/// scans `assets/data/req016/` from disk, so a violating pack turns the build
-/// red rather than reaching a reader (AC-35/AC-36/BR-18).
+/// scans `assets/data/req016/` and `assets/data/req017/` from disk, so a
+/// violating pack turns the build red rather than reaching a reader
+/// (AC-35/AC-36/BR-18, REQ-017 AC-14).
 List<ContextViolation> validateContextPacks({
   required ContentPackage<AskQuestion> askQuestions,
   required ContentPackage<SkillSeed> skillSeeds,
+  required ContentPackage<CheckinCaptureCopy> checkinCapture,
 }) {
   final List<ContextViolation> violations = <ContextViolation>[];
 
@@ -73,6 +76,22 @@ List<ContextViolation> validateContextPacks({
     violations.addAll(
       _invariantViolations(skillSeeds.id, seed.id, seed.label),
     );
+  }
+
+  for (final CheckinCaptureCopy copy in checkinCapture.items) {
+    violations.addAll(
+      _invariantViolations(checkinCapture.id, copy.id, copy.text),
+    );
+    for (final NotebookBoundaryHit hit in notebookBoundaryHitsIn(copy.text)) {
+      violations.add(
+        ContextViolation(
+          packageId: checkinCapture.id,
+          itemId: copy.id,
+          rule: _contextRuleFor(hit.rule.wireValue),
+          detail: hit.detail,
+        ),
+      );
+    }
   }
 
   for (final String requiredId in requiredSkillSeedIds) {

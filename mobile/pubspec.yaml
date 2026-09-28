@@ -103,6 +103,7 @@ flutter:
   # drag a code change with it.
   assets:
     - assets/data/req016/
+    - assets/data/req017/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -44,6 +44,25 @@ class NotebookEntries extends Table {
   /// back attached to its question (AC-4). NULL for a manually typed entry.
   TextColumn get questionId => text().nullable()();
 
+  /// `req016.evening_check_in.<cardId>` — the id of the check-in that produced
+  /// this entry, reused verbatim from `eveningCheckInOriginRef` so the notebook
+  /// and the journal name the same occasion. NULL on every entry not written
+  /// from a check-in.
+  ///
+  /// This is the idempotency key together with [ownerKey] (AC-8/BR-12):
+  /// uniqueness is per check-in, never per content, so two check-ins recording
+  /// the same interest are two valid rows.
+  TextColumn get originCheckInRef => text().nullable()();
+
+  /// The `activity_cards.id` the check-in was about, used only as the existence
+  /// probe behind the AC-9 label degrade. The card stays read-only (BR-6).
+  TextColumn get originCardId => text().nullable()();
+
+  /// Snapshot of the card title at write time, so renaming the card later does
+  /// not rewrite the origin label (AC-5). NULL when the title was unreadable
+  /// at write time, which must not block the write (AC-9).
+  TextColumn get originCardTitle => text().nullable()();
+
   DateTimeColumn get createdAt => dateTime()();
 
   DateTimeColumn get updatedAt => dateTime()();

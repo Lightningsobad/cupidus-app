@@ -86,6 +86,16 @@ void main() {
             updatedAt: DateTime.utc(2026, 9, 1),
           ),
         );
+    // A real v6 `notebook_entries` has no origin columns, and the v11 step adds
+    // them with a plain `ADD COLUMN` that fails on a column already there.
+    for (final column in const <String>[
+      'origin_check_in_ref',
+      'origin_card_id',
+      'origin_card_title',
+    ]) {
+      await seeded
+          .customStatement('ALTER TABLE notebook_entries DROP COLUMN $column');
+    }
     // Items first: it holds the cascading foreign key onto chapter_closures.
     // Dropping a table also drops its indexes, so the v7 index needs no
     // separate statement here.
@@ -117,7 +127,7 @@ void main() {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
-      expect(await readUserVersion(upgraded), 10);
+      expect(await readUserVersion(upgraded), 11);
       expect(
         await tableNames(upgraded),
         containsAll(<String>['chapter_closures', 'chapter_closure_items']),
@@ -198,8 +208,8 @@ void main() {
       await fresh.select(fresh.chapterClosures).get();
       await fresh.select(fresh.chapterClosureItems).get();
 
-      expect(await readUserVersion(fresh), 10);
-      expect(fresh.schemaVersion, 10);
+      expect(await readUserVersion(fresh), 11);
+      expect(fresh.schemaVersion, 11);
     });
 
     test('chapter_closure_items is keyed by (closure_id, item_kind, item_id)',

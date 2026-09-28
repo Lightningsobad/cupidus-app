@@ -2,7 +2,9 @@
 /// (`architecture/contract-summary.md` §3).
 ///
 /// STORY-005/008/009/010 read the notebook and reuse the ask mechanism through
-/// this file and nothing else. Deliberately absent: the DAO, the repository,
+/// this file and nothing else, and REQ-017 STORY-001 adds the evening check-in
+/// ask the same way ([loadCheckInCaptureCopy], [recordCheckInCapture]).
+/// Deliberately absent: the DAO, the repository,
 /// the cubit and every internal widget, plus any function that counts, ranks,
 /// or searches what the user wrote — a ranking helper here is how a "how
 /// complete is your notebook" surface gets built by accident (AC-12/AC-25).
@@ -11,7 +13,9 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../core/di/service_locator.dart';
+import 'data/checkin_capture_content_repository.dart';
 import 'data/context_notebook_repository.dart';
+import 'domain/checkin_capture_content.dart';
 import 'domain/context_notebook_models.dart';
 import 'presentation/screens/notebook_screen.dart';
 import 'presentation/screens/skill_profile_screen.dart';
@@ -23,6 +27,25 @@ export 'domain/context_content.dart' show AskTarget;
 export 'domain/context_notebook_models.dart'
     show NotebookEntry, NotebookKind, SkillEntry;
 export 'presentation/widgets/ask_on_the_spot_slot.dart' show AskOnTheSpotSlot;
+
+/// Resolved wording for the optional check-in ask, the copy ids a host needs to
+/// pick each line out of the package, and the one segmented control that
+/// renders its group. The asset key, the schema id and the parser stay inside
+/// the feature, so a host cannot pin a different package version or hand-build
+/// a copy set from literals (AC-14).
+export 'domain/checkin_capture_content.dart'
+    show
+        CheckinCaptureCopy,
+        CheckinCaptureCopySet,
+        checkinCaptureEventKindId,
+        checkinCaptureInterestKindId,
+        checkinCaptureKindRequiredHintId,
+        checkinCaptureOptionalLabelId,
+        checkinCaptureQuestionId,
+        checkinCaptureRetryId,
+        checkinCaptureSaveErrorId;
+export 'presentation/widgets/context_inline_add_row.dart'
+    show ContextInlineAddOption, ContextInlineSegmented;
 
 /// Read-only view of what the user has written down. Consumers personalise
 /// from this; they never write through it, because the only two ways context
@@ -113,6 +136,47 @@ Future<String> recordAnsweredQuestion({
     questionId: trimmedQuestionId,
   );
   return entry.id;
+}
+
+/// Caches the parsed package for the process, so a second check-in does not
+/// re-read the asset.
+final CheckinCaptureContentRepository _checkinCaptureContent =
+    CheckinCaptureContentRepository();
+
+/// Resolved wording for the optional check-in ask. Throws when the package is
+/// unreadable or its schema id does not match; a host that cannot show the ask
+/// treats that as "no ask on this screen", never as a check-in failure.
+Future<CheckinCaptureCopySet> loadCheckInCaptureCopy() =>
+    _checkinCaptureContent.load();
+
+/// Writes **at most one** notebook entry typed during an evening check-in.
+///
+/// The third write door, and the last one (`STORY-001/architecture/
+/// solution.md` §1 KD-1, amending §6 of the STORY-004 contract the same way
+/// [recordAnsweredQuestion] did). §6 forbids extra doors because a pre-fill flow
+/// would put words in the notebook the user never wrote; this door keeps that
+/// intact by being exactly as wide as one line the user typed on the check-in
+/// screen. Still deliberately absent: bulk, import, pre-fill, update, delete,
+/// and read-all.
+///
+/// [originCheckInRef] is what makes the write idempotent per check-in (AC-8,
+/// BR-12) — the same reference twice writes once. Resolving the entry and
+/// snapshotting [cardTitle] stay behind this door so a host never reads the
+/// card a second time (BR-6).
+Future<void> recordCheckInCapture({
+  required NotebookKind kind,
+  required String value,
+  required String originCheckInRef,
+  String? cardId,
+  String? cardTitle,
+}) async {
+  await getIt<ContextNotebookRepository>().recordFromCheckIn(
+    kind: kind,
+    value: value,
+    originCheckInRef: originCheckInRef,
+    cardId: cardId,
+    cardTitle: cardTitle,
+  );
 }
 
 /// Pushes the "Những gì bạn giỏi" screen, full-screen and on its own route.

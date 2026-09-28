@@ -175,9 +175,10 @@ void main() {
       // `location` + `invite_messages`, 5 -> 6 for the context-notebook tables,
       // 6 -> 7 for `calendar_event_state` + `portrait_answers`, 7 -> 8 for
       // `relationship_labels`, 8 -> 9 for the chapter-closure ledger, and
-      // 9 -> 10 for `thank_you_activations`, never for this converter:
+      // 9 -> 10 for `thank_you_activations`, and 10 -> 11 for the three
+      // `notebook_entries` origin columns, never for this converter:
       // attaching it to an existing TEXT column emits no DDL.
-      expect(database.schemaVersion, 10);
+      expect(database.schemaVersion, 11);
       final GeneratedColumn<Object> column = database.activityCards.$columns
           .firstWhere((GeneratedColumn<Object> c) => c.name == 'activity_type');
       expect(column.type, DriftSqlType.string);

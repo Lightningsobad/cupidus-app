@@ -83,7 +83,7 @@ class CupidDatabase extends _$CupidDatabase {
       : super(executor ?? _openConnection(excludeFromBackup));
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   /// From v3 onward this database is NO LONGER a disposable cache, and a
   /// destructive-recreate migration is forbidden.
@@ -104,8 +104,10 @@ class CupidDatabase extends _$CupidDatabase {
   /// v9 adds the two chapter-closure ledger tables (STORY-013, authored
   /// assuming it would land at v7; renumbered to v9 when merged after
   /// STORY-009's v7 and STORY-010's v8). v10 adds the device-authoritative
-  /// `thank_you_activations` ledger (STORY-007). Every migration step here and
-  /// onward must therefore be additive, or migrate the data explicitly.
+  /// `thank_you_activations` ledger (STORY-007). v11 adds the three nullable
+  /// origin columns on `notebook_entries` (REQ-017 STORY-001). Every migration
+  /// step here and onward must therefore be additive, or migrate the data
+  /// explicitly.
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
@@ -148,6 +150,15 @@ class CupidDatabase extends _$CupidDatabase {
             await m.createTable(notebookEntries);
             await m.createTable(skillProfileEntries);
             await m.createTable(askPromptState);
+          } else if (from < 11) {
+            // `createTable` above emits the *current* `notebook_entries`
+            // definition, so a machine coming from v5 already received the
+            // three origin columns and re-adding them would fail on a
+            // duplicate column name. Only machines that stopped between v6 and
+            // v10 have the narrower table.
+            await m.addColumn(notebookEntries, notebookEntries.originCheckInRef);
+            await m.addColumn(notebookEntries, notebookEntries.originCardId);
+            await m.addColumn(notebookEntries, notebookEntries.originCardTitle);
           }
           if (from < 7) {
             await m.createTable(calendarEventState);
