@@ -13,7 +13,7 @@ SCOPE_GATE_COMPLETE: YES
 
 - Scope status: `PROCEED`
 - Why this review is within budget or why it must stop: requirement có đúng MỘT story
-  (`STORY-001_checkin_notebook_capture`) đã qua story review `Outcome: DEFERRED_ONLY` và đã merge.
+  (`STORY-001_checkin_notebook_capture`) đã qua story review với verdict `DEFERRED_ONLY` và đã merge.
   `git -C <Worktree> diff dd46d89d254b49b983d331b3ace3db38e211fe2a HEAD` rỗng, nên cây merge trùng
   khít cây story branch: không có bề mặt cross-story nào để đối chiếu lại. Phạm vi thu về ba câu hỏi
   cấp requirement — merge có nhập trọn vẹn không, artifact cấp requirement (build/runtime, visual
@@ -28,7 +28,7 @@ SCOPE_GATE_COMPLETE: YES
 - Primary artifacts: `data/requirements/REQ-017_checkin_notebook_capture/req_master.md`;
   `.../STORY-001_checkin_notebook_capture/story_master.md`
 - Existing review findings: `.../STORY-001_checkin_notebook_capture/review/review-report.md`
-  (`Outcome: DEFERRED_ONLY`, mục `## Traceability`, `## Risk surfaces và critical gates`,
+  (verdict `DEFERRED_ONLY`, mục `## Traceability`, `## Risk surfaces và critical gates`,
   `## Xử lý toàn bộ carry-forward`, `## Completion/Resume Closure`, `## Khuyến nghị trạng thái`)
 - Test evidence: `.../STORY-001_checkin_notebook_capture/coding-plan/test-results.md` — chỉ ba mục
   `## Entry Point Reachability` (:788-856), `## Story Runtime Startup Smoke` (:858-914),

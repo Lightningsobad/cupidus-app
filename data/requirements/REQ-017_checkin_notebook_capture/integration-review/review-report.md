@@ -161,8 +161,8 @@ chấp thuận (Option B) — không mở lại.
 
 ## Traceability
 
-- **Merged story / merge ref**: STORY-001_checkin_notebook_capture (`standard`), story review
-  `Outcome: DEFERRED_ONLY`; merge `a15bde4f` (parents `908d22d8` ⊕ `dd46d89d`). Requirement một
+- **Merged story / merge ref**: STORY-001_checkin_notebook_capture (`standard`), story review verdict
+  `DEFERRED_ONLY`; merge `a15bde4f` (parents `908d22d8` ⊕ `dd46d89d`). Requirement một
   story nên không có bề mặt cross-story; AC-1..AC-17 đã có verdict ở story review và pass này không
   chấm lại (rule 16a).
 - **Integration evidence**: `integration-review/build-runtime-evidence.md` (F-I1);
