@@ -1,6 +1,6 @@
 # Story Master: STORY-001 Ghi điều mới biết về người ấy vào sổ tay ngay trên màn check-in 23h
 
-Status: IN_PROGRESS
+Status: DONE
 Complexity: standard
 Story-Class: standard
 Implementation Lane: shared (mobile-only trên thực tế; màn check-in REQ-016 STORY-012, màn Sổ tay REQ-016 STORY-004 và kho sổ tay đều nằm trong app Flutter `mobile/`; không có lane backend nào chạy trong story này, không có backend đọc/ghi sổ tay)

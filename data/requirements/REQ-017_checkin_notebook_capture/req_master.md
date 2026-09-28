@@ -1,5 +1,5 @@
 # Requirement Master: REQ-017 Ghi vào sổ tay từ màn check-in 23h
-Status: IN_PROGRESS
+Status: DONE
 Ready-For-Delivery: YES
 
 ## Deployment Status
@@ -16,7 +16,7 @@ Ready-For-Delivery: YES
 ## User Stories
 | ID | Title | Complexity | Status | Path |
 |----|-------|------------|--------|------|
-| STORY-001 | Ghi điều mới biết về người ấy vào sổ tay ngay trên màn check-in 23h | standard | TODO | `STORY-001_checkin_notebook_capture/story_master.md` |
+| STORY-001 | Ghi điều mới biết về người ấy vào sổ tay ngay trên màn check-in 23h | standard | DONE | `STORY-001_checkin_notebook_capture/story_master.md` |
 
 Breakdown: `requirements/requirements.md` (1 seed → 1 story; OQ-1 và OQ-2 đã giải quyết 2026-09-27, xem `## User Decisions`; không còn OQ chặn).
 
@@ -46,3 +46,32 @@ Breakdown: `requirements/requirements.md` (1 seed → 1 story; OQ-1 và OQ-2 đ�
 - Để gỡ: cần một exemption trong guard cho spawn backlog-shaping của brainstormer (`Mode: requirement-breakdown` / `story-requirements` / `ux-requirement-batch`), giống cách `Mode: ac-patch` hiện đang đi qua được. Sau đó chạy lại brainstormer `handoff-to-backlog` cho REQ-017, bắt đầu từ bước 7.
 - 2026-09-27 — RESOLVED: skeleton handoff PO/UX đã bỏ `Flow:`. Spawn `Andy-PO` (`requirement-breakdown`, rồi `story-requirements`) qua guard không bị chặn.
 - 2026-09-27 — Handoff hoàn tất: PO `requirement-breakdown` + `story-requirements` (STORY-001) và UX `ux-requirement-batch` đều COMPLETE. `Ready-For-Delivery: YES`. `Status` trả về `PENDING` (PO đã đổi thành IN_PROGRESS), để Scrum Master tự chuyển trạng thái khi `continue`.
+
+## Delivery Closure (2026-09-28)
+- STORY-001 review: `DEFERRED_ONLY` (`STORY-001_checkin_notebook_capture/review/review-report.md`).
+- Story branch merged vào integration branch: merge_sha
+  `a15bde4fb6a5d4e8de67410a1f0fd4b2b00612b7`.
+- Requirement integration review (`Iris-QC`, 2 lượt):
+  - Lượt 1: `PATCH_REQUIRED` (F-I1 thiếu build+runtime evidence cấp
+    integration, F-I2 thiếu mobile visual audit cấp integration).
+  - Lượt 2 (sau khi F-I1/F-I2 được xử lý): `DEFERRED_ONLY`, không còn blocking
+    finding. Các mục deferred: D-I3 (đã sửa), D-I1 (đã xử lý — xem dưới), D-I2
+    (thông tin, không cần hành động), A-1 (xem mục theo dõi bên dưới).
+    Report: `integration-review/review-report.md`.
+- `sync-integration` (do `land-integration` báo `LAND_BASE_STALE`, main đã
+  tiến thêm commit `70ddb8b8`): merge history-only, không đổi nội dung (diff
+  rỗng, xác nhận độc lập bởi Scrum Master và `Frank-Devops`). Build+runtime
+  evidence resync tại HEAD `e1012284` PASS, commit `04472512`.
+- Landed vào `main`: merge_sha `5fd1f448e7b1d091b123b1358d1a4579e3c01eab`.
+  Integration branch và story worktree đã dọn (`cleanup-requirement`,
+  `land-integration` lần 2 xoá nhánh `codex/REQ-017_checkin_notebook_capture-integration`).
+- **Theo dõi sau khi đóng requirement (chưa phải story riêng, không tự tạo
+  artifact backlog — cần user xác nhận trước khi vào brainstormer/PO):**
+  1. REQ-016 STORY-004: bổ sung "đổi loại" (kind-changing) cho UI sửa mục sổ
+     tay, theo quyết định Option B trước đây của user — vẫn cần qua
+     brainstormer/product-owner intake đúng quy trình.
+  2. A-1 (advisory từ mobile visual audit REQ-017): trên khối "Hôm nay biết
+     thêm gì về người ấy?" ở màn check-in 23h, các chip loại (sở thích /
+     sự kiện) bị nút Lưu (pinned CTA) che một phần — vẫn thao tác được bằng
+     cách cuộn nhẹ, không vi phạm AC nào, Iris-QC khuyến nghị ghi nhận như một
+     quan sát UX deferred, không mở lại STORY-001.
