@@ -784,3 +784,148 @@ STORY-004, chạy lại nó sẽ ghi đè ảnh của story khác.
 Sổ tay, ba tệp test, ba PNG, báo cáo fidelity, ba tệp coding-plan). Không PNG của
 story khác bị bẩn. `scrum-master-checkpoint.md` cũng hiện `M` nhưng không do lane
 này sửa — nó nằm ngoài Write Scope của P4 và không được chạm tới.
+
+## Entry Point Reachability
+
+Reachable: YES
+
+Mở ngày 2026-09-28 để đóng gap `B-2` trong `review/review-report.md` (rule 12e1).
+`story_master.md:118-120` khai không thêm điểm vào nào; dưới đây là đường đi cụ
+thể của cả hai bề mặt, truy theo mã chứ không khẳng định suông.
+
+### Bề mặt 1 — khối hỏi-tại-chỗ trên màn check-in 23h
+
+Reachable: YES · Cơ chế: tự hiện trên màn check-in sẵn có, không cần thao tác
+thêm; màn đó chỉ tới được từ nhắc 23h (đúng khai báo `story_master.md:118-120`).
+
+Chuỗi đầy đủ, mỗi mắt xích là một dòng mã thật, tất cả trong
+`mobile/lib/features/phase_status/presentation/evening_check_in_sheet.dart`:
+
+1. Dòng 714 — callback `onSelected: (String? payload) => _openFromPayload(...)`
+   gắn vào bộ lên lịch thông báo (`PluginLocalNotificationScheduler`), chạy khi
+   người dùng chạm thông báo 23h.
+2. Dòng 720-767 — `_openFromPayload` nạp gói nội dung hỏi-tại-chỗ bằng
+   `loadCheckInCaptureCopy()` (dòng 750, bọc try/catch — build thiếu gói vẫn
+   không chặn ảnh/nhật ký), rồi gọi `EveningCheckInSheet.show(..., capture:
+   capture)` ở dòng 761/767.
+3. Dòng 141-156 — `EveningCheckInSheet.show` đẩy `MaterialPageRoute<void>(
+   fullscreenDialog: true, ...)` dựng `EveningCheckInSheet` với `capture:
+   capture` truyền xuống.
+4. Dòng 369-380 — trong `build()`, `if (widget.capture != null)
+   CheckinCaptureBlock(...)` mount khối hỏi-tại-chỗ ngay trong sheet, không
+   route mới, không điểm vào riêng — khớp `master-plan.md:70-73` "không thêm
+   route/điểm vào nào".
+
+Không mắt xích nào thiếu: từ chạm thông báo tới khối hỏi hiện ra là một chuỗi
+gọi trực tiếp, không qua cổng ẩn hay cờ tính năng.
+
+### Bề mặt 2 — nhãn xuất xứ trên màn Sổ tay
+
+Reachable: YES · Cơ chế: vào qua đường sẵn có của màn Sổ tay (nhóm KHO / tab
+Sổ tay), không thêm điểm vào — khớp `story_master.md:118-120`.
+
+Điểm vào màn Sổ tay, tệp
+`mobile/lib/features/home/presentation/home_screen.dart`:
+
+1. Dòng 380-389 — case `SoloStageOneTab.soTay` dựng `_SoloDestinationBlock`
+   với `_SoloDestination(rowKey: Key('solo_destination_row_notebook'), ...,
+   open: widget.openNotebook ?? openNotebookScreen)` — đây là tab "Sổ tay"
+   trên thanh điều hướng dưới của màn (1).
+2. `mobile/lib/features/context_notebook/context_notebook_entry_point.dart:85-90`
+   — `openNotebookScreen` đẩy `MaterialPageRoute` dựng `NotebookScreen(
+   repository: getIt<ContextNotebookRepository>())`.
+3. Đường vào phụ: `mobile/lib/features/account/presentation/screens/
+   me_screen.dart:568` — `onTap: () => openNotebookScreen(context)` trong menu
+   Tài khoản, cùng hàm, không phải điểm vào thứ hai độc lập.
+
+Nhãn xuất xứ trong màn Sổ tay, tệp
+`mobile/lib/features/context_notebook/presentation/screens/notebook_screen.dart`:
+
+1. Dòng 110-129 — `_originLabels(entries)` chỉ resolve khi có ít nhất một mục
+   `entry.originCheckInRef != null` (dòng 111-112), gọi
+   `CheckinOriginResolver(copy: copy, probe: ...).labelsFor(entries)` (dòng
+   127-129).
+2. Dòng 188-198 — `originLabels` map được truyền xuống view của danh sách.
+3. Dòng 294-297 — mỗi hàng không-đang-sửa dựng `_NotebookRow(entry: entry,
+   originLabel: originLabels[entry.id], ...)`.
+4. Dòng 394/421-428 — `_NotebookRow` hiện `label` (nếu khác null) thành một
+   `Text` với `key: Key('notebook-entry-origin-${entry.id}')`, caption màu mờ,
+   không chip/badge — đúng AC-15 (không có "xem buổi hẹn gốc" tappable).
+
+Reachable: YES cho cả hai bề mặt, không mắt xích nào thiếu, không cần sửa
+route hay thêm điểm vào — khớp kết luận của B-2 trong `review-report.md`.
+
+## Story Runtime Startup Smoke
+
+Mở ngày 2026-09-28 để đóng gap `B-1` trong `review/review-report.md` (rule
+12g). Rủi ro gate này nhắm tới: story nâng `schemaVersion` 10 → 11 bằng
+`m.addColumn` (P1); đường migration đó chỉ chạy thật khi app mở trên một máy
+đang giữ database phiên bản cũ.
+
+**Result: PASS**
+
+### Android — PASS
+
+Thiết bị: `emulator-5554`, `sdk_gphone64_arm64`, ABI `arm64-v8a`. Bản cài cũ
+(schemaVersion 10, từ lượt chạy trước) được **giữ nguyên dữ liệu** khi gỡ
+(`uninstall -k`) rồi cài đè APK mới — đúng kịch bản nâng cấp mà rule 12g nhắm
+tới, không phải cài sạch.
+
+| Bước | Lệnh | Kết quả |
+|---|---|---|
+| Sinh l10n | `flutter gen-l10n` | dùng `l10n.yaml` sẵn có, exit code 0 |
+| Build | `flutter build apk --debug --flavor local --split-per-abi --target-platform android-arm64` | `Running Gradle task 'assembleLocalDebug'... 42.4s`, `✓ Built build/app/outputs/flutter-apk/app-arm64-v8a-local-debug.apk`, exit code 0 |
+| Gỡ (giữ data) | `adb shell cmd package uninstall -k com.snapsofts.cupid` | `Success` |
+| Cài đè | `adb install -r build/app/outputs/flutter-apk/app-arm64-v8a-local-debug.apk` | `Success` |
+| Khởi chạy nguội #1 | `adb shell am force-stop com.snapsofts.cupid` rồi `adb shell am start -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity` | `Starting: Intent { cmp=com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity }` |
+| Sống sót #1 | `adb shell pidof com.snapsofts.cupid` | `28218` — tiến trình còn sống sau khi màn đầu dựng xong |
+| Foreground #1 | `adb shell dumpsys activity activities` | `ResumedActivity: ActivityRecord{... com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity ...}` |
+| Ảnh màn #1 | `adb exec-out screencap -p` | màn "Không thể kết nối máy chủ" — Flutter dựng đúng, không phải crash (xem ghi chú dưới) |
+| Bắc cầu mạng | `adb reverse tcp:3000 tcp:21020` (`devstack status` xác nhận `cupid-apps api=21020`, `curl localhost:21020/` → `200`) | `3000` |
+| Khởi chạy nguội #2 | force-stop + am start lại | `Starting: Intent { cmp=com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity }` |
+| Sống sót #2 | `adb shell pidof com.snapsofts.cupid` | `28324` |
+| Ảnh màn #2 | `adb exec-out screencap -p` | `../visual-fidelity/runtime-smoke-android-first-screen.png` |
+| Quét crash | `adb logcat -c` ngay trước khởi chạy #1, `adb logcat -d -v brief` ngay sau khi chụp ảnh #2 | 0/972 dòng khớp `FATAL EXCEPTION`/`AndroidRuntime`/`ANR in`/`E/flutter`; trong 114 dòng `E/` + 165 dòng `W/` của toàn phiên, 0 dòng nào nhắc tới gói `cupid` |
+
+Đã **mở ảnh ra nhìn**, không chỉ đọc exit code. Ảnh #1 (trước khi bắc cầu) là
+màn "Không thể kết nối máy chủ" — nền gradient tím-hồng, icon đám mây gạch
+chéo, nút "Thử lại"; đây là **cùng lỗi bắc cầu cổng đã ghi ở tiền lệ REQ-016
+STORY-012** (`localhost` trên thiết bị không trỏ tới cổng `21020` của devstack
+khi chưa `adb reverse`), không phải crash: dấu tiếng Việt dựng đủ (`ể`, `ế`,
+`ạ`), không màn đỏ lỗi Flutter, không màn trắng, không exception overlay. Ảnh
+#2 (sau khi bắc cầu, `runtime-smoke-android-first-screen.png`) đi xa hơn hẳn
+tiền lệ: tới thẳng màn Home thật (`ActivityCardHubView`, tab "Muốn làm" đang
+chọn), có đủ bốn tab thanh điều hướng dưới **"Muốn làm" / "Ý tưởng" / "Sổ
+tay" / "Nhật ký"** — xác nhận trực tiếp bằng mắt rằng tab "Sổ tay" của Bề mặt
+2 trên tồn tại và hiện đúng sau khi qua migration schemaVersion 11. Dấu tiếng
+Việt đủ, không ô tofu.
+
+Cả hai lượt khởi chạy đều sống sót tới khi chụp ảnh (pid `28218` rồi `28324`,
+không pid nào chết giữa chừng) và không dòng log nào khớp bốn mẫu crash phía
+trên qua toàn bộ 972 dòng logcat của phiên — cửa sổ log đó phủ cả lượt khởi
+chạy #1 (trước bắc cầu) lẫn #2 (sau bắc cầu, nơi migration schemaVersion 10 →
+11 thực sự chạy trên database đã giữ lại từ bản cài trước). Đây đúng là lớp
+thay đổi rule 12g nhắm tới: nếu `m.addColumn` của P1 sai cột, sai kiểu, hay
+migration builder ném lỗi, Drift sẽ crash ngay lúc mở database lúc khởi
+động — nó không crash.
+
+Không chạy chặng iOS trong lượt này: Android đã đủ theo yêu cầu "ít nhất một
+nền tảng" của handoff, và đây là nền tảng đã sẵn thiết bị đang chạy
+(`emulator-5554`), tránh chi phí boot thêm simulator.
+
+## AC-5 — Deviation đã khai báo (khoá bởi Scrum Master, quyết định của user)
+
+`review/review-report.md` mục F-7 chỉ ra nửa "đổi loại" của AC-5 không triển
+khai được hết: `_update`/`updateEntry`
+(`context_notebook/presentation/screens/notebook_screen.dart`,
+`context_notebook/data/context_notebook_repository.dart`) không có tham số
+`kind`, và ô sửa (`ContextInlineAddRow` ở edit-mode) thiếu `options`/
+`selectedOptionId` so với ô thêm mới. Đây là hành vi kế thừa từ REQ-016
+STORY-004, không phải regression của P4/story này.
+
+**Quyết định (user, qua Scrum Master, 2026-09-28)**: giữ nguyên AC-5 ở trạng
+thái PARTIAL như đã ghi trong `review-report.md` Traceability — không sửa câu
+chữ AC-5. Một backlog item riêng sẽ được mở (qua luồng ý tưởng/PO chuẩn, ngoài
+phạm vi story này) nhằm bổ sung khả năng đổi loại khi sửa cho UI của REQ-016
+STORY-004. Story này đóng với AC-5 = PARTIAL đã khai báo, không chặn review
+completion/resume tiếp theo.
