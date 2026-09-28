@@ -5044,6 +5044,39 @@ class $NotebookEntriesTable extends NotebookEntries
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _originCheckInRefMeta = const VerificationMeta(
+    'originCheckInRef',
+  );
+  @override
+  late final GeneratedColumn<String> originCheckInRef = GeneratedColumn<String>(
+    'origin_check_in_ref',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _originCardIdMeta = const VerificationMeta(
+    'originCardId',
+  );
+  @override
+  late final GeneratedColumn<String> originCardId = GeneratedColumn<String>(
+    'origin_card_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _originCardTitleMeta = const VerificationMeta(
+    'originCardTitle',
+  );
+  @override
+  late final GeneratedColumn<String> originCardTitle = GeneratedColumn<String>(
+    'origin_card_title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -5076,6 +5109,9 @@ class $NotebookEntriesTable extends NotebookEntries
     eventOn,
     source,
     questionId,
+    originCheckInRef,
+    originCardId,
+    originCardTitle,
     createdAt,
     updatedAt,
   ];
@@ -5146,6 +5182,33 @@ class $NotebookEntriesTable extends NotebookEntries
         questionId.isAcceptableOrUnknown(data['question_id']!, _questionIdMeta),
       );
     }
+    if (data.containsKey('origin_check_in_ref')) {
+      context.handle(
+        _originCheckInRefMeta,
+        originCheckInRef.isAcceptableOrUnknown(
+          data['origin_check_in_ref']!,
+          _originCheckInRefMeta,
+        ),
+      );
+    }
+    if (data.containsKey('origin_card_id')) {
+      context.handle(
+        _originCardIdMeta,
+        originCardId.isAcceptableOrUnknown(
+          data['origin_card_id']!,
+          _originCardIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('origin_card_title')) {
+      context.handle(
+        _originCardTitleMeta,
+        originCardTitle.isAcceptableOrUnknown(
+          data['origin_card_title']!,
+          _originCardTitleMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -5203,6 +5266,18 @@ class $NotebookEntriesTable extends NotebookEntries
         DriftSqlType.string,
         data['${effectivePrefix}question_id'],
       ),
+      originCheckInRef: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}origin_check_in_ref'],
+      ),
+      originCardId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}origin_card_id'],
+      ),
+      originCardTitle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}origin_card_title'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -5250,6 +5325,25 @@ class NotebookEntryRow extends DataClass
   /// Stable id of the question that produced this entry, so the answer reads
   /// back attached to its question (AC-4). NULL for a manually typed entry.
   final String? questionId;
+
+  /// `req016.evening_check_in.<cardId>` — the id of the check-in that produced
+  /// this entry, reused verbatim from `eveningCheckInOriginRef` so the notebook
+  /// and the journal name the same occasion. NULL on every entry not written
+  /// from a check-in.
+  ///
+  /// This is the idempotency key together with [ownerKey] (AC-8/BR-12):
+  /// uniqueness is per check-in, never per content, so two check-ins recording
+  /// the same interest are two valid rows.
+  final String? originCheckInRef;
+
+  /// The `activity_cards.id` the check-in was about, used only as the existence
+  /// probe behind the AC-9 label degrade. The card stays read-only (BR-6).
+  final String? originCardId;
+
+  /// Snapshot of the card title at write time, so renaming the card later does
+  /// not rewrite the origin label (AC-5). NULL when the title was unreadable
+  /// at write time, which must not block the write (AC-9).
+  final String? originCardTitle;
   final DateTime createdAt;
   final DateTime updatedAt;
   const NotebookEntryRow({
@@ -5261,6 +5355,9 @@ class NotebookEntryRow extends DataClass
     this.eventOn,
     required this.source,
     this.questionId,
+    this.originCheckInRef,
+    this.originCardId,
+    this.originCardTitle,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -5280,6 +5377,15 @@ class NotebookEntryRow extends DataClass
     map['source'] = Variable<String>(source);
     if (!nullToAbsent || questionId != null) {
       map['question_id'] = Variable<String>(questionId);
+    }
+    if (!nullToAbsent || originCheckInRef != null) {
+      map['origin_check_in_ref'] = Variable<String>(originCheckInRef);
+    }
+    if (!nullToAbsent || originCardId != null) {
+      map['origin_card_id'] = Variable<String>(originCardId);
+    }
+    if (!nullToAbsent || originCardTitle != null) {
+      map['origin_card_title'] = Variable<String>(originCardTitle);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -5302,6 +5408,15 @@ class NotebookEntryRow extends DataClass
       questionId: questionId == null && nullToAbsent
           ? const Value.absent()
           : Value(questionId),
+      originCheckInRef: originCheckInRef == null && nullToAbsent
+          ? const Value.absent()
+          : Value(originCheckInRef),
+      originCardId: originCardId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(originCardId),
+      originCardTitle: originCardTitle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(originCardTitle),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -5321,6 +5436,9 @@ class NotebookEntryRow extends DataClass
       eventOn: serializer.fromJson<String?>(json['eventOn']),
       source: serializer.fromJson<String>(json['source']),
       questionId: serializer.fromJson<String?>(json['questionId']),
+      originCheckInRef: serializer.fromJson<String?>(json['originCheckInRef']),
+      originCardId: serializer.fromJson<String?>(json['originCardId']),
+      originCardTitle: serializer.fromJson<String?>(json['originCardTitle']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -5337,6 +5455,9 @@ class NotebookEntryRow extends DataClass
       'eventOn': serializer.toJson<String?>(eventOn),
       'source': serializer.toJson<String>(source),
       'questionId': serializer.toJson<String?>(questionId),
+      'originCheckInRef': serializer.toJson<String?>(originCheckInRef),
+      'originCardId': serializer.toJson<String?>(originCardId),
+      'originCardTitle': serializer.toJson<String?>(originCardTitle),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -5351,6 +5472,9 @@ class NotebookEntryRow extends DataClass
     Value<String?> eventOn = const Value.absent(),
     String? source,
     Value<String?> questionId = const Value.absent(),
+    Value<String?> originCheckInRef = const Value.absent(),
+    Value<String?> originCardId = const Value.absent(),
+    Value<String?> originCardTitle = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => NotebookEntryRow(
@@ -5362,6 +5486,13 @@ class NotebookEntryRow extends DataClass
     eventOn: eventOn.present ? eventOn.value : this.eventOn,
     source: source ?? this.source,
     questionId: questionId.present ? questionId.value : this.questionId,
+    originCheckInRef: originCheckInRef.present
+        ? originCheckInRef.value
+        : this.originCheckInRef,
+    originCardId: originCardId.present ? originCardId.value : this.originCardId,
+    originCardTitle: originCardTitle.present
+        ? originCardTitle.value
+        : this.originCardTitle,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -5377,6 +5508,15 @@ class NotebookEntryRow extends DataClass
       questionId: data.questionId.present
           ? data.questionId.value
           : this.questionId,
+      originCheckInRef: data.originCheckInRef.present
+          ? data.originCheckInRef.value
+          : this.originCheckInRef,
+      originCardId: data.originCardId.present
+          ? data.originCardId.value
+          : this.originCardId,
+      originCardTitle: data.originCardTitle.present
+          ? data.originCardTitle.value
+          : this.originCardTitle,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -5393,6 +5533,9 @@ class NotebookEntryRow extends DataClass
           ..write('eventOn: $eventOn, ')
           ..write('source: $source, ')
           ..write('questionId: $questionId, ')
+          ..write('originCheckInRef: $originCheckInRef, ')
+          ..write('originCardId: $originCardId, ')
+          ..write('originCardTitle: $originCardTitle, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -5409,6 +5552,9 @@ class NotebookEntryRow extends DataClass
     eventOn,
     source,
     questionId,
+    originCheckInRef,
+    originCardId,
+    originCardTitle,
     createdAt,
     updatedAt,
   );
@@ -5424,6 +5570,9 @@ class NotebookEntryRow extends DataClass
           other.eventOn == this.eventOn &&
           other.source == this.source &&
           other.questionId == this.questionId &&
+          other.originCheckInRef == this.originCheckInRef &&
+          other.originCardId == this.originCardId &&
+          other.originCardTitle == this.originCardTitle &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -5437,6 +5586,9 @@ class NotebookEntriesCompanion extends UpdateCompanion<NotebookEntryRow> {
   final Value<String?> eventOn;
   final Value<String> source;
   final Value<String?> questionId;
+  final Value<String?> originCheckInRef;
+  final Value<String?> originCardId;
+  final Value<String?> originCardTitle;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -5449,6 +5601,9 @@ class NotebookEntriesCompanion extends UpdateCompanion<NotebookEntryRow> {
     this.eventOn = const Value.absent(),
     this.source = const Value.absent(),
     this.questionId = const Value.absent(),
+    this.originCheckInRef = const Value.absent(),
+    this.originCardId = const Value.absent(),
+    this.originCardTitle = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -5462,6 +5617,9 @@ class NotebookEntriesCompanion extends UpdateCompanion<NotebookEntryRow> {
     this.eventOn = const Value.absent(),
     required String source,
     this.questionId = const Value.absent(),
+    this.originCheckInRef = const Value.absent(),
+    this.originCardId = const Value.absent(),
+    this.originCardTitle = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.rowid = const Value.absent(),
@@ -5481,6 +5639,9 @@ class NotebookEntriesCompanion extends UpdateCompanion<NotebookEntryRow> {
     Expression<String>? eventOn,
     Expression<String>? source,
     Expression<String>? questionId,
+    Expression<String>? originCheckInRef,
+    Expression<String>? originCardId,
+    Expression<String>? originCardTitle,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -5494,6 +5655,9 @@ class NotebookEntriesCompanion extends UpdateCompanion<NotebookEntryRow> {
       if (eventOn != null) 'event_on': eventOn,
       if (source != null) 'source': source,
       if (questionId != null) 'question_id': questionId,
+      if (originCheckInRef != null) 'origin_check_in_ref': originCheckInRef,
+      if (originCardId != null) 'origin_card_id': originCardId,
+      if (originCardTitle != null) 'origin_card_title': originCardTitle,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -5509,6 +5673,9 @@ class NotebookEntriesCompanion extends UpdateCompanion<NotebookEntryRow> {
     Value<String?>? eventOn,
     Value<String>? source,
     Value<String?>? questionId,
+    Value<String?>? originCheckInRef,
+    Value<String?>? originCardId,
+    Value<String?>? originCardTitle,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -5522,6 +5689,9 @@ class NotebookEntriesCompanion extends UpdateCompanion<NotebookEntryRow> {
       eventOn: eventOn ?? this.eventOn,
       source: source ?? this.source,
       questionId: questionId ?? this.questionId,
+      originCheckInRef: originCheckInRef ?? this.originCheckInRef,
+      originCardId: originCardId ?? this.originCardId,
+      originCardTitle: originCardTitle ?? this.originCardTitle,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -5555,6 +5725,15 @@ class NotebookEntriesCompanion extends UpdateCompanion<NotebookEntryRow> {
     if (questionId.present) {
       map['question_id'] = Variable<String>(questionId.value);
     }
+    if (originCheckInRef.present) {
+      map['origin_check_in_ref'] = Variable<String>(originCheckInRef.value);
+    }
+    if (originCardId.present) {
+      map['origin_card_id'] = Variable<String>(originCardId.value);
+    }
+    if (originCardTitle.present) {
+      map['origin_card_title'] = Variable<String>(originCardTitle.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -5578,6 +5757,9 @@ class NotebookEntriesCompanion extends UpdateCompanion<NotebookEntryRow> {
           ..write('eventOn: $eventOn, ')
           ..write('source: $source, ')
           ..write('questionId: $questionId, ')
+          ..write('originCheckInRef: $originCheckInRef, ')
+          ..write('originCardId: $originCardId, ')
+          ..write('originCardTitle: $originCardTitle, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -12075,6 +12257,9 @@ typedef $$NotebookEntriesTableCreateCompanionBuilder =
       Value<String?> eventOn,
       required String source,
       Value<String?> questionId,
+      Value<String?> originCheckInRef,
+      Value<String?> originCardId,
+      Value<String?> originCardTitle,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<int> rowid,
@@ -12089,6 +12274,9 @@ typedef $$NotebookEntriesTableUpdateCompanionBuilder =
       Value<String?> eventOn,
       Value<String> source,
       Value<String?> questionId,
+      Value<String?> originCheckInRef,
+      Value<String?> originCardId,
+      Value<String?> originCardTitle,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -12140,6 +12328,21 @@ class $$NotebookEntriesTableFilterComposer
 
   ColumnFilters<String> get questionId => $composableBuilder(
     column: $table.questionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get originCheckInRef => $composableBuilder(
+    column: $table.originCheckInRef,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get originCardId => $composableBuilder(
+    column: $table.originCardId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get originCardTitle => $composableBuilder(
+    column: $table.originCardTitle,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12203,6 +12406,21 @@ class $$NotebookEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get originCheckInRef => $composableBuilder(
+    column: $table.originCheckInRef,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get originCardId => $composableBuilder(
+    column: $table.originCardId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get originCardTitle => $composableBuilder(
+    column: $table.originCardTitle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -12246,6 +12464,21 @@ class $$NotebookEntriesTableAnnotationComposer
 
   GeneratedColumn<String> get questionId => $composableBuilder(
     column: $table.questionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get originCheckInRef => $composableBuilder(
+    column: $table.originCheckInRef,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get originCardId => $composableBuilder(
+    column: $table.originCardId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get originCardTitle => $composableBuilder(
+    column: $table.originCardTitle,
     builder: (column) => column,
   );
 
@@ -12301,6 +12534,9 @@ class $$NotebookEntriesTableTableManager
                 Value<String?> eventOn = const Value.absent(),
                 Value<String> source = const Value.absent(),
                 Value<String?> questionId = const Value.absent(),
+                Value<String?> originCheckInRef = const Value.absent(),
+                Value<String?> originCardId = const Value.absent(),
+                Value<String?> originCardTitle = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -12313,6 +12549,9 @@ class $$NotebookEntriesTableTableManager
                 eventOn: eventOn,
                 source: source,
                 questionId: questionId,
+                originCheckInRef: originCheckInRef,
+                originCardId: originCardId,
+                originCardTitle: originCardTitle,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -12327,6 +12566,9 @@ class $$NotebookEntriesTableTableManager
                 Value<String?> eventOn = const Value.absent(),
                 required String source,
                 Value<String?> questionId = const Value.absent(),
+                Value<String?> originCheckInRef = const Value.absent(),
+                Value<String?> originCardId = const Value.absent(),
+                Value<String?> originCardTitle = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<int> rowid = const Value.absent(),
@@ -12339,6 +12581,9 @@ class $$NotebookEntriesTableTableManager
                 eventOn: eventOn,
                 source: source,
                 questionId: questionId,
+                originCheckInRef: originCheckInRef,
+                originCardId: originCardId,
+                originCardTitle: originCardTitle,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,

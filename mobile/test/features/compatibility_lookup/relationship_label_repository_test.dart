@@ -96,6 +96,17 @@ void main() {
             ),
           );
       await seeded.customStatement('DROP TABLE relationship_labels');
+      // A real v6 `notebook_entries` has no origin columns, and the v11 step
+      // adds them with a plain `ADD COLUMN` that fails on one already there.
+      for (final column in const <String>[
+        'origin_check_in_ref',
+        'origin_card_id',
+        'origin_card_title',
+      ]) {
+        await seeded.customStatement(
+          'ALTER TABLE notebook_entries DROP COLUMN $column',
+        );
+      }
       // Also the closure ledger: its upgrade step builds an index, and
       // `Migrator.createIndex` emits a plain `CREATE INDEX` that fails on one
       // the fixture left behind. Items first — it holds the cascading key.
@@ -110,7 +121,7 @@ void main() {
       final upgraded = CupidDatabase(NativeDatabase(databaseFile));
       addTearDown(upgraded.close);
 
-      expect(await readUserVersion(upgraded), 10);
+      expect(await readUserVersion(upgraded), 11);
       expect(await tableNames(upgraded), contains('relationship_labels'));
     });
 
@@ -151,8 +162,8 @@ void main() {
 
       await fresh.select(fresh.relationshipLabels).get();
 
-      expect(await readUserVersion(fresh), 10);
-      expect(fresh.schemaVersion, 10);
+      expect(await readUserVersion(fresh), 11);
+      expect(fresh.schemaVersion, 11);
     });
 
     test('the natural key (owner_key, subject, system) is UNIQUE in the DDL',

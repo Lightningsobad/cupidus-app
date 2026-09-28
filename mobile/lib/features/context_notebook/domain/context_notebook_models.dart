@@ -75,6 +75,9 @@ class NotebookEntry {
     this.detail,
     this.eventOn,
     this.questionId,
+    this.originCheckInRef,
+    this.originCardId,
+    this.originCardTitle,
   });
 
   final String id;
@@ -94,6 +97,19 @@ class NotebookEntry {
   /// Stable id of the question that produced this entry (AC-4), or `null` when
   /// the user added it manually.
   final String? questionId;
+
+  /// Which check-in wrote this entry, `null` for every other entry. This — not
+  /// [source] — is what "came from a check-in" means, so no existing `switch`
+  /// on [ContextEntrySource] changes meaning (BR-11).
+  final String? originCheckInRef;
+
+  /// The card the check-in was about; the existence probe behind the AC-9
+  /// label degrade.
+  final String? originCardId;
+
+  /// Card title as it read when the entry was written, so a later rename does
+  /// not move the label (AC-5). `null` when it was unreadable then (AC-9).
+  final String? originCardTitle;
 
   final DateTime createdAt;
   final DateTime updatedAt;

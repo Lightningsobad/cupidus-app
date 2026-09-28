@@ -1,8 +1,13 @@
+import 'dart:io';
+
+import 'package:cupid_mobile/core/content/content_package.dart';
 import 'package:cupid_mobile/core/database/cupid_database.dart';
 import 'package:cupid_mobile/core/realtime/backend_user_id_store.dart';
 import 'package:cupid_mobile/design_system/design_system.dart';
 import 'package:cupid_mobile/features/context_notebook/data/context_notebook_dao.dart';
 import 'package:cupid_mobile/features/context_notebook/data/context_notebook_repository.dart';
+import 'package:cupid_mobile/features/context_notebook/domain/checkin_capture_content.dart';
+import 'package:cupid_mobile/features/context_notebook/domain/checkin_origin_resolver.dart';
 import 'package:cupid_mobile/features/context_notebook/domain/context_notebook_models.dart';
 import 'package:cupid_mobile/features/context_notebook/presentation/screens/notebook_screen.dart';
 import 'package:cupid_mobile/l10n/generated/app_l10n.dart';
@@ -65,6 +70,18 @@ void expectNoBannedSurfaces() {
   expect(find.byType(Slider, skipOffstage: false), findsNothing);
 }
 
+/// The shipped origin wording, read off disk rather than restated here: the two
+/// lines are versioned content, so a literal in this test would keep passing
+/// after the copy moved (AC-14).
+final CheckinCaptureCopySet _shippedCopy = CheckinCaptureCopySet(
+  ContentPackage.parse<CheckinCaptureCopy>(
+    File(checkinCaptureAssetKey).readAsStringSync(),
+    expectedSchemaId: checkinCaptureSchemaId,
+    itemParser: checkinCaptureCopyFromJson,
+    source: checkinCaptureAssetKey,
+  ),
+);
+
 NotebookEntry _entry({
   required String id,
   required NotebookKind kind,
@@ -110,6 +127,22 @@ void main() {
       brightness: Brightness.dark,
     ),
     home: NotebookScreen(repository: repository),
+  );
+
+  Widget originHarness({required ReadableCardProbe probe}) => MaterialApp(
+    locale: const Locale('vi'),
+    localizationsDelegates: AppL10n.localizationsDelegates,
+    supportedLocales: AppL10n.supportedLocales,
+    debugShowCheckedModeBanner: false,
+    theme: buildCupidTheme(
+      platform: CupidPlatform.material,
+      brightness: Brightness.dark,
+    ),
+    home: NotebookScreen(
+      repository: repository,
+      originCopy: _shippedCopy,
+      cardProbe: probe,
+    ),
   );
 
   group('gom nhóm (unit)', () {
@@ -408,6 +441,242 @@ void main() {
       final NotebookEntry stored = (await repository.entries()).single;
       expect(stored.detail, 'Quán gần nhà');
       expect(stored.kind, NotebookKind.interest);
+    });
+  });
+
+  group('nhãn xuất xứ từ check-in (AC-4, AC-5, AC-9, AC-11, AC-15)', () {
+    Finder originOf(String id) =>
+        find.byKey(Key('notebook-entry-origin-$id'), skipOffstage: false);
+
+    testWidgets('hàng từ check-in mang nhãn với ảnh chụp tên thẻ', (
+      WidgetTester tester,
+    ) async {
+      final NotebookEntry saved = await repository.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Cà phê muối',
+        originCheckInRef: 'checkin-2026-09-27',
+        cardId: 'card-1',
+        cardTitle: 'Đi cà phê tối',
+      );
+
+      await tester.pumpWidget(originHarness(probe: (ids) async => ids));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cà phê muối'), findsOneWidget);
+      expect(originOf(saved.id), findsOneWidget);
+      expect(
+        tester.widget<Text>(originOf(saved.id)).data,
+        _shippedCopy.originLabel(cardTitle: 'Đi cà phê tối'),
+      );
+      // Not a chip, badge, button or link, and the check-in reference itself
+      // never reaches the screen (AC-15, BR-9).
+      expect(
+        find.descendant(of: originOf(saved.id), matching: find.byType(InkWell)),
+        findsNothing,
+      );
+      expect(
+        find.textContaining('checkin-2026-09-27', skipOffstage: false),
+        findsNothing,
+      );
+      expectNoBannedSurfaces();
+    });
+
+    testWidgets('thẻ gốc không còn dò được thì nhãn suy biến (AC-9)', (
+      WidgetTester tester,
+    ) async {
+      final NotebookEntry saved = await repository.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Cà phê muối',
+        originCheckInRef: 'checkin-2026-09-27',
+        cardId: 'card-gone',
+        cardTitle: 'Đi cà phê tối',
+      );
+
+      await tester.pumpWidget(
+        originHarness(probe: (ids) async => const <String>{}),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<Text>(originOf(saved.id)).data,
+        _shippedCopy.text(notebookOriginFallbackId),
+      );
+      expect(
+        find.textContaining('Đi cà phê tối', skipOffstage: false),
+        findsNothing,
+        reason: 'a card that can no longer be read must not leave its title '
+            'behind on the row',
+      );
+    });
+
+    testWidgets('phép dò lỗi vẫn ra nhãn suy biến, không lỗi trên màn hình', (
+      WidgetTester tester,
+    ) async {
+      final NotebookEntry saved = await repository.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Cà phê muối',
+        originCheckInRef: 'checkin-2026-09-27',
+        cardId: 'card-1',
+        cardTitle: 'Đi cà phê tối',
+      );
+
+      await tester.pumpWidget(
+        originHarness(probe: (ids) async => throw StateError('store down')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(
+        tester.widget<Text>(originOf(saved.id)).data,
+        _shippedCopy.text(notebookOriginFallbackId),
+      );
+    });
+
+    testWidgets('hàng tự thêm không có nhãn nào (AC-11, BR-11)', (
+      WidgetTester tester,
+    ) async {
+      final NotebookEntry manual = await repository.addEntry(
+        kind: NotebookKind.interest,
+        value: 'Trà sữa ít đường',
+        source: ContextEntrySource.manual,
+      );
+      final NotebookEntry fromCheckIn = await repository.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Cà phê muối',
+        originCheckInRef: 'checkin-2026-09-27',
+        cardId: 'card-1',
+        cardTitle: 'Đi cà phê tối',
+      );
+
+      await tester.pumpWidget(originHarness(probe: (ids) async => ids));
+      await tester.pumpAndSettle();
+
+      expect(originOf(manual.id), findsNothing);
+      expect(originOf(fromCheckIn.id), findsOneWidget);
+    });
+
+    testWidgets('mục sự kiện từ check-in vào đúng nhóm cũ, không nhóm thứ ba', (
+      WidgetTester tester,
+    ) async {
+      final NotebookEntry saved = await repository.recordFromCheckIn(
+        kind: NotebookKind.event,
+        value: 'Kỷ niệm quen nhau',
+        originCheckInRef: 'checkin-2026-09-27',
+        cardId: 'card-1',
+        cardTitle: 'Đi cà phê tối',
+      );
+
+      await tester.pumpWidget(originHarness(probe: (ids) async => ids));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.byKey(Key('notebook-group-${NotebookKind.event.wireValue}')),
+          matching: find.byKey(Key('notebook-entry-${saved.id}')),
+        ),
+        findsOneWidget,
+      );
+      final Iterable<Widget> groups = tester.widgetList(
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is Column &&
+              widget.key is ValueKey<String> &&
+              (widget.key! as ValueKey<String>).value.startsWith(
+                'notebook-group-',
+              ),
+          skipOffstage: false,
+        ),
+      );
+      expect(
+        groups.length,
+        2,
+        reason: 'check-in entries reuse the two fixed groups; a third group '
+            'would be the "từ buổi hẹn" destination the plan rules out',
+      );
+    });
+
+    testWidgets('menu "..." vẫn đúng Sửa và Xoá khi hàng có nhãn (AC-11)', (
+      WidgetTester tester,
+    ) async {
+      final NotebookEntry saved = await repository.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Cà phê muối',
+        originCheckInRef: 'checkin-2026-09-27',
+        cardId: 'card-1',
+        cardTitle: 'Đi cà phê tối',
+      );
+
+      await tester.pumpWidget(originHarness(probe: (ids) async => ids));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(Key('notebook-entry-menu-${saved.id}')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byWidgetPredicate((Widget w) => w is PopupMenuItem),
+        findsNWidgets(2),
+      );
+      expect(find.text('Sửa'), findsOneWidget);
+      expect(find.text('Xoá'), findsOneWidget);
+      expectNoBannedSurfaces();
+    });
+
+    testWidgets('sửa hàng có nhãn vẫn lưu tại chỗ và nhãn còn nguyên (AC-11)', (
+      WidgetTester tester,
+    ) async {
+      final NotebookEntry saved = await repository.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Cà phê muối',
+        originCheckInRef: 'checkin-2026-09-27',
+        cardId: 'card-1',
+        cardTitle: 'Đi cà phê tối',
+      );
+
+      await tester.pumpWidget(originHarness(probe: (ids) async => ids));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(Key('notebook-entry-menu-${saved.id}')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Sửa'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('context-inline-add-field')),
+        'Cà phê không đường',
+      );
+      await tester.tap(find.byKey(const Key('context-inline-add-save')));
+      await tester.pumpAndSettle();
+
+      expect((await repository.entries()).single.value, 'Cà phê không đường');
+      expect(
+        tester.widget<Text>(originOf(saved.id)).data,
+        _shippedCopy.originLabel(cardTitle: 'Đi cà phê tối'),
+        reason: 'editing the text the user wrote must not drop the origin the '
+            'entry was written with (AC-5)',
+      );
+    });
+
+    testWidgets('xoá hàng có nhãn vẫn xoá ngay, không bước xác nhận', (
+      WidgetTester tester,
+    ) async {
+      final NotebookEntry saved = await repository.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'Cà phê muối',
+        originCheckInRef: 'checkin-2026-09-27',
+        cardId: 'card-1',
+        cardTitle: 'Đi cà phê tối',
+      );
+
+      await tester.pumpWidget(originHarness(probe: (ids) async => ids));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(Key('notebook-entry-menu-${saved.id}')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Xoá'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(originOf(saved.id), findsNothing);
+      expect(await repository.entries(), isEmpty);
     });
   });
 }

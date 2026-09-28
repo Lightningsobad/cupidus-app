@@ -11,11 +11,13 @@ import '../../../design_system/tokens/cupid_platform_tokens.dart';
 import '../../../design_system/tokens/cupid_spacing.dart';
 import '../../../design_system/tokens/cupid_typography_tokens.dart';
 import '../../../l10n/generated/app_l10n.dart';
+import '../../context_notebook/context_notebook_entry_point.dart';
 import '../../journal/journal_entry_point.dart';
 import '../data/local_notification_scheduler.dart';
 import '../data/phase_content_repository.dart';
 import '../domain/evening_check_in_scheduler.dart';
 import '../domain/phase_content.dart';
+import 'widgets/checkin_capture_block.dart';
 
 /// The design shows the places a photo can go before one is picked, so the
 /// sheet states its whole ask up front instead of hiding it behind a word.
@@ -43,6 +45,37 @@ typedef EveningJournalRoute = Future<void> Function(
   required List<String> photoPaths,
   required String originRef,
 });
+
+/// The notebook side of saving. Separate from [EveningJournalRoute] because the
+/// two halves must be able to fail independently (BR-10).
+typedef EveningCaptureWrite = Future<void> Function({
+  required NotebookKind kind,
+  required String value,
+  required String originCheckInRef,
+  String? cardId,
+  String? cardTitle,
+});
+
+/// Where the typed line stood when the save button finished with it.
+enum _CaptureOutcome {
+  /// Nothing to write: no copy shipped, or the field was empty or blank (AC-2).
+  nothingAsked,
+
+  /// One notebook entry now exists for this check-in.
+  written,
+
+  /// Typed, but no group chosen. Deliberately not written and deliberately not
+  /// guessed (AC-16, BR-4).
+  kindMissing,
+
+  /// The notebook write itself failed. The sentence and photos are unaffected.
+  failed;
+
+  /// Whether the block has nothing left to ask the user, which is what decides
+  /// if the screen may close (KD-1).
+  bool get settled =>
+      this == _CaptureOutcome.nothingAsked || this == _CaptureOutcome.written;
+}
 
 /// Where the 23h nudge lands (`ux/uiux-spec.md` §4).
 ///
@@ -72,6 +105,8 @@ class EveningCheckInSheet extends StatefulWidget {
     this.pickPhotos,
     this.openJournal,
     this.journalAvailable = true,
+    this.capture,
+    this.recordCapture,
   });
 
   /// Title and body of the `evening_check_in` item of `nudges.v1.json`, so the
@@ -96,6 +131,13 @@ class EveningCheckInSheet extends StatefulWidget {
   /// an unconditional top-level function with no absent state to detect.
   final bool journalAvailable;
 
+  /// Resolved REQ-017 copy. `null` means the build shipped no wording for the
+  /// optional notebook ask, so the whole block is absent — the content decides
+  /// this, never [recordCapture], which is only a test seam (STORY-012 §7).
+  final CheckinCaptureCopySet? capture;
+
+  final EveningCaptureWrite? recordCapture;
+
   static Future<void> show(
     BuildContext context, {
     String? title,
@@ -105,6 +147,8 @@ class EveningCheckInSheet extends StatefulWidget {
     EveningPhotoPicker? pickPhotos,
     EveningJournalRoute? openJournal,
     bool journalAvailable = true,
+    CheckinCaptureCopySet? capture,
+    EveningCaptureWrite? recordCapture,
   }) {
     return Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
@@ -117,6 +161,8 @@ class EveningCheckInSheet extends StatefulWidget {
           pickPhotos: pickPhotos,
           openJournal: openJournal,
           journalAvailable: journalAvailable,
+          capture: capture,
+          recordCapture: recordCapture,
         ),
       ),
     );
@@ -128,13 +174,49 @@ class EveningCheckInSheet extends StatefulWidget {
 
 class _EveningCheckInSheetState extends State<EveningCheckInSheet> {
   final TextEditingController _line = TextEditingController();
+
+  /// Always starts empty and is never seeded from [_line] or anywhere else
+  /// (AC-6, BR-3).
+  final TextEditingController _captureLine = TextEditingController();
+
   List<String> _photos = const <String>[];
   bool _busy = false;
+  NotebookKind? _captureKind;
+  bool _captureKindMissing = false;
+  bool _captureFailed = false;
+
+  /// The journal is handed the sentence and photos once per screen. The screen
+  /// now stays open in two states (AC-16, AC-12), so without this a second tap
+  /// on save would compose a second entry out of the same evening.
+  bool _journalHandedOff = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _captureLine.addListener(_onCaptureLineChanged);
+  }
 
   @override
   void dispose() {
     _line.dispose();
+    _captureLine.removeListener(_onCaptureLineChanged);
+    _captureLine.dispose();
     super.dispose();
+  }
+
+  /// Clearing the line clears what the block was asking about, so the screen
+  /// goes back to the untouched case with no message left over (UX Phần A.4).
+  void _onCaptureLineChanged() {
+    if (_captureLine.text.trim().isNotEmpty) {
+      return;
+    }
+    if (!_captureKindMissing && !_captureFailed) {
+      return;
+    }
+    setState(() {
+      _captureKindMissing = false;
+      _captureFailed = false;
+    });
   }
 
   @override
@@ -284,6 +366,18 @@ class _EveningCheckInSheetState extends State<EveningCheckInSheet> {
                           ],
                         ),
                       ],
+                      if (widget.capture != null)
+                        CheckinCaptureBlock(
+                          key: eveningCheckInCaptureKey,
+                          copy: widget.capture!,
+                          controller: _captureLine,
+                          selectedKind: _captureKind,
+                          enabled: !_busy,
+                          kindMissing: _captureKindMissing,
+                          saveFailed: _captureFailed,
+                          onKindSelected: _selectCaptureKind,
+                          onRetry: _retryCapture,
+                        ),
                     ],
                   ),
                 ),
@@ -374,21 +468,108 @@ class _EveningCheckInSheetState extends State<EveningCheckInSheet> {
     });
   }
 
+  /// The notebook write runs first and its result never reaches the journal call
+  /// below, which is what keeps one half from taking the other down (BR-10,
+  /// KD-1). Only the pop is conditional: the screen has to stay for a missing
+  /// group or a failed write, because both are answered in place.
   Future<void> _save() async {
     final EveningJournalRoute route = widget.openJournal ?? _openJournal;
     final String trimmed = _line.text.trim();
     final NavigatorState navigator = Navigator.of(context);
-    setState(() => _busy = true);
-    await route(
-      context,
-      line: trimmed.isEmpty ? null : trimmed,
-      photoPaths: _photos,
-      originRef: eveningCheckInOriginRef(widget.cardId),
-    );
+    setState(() {
+      _busy = true;
+      _captureKindMissing = false;
+      _captureFailed = false;
+    });
+
+    final _CaptureOutcome outcome = await _writeCapture();
     if (!mounted) {
       return;
     }
-    navigator.pop();
+    setState(() {
+      _captureKindMissing = outcome == _CaptureOutcome.kindMissing;
+      _captureFailed = outcome == _CaptureOutcome.failed;
+    });
+
+    if (!_journalHandedOff) {
+      _journalHandedOff = true;
+      await route(
+        context,
+        line: trimmed.isEmpty ? null : trimmed,
+        photoPaths: _photos,
+        originRef: eveningCheckInOriginRef(widget.cardId),
+      );
+    }
+    if (!mounted) {
+      return;
+    }
+    setState(() => _busy = false);
+    if (outcome.settled) {
+      navigator.pop();
+    }
+  }
+
+  /// Picking a group answers the message the save button left behind, so the
+  /// line is written right then — a second tap on save is not required
+  /// (UX Phần A.4).
+  Future<void> _selectCaptureKind(NotebookKind kind) async {
+    final bool answersOpenQuestion = _captureKindMissing;
+    setState(() {
+      _captureKind = kind;
+      _captureKindMissing = false;
+    });
+    if (answersOpenQuestion) {
+      await _resolveCaptureInPlace();
+    }
+  }
+
+  Future<void> _retryCapture() => _resolveCaptureInPlace();
+
+  /// Re-runs the notebook half alone. The photos and sentence are already with
+  /// the journal and are not touched again; the same check-in reference keeps a
+  /// retry from adding a second entry (AC-12, AC-8).
+  Future<void> _resolveCaptureInPlace() async {
+    final NavigatorState navigator = Navigator.of(context);
+    setState(() => _busy = true);
+    final _CaptureOutcome outcome = await _writeCapture();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _busy = false;
+      _captureKindMissing = outcome == _CaptureOutcome.kindMissing;
+      _captureFailed = outcome == _CaptureOutcome.failed;
+    });
+    if (outcome.settled && _journalHandedOff) {
+      navigator.pop();
+    }
+  }
+
+  Future<_CaptureOutcome> _writeCapture() async {
+    if (widget.capture == null) {
+      return _CaptureOutcome.nothingAsked;
+    }
+    final String value = _captureLine.text.trim();
+    if (value.isEmpty) {
+      return _CaptureOutcome.nothingAsked;
+    }
+    final NotebookKind? kind = _captureKind;
+    if (kind == null) {
+      return _CaptureOutcome.kindMissing;
+    }
+    final EveningCaptureWrite write = widget.recordCapture ?? _recordCapture;
+    try {
+      await write(
+        kind: kind,
+        value: value,
+        originCheckInRef: eveningCheckInOriginRef(widget.cardId),
+        cardId: widget.cardId,
+        cardTitle: widget.cardTitle,
+      );
+    } catch (_) {
+      return _CaptureOutcome.failed;
+    }
+    return _CaptureOutcome.written;
   }
 }
 
@@ -565,6 +746,14 @@ Future<void> _openFromPayload(
   } catch (_) {
     cardTitle = null;
   }
+  // A build whose copy package cannot be read simply has no optional notebook
+  // ask on this screen; the photo and sentence steps are unaffected.
+  CheckinCaptureCopySet? capture;
+  try {
+    capture = await loadCheckInCaptureCopy();
+  } catch (_) {
+    capture = null;
+  }
   final NavigatorState? navigator = navigatorKey.currentState;
   if (navigator == null || !navigator.mounted) {
     return;
@@ -573,6 +762,26 @@ Future<void> _openFromPayload(
     navigator.context,
     title: nudge.title,
     body: nudge.body,
+    cardId: cardId,
+    cardTitle: cardTitle,
+    capture: capture,
+  );
+}
+
+/// Production wiring of the notebook half. The check-in screen hands down the
+/// line, the group, and the card values it already holds; resolving the entry
+/// and snapshotting the title stay behind the notebook's own write door (BR-6).
+Future<void> _recordCapture({
+  required NotebookKind kind,
+  required String value,
+  required String originCheckInRef,
+  String? cardId,
+  String? cardTitle,
+}) {
+  return recordCheckInCapture(
+    kind: kind,
+    value: value,
+    originCheckInRef: originCheckInRef,
     cardId: cardId,
     cardTitle: cardTitle,
   );

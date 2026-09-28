@@ -1,0 +1,45 @@
+{
+  "id": "req017.checkin_capture",
+  "version": "1.0.0",
+  "schema_id": "req017.checkin_capture.v1",
+  "locale": "vi",
+  "items": [
+    {
+      "id": "checkin.capture.question.v1",
+      "text": "Hôm nay biết thêm gì về người ấy?"
+    },
+    {
+      "id": "checkin.capture.optional_label.v1",
+      "text": "Tuỳ chọn"
+    },
+    {
+      "id": "checkin.capture.kind.interest.v1",
+      "text": "Sở thích"
+    },
+    {
+      "id": "checkin.capture.kind.event.v1",
+      "text": "Sự kiện"
+    },
+    {
+      "id": "checkin.capture.kind_required_hint.v1",
+      "text": "Chọn một loại để lưu, hoặc xoá ý này"
+    },
+    {
+      "id": "checkin.capture.save_error.v1",
+      "text": "Chưa ghi được vào sổ tay"
+    },
+    {
+      "id": "checkin.capture.retry.v1",
+      "text": "Thử lại"
+    },
+    {
+      "id": "notebook.origin.with_card.v1",
+      "text": "từ buổi hẹn {card}",
+      "params": ["card"]
+    },
+    {
+      "id": "notebook.origin.fallback.v1",
+      "text": "từ một buổi hẹn"
+    }
+  ]
+}

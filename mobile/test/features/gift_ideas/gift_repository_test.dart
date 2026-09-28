@@ -284,4 +284,61 @@ void main() {
       );
     });
   });
+
+  group('xuất xứ check-in không rò sang mặt quà (REQ-017 AC-10)', () {
+    test('an entry written by a check-in reaches the snapshot as its value only',
+        () async {
+      await notebook.recordFromCheckIn(
+        kind: NotebookKind.interest,
+        value: 'cà phê muối',
+        originCheckInRef: 'checkin-2026-09-27',
+        cardId: 'card-1',
+        cardTitle: 'Đi cà phê tối',
+      );
+
+      final GiftContextSnapshot context = await repository.context();
+
+      // Exactly the text the user wrote, on both fields. The origin is
+      // notebook-screen chrome: no card title, no check-in reference and no
+      // origin wording may travel with the row to this surface.
+      expect(context.values, hasLength(1));
+      expect(context.values.single.key, 'cà phê muối');
+      expect(context.values.single.label, 'cà phê muối');
+      expect(context.values.single.kind, GiftContextKind.interest);
+
+      final String carried =
+          '${context.values.single.key}\n${context.values.single.label}';
+      expect(carried, isNot(contains('Đi cà phê tối')));
+      expect(carried, isNot(contains('checkin-2026-09-27')));
+    });
+
+    test('no gift source file can read an origin column at all', () {
+      final Map<String, List<String>> offenders = <String, List<String>>{};
+      for (final File file in _giftSourceFiles()) {
+        final String source = file.readAsStringSync();
+        final List<String> hits = <String>[
+          for (final String token in <String>[
+            'originCheckInRef',
+            'originCardId',
+            'originCardTitle',
+            'origin_check_in_ref',
+            'origin_card_id',
+            'origin_card_title',
+            'originLabel',
+            'CheckinOriginResolver',
+          ])
+            if (source.contains(token)) token,
+        ];
+        if (hits.isNotEmpty) {
+          offenders[file.path] = hits;
+        }
+      }
+
+      expect(
+        offenders,
+        isEmpty,
+        reason: 'the gift surface must not reach the origin columns: $offenders',
+      );
+    });
+  });
 }
