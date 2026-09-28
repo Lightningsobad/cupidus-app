@@ -1,161 +1,199 @@
 # Requirement Integration Review: REQ-017_checkin_notebook_capture
 
-Review type: `requirement-integration-review`
-Outcome: PATCH_REQUIRED
+Review type: `requirement-integration-review` (pass 2 — `completion/resume` hẹp trên F-I1 + F-I2)
+Outcome: DEFERRED_ONLY
 
 Scope gate: `/Users/alantravala/workspace/snapsofts/.ai-team-worktrees/cupid-apps/integration-REQ-017_checkin_notebook_capture/data/requirements/REQ-017_checkin_notebook_capture/integration-review/scope-gate.md`
-Branch: `codex/REQ-017_checkin_notebook_capture-integration` @ `a15bde4fb6a5d4e8de67410a1f0fd4b2b00612b7`
+Branch: `codex/REQ-017_checkin_notebook_capture-integration` @ `646ec1efc51f6cd8c19892c7a6e6052b34029b71`
 BaseHead: `0198e32ddd3f8bad6a4d5274fd7b5ebeae9158b1`
-Reviewed: 2026-09-28
+Reviewed: 2026-09-28 (pass 1 `PATCH_REQUIRED` @ `a15bde4f`; pass 2 re-verify @ `646ec1ef`)
 
 ## Outcome và lý do
 
-Phần **code** của requirement sạch ở tầng integration: merge nhập trọn vẹn, schema cộng thêm đúng
-tuần tự, asset mới phân giải được lúc chạy, và luồng end-to-end check-in → mục sổ tay → nhãn xuất xứ
-còn nguyên sau merge. Không có finding code nào chặn.
+Pass 1 chốt `PATCH_REQUIRED` vì thiếu đúng hai gate cấp đóng-requirement. Cả hai nay đã có bằng
+chứng thật, đã kiểm lại trực tiếp, và **đều đóng**:
 
-Nhưng requirement **chưa đủ hai gate cấp đóng-requirement**, và cả hai đều thiếu hoàn toàn (không
-phải cũ hay mâu thuẫn — không tồn tại):
+- **F-I1 — ĐÓNG.** `integration-review/build-runtime-evidence.md` (commit `cdbbb1f0`) có mục
+  `## Integration Build & Runtime` với build thật và smoke khởi chạy thật, **cài đè lên dữ liệu v10
+  có sẵn** đúng như pass 1 yêu cầu.
+- **F-I2 — ĐÓNG.** `integration-review/mobile-visual-audit.md` + `mobile-screenshots/` (commit
+  `646ec1ef`) là audit cross-screen thật trên thiết bị, 8 khung hình chụp từ app đang chạy.
 
-1. `## Integration Build & Runtime` với cả `- Build: PASS — …` và `- Runtime/Smoke: PASS — …` trong
-   cùng một file dưới `integration-review/` (rule 12g3). `req_master.md` không có dòng
-   `Integration-Verify: WAIVED`.
-2. `integration-review/mobile-visual-audit.md` cấp requirement (rule 12g2).
+Không phát sinh finding chặn nào. Phần code tầng integration đã sạch từ pass 1 và không đổi kể từ đó.
+Các hạng mục còn lại đều là deferred/informational, nên `DEFERRED_ONLY` (không phải `CLEAN`: có ghi
+chú cần giữ lại, trong đó **D-I3 nên xử lý trước khi chạy DONE gate**).
 
-Cả hai là bằng chứng phải do lane thực thi sinh ra trên nhánh đã merge, nên `PATCH_REQUIRED` (rule
-12c: lane vẫn cấp được bằng chứng), không phải `BLOCKED`. Không có gì trong hai gate này bị chặn bởi
-môi trường, credential, hay quyết định thượng nguồn — REQ-016 đã làm đúng hai gate này bằng
-`integration-review/build-runtime-evidence.md` (build `assembleLocalDebug` thật + `am start -W` thật
-trên `emulator-5554`) và `integration-review/mobile-visual-audit.md`.
+## Re-verification — F-I1 (rule 12g3)
 
-Reviewer **không tự viết** hai dòng `Build: PASS` / `Runtime/Smoke: PASS`. Cây merge trùng khít cây
-story branch (chứng minh dưới đây), nên có thể lập luận rằng bằng chứng build/smoke cấp story áp cho
-đúng những byte này — nhưng dùng lập luận đó để tự điền gate mình đang canh là tự sản xuất bằng
-chứng, và nó lệch khỏi hình dạng bằng chứng mà rule 12g3 cùng tiền lệ REQ-016 đòi (một lần build +
-một lần khởi chạy thật **trên nhánh merge**). Việc chụp trên thiết bị/emulator cho gate 2 cũng thuộc
-mobile-dev, không thuộc Reviewer (rule 12e3).
+Đọc `build-runtime-evidence.md` trực tiếp, không tin verdict token:
 
-## Merged stories và story review
+| Điểm kiểm | Kết quả |
+|---|---|
+| Mục `## Integration Build & Runtime` tồn tại | **PASS** — `build-runtime-evidence.md:13` |
+| Verdict build + verdict runtime trong **cùng một file** | **PASS** — :15, :30 (build), :36 (runtime/smoke) |
+| `- Runtime/Smoke: PASS — …` đúng dạng literal | **PASS** — :36, verdict là từ đầu tiên sau dấu hai chấm |
+| `Runtime: NOT_APPLICABLE` có bị dùng thay pass không | **KHÔNG** — :82-85 nói rõ có thiết bị thật (`emulator-5554`) và đã chạy tiến trình thật |
+| Build thật trên nhánh integration | **PASS** — `flutter build apk --debug --split-per-abi` ở cả `0198e32d` (v10, scratch worktree riêng) và `c41c1556` (v11, worktree được giao); ba APK split-ABI mỗi lần; chỉ warning Gradle/KGP tiền tồn |
+| Smoke là **cài đè giữ data**, không phải cài sạch | **PASS** — :41-44 `adb install -r`, không `uninstall`, không `--uninstall-only`; :89-92 nói rõ vì sao cài sạch sẽ che mất đúng rủi ro |
+| Migration 10 → 11 **thực sự chạy** | **PASS** — :117-124 `PRAGMA user_version` = `10` trước; :145-152 = **`11`** sau. Đây là bằng chứng migration chạy, không phải "không thấy lỗi trong log" |
+| Dữ liệu sống sót qua migration | **PASS** — `journal_entries` 1 dòng và `notebook_entries` 1 dòng khớp đúng số trước/sau |
+| Dữ liệu v10 là do app tự ghi, không phải sqlite chế tay | **PASS** — :94-116 seed session qua `POST /auth/register` + OTP từ mailpit, rồi tạo mục bằng thao tác UI thật; :118-119 trích DB ra từ `app_flutter/cupid.sqlite` |
+| Quét crash | **PASS** — :61-78, 37 dòng `*:E` được phân loại hết (ashmem, `flutter_facebook_auth` chưa cấu hình, `HwcComposer` của emulator); zero `FATAL EXCEPTION`/`AndroidRuntime`, zero dòng nhắc `drift`/`onUpgrade`/`schema` |
+| Tắt sạch | **PASS** — :79-80 `am force-stop` theo `shutdownCommand` của registry |
+| Bằng chứng còn áp cho HEAD hiện tại không | **PASS** — build chạy ở `c41c1556`; `git diff --name-only c41c1556..646ec1ef -- mobile` **rỗng** (tôi tự chạy lại): không byte nào dưới `mobile/` đổi kể từ lần build đó, hai commit sau chỉ thêm file `data/` |
 
-| Story | Complexity | Story review | Merge |
-|---|---|---|---|
-| STORY-001_checkin_notebook_capture | standard | `Outcome: DEFERRED_ONLY` — `STORY-001_checkin_notebook_capture/review/review-report.md:3` | `a15bde4f` (parents `908d22d8` ⊕ `dd46d89d`) |
+Ghi chú về `Status: timeout` của `am start -W` (:45-56): không phải launch fail, và lời giải thích
+kiểm được — vòng poll `dumpsys activity activities` khớp `ResumedActivity` ngay lần poll đầu (~2s),
+cộng hai ảnh màn (spinner → home đã render). Một app crash lúc migration sẽ không bao giờ đạt
+`ResumedActivity` rồi render home. Diễn giải này nhất quán với chứng cứ, không phải bào chữa.
 
-Requirement có đúng một story, nên không có bề mặt cross-story nào để đối chiếu. Không AC nào đã
-PASS ở story review được mở lại (rule 16a).
+## Re-verification — F-I2 (rule 12g2)
 
-## Integration gates
+Theo rule 12e3, tôi **không chụp lại** (device lifecycle không thuộc Reviewer) nhưng **phải mở ảnh ra
+nhìn**, vì đếm file là việc của stop gate chứ không phải review. Tôi mở 4/8 khung, gồm cả hai màn đã
+đổi:
 
-| # | Gate | Kết quả | Bằng chứng |
-|---|---|---|---|
-| 1 | merge nhập trọn vẹn, không mất nội dung | **PASS** | `git diff dd46d89d..HEAD` **rỗng** → cây merge trùng khít cây story tip. `git diff 70ddb8b8..HEAD --name-status` chỉ ra các file REQ-017 (thêm/sửa), không có file nào của `main` bị mất hay lùi. Working tree sạch, không còn `MERGE_HEAD`. |
-| 2 | không divergence trên file cả hai nhánh cùng chạm | **PASS** | `mobile/lib/features/zodiac_shell/domain/zodiac_shell_resolver.dart` — giao điểm với BUG-20260927-001 (BR-16) — `git diff 70ddb8b8 HEAD -- <file>` **rỗng**: nội dung bản vá của `main` có mặt nguyên văn trong cây integration. Bản vá không bị merge ghi đè, và cổng nội dung của story chạy cùng lúc với nó. |
-| 3 | schema/migration cộng thêm, tuần tự, không xung đột | **PASS** | `cupid_database.dart:86` `schemaVersion => 11`; bản `main` cùng dòng là `10` → bump đúng một bậc, không nhánh nào khác đang tranh `11` (requirement chỉ có một story). Bước nâng cấp ở `:153` (`else if (from < 11)`). |
-| 4 | asset/pack mới phân giải được lúc chạy | **PASS** | `pubspec.yaml` diff so với `main` là **một dòng duy nhất**: `- assets/data/req017/`. `checkin_capture_content.dart:9` khai path `assets/data/req017/checkin_capture.v1.json`, khớp thư mục đã đăng ký, và file có thật trong cây (`A mobile/assets/data/req017/checkin_capture.v1.json`). |
-| 5 | luồng end-to-end cấp requirement còn nguyên sau merge | **PASS** | Đọc trực tiếp trong cây integration, không suy từ prose: `evening_check_in_sheet.dart:369-380` mount `CheckinCaptureBlock` (có `eveningCheckInCaptureKey`, `onRetry`, `kindMissing`); `:753` `loadCheckInCaptureCopy()`; `context_notebook_entry_point.dart:85-90` `openNotebookScreen` đẩy `NotebookScreen` trên route riêng. Hai đầu của luồng (ghi ở check-in, đọc + nhãn ở Sổ tay) đều còn mắc. |
-| 6 | configuration guide (rule 12a) | **NOT_REQUIRED — đúng** | Thay đổi cấu hình duy nhất của toàn requirement là dòng asset dir ở gate 4. Không env var, không secret, không dependency mới, không third-party, không bước thiết lập thủ công. `req_master.md` `## Configuration Documentation` `Status: NOT_REQUIRED` khớp với phạm vi đã đổi. |
-| 7 | `## Integration Build & Runtime` (rule 12g3) | **MISSING — F-I1** | Không có file nào dưới `integration-review/` chứa hai dòng đó. `req_master.md` không có `Integration-Verify: WAIVED`. |
-| 8 | `mobile-visual-audit.md` cấp requirement (rule 12g2) | **MISSING — F-I2** | `integration-review/` không có file này. Mọi requirement mobile trước đó (REQ-001, 002, 007, 009, 010, 011, 012, 016) đều có. |
-| 9 | visual fidelity per story (12e2/12e3) | **PASS — không mở lại** | `visual-fidelity/visual-fidelity-report.md:3` `VISUAL_FIDELITY: PASS`; story review đã mở ảnh ra nhìn và tự chạy lại gate kèm negative control. Gate 8 là kiểm cross-screen riêng, **không** thay gate này theo chiều nào (rule 12g2). |
-| 10 | bằng chứng runtime/entry-point cấp story còn đúng cho cây merge | **PASS** | `coding-plan/test-results.md:788-856` `## Entry Point Reachability` (`Reachable: YES` cả hai bề mặt), `:858-914` `## Story Runtime Startup Smoke`, `:916-931` `## AC-5 — Deviation đã khai báo`. Vì cây merge trùng khít cây story tip (gate 1), bằng chứng này không bị cũ đi bởi merge. Nó là **đầu vào** cho F-I1, không phải sự thay thế. |
+| Khung đã mở | Thấy gì | Có mâu thuẫn verdict không |
+|---|---|---|
+| `23h-vua-ve-j8-capture-block-empty.png` | Màn check-in thật (app thật, cờ DEBUG). Khối hỏi "Hôm nay biết thêm gì về người ấy?" + "Tuỳ chọn" nằm **sau** thẻ ảnh và **sau** khối "Một câu để giữ tối nay". Ô nhập rỗng, không điền sẵn. Hai chip mô tả STORY-012 ("+ ghi vào sổ tay", "chỉ mình đọc") còn nguyên | Không — khớp AC-1, AC-2, AC-6, AC-7 |
+| `23h-vua-ve-j8-capture-block-filled.png` | Đã gõ chữ; đúng **hai** chip "Sở thích"/"Sự kiện", một chip đang chọn. Không loại thứ ba, không trường chấm điểm, không câu hỏi thứ hai | Không — khớp AC-3, AC-17 |
+| `2-so-tay-nguoi-yeu-origin-label-grouped.png` | Màn "Sổ tay người yêu". Mục từ check-in nằm trong nhóm "Sở thích" kèm dòng phụ "từ buổi hẹn Ca phe sach Ho Tay"; **ngay dưới** là mục thủ công `smoke_test_entry` **không có nhãn**. Chỉ hai nhóm, không nhóm thứ ba. Cả hai mục đều có "..." | Không — khớp AC-4, AC-9, BR-11, và chứng minh nhãn là thuộc tính **cộng thêm** |
+| `shell-nav-hub-bottom-nav-no-new-route.png` | Hub thật, bottom nav đúng 4 đích "Muốn làm / Ý tưởng / Sổ tay / Nhật ký", không tab/tile/route mới cho REQ-017 | Không — khớp khai báo "không thêm điểm vào nào" |
+
+Không khung nào là màn lỗi, spinner, placeholder, hay nhầm màn. Chữ sản phẩm hiển thị đủ dấu tiếng
+Việt ở mọi khung tôi mở ("Sở thích", "Sự kiện", "từ buổi hẹn", "Tuỳ chọn", "Nhật ký") — không ô tofu.
+Điều này khớp với `L-1` mà audit tự khai: chỉ **dữ liệu người kiểm tự gõ** là ASCII không dấu
+(`Ca phe sach Ho Tay`), do `adb shell input text` ném NPE với dấu tiếng Việt; chữ của sản phẩm nạp từ
+content pack nên không bị ảnh hưởng. Khai báo này đúng với những gì nhìn thấy.
+
+Hai điểm khác đã kiểm:
+- Audit chụp ở `cdbbb1f0`, HEAD hiện tại là `646ec1ef`; chênh lệch giữa hai commit chỉ là chính các
+  file audit (`git diff --name-status` tôi tự chạy). Bản dựng đang chạy trên máy là source-identical
+  với HEAD được audit.
+- Tên file cố ý tránh tiền tố `implemented-` / `design-reference-` (:166-170) nên gate ghép đôi
+  visual-fidelity cấp story không nhận nhầm các khung cross-screen này thành bằng chứng fidelity của
+  story. Đây là quyết định đúng, không phải né gate.
+
+## Integration gates (giữ nguyên từ pass 1, đã tái xác nhận)
+
+| # | Gate | Kết quả |
+|---|---|---|
+| 1 | merge nhập trọn vẹn | **PASS** — `git diff dd46d89d..HEAD` rỗng tại merge; cây merge trùng khít cây story tip |
+| 2 | không divergence với `main` trên file cùng chạm | **PASS** — `zodiac_shell_resolver.dart` (giao điểm BUG-20260927-001/BR-16) giống hệt bản vá của `main` |
+| 3 | schema/migration cộng thêm, tuần tự | **PASS** — `cupid_database.dart:86` `schemaVersion => 11` (bản `main` là `10`); bước nâng ở `:153`. Nay có thêm bằng chứng **chạy thật** từ F-I1 |
+| 4 | asset/pack mới phân giải được lúc chạy | **PASS** — `pubspec.yaml` thêm đúng một dòng `assets/data/req017/`; `checkin_capture_content.dart:9` khớp |
+| 5 | luồng end-to-end còn nguyên sau merge | **PASS** — đọc code ở pass 1 (`evening_check_in_sheet.dart:369-380`, `:753`; `context_notebook_entry_point.dart:85-90`); nay có thêm xác nhận **bằng ảnh** ở F-I2 |
+| 6 | configuration guide (rule 12a) | **NOT_REQUIRED — đúng** |
+| 7 | `## Integration Build & Runtime` (rule 12g3) | **PASS — F-I1 đóng** |
+| 8 | `mobile-visual-audit.md` cấp requirement (rule 12g2) | **PASS — F-I2 đóng** |
+| 9 | visual fidelity per story (12e2/12e3) | **PASS — không mở lại** |
 
 ## Blocking findings
 
-### F-I1 — thiếu `## Integration Build & Runtime` trên nhánh merge (rule 12g3)
-
-- **Bề mặt rủi ro**: app lifecycle + persistence/schema/migration. Đây là requirement nâng drift
-  `schemaVersion` 10 → 11, tức rủi ro thật là máy đã có dữ liệu ở v10 mở app lần đầu sau cập nhật.
-- **Đang có gì**: bằng chứng cấp story ở `test-results.md:858-914` (build → `uninstall -k` + cài đè
-  giữ data → khởi chạy nguội hai lượt → ảnh màn mở → quét 972 dòng logcat), đã được story review đối
-  chiếu và chốt ĐÓNG.
-- **Còn thiếu gì**: chính hai dòng verdict trên **nhánh merge**, trong một file dưới
-  `integration-review/`. `Runtime: NOT_APPLICABLE` không phải pass.
-- **Vì sao không hạ xuống DEFERRED**: rule 12c cấm ghi `DEFERRED_ONLY` cho gate là bằng chứng chính
-  của hành vi đã đổi, và DONE gate cưỡng chế 12g3 độc lập — trả `DEFERRED_ONLY` ở đây chỉ dồn tắc
-  sang bước đóng requirement.
-
-### F-I2 — thiếu `integration-review/mobile-visual-audit.md` cấp requirement (rule 12g2)
-
-- **Bề mặt rủi ro**: mobile navigation/discoverability + cross-screen consistency. Requirement sửa
-  hai màn REQ-016 đang chạy (`23h-vua-ve-j8` và `2-so-tay-nguoi-yeu`) chứ không thêm màn mới, nên
-  đúng loại rủi ro mà ảnh chụp một màn của story không bắt được: khối hỏi mới đẩy layout màn check-in,
-  và nhãn xuất xứ mới thêm dòng vào mỗi mục Sổ tay.
-- **Phạm vi đủ**: hẹp — hai màn đó cộng shell/nav quanh chúng. Không cần quét lại toàn app.
-- **Ranh giới vai**: chụp thiết bị/emulator thuộc mobile-dev (rule 12e3). Reviewer không chụp lại và
-  không tự viết verdict.
-- **Nếu Scrum Master phán quyết `NOT_APPLICABLE`**: đó là quyền của Scrum Master và phải ghi vào
-  `req_master.md` để đọc lại được. Báo cáo này không tự suy ra miễn trừ đó — rule 12g2 không có ngoại
-  lệ cho requirement một story, và tám requirement mobile trước đều có artifact này.
+Không có.
 
 ## Deferred findings
 
-Toàn bộ carry-forward của story review được mang sang **nguyên trạng**, không mở lại, không đổi
-phân loại: R-1 (AC-8(i) sub-frame dedup latch, tuỳ chọn), F-2 (migration `else if` maintainability —
-đã đối chiếu: đúng `cupid_database.dart:153`, đúng ở v11, chỉ là nợ cho lần thêm cột sau), F-5 (gate
-asymmetry required-id — khớp doc-comment `context_content_gate.dart:47`), P3-U1, P3-U2, O-4, O-5, và
-ghi chú prose cũ ở `coding-plan/phase-P4-notebook-origin-label.md` §4:86. Deviation AC-5 "đổi loại"
-đã là deviation user chấp thuận (Option B, `test-results.md:916-931`) — **không** mở lại.
+### D-I3 — nhãn dòng `- Build:` lệch dạng literal mà rule 12g3 trích (nên xử lý TRƯỚC khi chạy DONE gate)
 
-Thêm hai ghi chú cấp requirement phát sinh từ pass này:
+Rule 12g3 trích nguyên văn hai dòng bắt buộc: `- Build: PASS — <command + result>` và
+`- Runtime/Smoke: PASS — <startup smoke command + result>`. Trong `build-runtime-evidence.md`:
 
-- **D-I1 — dòng registry lệch trạng thái.** `req_master.md` `## User Stories` ghi STORY-001
-  `Status: TODO`, trong khi `story_master.md:3` là `IN_PROGRESS` và story đã review-pass + merge.
-  Dòng cũ này là thứ khiến một story đã giao bị điều phối lại. Scrum Master sở hữu cập nhật (rule 17).
-- **D-I2 — topology merge-về-main.** `main` tip `70ddb8b8` **không** là ancestor của integration HEAD
-  (nhánh cắt từ `908d22d8`), nhưng nội dung bản vá `70ddb8b8` có mặt nguyên văn trong cây (gate 2).
-  Nên merge về `main` sẽ là merge thật chứ không fast-forward, và theo nội dung thì không có xung đột
-  nào phải giải. Ghi lại để lần merge đó không bị đọc nhầm là divergence.
+- dòng runtime đúng literal: `- Runtime/Smoke: PASS — …` (:36)
+- hai dòng build lại chèn ngoặc **trước** dấu hai chấm:
+  `- Build (pre-migration baseline, schemaVersion 10): PASS —` (:15) và
+  `- Build (this Worktree's actual HEAD, schemaVersion 11): PASS —` (:30)
+
+Về **nội dung** thì đạt và còn vượt yêu cầu (hai lần build thay vì một), và verdict vẫn là từ đầu
+tiên sau dấu hai chấm — nên đây **không** phải "thiếu bằng chứng build/runtime", và không kích hoạt
+`PATCH_REQUIRED` của 12g3. Rủi ro là ở chỗ khác: DONE gate cưỡng chế 12g3 **độc lập**, và hook trong
+repo này nhiều lần được đo là khớp **chuỗi nhãn cố định** chứ không hiểu nghĩa. Nếu
+`validate-done-gate.sh` khớp tiền tố literal `- Build: PASS`, dạng có ngoặc sẽ vô hình với nó và
+requirement sẽ bị chặn ở bước đóng.
+
+Tôi **không đo được** điều này: Reviewer không được đọc `.claude/hooks/**`, nên đây là rủi ro đã nhận
+diện chứ không phải lỗi đã đo. Cách gỡ rẻ nhất là một dòng: thêm vào cùng mục
+`## Integration Build & Runtime` một dòng đúng literal, ví dụ
+`- Build: PASS — flutter build apk --debug --split-per-abi, hai lần (v10 baseline và v11 HEAD), chi tiết hai gạch đầu dòng dưới đây`,
+giữ nguyên hai dòng hiện có. Chủ sở hữu file là lane đã tạo nó (mobile-dev/devops); ngoài WriteScope
+của Reviewer nên báo cáo này không tự sửa. Làm trước khi chạy DONE gate thì mất một dòng; bỏ qua thì
+rủi ro mất một vòng chặn ở DONE.
+
+### D-I1 — bản sửa dòng registry nằm sai nhánh (nguy cơ xung đột ở `land-integration`)
+
+Pass 1 nêu dòng STORY-001 trong `req_master.md` `## User Stories` bị kẹt ở `TODO`. Bản sửa **đã tồn
+tại nhưng ở nhánh khác**, và đây mới là điểm cần lưu ý:
+
+- control checkout (`cupid-apps/`, trên `main`, **chưa commit**), `req_master.md:19`:
+  `| STORY-001 | … | standard | IN_PROGRESS (review DEFERRED_ONLY, merged vào integration branch — chờ Integration Review) | … |`
+- worktree integration (`codex/REQ-017_…-integration` @ `646ec1ef`), **cùng dòng 19**:
+  `| STORY-001 | … | standard | TODO | … |`
+
+Hai phiên bản khác nhau trên **đúng cùng một dòng** của cùng một file. Vì
+`land-integration` là merge thật (xem D-I2, không fast-forward), dòng 19 này là ứng viên xung đột
+merge duy nhất mà tôi thấy trong toàn requirement — hoặc tệ hơn, `TODO` từ nhánh integration ghi đè
+bản sửa nếu giải xung đột theo hướng "lấy nhánh đang merge". Nên commit/stash bản sửa ở control
+checkout một cách có chủ đích **trước** khi land, và kiểm lại dòng 19 **sau** khi land. Scrum Master
+sở hữu cả file lẫn thao tác merge (rule 17).
+
+### D-I2 — topology merge-về-main (từ pass 1, thông tin)
+
+`main` tip `70ddb8b8` không phải ancestor của integration HEAD (nhánh cắt từ `908d22d8`), nhưng nội
+dung bản vá `70ddb8b8` có mặt nguyên văn trong cây. Merge về `main` sẽ là merge thật chứ không
+fast-forward, và theo nội dung thì không có xung đột phải giải. Ghi lại để lần merge đó không bị đọc
+nhầm là divergence.
+
+### A-1 — chip loại bị CTA ghim che một phần (thông tin, không phán quyết ở pass này)
+
+Do mobile-dev nêu trong `mobile-visual-audit.md:99-109` dưới dạng advisory, và Scrum Master đã nêu rõ
+đây không phải việc pass này phán quyết. Tôi có mở khung
+`23h-vua-ve-j8-capture-block-kind-chips-occluded.png`: mô tả **khớp** với ảnh — hàng chip bị nút ghim
+"Lưu vào nhật ký" cắt mất phần dưới nhưng nhãn vẫn đọc được và phần trên vẫn chạm được, đúng là
+advisory chứ không phải defect bị nói giảm. Ghi lại ở đây để nó không rơi mất, theo dõi như quan sát
+UX deferred trên màn check-in, không mở lại STORY-001.
+
+### Carry-forward cấp story (giữ nguyên trạng, không mở lại)
+
+R-1 (AC-8(i) sub-frame dedup latch, tuỳ chọn), F-2 (migration `else if` maintainability), F-5 (gate
+asymmetry required-id), P3-U1, P3-U2, O-4, O-5, và ghi chú prose ở
+`coding-plan/phase-P4-notebook-origin-label.md` §4:86. Deviation AC-5 "đổi loại" là deviation user
+chấp thuận (Option B) — không mở lại.
 
 ## Traceability
 
-- **Merged stories / merge refs**: bảng `## Merged stories và story review`. Merge commit
-  `a15bde4f`, parents `908d22d8` (main-side) ⊕ `dd46d89d` (story tip).
-- **Story review reports**: `STORY-001_checkin_notebook_capture/review/review-report.md`
-  (`Outcome: DEFERRED_ONLY`) cùng bốn slice `slice-p1-schema.md`, `slice-p2-content-pack.md`,
-  `slice-p3-capture-ui.md`, `slice-p4-origin-label.md`. AC-1..AC-17 đã có verdict ở
-  `## Traceability — AC → slice chốt → verdict` của báo cáo đó; pass này không chấm lại.
-- **Integration evidence**: git diff/ancestry đã nêu trong bảng gate; `test-results.md` ba mục
-  :788-856, :858-914, :916-931; `visual-fidelity/visual-fidelity-report.md:3`.
-- **Runtime/configuration**: `req_master.md` `## Configuration Documentation` `NOT_REQUIRED` — xác
-  nhận đúng (gate 6). `## Deployment Status` vẫn `NOT_DEPLOYED`/`NOT_REQUESTED`, phù hợp: không có
-  triển khai nào được yêu cầu trong requirement này.
-- **Cross-story contracts**: không có (một story). Hợp đồng **cross-requirement** đã kiểm: BR kế thừa
-  REQ-016 R-1f (không xuất/chia sẻ), SC-3 (không điền sẵn), R-15 (nội dung có id bền qua cổng nhập),
-  BR-12 (không ghi vào thẻ) — đều đã do story review chốt PASS ở AC-6/AC-9/AC-14/AC-15; tầng
-  integration chỉ xác nhận không có gì trong merge phá chúng (gate 2 và gate 4).
-- **OQ discipline**: `req_master.md` `## User Decisions` — OQ-1, OQ-2, A-5 đều RESOLVED 2026-09-27;
-  `story_master.md` `## Open Question Impact` không ghi phạm vi nào bị chặn. Không lỗi OQ (rule 12).
+- **Merged story / merge ref**: STORY-001_checkin_notebook_capture (`standard`), story review
+  `Outcome: DEFERRED_ONLY`; merge `a15bde4f` (parents `908d22d8` ⊕ `dd46d89d`). Requirement một
+  story nên không có bề mặt cross-story; AC-1..AC-17 đã có verdict ở story review và pass này không
+  chấm lại (rule 16a).
+- **Integration evidence**: `integration-review/build-runtime-evidence.md` (F-I1);
+  `integration-review/mobile-visual-audit.md` + `integration-review/mobile-screenshots/` (F-I2,
+  8 khung, 4 khung đã được Reviewer mở xem); git diff/ancestry nêu trong bảng gate.
+- **Runtime/configuration**: `req_master.md` `## Configuration Documentation` `NOT_REQUIRED` — đúng
+  với phạm vi (thay đổi cấu hình duy nhất là một dòng asset dir). `## Deployment Status` vẫn
+  `NOT_DEPLOYED`/`NOT_REQUESTED`, phù hợp.
+- **Cross-requirement contracts**: BR kế thừa REQ-016 — R-1f (không xuất/chia sẻ), SC-3 (không điền
+  sẵn), R-15 (nội dung có id bền), BR-12 (không ghi vào thẻ) — đã do story review chốt PASS; tầng
+  integration xác nhận merge không phá chúng (gate 2, gate 4), và audit F-I2 xác nhận bằng ảnh rằng
+  không có nhóm/route/trường mới nào xuất hiện.
+- **OQ discipline**: OQ-1, OQ-2, A-5 đều RESOLVED 2026-09-27 trong `req_master.md`
+  `## User Decisions`; không phạm vi nào bị chặn. Không lỗi OQ (rule 12).
 
 ## Action items
 
-1. **[mobile-dev hoặc devops — integration-verification pass]** F-I1: trên nhánh
-   `codex/REQ-017_checkin_notebook_capture-integration` (không phải nhánh story), chạy một lần build
-   thật và một lần khởi chạy thật, rồi ghi vào **một file** dưới
-   `data/requirements/REQ-017_checkin_notebook_capture/integration-review/` (tiền lệ REQ-016 đặt tên
-   `build-runtime-evidence.md`) một mục `## Integration Build & Runtime` chứa cả hai dòng, verdict là
-   từ đầu tiên sau dấu hai chấm:
-   - `- Build: PASS — <lệnh + kết quả>`
-   - `- Runtime/Smoke: PASS — <lệnh khởi chạy + kết quả>`
-   Smoke cần đúng rủi ro của requirement này: cài **đè** lên bản đã có dữ liệu v10 (giữ data) rồi
-   khởi chạy, để chứng minh nâng `schemaVersion` 10 → 11 không crash — cài sạch che mất chính rủi ro
-   đó. `Runtime: NOT_APPLICABLE` không được tính là pass.
-2. **[mobile-dev — mobile visual audit]** F-I2: tạo
-   `data/requirements/REQ-017_checkin_notebook_capture/integration-review/mobile-visual-audit.md`,
-   phạm vi hẹp ở hai màn đã đổi (`23h-vua-ve-j8` với khối hỏi mới, `2-so-tay-nguoi-yeu` với nhãn xuất
-   xứ) cộng shell/nav quanh chúng. Đây là kiểm cross-screen, không phải chụp lại per-story (ảnh
-   per-story đã PASS và không được chụp lại).
-3. **[Scrum Master]** D-I1: sửa dòng STORY-001 trong `req_master.md` `## User Stories` cho khớp
-   trạng thái thật sau story review + merge. Nếu phán quyết F-I2 là `NOT_APPLICABLE`, ghi phán quyết
-   đó vào `req_master.md` để đọc lại được, thay vì để artifact vắng mặt không lý do.
+1. **[mobile-dev hoặc devops — một dòng]** D-I3: thêm một dòng đúng dạng literal `- Build: PASS — …`
+   vào mục `## Integration Build & Runtime` của `build-runtime-evidence.md`, giữ nguyên hai dòng
+   build chi tiết hiện có. Nên làm **trước** khi Scrum Master chạy DONE gate.
+2. **[Scrum Master]** D-I1: xử lý bản sửa dòng 19 `req_master.md` đang treo chưa commit ở control
+   checkout **trước** khi chạy `land-integration`, và kiểm lại dòng đó **sau** khi land — đây là
+   dòng duy nhất trong requirement có hai nội dung khác nhau ở hai nhánh sắp merge.
+3. **[Scrum Master]** A-1: ghi nhận như quan sát UX deferred trên màn check-in (không mở lại
+   STORY-001), để nó vào đúng hàng đợi thay vì nằm lại trong file audit.
 4. **[không bắt buộc]** dọn nợ prose đã ghi nhận: `phase-P4-notebook-origin-label.md` §4:86 và O-4.
 
 ## Khuyến nghị trạng thái
 
-- `Review (Reviewer)` cấp requirement: để **chưa tick**.
-- Requirement status: `IN_PROGRESS` (không phải `DONE`). Requirement chỉ đóng được sau khi F-I1 và
-  F-I2 có artifact, và Scrum Master sở hữu việc chuyển trạng thái (rule 17).
-- Nhánh story: đã merge sạch, **không** cần rework code và **không** cần trả story về lane nào. Hai
-  action item là bằng chứng cấp requirement trên nhánh integration, không phải defect trong
-  `mobile/lib/**`.
-- Sau khi F-I1/F-I2 xong, một pass `completion/resume` hẹp trên đúng báo cáo này là đủ — không cần
-  review lại từ đầu, và không đọc lại `mobile/lib/**` hay bốn slice story.
+- `Implementation (Development)`: giữ tick.
+- `Review (Reviewer)` cấp requirement: **có thể tick** — `DEFERRED_ONLY`.
+- Requirement status: **`DONE`** được, sau khi D-I3 xử lý xong (một dòng) và Scrum Master xác nhận
+  báo cáo này. Scrum Master sở hữu việc chuyển trạng thái (rule 17).
+- Không story nào cần trả về lane nào; không cần rework code.

@@ -12,6 +12,8 @@ Runtime id: `mobile-app` (`data/devops/system/runtime-command-registry.json`)
 
 ## Integration Build & Runtime
 
+- Build: PASS — flutter build apk --debug --split-per-abi, run twice (v10
+  baseline and v11 Worktree HEAD), full detail in the two dated bullets below.
 - Build (pre-migration baseline, schemaVersion 10): PASS —
   `flutter pub get && flutter build apk --debug --split-per-abi` run from
   `mobile/` in a separate scratch worktree
