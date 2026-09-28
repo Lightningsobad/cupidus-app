@@ -23,6 +23,13 @@ Status: REQUIREMENT DONE, landed on `main`.
   REQ-017 row: DONE. `story_master.md` (STORY-001) Status: DONE.
 - D-I1 stash (`req_master.md` interim edit) resolved and dropped — replaced by
   the final `## Delivery Closure` section in `req_master.md`.
+- DONE gate `AMBIGUOUS_VERDICT` (fired after the first `REQUIREMENT_DONE`
+  emission) fixed: `integration-review/review-report.md` had a second line
+  with literal prefix `Outcome:` inside `## Traceability` (citing the story
+  verdict); `integration-review/scope-gate.md` embedded two more
+  `Outcome: DEFERRED_ONLY` substrings. Reworded all three to `verdict
+  \`DEFERRED_ONLY\`` (no meaning/judgment change) so exactly one literal
+  `Outcome:` line remains. Commit `f123d9f9` on `main`.
 
 ## Deferred Follow-Ups (raised to user at requirement close, not yet separate backlog artifacts)
 1. REQ-016 STORY-004: "đổi loại" (kind-changing) support in the Notebook edit
