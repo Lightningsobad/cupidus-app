@@ -6,7 +6,10 @@ install-over-existing-data migration smoke (not a fresh install), because this
 requirement's core change is a Drift `schemaVersion` bump (10 → 11).
 
 Branch: `codex/REQ-017_checkin_notebook_capture-integration`
-HEAD verified: `c41c1556583e90c6e9627bd0af002124a8951a22`
+HEAD verified: `e1012284cb3d398b36974d91f0e33f98e2ae06f7` (sync-merge of `main`
+  commit `70ddb8b88569a1661d9a41568c8dad53060` into this integration branch;
+  see `### Post-Sync Resync Verification` below — previously verified at
+  `c41c1556583e90c6e9627bd0af002124a8951a22`)
 Date: 2026-09-28
 Runtime id: `mobile-app` (`data/devops/system/runtime-command-registry.json`)
 
@@ -156,3 +159,99 @@ build directly over a real, app-generated v10 database:
 Together, (3) and (4) confirm the v10 → v11 Drift migration ran during the
 install-over launch with no error and with full data survival — this is the
 specific risk F-I1 was raised to cover.
+
+### Post-Sync Resync Verification (2026-09-28, HEAD `e1012284`)
+
+`.claude/hooks/git-story-boundary.sh sync-integration --req
+REQ-017_checkin_notebook_capture` merged `main` (commit `70ddb8b8`, the BR-16
+zodiac_shell_resolver doc-comment reword) into this integration branch,
+producing merge commit `e1012284cb3d398b36974d91f0e33f98e2ae06f7`
+(first-parent `0e482f8e`, second-parent `70ddb8b8`). This is a history-only
+sync — repo policy requires fresh build + runtime evidence at the new HEAD
+regardless, so this section documents that independently of the prior
+`c41c1556` pass rather than replacing it.
+
+**Empty-diff proof:**
+
+```
+$ git -C <Worktree> diff --stat 0e482f8e..HEAD
+(empty output)
+
+$ git -C <Worktree> log --oneline 0e482f8e..HEAD
+70ddb8b8 fix(BUG-20260927-001): reword zodiac_shell_resolver doc comment to clear BR-16
+
+$ git -C <Worktree> log -1 --format='%H %P' HEAD
+e1012284cb3d398b36974d91f0e33f98e2ae06f7 0e482f8e49f5f413ffeedaea5bea0008cea797e3 70ddb8b88569a1661d9a41568c8dad53060...
+```
+
+Confirms zero file-content change entered the tree by this sync — the merge's
+second-parent content (`70ddb8b8`) was already present in the integration
+branch before the sync, matching Scrum Master's and Iris-QC's independent
+verification.
+
+- **Build (resync, HEAD `e1012284`): PASS** — `flutter pub get && flutter
+  build apk --debug --split-per-abi --dart-define=CUPID_API_BASE_URL=http://10.0.2.2:21020`
+  run from `mobile/` in the assigned Worktree at the new HEAD. Produced:
+  - `build/app/outputs/flutter-apk/app-armeabi-v7a-local-debug.apk`
+  - `build/app/outputs/flutter-apk/app-arm64-v8a-local-debug.apk`
+  - `build/app/outputs/flutter-apk/app-x86_64-local-debug.apk`
+  Only the same pre-existing, non-fatal Gradle/KGP notices as every prior
+  pass (native-access restriction, KGP-application notice for `home_widget` /
+  `mobile_scanner` / `sign_in_with_apple`) — no compile error, no task
+  failure. Gradle task `assembleLocalDebug` completed in 16.2s.
+- **Runtime/Smoke (resync, HEAD `e1012284`): PASS** — install-over-existing
+  data on `emulator-5554` (no uninstall), confirming the app still launches
+  cleanly on top of the DB state already on the device from the prior F-I1
+  pass:
+  1. Pre-install device state check: the device's `app_flutter/cupid.sqlite`
+     (172032 bytes) and `shared_prefs/FlutterSharedPreferences.xml` (seeded
+     auth session) were both still present and non-empty before this
+     install — the prior pass's v10→v11 migration data was not lost, so a
+     full from-scratch pre-migration data seed was not needed per the
+     handoff's allowance.
+  2. `adb install -r build/app/outputs/flutter-apk/app-arm64-v8a-local-debug.apk`
+     (this pass's fresh build) — `Success`, no prior uninstall.
+  3. `adb shell am force-stop com.snapsofts.cupid` then `adb shell am start
+     -W -n com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity` —
+     `Status: timeout`, `LaunchState: UNKNOWN (-1)`, `WaitTime: 14145`. As in
+     the prior pass, this reflects `am start -W`'s full-window-draw wait
+     timing out on cold-start work, not a launch failure — the readiness
+     probe below confirms the activity was actually resumed.
+  4. `adb shell "dumpsys activity activities | grep -m 1 ResumedActivity"`
+     (~3s after launch) — matched
+     `topResumedActivity=ActivityRecord{... com.snapsofts.cupid/com.snapsofts.cupid_mobile.MainActivity ...}`,
+     confirming foreground/resumed. `adb shell pidof com.snapsofts.cupid`
+     returned a single live pid (`32467`), confirming no crash-restart loop.
+  5. `adb logcat -d -t 500 "*:E"` after launch — 39 content lines total
+     (`/tmp/req017_resync_crash_scan.txt`), all accounted for:
+     - 31 lines: `GeneratedPluginRegistrant: Error registering plugin
+       flutter_facebook_auth ... The SDK has not been initialized ...` plus
+       its stack trace — the same known pre-existing non-fatal
+       plugin-registration warning documented in the prior pass (no Facebook
+       App ID in local/debug builds); does not affect app launch, navigation,
+       or the Drift database layer.
+     - 1 line: `FrameTracker: force finish cuj, time out:
+       J<DEFAULT_TASK_TO_TASK_ANIMATION>` — Android system compositor
+       animation-tracking noise, unrelated to `com.snapsofts.cupid`.
+     - 7 lines: `TraceManagerImpl: Trace Broadcast to
+       com.google.android.apps.wellbeing...PackageFullyRemovedCoalescedBroadcast_Receiver
+       ... timed out` plus its trace — Google Digital Wellbeing's own
+       system-level broadcast-trace telemetry, unrelated to
+       `com.snapsofts.cupid` or Drift.
+     - Zero `AndroidRuntime`/`FATAL` lines (`grep -n -m 5
+       "AndroidRuntime\|FATAL"` → 0 matches). Zero lines mentioning `drift`,
+       `migration`, `onUpgrade`, `schema`, `cupid_database`,
+       `VmMigrationException`, or `MigrationError` (`grep -n -m 5` on that
+       pattern set → 0 matches). No crash.
+  6. Post-launch DB state re-extracted (`adb exec-out run-as
+     com.snapsofts.cupid cat app_flutter/cupid.sqlite >
+     /tmp/req017_resync_db_check.sqlite`, deleted after inspection):
+     `PRAGMA user_version` = **`11`** (already-migrated state preserved — this
+     install-over did not need to re-run the v10→v11 migration since the
+     on-device DB was already at v11 from the prior F-I1 pass, exactly as the
+     empty-diff proof predicts), `journal_entries` = 1 row, `notebook_entries`
+     = 2 rows (one additional row vs. the prior pass's snapshot, consistent
+     with intervening manual/QC interaction with the notebook feature on this
+     shared emulator between passes — not a migration artifact, since no
+     migration ran).
+  7. Clean shutdown: `adb shell am force-stop com.snapsofts.cupid`, exit 0.
