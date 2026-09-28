@@ -1,6 +1,6 @@
 # Story Review — STORY-001 Ghi điều mới biết về người ấy vào sổ tay trên màn check-in 23h
 
-Outcome: PATCH_REQUIRED
+Outcome: DEFERRED_ONLY
 
 - Review type: `final-synthesis` (Tier 3, pass 5 of 5 — sau 4 slice `scoped-slice`)
 - Story: `STORY-001_checkin_notebook_capture` (REQ-017), Complexity `standard`, Lane `shared` (mobile-only trên thực tế)
@@ -208,14 +208,54 @@ incomplete), vì Option B sẽ đòi một pass sửa UI sửa-mục của REQ-0
 | O-1/O-2 của Slice 3 (đường dẫn handoff sai, AC-13 thuộc P4) | CLOSED, đã tự sửa trong slice. AC-13 chốt PASS ở P4-A7. |
 | O-2/O-6..O-9 của Slice 4 | Không cần hành động (nit artifact + ghi chú kiểm ảnh bằng mắt). |
 
+## Completion/Resume Closure
+
+Pass hẹp, sau khi A-1/A-2 (mobile-dev) và A-3 (Scrum Master, quyết định user) đã đóng. Không chạy lại
+4 slice, không đụng AC-1..AC-17/R-1/F-1..F-6, không đụng `mobile/lib/**`.
+
+- **B-1 (Story Runtime Startup Smoke) — ĐÓNG.** `coding-plan/test-results.md:858-914` là chuỗi build →
+  cài đè (giữ data, `uninstall -k` + `install -r`, đúng kịch bản nâng cấp — không phải cài sạch) →
+  khởi chạy nguội hai lượt → ảnh màn mở ra nhìn → quét crash log 972 dòng logcat. Đã đối chiếu trực
+  tiếp với code: chuỗi callback thông báo → `_openFromPayload` → `EveningCheckInSheet.show` →
+  `CheckinCaptureBlock` khớp đúng `evening_check_in_sheet.dart:714, 720-767, 141-156, 369-380` (đọc
+  trực tiếp, không phải suy luận từ prose). Ảnh #2 sau khi bắc cầu cổng cho thấy Home thật với đủ 4
+  tab, xác nhận DB đã qua migration `schemaVersion` 10 → 11 từ bản cài cũ mà không crash — đúng rủi ro
+  mà rule 12g nhắm tới, không phải cài sạch che giấu lỗi migration. Phương pháp quét crash (logcat -c
+  trước lượt #1, -d -v brief sau ảnh #2, đối chiếu 4 mẫu FATAL/AndroidRuntime/ANR/E-flutter và quét tên
+  gói trong toàn bộ dòng E/W) là thật, không phải liệt kê hình thức. Bảng nhất quán nội tại: pid khác
+  nhau giữa hai lượt (`28218` → `28324`, không lượt nào chết giữa), ảnh #1 là lỗi bắc cầu cổng đã biết
+  (đúng tiền lệ REQ-016 STORY-012), không phải crash.
+- **B-2 (Entry Point Reachability) — ĐÓNG.** `coding-plan/test-results.md:788-856` khai `Reachable: YES`
+  cho cả hai bề mặt. Đã đối chiếu trực tiếp với code, không chỉ tin theo prose:
+  - Bề mặt 1 (khối hỏi màn check-in 23h): `evening_check_in_sheet.dart:714` (`onSelected`), `:720-767`
+    (`_openFromPayload`, `loadCheckInCaptureCopy()` ở dòng 753 — báo cáo ghi 750, lệch 3 dòng, không
+    ảnh hưởng chuỗi), `:141-156` (`EveningCheckInSheet.show`), `:369-380` (mount `CheckinCaptureBlock`)
+    — cả bốn mắt xích đọc khớp nguyên văn.
+  - Bề mặt 2 (nhãn xuất xứ màn Sổ tay): `home_screen.dart:380-389` (tab Sổ tay),
+    `context_notebook_entry_point.dart:85-90` (`openNotebookScreen`), `notebook_screen.dart:110-129`
+    (`_originLabels`), `:394` (`label = originLabel`), `:421-428` (`Text` với
+    `Key('notebook-entry-origin-${entry.id}')`) — tất cả khớp nguyên văn.
+  - Không thêm route/điểm vào nào, đúng khai báo `master-plan.md:70-73`. Gap bằng chứng đã bù đúng
+    như A-2 yêu cầu.
+- **A-3 (AC-5 "đổi loại") — ĐÓNG theo Option B của user.** `coding-plan/test-results.md:916-931` khai
+  deviation, giữ `AC-5` ở `PARTIAL` — khớp đúng dòng Traceability trong báo cáo này ("PARTIAL — nửa
+  'đổi loại' không đạt, F-7, deferred"), không sửa câu chữ AC-5, không tự ý nâng lên PASS. Section ghi
+  rõ quyết định là của user qua Scrum Master (2026-09-28) và một backlog item riêng sẽ mở qua luồng
+  ý tưởng/PO chuẩn, ngoài phạm vi story này — không mâu thuẫn với F-7 hay Traceability.
+  - Ghi chú không chặn: `phase-P4-notebook-origin-label.md` §4:86 (claim "đổi loại: đạt") mà F-7 nêu
+    vẫn chưa được sửa — section deviation mới nằm ở `test-results.md`, không đụng tới claim đó trong
+    phase file. Đây là nợ prose thuộc Option A cũ, không phải điều kiện đóng của Option B; không dùng
+    để chặn pass này, nhưng nên dọn khi thuận tiện (kế `O-4`).
+
 ## Khuyến nghị trạng thái
 
-- `Implementation (Development)`: **bỏ tick** — story trở về lane implementation để bù A-1/A-2.
-- `Review (Reviewer)`: để trống.
-- Story status: `IN_PROGRESS` (hiện đang là `TODO`, O-3).
-- Chưa merge nhánh story vào `codex/REQ-017_checkin_notebook_capture-integration` cho tới khi A-1, A-2,
-  A-3 xong và một pass review tiếp nhận ghi `Outcome: CLEAN` hoặc `DEFERRED_ONLY`.
-- Pass tiếp theo nên là `Reviewer: completion/resume` hẹp trên đúng báo cáo này: chỉ kiểm hai section
-  bằng chứng mới của A-1/A-2 và cách đóng A-3. Không cần chạy lại 4 slice.
+- `Implementation (Development)`: có thể tick — A-1/A-2 đã bù bằng chứng, A-3 đã đóng theo quyết định
+  user.
+- `Review (Reviewer)`: `DEFERRED_ONLY` — merge-eligible.
+- Story status: `IN_PROGRESS` → có thể chuyển tiếp theo lane kế tiếp của Scrum Master (không phải
+  `TODO`, O-3 vẫn đúng như đã ghi).
+- Nhánh story merge-eligible vào `codex/REQ-017_checkin_notebook_capture-integration`.
+- Carry-forward còn lại (R-1, F-2, F-5, P3-U1, P3-U2, O-4, O-5, ghi chú `phase-P4-notebook-origin-label.md`
+  §4:86 ở trên) đều DEFERRED/ACCEPTED-AS-IS, không chặn merge.
 
 REVIEW_COMPLETE
