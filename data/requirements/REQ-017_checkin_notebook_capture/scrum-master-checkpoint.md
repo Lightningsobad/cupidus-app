@@ -40,7 +40,24 @@ Status: REQUIREMENT DONE, landed on `main`.
    AC violated. Recorded as a deferred UX observation per Iris-QC's
    recommendation, not a STORY-001 reopen.
 
+## Deployment (2026-09-28)
+- `development-local`: DEPLOYED (automatic post-DONE, via `Frank-Devops`,
+  `Mode: requirement-deployment`). `deployment/deployment-log.md` created
+  (first deployment for this requirement). `req_master.md` `## Deployment
+  Status` `Development Environment: DEPLOYED`. Scoped `flutter test` green
+  (70 passed / 2 skipped), live APK build + install + launch smoke on
+  `emulator-5554`, no crash/error logcat signal, clean shutdown.
+  `configuration-guide.md` skipped — no new third-party/config surface.
+- Note: an earlier `Frank-Devops` idle-notification wrongly reported this task
+  as already done by citing the OLD `build-runtime-evidence.md` resync (commit
+  `04472512`). Scrum Master verified on disk that deployment had NOT run,
+  re-dispatched as a fresh spawn `Frank-Devops-2` (SendMessage continuation to
+  `devops` was blocked by `GIT_BOUNDARY_MISSING` — a story-boundary guard does
+  not fit a deploy-flow continuation with no active story), and confirmed the
+  real result against disk before accepting it.
+
 ## Do Not Re-read
-All REQ-017 artifacts are closed and committed on `main`. No further
-continuation expected for this requirement unless the two deferred follow-ups
-above are explicitly taken up.
+All REQ-017 artifacts are closed and committed on `main`, and
+`development-local` deployment is complete. No further continuation expected
+for this requirement unless the two deferred follow-ups above are explicitly
+taken up.

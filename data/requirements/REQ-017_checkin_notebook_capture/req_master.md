@@ -3,7 +3,12 @@ Status: DONE
 Ready-For-Delivery: YES
 
 ## Deployment Status
-- Development Environment: NOT_DEPLOYED
+- Development Environment: DEPLOYED (2026-09-28, automatic post-DONE; see
+  `deployment/deployment-log.md` — mobile-only; risk surfaces (schema
+  `schemaVersion` 10→11 migration, `checkin_capture.v1.json` content pack,
+  check-in 23h navigation mount) verified via scoped test suite plus a live
+  APK build/install/launch smoke on `emulator-5554`, no crash/error signal,
+  clean shutdown; backend-api unchanged)
 - Staging: NOT_REQUESTED
 - Production: NOT_REQUESTED
 
