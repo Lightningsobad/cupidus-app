@@ -127,11 +127,11 @@ background ambiguity is resolved as a capture artifact, not a product defect:
 `iosHarness()` in `journal_screen_test.dart` moved from an opaque
 `ColoredBox` to the product's own `MaterialApp.builder` +
 `CupidAppBackground(enableEffectsOverride: false)`, the same wrapper the
-accepted P4 frames use, and the re-captured `implemented-s1:diary-ios.png`
+accepted P4 frames use, and the re-captured `implemented-s1-diary-ios.png`
 shows the purple wash behind the header. `scaffoldBackgroundColor` and
 `CupidHeader.backgroundColor` are both transparent, so the wrapper reports
 what the pushed route really sits on. (2) The four uncited deltas: I opened
-the re-captured implemented frame and `design-reference-s1:diary-ios.png` side
+the re-captured implemented frame and `design-reference-s1-diary-ios.png` side
 by side. Dates now read `Thứ Năm 3/9` / `Thứ Tư 2/9` in the reference's warm
 relative form (`journalEntryDateLabel`, `journal_screen.dart`), against the
 reference's `Thứ Bảy 16/8` / `Thứ Ba 12/8`. The muted `colorSurfaceAlt`

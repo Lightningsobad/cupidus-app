@@ -368,7 +368,7 @@ misspelled `isExcludedFromBackupTYPO`) proving the check is not a no-op.
 The story had no `visual-fidelity/` directory and no `Design-Screen:` line, so
 the reference was resolved and rendered here rather than left for P3.
 
-`design-reference-s1:diary-ios.png` (416x900) is now in
+`design-reference-s1-diary-ios.png` (416x900) is now in
 `../visual-fidelity/`, and `Design-Screen: s1:diary` is recorded in
 `../story_master.md`.
 
@@ -398,7 +398,7 @@ carry prototype chrome.
 **Still open for P3:** there is no `implemented-*.png` and no
 `visual-fidelity-report.md` verdict, because no screen has been built. P2 is the
 data layer and its phase file declares `Per-story visual fidelity:
-NOT_APPLICABLE`. The P3 run must capture `implemented-s1:diary-*` against this
+NOT_APPLICABLE`. The P3 run must capture `implemented-s1-diary-*` against this
 reference and write the `VISUAL_FIDELITY:` verdict. No verdict was written here:
 a PASS or FAIL without a capture would assert a comparison nobody made.
 
@@ -463,7 +463,7 @@ All from the story worktree, `mobile/` as cwd, with
    → `+19 ~2: All tests passed!` (10 cubit + 9 widget; the 2 skips are the
    capture tests, which run only under `--dart-define=CAPTURE_VISUALS=true`).
 5. `flutter test test/features/journal/journal_screen_test.dart --dart-define=CAPTURE_VISUALS=true`
-   → `+11: All tests passed!`, writing both `implemented-s1:diary-*.png` files.
+   → `+11: All tests passed!`, writing both `implemented-s1-diary-*.png` files.
 
 Re-run and re-verified in the session that closed this phase; results identical.
 
@@ -541,9 +541,9 @@ Full comparison: `../visual-fidelity/visual-fidelity-report.md`.
 
 Artefacts in `../visual-fidelity/`:
 
-- `design-reference-s1:diary-ios.png` (416x900, resolved by the P2 run)
-- `implemented-s1:diary-ios.png` (393x852, populated state)
-- `implemented-s1:diary-empty-ios.png` (393x852, empty state)
+- `design-reference-s1-diary-ios.png` (416x900, resolved by the P2 run)
+- `implemented-s1-diary-ios.png` (393x852, populated state)
+- `implemented-s1-diary-empty-ios.png` (393x852, empty state)
 
 Capture command (from `mobile/`):
 
@@ -715,8 +715,8 @@ screen".
 
 Frames produced (393x852 each):
 
-- `../visual-fidelity/implemented-s1:diary-compose-empty-ios.png`
-- `../visual-fidelity/implemented-s1:diary-compose-photo-ios.png`
+- `../visual-fidelity/implemented-s1-diary-compose-empty-ios.png`
+- `../visual-fidelity/implemented-s1-diary-compose-photo-ios.png`
 
 Design-source detection was re-run from scratch for this phase and returned
 `DESIGN_SOURCE_NOT_DETECTED` **for the composer state specifically**: neither the
@@ -728,7 +728,7 @@ compared against `../ux/uiux-spec.md` sections 3, 4 and 6, which are binding.
 The same detection run also corrects a premise in the P4 dispatch: `s1:diary` is
 **not** a paired-mode screen id. Rendering `cupid-ch-ng-1 --screen=4-nhat-ky-rieng
 --platform=ios` produces the same artwork as the story's existing
-`design-reference-s1:diary-ios.png` (same title, same three entry cards, same
+`design-reference-s1-diary-ios.png` (same title, same three entry cards, same
 privacy note, same gradient FAB; only the tab-bar count differs), so `s1:` is the
 Stage-1 / solo family inside the shared `cupid-app` canvas. `story_master.md:9`
 already locks `Design-Screen: s1:diary` and it is correct.

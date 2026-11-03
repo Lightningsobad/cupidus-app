@@ -25,7 +25,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// `flutter test test/features/journal/journal_screen_test.dart --dart-define=CAPTURE_VISUALS=true`
 const bool kCaptureVisuals = bool.fromEnvironment('CAPTURE_VISUALS');
 
-/// iOS reference viewport. `design-reference-s1:diary-ios.png` is 416x900,
+/// iOS reference viewport. `design-reference-s1-diary-ios.png` is 416x900,
 /// i.e. this frame bounded by the capture tool's `--max-edge=900`, so the two
 /// images share an aspect ratio and compare without distorting either.
 const Size kIosReferenceViewport = Size(393, 852);
@@ -456,7 +456,7 @@ void main() {
       await _captureAtReferenceViewport(
         tester,
         iosHarness(),
-        'implemented-s1:diary-empty-ios.png',
+        'implemented-s1-diary-empty-ios.png',
       );
     }, skip: !kCaptureVisuals);
 
@@ -466,7 +466,7 @@ void main() {
       await _captureAtReferenceViewport(
         tester,
         iosHarness(),
-        'implemented-s1:diary-ios.png',
+        'implemented-s1-diary-ios.png',
       );
     }, skip: !kCaptureVisuals);
   });

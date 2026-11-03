@@ -5,10 +5,10 @@ VISUAL_FIDELITY: PASS
 ## P3 — Journal list screen
 
 - Design screen id: `s1:diary`, platform `ios`
-- Design reference: `design-reference-s1:diary-ios.png` (416x900, rendered by the
+- Design reference: `design-reference-s1-diary-ios.png` (416x900, rendered by the
   P2 run)
-- Implemented: `implemented-s1:diary-ios.png` and
-  `implemented-s1:diary-empty-ios.png` (393x852 each)
+- Implemented: `implemented-s1-diary-ios.png` and
+  `implemented-s1-diary-empty-ios.png` (393x852 each)
 - Phase: P3 (`coding-plan/phase-P3-journal-list-screen-and-delete.md`)
 
 `393x852` is the iOS reference frame; the design reference is that same frame
@@ -92,7 +92,7 @@ Also: the reference titles the screen `Nhật ký`; `uiux-spec.md` line 20 speci
 Delta 1 stays open as a designer call. Deltas 2-5 were carried as deferred in
 the first pass; the review round that produced finding F-VF1 rejected deferring
 them uncited, so all four are now closed against a re-captured frame rather than
-described. `implemented-s1:diary-ios.png` and `implemented-s1:diary-empty-ios.png`
+described. `implemented-s1-diary-ios.png` and `implemented-s1-diary-empty-ios.png`
 were re-taken after the changes below and after the harness fix in
 [Re-capture](#re-capture-what-changed-in-the-harness).
 
@@ -137,7 +137,7 @@ were re-taken after the changes below and after the harness fix in
    `journal_screen.dart`), matching the reference's two squares on its first
    card. Not observable in this frame: the capture seeds text-only entries, and
    seeding real image bytes into a widget-test capture is what the P4 composer
-   frames (`implemented-s1:diary-compose-photo-ios.png`) already cover for
+   frames (`implemented-s1-diary-compose-photo-ios.png`) already cover for
    thumbnail rendering. The cap is asserted in code, not by this frame.
 5. **Background — CLOSED as a capture artifact, no product change.** The flat
    background was the old harness, not the screen. The product mounts
@@ -147,7 +147,7 @@ were re-taken after the changes below and after the harness fix in
    pushed route has always sat on the app wash on device. The P3 harness wrapped
    the screen in an opaque `ColoredBox(color: colorBackground)` and reported that
    wrapper. Re-captured with the P4 wrapper; the purple wash behind the header is
-   now visible in `implemented-s1:diary-ios.png`.
+   now visible in `implemented-s1-diary-ios.png`.
 
 ### Re-capture — what changed in the harness
 
@@ -176,8 +176,8 @@ a designer call, not a defect. No delta affects an acceptance criterion.
 - Design-Screen: s1:diary
 - Design-Screen-Platform: ios (the `cupid-app` canvas renders every `s1:*` id as
   a placeholder on `--platform=android`; only the iOS frame carries the screen)
-- Implemented: `implemented-s1:diary-compose-empty-ios.png` and
-  `implemented-s1:diary-compose-photo-ios.png` (393x852 each)
+- Implemented: `implemented-s1-diary-compose-empty-ios.png` and
+  `implemented-s1-diary-compose-photo-ios.png` (393x852 each)
 - Design reference for the composer state: **none exists** — see the detection
   run below.
 
@@ -199,7 +199,7 @@ Findings:
 2. `cupid-app` lists a large inventory containing a dedicated `s1:*` family
    (`s1:mode`, `s1:empty`, `s1:list`, `s1:notebook`, `s1:skills`, `s1:diary`, …).
 3. `4-nhat-ky-rieng` rendered at `--platform=ios` (415x900) and the story's
-   existing `design-reference-s1:diary-ios.png` are **the same screen**:
+   existing `design-reference-s1-diary-ios.png` are **the same screen**:
    identical Vietnamese content ("Nhật ký", "chỉ mình đọc · 9 dòng"), the same
    three entry cards, the same privacy note, the same gradient pencil FAB. The
    only difference is a 4-tab versus 5-tab bottom bar.
@@ -252,7 +252,7 @@ frame if missed:
 
 ### Frame-by-frame against `ux/uiux-spec.md` sections 3 and 4
 
-`implemented-s1:diary-compose-empty-ios.png`:
+`implemented-s1-diary-compose-empty-ios.png`:
 
 - Full-screen route, not a bottom sheet (spec section 3: the body has no length
   bound). Correct.
@@ -266,7 +266,7 @@ frame if missed:
 - Background is the app's dark purple gradient shell with its star wash,
   consistent with the rest of the app.
 
-`implemented-s1:diary-compose-photo-ios.png`:
+`implemented-s1-diary-compose-photo-ios.png`:
 
 - Body text set in the Nunito ramp at `colorText`, wrapping naturally.
 - "Lưu" is now the full pink accent — the state carries content, so save is

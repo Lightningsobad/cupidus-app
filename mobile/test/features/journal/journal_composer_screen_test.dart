@@ -580,7 +580,7 @@ void main() {
           platform: CupidPlatform.ios,
           withAppBackground: true,
         ),
-        'implemented-s1:diary-compose-empty-ios.png',
+        'implemented-s1-diary-compose-empty-ios.png',
       );
     }, skip: !kCaptureVisuals);
 
@@ -599,7 +599,7 @@ void main() {
           platform: CupidPlatform.ios,
           withAppBackground: true,
         ),
-        'implemented-s1:diary-compose-photo-ios.png',
+        'implemented-s1-diary-compose-photo-ios.png',
         attachedPhoto: photo,
       );
     }, skip: !kCaptureVisuals);
