@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "D:\\App\\cupidus\\.archify\\architecture-flutter-20261103-120000\\candidate.json",
+    "sha256": "1342a38f3423b9c637e5ee0a0b166dd1666f4819e9304d6ce51275f90530ad70",
+    "bytes": 9599
+  },
+  "artifact": {
+    "path": "D:\\App\\cupidus\\.archify\\architecture-flutter-20261103-120000\\flutter-architecture.html",
+    "sha256": "1843560f436ebeeaeb83e635d9c673eddb3c3552222fac87a88ec6835c2f5cbc",
+    "bytes": 852965
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [
+    {
+      "code": "i18n/locale-fallback",
+      "severity": "warning",
+      "message": "meta.locale \"vi\" has no bundled catalog and no usable meta.translations; the Viewer chrome and <html lang> fall back to English.",
+      "subject": {
+        "diagramType": "architecture",
+        "path": "/meta/locale"
+      },
+      "evidence": {
+        "locale": "vi",
+        "bundledLocales": [
+          "en",
+          "zh-CN",
+          "zh-TW",
+          "es",
+          "ko",
+          "ar"
+        ]
+      },
+      "supportedFixes": [
+        "Supply meta.translations for this locale.",
+        "Use a bundled locale: en, zh-CN, zh-TW, es, ko, ar."
+      ]
+    }
+  ],
+  "diagnosticSummary": {
+    "total": 1,
+    "shown": 1,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "D:\\App\\cupidus\\.archify\\architecture-flutter-20261103-120000\\flutter-architecture.finalize.json",
+    "summaryReceipt": "D:\\App\\cupidus\\.archify\\architecture-flutter-20261103-120000\\flutter-architecture.finalize-summary.json",
+    "browserCheckReceipt": "D:\\App\\cupidus\\.archify\\architecture-flutter-20261103-120000\\flutter-architecture.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-11-03T15:52:05.611Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 3506,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  }
+}

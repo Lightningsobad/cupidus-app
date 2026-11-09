@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "a59b980a-9492-459d-b856-46a6b4d73ef7",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "D:\\App\\cupidus\\.archify\\architecture-flutter-20261103-120000\\candidate.json",
+  "output": "D:\\App\\cupidus\\.archify\\architecture-flutter-20261103-120000\\flutter-architecture.html",
+  "specification": {
+    "sha256": "1342a38f3423b9c637e5ee0a0b166dd1666f4819e9304d6ce51275f90530ad70",
+    "bytes": 9599
+  },
+  "artifact": {
+    "sha256": "1843560f436ebeeaeb83e635d9c673eddb3c3552222fac87a88ec6835c2f5cbc",
+    "bytes": 852965
+  }
+}

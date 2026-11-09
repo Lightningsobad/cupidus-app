@@ -1,0 +1,367 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Cupid Flutter — tầng, module và phụ thuộc",
+    "locale": "vi",
+    "output": ".archify/architecture-flutter-20261103-120000/flutter-architecture.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/snapsofts/cupidus",
+      "revision": "f0b7b03c3a57cdb9974840d267d8c63a1928af7e"
+    }
+  },
+  "components": [
+    {
+      "id": "boot",
+      "type": "backend",
+      "label": "Khởi tạo & DI",
+      "sublabel": "main → Firebase → GetIt",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        240,
+        76
+      ],
+      "sources": [
+        {
+          "path": "mobile/lib/main.dart",
+          "line": 17,
+          "end_line": 26
+        },
+        {
+          "path": "mobile/lib/core/di/service_locator.dart",
+          "line": 135,
+          "end_line": 182
+        }
+      ]
+    },
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "App & điều hướng",
+      "sublabel": "Splash / pair gate / tab shell",
+      "pos": [
+        40,
+        235
+      ],
+      "size": [
+        240,
+        76
+      ],
+      "sources": [
+        {
+          "path": "mobile/lib/app/cupid_app.dart",
+          "line": 50,
+          "end_line": 107
+        },
+        {
+          "path": "mobile/lib/core/navigation/pair_gate_shell.dart",
+          "line": 130,
+          "end_line": 146
+        },
+        {
+          "path": "mobile/lib/core/navigation/app_shell.dart",
+          "line": 115,
+          "end_line": 175
+        }
+      ]
+    },
+    {
+      "id": "state",
+      "type": "frontend",
+      "label": "State theo feature",
+      "sublabel": "Cubit / Bloc / stream",
+      "pos": [
+        440,
+        235
+      ],
+      "size": [
+        240,
+        76
+      ],
+      "sources": [
+        {
+          "path": "mobile/lib/features/chat/presentation/chat_cubit.dart",
+          "line": 70,
+          "end_line": 106
+        },
+        {
+          "path": "mobile/lib/features/reminders/presentation/reminder_schedule_bloc.dart",
+          "line": 121,
+          "end_line": 140
+        }
+      ]
+    },
+    {
+      "id": "repos",
+      "type": "backend",
+      "label": "Repository & nghiệp vụ",
+      "sublabel": "Chat / Gallery / Journal / Expenses",
+      "pos": [
+        840,
+        235
+      ],
+      "size": [
+        240,
+        76
+      ],
+      "sources": [
+        {
+          "path": "mobile/lib/features/chat/data/chat_repository.dart",
+          "line": 19,
+          "end_line": 33
+        },
+        {
+          "path": "mobile/lib/features/gallery/data/gallery_repository.dart",
+          "line": 31,
+          "end_line": 64
+        },
+        {
+          "path": "mobile/lib/features/journal/data/journal_repository.dart",
+          "line": 65,
+          "end_line": 123
+        }
+      ]
+    },
+    {
+      "id": "session",
+      "type": "security",
+      "label": "Phiên đăng nhập",
+      "sublabel": "JWT + Firebase; xóa store theo phiên",
+      "pos": [
+        440,
+        40
+      ],
+      "size": [
+        240,
+        76
+      ],
+      "sources": [
+        {
+          "path": "mobile/lib/core/auth/cupid_session.dart",
+          "line": 59,
+          "end_line": 119
+        },
+        {
+          "path": "mobile/lib/features/auth/data/auth_repository.dart",
+          "line": 37,
+          "end_line": 65
+        },
+        {
+          "path": "mobile/lib/features/auth/data/auth_repository.dart",
+          "line": 228,
+          "end_line": 252
+        }
+      ]
+    },
+    {
+      "id": "realtime",
+      "type": "messagebus",
+      "label": "RealtimeCoordinator",
+      "sublabel": "Socket / FCM / dedup / resync",
+      "pos": [
+        840,
+        40
+      ],
+      "size": [
+        240,
+        76
+      ],
+      "sources": [
+        {
+          "path": "mobile/lib/core/di/service_locator.dart",
+          "line": 264,
+          "end_line": 283
+        },
+        {
+          "path": "mobile/lib/core/realtime/realtime_coordinator.dart",
+          "line": 275,
+          "end_line": 290
+        },
+        {
+          "path": "mobile/lib/core/realtime/realtime_coordinator.dart",
+          "line": 325,
+          "end_line": 364
+        }
+      ]
+    },
+    {
+      "id": "local",
+      "type": "database",
+      "label": "Dữ liệu trên thiết bị",
+      "sublabel": "Drift + media + cache gallery",
+      "pos": [
+        840,
+        440
+      ],
+      "size": [
+        240,
+        76
+      ],
+      "sources": [
+        {
+          "path": "mobile/lib/features/chat/data/chat_repository.dart",
+          "line": 64,
+          "end_line": 72
+        },
+        {
+          "path": "mobile/lib/features/journal/data/journal_repository.dart",
+          "line": 90,
+          "end_line": 123
+        },
+        {
+          "path": "mobile/lib/features/gallery/data/gallery_repository.dart",
+          "line": 31,
+          "end_line": 48
+        }
+      ]
+    },
+    {
+      "id": "http",
+      "type": "backend",
+      "label": "HTTP adapter",
+      "sublabel": "CupidApi / Dio + interceptor",
+      "pos": [
+        440,
+        440
+      ],
+      "size": [
+        240,
+        76
+      ],
+      "sources": [
+        {
+          "path": "mobile/lib/core/network/cupid_api_client.dart",
+          "line": 10,
+          "end_line": 25
+        },
+        {
+          "path": "mobile/lib/features/expenses/data/expenses_repository.dart",
+          "line": 18,
+          "end_line": 55
+        },
+        {
+          "path": "mobile/lib/features/chat/data/chat_repository.dart",
+          "line": 188,
+          "end_line": 197
+        }
+      ]
+    },
+    {
+      "id": "server",
+      "type": "external",
+      "label": "API cấu hình ngoài app",
+      "sublabel": "Đích gọi REST; nội bộ ngoài phạm vi",
+      "pos": [
+        40,
+        440
+      ],
+      "size": [
+        240,
+        76
+      ],
+      "sources": [
+        {
+          "path": "mobile/lib/core/network/cupid_api_client.dart",
+          "line": 13,
+          "end_line": 25
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "edge0",
+      "from": "boot",
+      "to": "ui",
+      "label": "runApp"
+    },
+    {
+      "id": "edge1",
+      "from": "boot",
+      "to": "session",
+      "label": "đăng ký"
+    },
+    {
+      "id": "edge2",
+      "from": "ui",
+      "to": "state",
+      "label": "tạo / render"
+    },
+    {
+      "id": "edge3",
+      "from": "state",
+      "to": "repos",
+      "label": "gọi"
+    },
+    {
+      "id": "edge4",
+      "from": "repos",
+      "to": "realtime",
+      "label": "emit / events"
+    },
+    {
+      "id": "edge5",
+      "from": "repos",
+      "to": "local",
+      "label": "đọc / ghi"
+    },
+    {
+      "id": "edge6",
+      "from": "repos",
+      "to": "http",
+      "label": "REST"
+    },
+    {
+      "id": "edge7",
+      "from": "http",
+      "to": "server",
+      "label": "request"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "XÁC NHẬN • Các tầng",
+      "items": [
+        "Presentation gọi repository cụ thể; ChatCubit còn nghe coordinator.status.",
+        "GetIt là composition root; singleton và factory có vòng đời khác nhau.",
+        "Mũi tên thể hiện lời gọi/phụ thuộc; stream phát ngược về UI."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "XÁC NHẬN • Luồng chính",
+      "items": [
+        "Splash: chưa đăng nhập → Welcome; phiên hết hạn → Login; đã đăng nhập → return gate → pair gate.",
+        "Pair gate: paired → AppShell; unpaired → Home solo; lỗi mạng → retry.",
+        "Chat: socket ACK → upsert Drift → watchThread → emit UI; ACK thiếu → REST resync.",
+        "Gallery: upload file rồi tạo item; đọc lỗi mạng → cache có isStale."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Module theo thư mục • nhóm do người phân tích đặt",
+      "items": [
+        "Truy cập: auth, onboarding, pairing, account, love_contracts, vow.",
+        "Tương tác: chat, emojis, anti_ghosting, vibes, reminders, in_app_notifications.",
+        "Đời sống chung: home, pet, timeline, gallery, dream_jar, expenses, themes.",
+        "Nội dung/cá nhân: activity_cards, journal, context_notebook, invite_composer, conversation_starters, date_script, gift_ideas, compatibility_lookup, your_view_portrait, zodiac, zodiac_shell, phase_status, before_you_go, chapter_closure."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "SUY LUẬN & giới hạn",
+      "items": [
+        "Có thể gọi đây là kiến trúc feature-first nhiều tầng; không đủ cơ sở gọi Clean Architecture thuần.",
+        "Các nhóm module là phân loại phân tích, không phải boundary runtime được code khai báo.",
+        "Không suy diễn nội bộ backend, độ bền server hay đảm bảo giao nhận từ client.",
+        "Bản đồ ở mức subsystem; báo cáo kèm theo giải thích state và dẫn chứng chi tiết.",
+        "Nội dung tiếng Việt; Viewer dùng giao diện English fallback."
+      ]
+    }
+  ]
+}
